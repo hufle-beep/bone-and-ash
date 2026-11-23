@@ -2,6 +2,29 @@
 
 Started 2026-11-23 (v0.11.258), when `history-49.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-49.md` … `history.md`.
 
+## Moved from the handover in v0.11.260 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-23 (Europe/Budapest). **Version:** 0.11.259 (`sw.js` VERSION `bone-ash-0.11.259`): **the tests and tools on the long calendar (OC-A, the old calendar's code, push 1 of 2; the owner 2026-11-23, in the question dialog: "OC-A 🟡 (Recommended)", then, at the stop on the size, "W1 🟢 (Recommended)", then, at the stop on B2's finding, "K-A 🟢 (Recommended)"):** OC3 (`main.js` no longer reads the browser test's old-calendar key), OC4 (`newGame`'s default `cal` the long calendar; about 430 test checks re-pinned: clocks by story day `calMinutes` where a story day was meant, by calendar day for the clock rules; the long numbers for shared rules; a check of a rule only the old calendar has builds its state with `cal: 0` / `OC2_OLD` and goes with that code in push 2; `tests/flip-before.json` freezes each old save's reading before the move), OC5 (the lint, the text lint and Fable's packets on the long calendar; the text snapshot re-saved), K-A (`replies.js`: the three pot patterns accept the long calendar's meal prefix, so four pot lines with speech show among the Results again), and the cold review's fixes (Opus: no high; M1 the sanity invariants on the long numbers, M2 the shared rules re-pinned on the long calendar, M3, L1–L4, TG-A1–A5, A8, A9). No balance or save change. **Next push:** open, options later (OC's push 2: OC1, OC2, OC6).
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** OC-A done (v0.11.259, push 1 of 2). Next in order: OC's push 2 (OC1 the 72 story branches, OC2 the 28 core branches and the checks marked `cal: 0` / `OC2_OLD`, OC6 the old calendar's two notes); its open points from v0.11.259: the music-line walk and Fable's failed-try lines (`JADE_FAIL`, `SPEARS_FAIL`) have no long-calendar test yet (the review's M2; old-only marks in `tests/story.test.mjs` ~3833 and `tests/tasks.test.mjs` 274, 3512), the review's M4 (the routine's hammerspace meals split, "Breakfast: smoked meat." in the reply; since v0.11.204, the owner's call), the old calendar's extraordinary-hours table pins (calendar-free asserts in the old block to keep). Then the rest of section 2 (the RA1 items, MF; most measured on the old calendar), 5b, Act 2, art, systems, later. *(The entry as it stood, word for word, in `history-50.md`.)*
+
+*(the decision as it stood)*
+
+- **v0.11.257: P27-A (the owner 2026-11-23, in the question dialog after 08:16: "P27-A 🟢 (Recommended)").** The options as laid out in chat (`claude/p27-options.md`): **P27-A 🟢 FQ + LK + LO + AW1 + FL + SL + MQ (picked, recommended)**; P27-B 🟡 as A with LF (the militia floor after the spread and LN: Lu Han's lowest 4 → 8; 0 of 634 model fights move; an Opus review); P27-C 🟠 as B with LC (LR capped at 4 reads: realm 14 about 28 → 22 HP); P27-D 🔴 FL + SL + MQ only. Closed as accepted: LK (Lu Han's lowest 4 / 7, only full militia + spears + a 1), LO (LR uncapped, as his DC and attack reads), AW1 (the ape's wall goes at a kept Core Formation: by design).
+
+*(the version notes as they stood)*
+
+## v0.11.257 — The retune's notes and the test tools (P27-A)
+
+- **Files:** `js/core/faq.js` (FQ), `js/core/news.js` (What's new), `sw.js`; tools: `tools/lib/fightlab.mjs` (`labId`), `tools/fightlab.mjs` (usage line), `tools/mutate.mjs` (`DEFAULT_CMD`); tests: `tests/faq.test.mjs` (FQ: the words, and the sits a realm read against `sitGain` on both calendars: never fewer, not always more), `tests/tools.test.mjs` (FL `labId`; MQ the default's flags are the story test's; SL the NOTE's threshold under the cap), `tests/story.test.mjs` (`LONG_RUN_NOTE`, the NOTE line); docs: `claude/p27-options.md` (project only), the four docs, `history-49.md`, `tests/README.md`.
+- **What:** see the version line. No balance or save change; the FAQ's one line is the only change a player sees.
+- **Checks:** a game change (rule 2: `faq.js`): while building the FAQ, news and tools tests and `bash tools/check.sh quick` (it stopped on the tools test's history pin for the v0.11.254 move, two clauses; fixed, the tools test 566 passed); the full `bash tools/check.sh` once after the docs: exit 0, 2,130 s (3 jobs on 2 cores), sanity 119 compared, 0 drifted, 0 moved more than 5, 0 invariants failed; the models (200 games) as in v0.11.256: Careful 2.29 / 4.41, the Sociable 2.29 / 4.36, the Completionist 21.5%, the Cultivator 22% (realm 4.09), the Farmer 17.5%; no long-run NOTE.
+- **Opus / Fable:** none (no game logic, balance or story text; the FAQ line and What's new are Claude's).
+
 ## Moved from the handover in v0.11.259 (word for word)
 
 *(the version line as it stood)*

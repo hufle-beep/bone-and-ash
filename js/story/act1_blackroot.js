@@ -13,7 +13,7 @@ import { hasForm } from '../core/forms.js';
 import { choiceOpen, gives } from '../core/story.js'; // v0.11.161 (PO2): `optionLeft`; RV (GV, Fable's H1): the wrapper carries the card's items
 import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayReply, dayKey } from './common.js';
 import { noteDay, DAY_REPLIES, coilReply, dayIndex, seqText } from '../core/lines.js'; // v0.11.246 (P16-A, AH): seqText // v0.11.231 (P4-2, AT): dayIndex
-import { storyDay, calMinutes, blSpan, longCal } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): longCal // v0.11.222 (owner pick J2, TS9): blSpan, the camps' days a story day; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 11 is 65, Day 16 is 70) // v0.11.166 (RW1): coilReply, the flirts by Coil
+import { storyDay, calMinutes, blSpan } from '../core/calendar.js'; // v0.11.222 (owner pick J2, TS9): blSpan, the camps' days a story day; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 11 is 65, Day 16 is 70) // v0.11.166 (RW1): coilReply, the flirts by Coil
 import { talkBeat } from './remember.js'; // v0.11.184 (S1)
 import { encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil } from './act1_common.js';
 
@@ -441,7 +441,7 @@ const bday = (g) => g.flags.bl_day || 1;
 /* v0.11.222 (owner pick J2, TS9: MH + K3 + SV): on a long-calendar game with `calBl` each story day of the Blackroot lasts blSpan(g)
  * days at its camp. `bl_n` counts the nights slept this story day (0 … blSpan − 1); the story day (bl_day) turns on the morning after
  * its last night. Its beats (the split, the hollow, the pass) and its night event come on its last day and night, as before; the
- * nights before it are quiet (Sleep goes straight to the morning). With blSpan 1 (the old calendar, an old save) every day is the last. */
+ * nights before it are quiet (Sleep goes straight to the morning). With blSpan 1 (a save moved in or past the Blackroot) every day is the last. */
 const blN = (g) => g.flags.bl_n || 0;
 /** v0.11.224 (owner pick TX2, TS6: DN12; RV1 MP2): the quiet mornings' lines (the second and third of a story day's camp), by `bl_day`. */
 const BL_QUIET = { 1: ['Another morning on the root. It is warm under the bedroll and cold everywhere else. Ya has been out and back already, and smells of whatever she found.', 'The root has not moved in the night, which out here counts as news. Dew has beaded on your glasses. Yuki regards the cold fire and then you, in that order, until you light it.'], 2: ['Morning, and the same stretch of root. Ya has her nose to the wind before anyone else is upright. "Still there," she says of the wyrm, fondly.', 'Grey light on the root again. Ya is restringing her necklace, and holds one of the teeth up beside your mouth for comparison. She looks sorry for you.'], 3: ['Mist again, and grey water under it. Mei Lin wrings out a sleeve that was dry when she lay down, with the face of a woman drafting a complaint to Heaven.', 'Morning, by the colour of the mist. Something surfaces beside the raft, considers the breakfast, and goes back under. Yuki keeps her eyes on the spot until the rings are gone.'], 4: ['Morning in the hills. Ash has got into the bedrolls, the water and the millet. The dead tree stands where it stood at dusk, holding the same half of the sky.', 'The hills are the grey they were. Your footprints from dusk have filled in overnight, and Ya walks the camp\'s edge reading the ground anyway, annoyed at how little it will say.'], 5: ['Morning under the tree. The sun gets round it late. Ya\'s whetstone has started already, and Mei Lin has given up asking how sharp one spear needs to be.', 'The tree has not come any closer overnight; you checked. Nobody talks much over the millet. Yuki faces it through the whole meal, and so far the tree has not blinked.'] };
@@ -948,14 +948,14 @@ Ya is furious. Not with you; with the elk, which she curses in a language you su
 
 "Me?"
 
-${longCal(g) ? '"Way back, before the village: your camp, by the stream.' : '"Ten days back, before the village: your camp, by the stream.'} The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. ${longCal(g) ? 'Weeks it took me, working out what you were.' : 'Three nights it took me, working out what you were.'}"
+"Way back, before the village: your camp, by the stream. The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. Weeks it took me, working out what you were."
 
 ${g.flags.saw_lights ? 'Further on, where the roots braid together, she has one more thing to show you: a trail in the moss, greener than the moss on either side of it, running inward. "The lights walk here," she says. "Every night. Toward the old tree. I followed them once, when I was small. I didn\'t go in."' : 'Further on, where the roots braid together, the moss runs greener along a line that points at the heart of the forest. "Something walks here at night," Ya says. "Not an animal. I don\'t follow it."'}`,
         choices: [
             { text: 'Learn it properly. Nose in the moss and everything.', check: { skill: 'GU', dc: 4 }, time: 90, do: (g) => { g.flags.bl_tracker = true; bumpRel(g, 'Ya', 3, 2); return ['"Eyes lie. Ears lie. Nose doesn\'t," says Ya, and holds your face down in the moss until you agree. You can smell wolf now. You will never again be able to stop smelling wolf. Ya is extremely proud of you.']; /* RV1 (M2): the menu's text is never drawn, so the lesson's first words go here */ }, failDo: (g) => { bumpRel(g, 'Ya', 1, 0); return ['You smell moss. Chiefly moss. Ya pats you on the head.']; }, to: 'rr_hub' },
-            { text: (g) => (longCal(g) ? '"You followed me for weeks?"' : '"You followed me for three nights?"'), // v0.11.224 (TX2, DN5)
+            { text: (g) => '"You followed me for weeks?"', // v0.11.224 (TX2, DN5)
               // v0.11.179 (LB1, H1): the count as in the Fallout ("Three nights I sat outside your little fire")
-              do: (g) => { bumpRel(g, 'Ya', 2, 4); return [(longCal(g) ? '"From the start. Your first camp, by the stream.' : '"Ten days back. Your first camp, by the stream.') + ' The wolves weren\'t the only ones going round it." She shrugs. "You fed the cat first, so: not Sect. You were interesting. Most things aren\'t."']; /* RV1 (M2): the calendar fix and the CW line where they are read */ }, time: 30, to: 'rr_hub' },
+              do: (g) => { bumpRel(g, 'Ya', 2, 4); return ['"From the start. Your first camp, by the stream.' + ' The wolves weren\'t the only ones going round it." She shrugs. "You fed the cat first, so: not Sect. You were interesting. Most things aren\'t."']; /* RV1 (M2): the calendar fix and the CW line where they are read */ }, time: 30, to: 'rr_hub' },
         ],
     },
     rr_roots: {
@@ -1310,7 +1310,7 @@ She doesn't mean a word. All of you can hear that she doesn't, and it helps nobo
     },
     ah_hunt: {
         id: 'ah_hunt', title: 'Hawks', art: 'cinder_hawks', place: PLACE.ah,
-        text: (g) => (!daily('ah_hawks')(g) ? awayText(g, HUNT_AGAIN.ah, AW.hunt_again) : longCal(g) && bday(g) >= 5 /* RV (C L2): the Blackroot's own day, as the hub's text */ ? seqText(g, 'ah_hunt:15', awayList(AH15, AW.hunt15)) : byDay(g, awayList([ /* v0.11.246 (P16-A, AH): the first stay three texts (a third), the second its own three (AH15, by `s:ah_hunt:15`; the long calendar) */(g) => `Since you crossed the line into the ash, the cinder hawks have kept you in sight. They are bigger than eagles and ash-grey, and every wingbeat knocks a few faint sparks loose, as though the birds were built of coals that never went all the way out.
+        text: (g) => (!daily('ah_hawks')(g) ? awayText(g, HUNT_AGAIN.ah, AW.hunt_again) : bday(g) >= 5 /* RV (C L2): the Blackroot's own day, as the hub's text */ ? seqText(g, 'ah_hunt:15', awayList(AH15, AW.hunt15)) : byDay(g, awayList([ /* v0.11.246 (P16-A, AH): the first stay three texts (a third), the second its own three (AH15, by `s:ah_hunt:15`; the long calendar) */(g) => `Since you crossed the line into the ash, the cinder hawks have kept you in sight. They are bigger than eagles and ash-grey, and every wingbeat knocks a few faint sparks loose, as though the birds were built of coals that never went all the way out.
 
 "Threes," says Ya. "Always threes." ${byForm(g, '"It\'s the cat they want."', '"They won\'t go for the cat. Not that cat."', '"They\'ll go for the small one."')}
 

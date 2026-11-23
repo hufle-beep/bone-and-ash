@@ -10,7 +10,7 @@ import { condensationSatGain } from '../core/formulas.js';
 import { daily, markDaily, hour, eatBest, pantry, foodCount, byForm, dayKey } from './common.js'; // v0.11.126 (NQ1): byForm
 import { registerStomp } from './power.js';
 import { pickLine } from '../core/lines.js';
-import { calMinutes, calStart, longCal } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): longCal // v0.11.203 (owner pick T1, TS1): the long calendar (Day 4 is 22) // v0.11.175 (P8A, SW): the drills' lines
+import { calMinutes, calStart } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar (Day 4 is 22) // v0.11.175 (P8A, SW): the drills' lines
 
 /** v0.11.71 (owner pick Y1): the Long Forest's "Let Yuki hunt": { item, n, line }; the first kind with room for the whole haul (R1); item null: none, she eats it. */
 export function lfYukiCatch(g) {
@@ -245,11 +245,11 @@ export const LONGFOREST = {
         enter: (g) => { g.flags.lf_active = true; g.flags.longforest = true; g.flags.lf_days = g.flags.lf_days || 0; return []; },
         text: (g) => `Past the black trees there are people. When the wind turns you can smell their smoke: wood, cooking fat, and the faint sour edge of lives lived at close quarters.
 
-You could walk out to them. That would be the sensible thing, and this time you know where the sensible thing leads: ${longCal(g) ? 'a scream out of the forest, then a village, a Sect, and a tribute on the day appointed.' : 'a scream on the fourth morning, a village, a Sect, a tribute on the seventh day.'}
+You could walk out to them. That would be the sensible thing, and this time you know where the sensible thing leads: a scream out of the forest, then a village, a Sect, and a tribute on the day appointed.
 
 Instead you sit down on a root and look at your hands, and at Yuki, and at a forest that did its best to eat you the last time through, and you think: *I know exactly what is waiting out there. What I don't know is how far I can climb before I walk back into it.*
 
-You have, as far as you can tell, all the time in the world, and lately you mean it literally. ${longCal(g) ? 'Your people live eight or nine hundred years, and the days behind you have already shown that they come round again.' : 'Your people live eight or nine hundred years, and this week has already shown that it comes round again.'}
+You have, as far as you can tell, all the time in the world, and lately you mean it literally. Your people live eight or nine hundred years, and the days behind you have already shown that they come round again.
 
 "Yuki," you say. "How do you feel about camping?"
 

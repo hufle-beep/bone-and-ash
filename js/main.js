@@ -219,7 +219,7 @@ function doTask(id) {
 /* v0.11.204 (owner pick W1): the long calendar's week. R3: after a story choice, the quiet night's screens seen before are walked at
  * once (one Results entry); P1: a plan stopped by the evening's choice goes on by itself the next morning. */
 function weekAfter() {
-    if (!g || g.cal !== LONG_CAL || g.combat) return;
+    if (!g || g.combat) return; // v0.11.260 (P28-A, OC2): every game on the long calendar (a load moves an old save first)
     const { fold: f, resume } = afterStory(g, SCENES); // v0.11.206 (FC1, RV1 TG1): the steps the forecast's dry run takes
     if (f.steps) addResult('A quiet night', f.lines.length ? f.lines : [`${f.steps} screen${f.steps > 1 ? 's' : ''} seen on an earlier night, walked at once.`], false, { quiet: true });
     if (resume) runPlan(); // RV1 (L1): also a plan whose week just ended, so "The week is over." shows
@@ -425,7 +425,7 @@ ${statusHtml()}
 /** v0.11.226 (owner pick FP1, the flip: NG + OB + BT): every new game is on the long calendar (calendar.js; the test switch of
  *  v0.11.203 is gone). v0.11.259 (owner pick OC-A, OC3): the browser test's old-calendar key (`boneash.oldcal`, set by nothing since
  *  v0.11.253) is no longer read: every game and every loaded save is on the long calendar. */
-const freshGame = (cal = LONG_CAL) => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true, cal })); // meridians closed at the start (v0.9.6); v0.11.203 (T1, TS1): cal, the long calendar
+const freshGame = () => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true })); // meridians closed at the start (v0.9.6); v0.11.260 (P28-A, OC2): every game on the long calendar (newGame's `cal` option gone)
 const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
 function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: ☰ Menu → Saves.'); } }
 

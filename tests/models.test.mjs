@@ -70,8 +70,8 @@ for (const m of PLAY) if (!MODELS.includes(m)) { console.error(`unknown model ${
 const JSON_OUT = opt('json', null);
 // v0.11.203 (owner pick T1, TS8): --cal 7 plays the long calendar (js/core/calendar.js; the main menu's test switch); log only, never
 // compared with the models baseline. Every model's day of the tribute and of Act 1's end is in its "days" line (both calendars).
-const CAL = Number(opt('cal', LONG_CAL)) || 0; // v0.11.253 (owner pick P23-A, LB): the long calendar by default (every new game since the flip); --cal 0 the old one
-if (CAL && CAL !== LONG_CAL) { console.error(`--cal takes ${LONG_CAL} (the long calendar) or 0 (${CAL})`); process.exit(2); }
+const CAL = Number(opt('cal', LONG_CAL)) || 0; // v0.11.253 (owner pick P23-A, LB): the long calendar by default (every new game since the flip)
+if (CAL !== LONG_CAL) { console.error(`--cal takes only ${LONG_CAL} (the long calendar; the old calendar's 0 went with its code in v0.11.260, P28-A OC2: ${CAL})`); process.exit(2); } // the cold review's L2
 const TEXTS = argv.includes('--texts'); // v0.11.132 (E1, RP)
 // v0.11.227 (owner pick KA1, KM): --kept plays each game on: after a won Act 1 the model goes round again from Day 1 (a1_again, the whole
 // game) and plays that second pass, with its Coil bonus and the realm kept, to its own Act 1 end. The `<model>:kept` lines count the second
@@ -230,7 +230,7 @@ function play(run, model, st, yuki, kept = false) {
     const real = st; if (kept) st = blank(); // KA1 (KM): the first pass counts apart
     rs = seedOf(run, 7 + MODELS.indexOf(model === 'sociable' ? 'careful' : model) + (yuki === 'off' ? 50 : 0)); // RV1 (PS): the Sociable on Careful's dice, so the two compare game for game
     const smart = model !== 'random' || run % 2 === 0;
-    const g = ensureBars(newGame(run + 1 + 900000, { closed: true, cal: CAL }));
+    const g = ensureBars(newGame(run + 1 + 900000, { closed: true }));
     let off = 0; // v0.11.86: the Farmer's bites by choice, through the scenes the James tab's button leads to
     if (model === 'farmer') {
         for (let k = 0; k < FARM_BITES; k++) {

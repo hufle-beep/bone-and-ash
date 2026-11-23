@@ -67,7 +67,7 @@ export const SAMPLES = FORMS.flatMap(([f, r, name]) => [{ g: sample(f, r, 0), fo
  *  RV1 (the cold review's C M1, M2, L1): the away states by day (at 20:00 they were inert), every day of the cycles in every form (the packet drew
  *  4 of the 12 new texts), and each state only on the scenes of its area (`ASHFALL`, `FALLOUT`, `BLACKROOT`; the walk not in the first week). */
 function stateOf(flags, minutes, { k = 0, cooked = false, rel = null, form = ['cat', 0] } = {}) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.form = form[0]; g.yuki.realm = form[1]; g.james.realm = form[1]; Object.assign(g.flags, flags); /* the long calendar, as textlint's */ g.minutes = typeof minutes === 'function' ? minutes(g) : minutes; /* v0.11.238 RV2 (C L2): or a function of the game */ if (rel) for (const [n, a] of Object.entries(rel)) g.rel[n] = { f: a ? 90 : 20, a };
+    const g = ensureBars(newGame(1234, { closed: true })); g.yuki.form = form[0]; g.yuki.realm = form[1]; g.james.realm = form[1]; Object.assign(g.flags, flags); /* the long calendar, as textlint's */ g.minutes = typeof minutes === 'function' ? minutes(g) : minutes; /* v0.11.238 RV2 (C L2): or a function of the game */ if (rel) for (const [n, a] of Object.entries(rel)) g.rel[n] = { f: a ? 90 : 20, a };
     if (k) { const today = textDay(g); const days = [...Array(k).keys()].map((i) => -1 - i).concat([today]); g.lines = { c: coilStamp(g), p: {}, last: {}, cur: {}, at: null, said: [], d: new Proxy({}, { get: (_, key) => (typeof key === 'string' ? days : undefined) }) }; }
     if (cooked) markDaily(g, 'bl_cook');
     return ensureBars(g);

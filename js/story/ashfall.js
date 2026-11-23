@@ -6,7 +6,7 @@ import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awar
 import { FW } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
 import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply, seqText } from './common.js';
 import { dayIndex } from '../core/lines.js'; // v0.11.232 (P5-B, V3b): the roof's lines by the text's index
-import { storyNight, weekMorning, longCal, tributeLeft, daysWord, DaysWord } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
+import { storyNight, weekMorning, tributeLeft, daysWord, DaysWord } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
@@ -218,7 +218,7 @@ The boy bows to you both in passing, gravely, without taking his eyes off the ga
 // v0.11.232 (owner picks P5-B, D1; V3b): the roof a sequence of three for the first week and for the later nights on the long calendar (lines.js
 // seqText; the first the old text), each new text with its own line after "Stay until the cold drives you in." (by the same index). Fable's (run R), Claude's cuts.
 /** v0.11.247 (owner pick P17-A, SR3): the roof's weeks: 1, 2, and week 3 its own (the long calendar). */
-const roofWeek = (g) => (vday(g) === 1 ? 1 : longCal(g) && vday(g) >= 3 ? 3 : 2);
+const roofWeek = (g) => (vday(g) === 1 ? 1 : vday(g) >= 3 ? 3 : 2);
 const roofKey = (g) => `supper_roof:${roofWeek(g)}`;
 const ROOF_NEW = { 1: [`On the roof Mei Lin lists what Ashfall has decided you are.
 
@@ -403,7 +403,7 @@ export const ROOF_BURNED = ["The cold finds her hands before the rest of her. Sh
 const ROOF_STAY = { 1: [`The cold wins, as it does. On the ladder she adds a late entry: the dyer has you down as a tax spy, and has hidden his good vat. You promise to leave the vat alone. She says goodnight to the rungs, and you take the fox spirit up to the loft.`, `She sits up only when the thatch has gone cold under you both. "Tell them it was well played," she says, with a small bow to your arm, and is down the ladder before you can decide whether she was joking. You are in the herb loft and still have not settled it.`, `The cold decides it before she does. On the ladder she tries the meaning aloud as a title, and finds that it suits a lodger rather well. Indoors she wishes the supplanter goodnight, bowing slightly, with an entirely straight face. You climb up and take the place of nobody, among the drying mint.`, `You stay until the Granary has cleared the miller's roof and the thatch has gone cold under you. On the way down she examines you on the Ox and the Broken Plough, passes you without praise, and bows you a correct goodnight in the passage. You go up to the herb loft with a sky that has names in it.`], 2: [`The jar goes down the ladder lighter, and she a little less steady, which she blames on the rungs. At the bottom she asks how long the soup takes, exactly, and repeats the answer under her breath as she goes. You reach the loft composing a shopping list for a village with no shops.`, `On the way down she has you bow once more, to the water butt, and passes you, narrowly. "Mute," she reminds you outside her mother's room, a finger laid to her own lips. You carry your silence up into the loft and practise it on the ginseng.`, `The dyer's lamp outlasts you both, and his sums come out no better for the extra oil. On the ladder she tells you where the yoke hangs and which bucket leaks, as a kindness to the defeated. You go in like a man with water to carry.`, `She runs out of sprigs before you run out of wrong answers. You have failed four, every one a plain leaf, and she goes down the ladder naming them at you like a debt. You follow her in, owing condolences to the third shelf.`, `The chestnuts run out before the rules do. There is a fourth, about the ladder after dark, and you break it together, rung by rung. At the bottom she folds the blanket with great correctness, as evidence. You reach the door smelling of chestnut smoke, which is also evidence.`, `You concede the mushroom on the ladder, your arm being in no state to argue; it hangs off you like borrowed goods. She watches you fumble a rung and says nothing, which from her is an apology. Outside the herb loft she adds that a toadstool counts as well, and is gone before you can appeal.`], 3: [`The cold finds her hands before the rest of her. She takes the rungs with her fingertips, to spare the wood, and leaves a green thumbprint on your cuff anyway, which she studies and does not apologise for. You carry it into the herb loft, where water makes no impression on it either.`, `When the cold comes she smooths the hollow flat with her palm, as one does a bed, and is first down. On the ladder she says he snored up there, and the whole lane agreed to call it cultivation. You reach the herb loft feeling calmer and no stronger, which she would say runs in the roof.`, `You stay until the cold has won the argument. On the ladder she remarks, loudly enough for the house, that it looks a settled night, and the house keeps its opinion to itself. Then she bows you goodnight, correctly, and you go up to the herb loft.`, `The loom is still going when the thatch gives up its warmth. Inside she walks on the edges of the boards, where they keep quiet, and shows you which ones with her toe. The nothing behind her mother's door does not break rhythm. You get to the loft having made no sound she will have to explain.`, `The court rises when neither of its officers can feel their feet. She hears one more case on the ladder, yours, for treading on the judge's hand, and fines you an apology, paid at once. In the house she bows to you as one magistrate to another. You carry the verdict up the ladder and sleep on it.`, `She swears you in afresh on the ladder, in case the roof ridge was not binding. Passing the house shrine she gives it no glance, and it, you notice, has the tact not to look at her. You climb on carrying a dead rat's good name, and you mean to keep it.`] }; // v0.11.234 (P7-A, RN): the later nights' results 4–6 (RV1 RT: Fable's run RT, T M1: they stop at the door)
 
 // v0.11.237 (owner pick P10-A, EVk, D1; 2026-11-20 14:21, 15:19): the quiet night's weeks 2 and 3 on the long calendar a sequence of
-// three each (seqText, `village_night:2` / `village_night:3`), as the supper's story days; week 1 and the old calendar keep the old three
+// three each (seqText, `village_night:2` / `village_night:3`), as the supper's story days; week 1 keeps the old three
 // v0.11.242 (owner pick P14-A, EVn-23): six each (texts 4–6 by Fable, runs K4 and K5; Claude's cuts, D1), a rule change past three for a non-social scene
 // (`village_night:quiet`). Fable's (runs K2 and K3), Claude's cuts (D1: VD, FD, AU, MM, BK, FT). Each a shared text and Yuki's passage by form.
 // RV2 (owner pick 2026-11-20 16:03; the cold reviews' T M1, M2, L2–L4, L6): the reviewers' and Claude's wording (BL: no dried herbs in a loft
@@ -466,11 +466,11 @@ const QUIET_WEEK = {
             "\"Tell it to stand down,\" Yuki says, facing the ladder, her back to you. \"I have kept this watch since before you knew there were nine. Give it the shutter. I have the rest.\""),
     ],
 };
-/** v0.11.230 (P3-2, FT): the quiet night's three old texts (week 1 and the old calendar). */
+/** v0.11.230 (P3-2, FT): the quiet night's three old texts (week 1). */
 const QUIET_OLD = [(g) => byForm(g, 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki settles on the middle of your chest, which is also the middle of your sleep. You let her have both.', 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki takes the loft, and leaves you a strip along the wall and one flank for a pillow. The posts creak, consider the matter, and hold.', 'The herb loft smells of mint and drying ginseng, and under it the house breathes. Yuki gives up the stove once the house is dark, stretches out behind you, and takes most of the blanket without discussion. You let her keep it.'), (g) => byForm(g, 'Below the herb loft somebody banks the stove, and the last of the talk in the house goes out with it. Yuki treads a circle on your chest, finds her place exactly, and is asleep while you are still deciding to mind.', 'Below the herb loft somebody banks the stove, and the last of the talk in the house goes out with it. Yuki settles along the loft by stages, and the floor reports each one. You get the wall, and one paw the weight of a rice sack across your shins.', 'Below the herb loft somebody banks the stove, and the last of the talk in the house goes out with it. Yuki comes up the ladder last, puts her cold feet against your calves without apology, and is asleep before you have settled on a complaint.'), (g) => byForm(g, 'The herb loft is dark and the lane outside is darker, and Ashfall has nothing further to say tonight. The house below does: through the floor Mei Lin\'s mother tells her daughter, gravely, that a guest who asks twice what is in the pot will be handed the ladle and watched. *Stop thinking,* Yuki sends from the hollow of your shoulder. *It\'s loud.* You stop, more or less.', 'The herb loft is dark and the lane outside is darker, and Ashfall has nothing further to say tonight. The house below does: through the floor Mei Lin\'s mother tells her daughter, gravely, that a guest who asks twice what is in the pot will be handed the ladle and watched. *Stop thinking,* Yuki sends from most of the floor. *It\'s loud.* Her tail comes down across your legs, and that is the end of the discussion.', 'The herb loft is dark and the lane outside is darker, and Ashfall has nothing further to say tonight. The house below does: through the floor Mei Lin\'s mother tells her daughter, gravely, that a guest who asks twice what is in the pot will be handed the ladle and watched. "Stop thinking," Yuki says from behind you, mostly asleep. "It\'s loud." You stop, more or less.')];
 // v0.11.238 (owner pick P11-A, EVn-1, D1; 2026-11-20 17:06, 17:17; Fable's run N1, Claude's cut GW): the long calendar's first week a cycle of
 // six: the old three, then these three (by the quiet key's day, so its seventh night is the first again and folds); the owner's pick takes the
-// quiet night to six, a non-social scene. The old calendar keeps the old three. RV2 (owner pick 2026-11-20 18:19; the cold review's T M2, M3, L1–L3,
+// quiet night to six, a non-social scene. RV2 (owner pick 2026-11-20 18:19; the cold review's T M2, M3, L1–L3,
 // L6): the reviewer's and Claude's wording, and the order coat, board, bird (the supper's board on night 3, its glasses on night 6)
 const QUIET_W1 = [
         quietY("Your lab coat hangs from a rafter peg between two bundles of something bitter, and has started to smell of them. Along the lane a shutter is pulled to, then the next, each household closing in its turn like a queue. {yuki} You fall asleep drafting a laundry protocol that needs neither soap nor witnesses.",
@@ -488,7 +488,7 @@ const QUIET_W1 = [
 ];
 /** v0.11.243 (owner picks P15-B, D1; SN7, the owner's rule: seven a story day): the seventh evening of the long calendar's village weeks 1 and 2
  *  (`supper:4` / `supper:5`, after the old three and SUPPER_NEW) and week 1's seventh quiet night (`village_night:quiet`, after QUIET_OLD and
- *  QUIET_W1); each read text 1 again, folded. Fable's run S2, Claude's cuts (D1). The old calendar unchanged (one evening a story day). */
+ *  QUIET_W1); each read text 1 again, folded. Fable's run S2, Claude's cuts (D1). */
 // v0.11.243 RV1 (T M4, L2; L1 in 3:5): supper4 no longer opens on "in this house" (the quiet seventh, the same evening, does); the mother named as the speaker
 export const SN7 = {
     supper4: "Fish bones go on the rim of the bowl here, and never on the table. You learn it by watching Mei Lin's mother look at yours.\n\nYou move them, and being what you are, set them out in order, spine first, then the ribs by size.\n\nThe mother studies the result. \"It is not required to rebuild the fish,\" she says.\n\n\"Ask him what it died of,\" says Mei Lin.\n\n\"Smoke,\" you say. \"Some days ago.\"\n\n\"A guest is not asked to examine his supper.\" Then, to you: \"Tidy,\" the mother says, as a clerk notes a weight, and not yet in your favour.\n\nMei Lin gathers the bowls, admiring yours aloud as far as the basin.",
@@ -529,7 +529,7 @@ const vmW2 = (g) => `Ashfall in the morning: smoke from forty chimneys, a rooste
 ${DaysWord(tributeLeft(g))} until the collectors. The village is being ordinary as loudly as it can. You have those ${daysWord(tributeLeft(g))} to make sure that when the Crimson Lotus walks up that road, what waits at the top of it is considerably stronger than one confused mycologist and Yuki. The mycologist is where the work is.`;
 const vmW3Old = (g) => `${tributeLeft(g) <= 1 ? 'The last day. Tomorrow at sunrise, the collectors.' : 'The last week. When it runs out, at sunrise, the collectors.'}
 
-All of Ashfall is up early, and all of it has found some errand that leads past Mei Lin's house, to see whether you are still there. You are. ${g.flags.loft_burned ? (longCal(g) && dayIndex(g, 's:village_morning:3') > 0 ? VM_W3_COLD /* v0.11.248 (P18-A, RV: T M4, C L2): the later mornings, the loft cooled */ : 'What is left of the loft is still smoking a little.') : byForm(g, 'Yuki is sunning herself on the doorstep like a small white guard dog.', 'Yuki is sunning herself across the doorstep like a large white guard dog.', 'Yuki is sunning herself on the doorstep, eyes shut, like a white guard dog in a high black collar.')}`;
+All of Ashfall is up early, and all of it has found some errand that leads past Mei Lin's house, to see whether you are still there. You are. ${g.flags.loft_burned ? (dayIndex(g, 's:village_morning:3') > 0 ? VM_W3_COLD /* v0.11.248 (P18-A, RV: T M4, C L2): the later mornings, the loft cooled */ : 'What is left of the loft is still smoking a little.') : byForm(g, 'Yuki is sunning herself on the doorstep like a small white guard dog.', 'Yuki is sunning herself across the doorstep like a large white guard dog.', 'Yuki is sunning herself on the doorstep, eyes shut, like a white guard dog in a high black collar.')}`;
 /** v0.11.248 (owner pick P18-A; Fable's, Claude's cuts): VM, the long calendar's village mornings by visit (`seqText`; the keys reset with the Coil, as the roof's): week 1 three (the old text first),
  *  week 3 four (the old text first; its last day keeps the old text alone); a new week-3 text's Yuki passage gives way to its own line after a burn (LC1). */
 export const VM_W1 = [
@@ -584,8 +584,8 @@ ${byForm(g, `What this house owes the post stands by the door in two sacks, weig
 *Tell her I charge less than the Sect,* Yuki sends, and yawns, which is a lot of teeth to show a household at supper.`, `What this house owes the post stands by the door in two sacks, weighed and tied. Mei Lin's mother has weighed them again since morning; the steelyard is still out. "The Sect's measure is larger than ours," she says, serving the fish. "Each year it is a little larger. One does not remark on it." "One remarks on it constantly," says Mei Lin. "One just does it indoors." She glances at the shutter all the same. "Indoors," her mother says, "is where it will stay." Yuki, at the head of the table, has been listening with her ears forward.
 
 "How much larger," she asks. The mother tells her, to the handful. Yuki nods and says no more, and you, who know that nod, eat your fish and feel briefly sorry for the measure.`)}`, ...SUPPER_NEW[4], SN7.supper4]) /* v0.11.243 (P15-B, SN7): the seventh */
-            : longCal(g) && vday(g) >= 3 ? seqText(g, 'supper:6', SW3.map(sw3)) // v0.11.241 (owner picks P13-A, WK-d): week 3 its own six (the long calendar only)
-            : seqText(g, 'supper:5', [/* v0.11.248 (P18-A, HM; Fable's run HM): "her mother" twice */ (g) => `${longCal(g) ? 'Another supper at Mei Lin\'s.' : 'Second supper at Mei Lin\'s.'} Her mother no longer watches you as she would a fox in the henhouse. She watches you as she would a fox she might find a use for.
+            : vday(g) >= 3 ? seqText(g, 'supper:6', SW3.map(sw3)) // v0.11.241 (owner picks P13-A, WK-d): week 3 its own six (the long calendar only)
+            : seqText(g, 'supper:5', [/* v0.11.248 (P18-A, HM; Fable's run HM): "her mother" twice */ (g) => `Another supper at Mei Lin\'s. Her mother no longer watches you as she would a fox in the henhouse. She watches you as she would a fox she might find a use for.
 
 Tonight she talks. Of Mei Lin's father, who had a spirit root, and who went up the road with the collectors when Mei Lin was six. Of the letter that came down four years later, two words long: *Tribulation. Honoured.* Of the box they buried, which had nothing in it.
 
@@ -628,7 +628,7 @@ She gives the patch of dark her full and serious attention. "It looks cold."
 "It was warm. We grew our houses out of trees. They sang back when you sang to them." You stop. "Sorry. That sounds insane."
 
 "It sounds," she says, "like the only thing anyone has told me in years that I wanted to be true."`
-            : `${longCal(g) ? 'Up on the roof again.' : 'Second night on the roof.'} This time she brings the plum wine, and does not ask whether you want any.
+            : `Up on the roof again. This time she brings the plum wine, and does not ask whether you want any.
 
 She tells you what the tribute costs, in numbers: so many baskets of grass, so many sacks of millet, so many children tested for roots. Which families hid their children last year, and which of those were caught. Her voice is perfectly level through all of it. Her hands are not.
 
@@ -646,8 +646,8 @@ After that she says nothing until the jar is nearly empty. Your forearm has been
         dayKey: (g) => (arsonNight(g) ? null : 'village_night:quiet'), // v0.11.230 (P3-2, FT): the quiet nights' own count (an arson night is no step)
         text: (g) => {
             // v0.11.230 (owner picks P3-2, D1: FT; Fable's, Claude's cuts): the quiet night a sequence of three by its own day key (`dayKey` below); weeks 2 and 3 six each since v0.11.242 (P14-A)
-            if (!arsonNight(g) && longCal(g) && QUIET_WEEK[vday(g)]) return seqText(g, `village_night:${vday(g)}`, QUIET_WEEK[vday(g)]); // v0.11.237 (P10-A, EVk): weeks 2 and 3 their own three; v0.11.242 (P14-A, EVn-23): six each (RV1, C L2)
-            if (!arsonNight(g)) return byDay(g, longCal(g) ? [...QUIET_OLD, ...QUIET_W1, SN7.quiet] : QUIET_OLD, 'village_night:quiet'); // v0.11.238 (P11-A, EVn-1): the first week six on the long calendar; v0.11.243 (P15-B, SN7): seven
+            if (!arsonNight(g) && QUIET_WEEK[vday(g)]) return seqText(g, `village_night:${vday(g)}`, QUIET_WEEK[vday(g)]); // v0.11.237 (P10-A, EVk): weeks 2 and 3 their own three; v0.11.242 (P14-A, EVn-23): six each (RV1, C L2)
+            if (!arsonNight(g)) return byDay(g, [...QUIET_OLD, ...QUIET_W1, SN7.quiet], 'village_night:quiet'); // v0.11.238 (P11-A, EVn-1): the first week six on the long calendar; v0.11.243 (P15-B, SN7): seven
             if (g.flags.gao_broken) return `It is still dark when Mei Lin's hand on your shoulder wakes you. Her other hand is closed on a twist of cloth, and in the cloth is Gao Feng's jade token: she had it out of his sleeve while he was lying in the herbs with his arm pointing the wrong way.
 
 The jade is warm. It *beats*, slow and faint, as if it kept a pulse of its own.
@@ -714,10 +714,10 @@ Mei Lin stands in the lane, soot across her face, and looks at what is left. She
         },
         // v0.11.224 (owner pick TX2, TS6: DC7–DC9): the long calendar's first week has its own mornings (story day 6's showed before); the counts from the calendar
         text: (g) => (vday(g) === 1
-            ? (longCal(g) ? seqText(g, 'village_morning:1', [vmW1Old, ...VM_W1.map(vmText)]) : vmW1Old(g)) /* v0.11.248 (P18-A, VM) */
+            ? seqText(g, 'village_morning:1', [vmW1Old, ...VM_W1.map(vmText)]) /* v0.11.248 (P18-A, VM) */
             : vday(g) === 2
             ? vmW2(g)
-            : longCal(g) && tributeLeft(g) > 1 ? seqText(g, 'village_morning:3', [vmW3Old, ...VM_W3.map(vmText)]) /* v0.11.248 (P18-A, VM) */ : vmW3Old(g)),
+            : tributeLeft(g) > 1 ? seqText(g, 'village_morning:3', [vmW3Old, ...VM_W3.map(vmText)]) /* v0.11.248 (P18-A, VM) */ : vmW3Old(g)),
         choices: [{ text: 'Out into the village.', to: 'ashfall' }],
     },
 
@@ -737,7 +737,7 @@ ${[pantry(g), g.james.satiety < 30 ? 'You are hungry.' : '', g.james.hp < jamesH
             { text: 'Visit Old Wen.', show: (g) => !g.flags.elder && !late(g), time: 30, do: set('elder'), to: 'elder' },
             { text: 'Go to the coughing house. A child is sick.', show: (g) => !g.flags.healed_try && !late(g), time: 30, to: 'heal' },
             { text: 'Hunt the ironhide boar past the oak hollow.', show: (g) => !g.flags.village_hunt && hour(g) < 15, time: 90, to: 'village_hunt' },
-            { text: 'Gather herbs with Mei Lin on the slopes.', show: (g) => daily('slopes')(g) && hour(g) < 15 && (!longCal(g) || vday(g) >= 2), // RV1 (H3a): not in the long calendar's first week
+            { text: 'Gather herbs with Mei Lin on the slopes.', show: (g) => daily('slopes')(g) && hour(g) < 15 && vday(g) >= 2, // RV1 (H3a): not in the first week
               time: 30, to: 'herb_slopes' },
             { text: 'Run a clinic: the sick and the hurt line up at the well.', show: (g) => !!g.flags.healed_try && !late(g), time: 20, to: 'clinic' },
             { text: 'Bone workshop: make things the village needs.', show: (g) => !late(g), time: 10, to: 'workshop' },
@@ -745,7 +745,7 @@ ${[pantry(g), g.james.satiety < 30 ? 'You are hungry.' : '', g.james.hp < jamesH
             { text: 'Sit with Old Wen and listen.', show: (g) => !!g.flags.elder && daily('wen')(g) && !late(g), time: 20, to: 'wen_lesson' },
             { text: 'Hunt beyond the oak hollow.', show: (g) => daily('far')(g) && hour(g) < 16, time: 60, to: 'far_hunt' },
             { text: 'Scout the tribute road.', show: (g) => vday(g) === 3 && !g.flags.scouted_try && hour(g) < 17, time: 30, to: 'scout' },
-            { text: 'Walk with Mei Lin at sunset.', show: (g) => daily('walk')(g) && hour(g) >= 15 && hour(g) < 20 && (!longCal(g) || vday(g) >= 2), // RV1 (H3a)
+            { text: 'Walk with Mei Lin at sunset.', show: (g) => daily('walk')(g) && hour(g) >= 15 && hour(g) < 20 && vday(g) >= 2, // RV1 (H3a)
               time: 30, to: 'mei_walk' },
             { text: 'Eat at the communal pot.', show: (g) => daily('pot')(g) && g.james.satiety < 80 && !late(g), time: 30, do: (g) => { markDaily(g, 'pot'); eat(g, 25); return [potLine(g, 'ashfall') ?? 'Barley and bean stew, ladled by a woman who addresses you as "honoured guest" in the tone of someone who has not yet ruled on whether you are one: +25 satiety.']; }, to: 'ashfall' }, // v0.11.181 (SP1, PS): from the village's 90, potLine
             { text: 'Eat something from the hammerspace.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: true }), to: 'ashfall' },
@@ -760,7 +760,7 @@ ${[pantry(g), g.james.satiety < 30 ? 'You are hungry.' : '', g.james.hp < jamesH
         id: 'herb_slopes', title: 'The Herb Slopes', art: 'herb_slope', place: `${P} — the herb slopes`,
         enter: (g) => { markDaily(g, 'slopes'); return []; },
         text: (g) => (vday(g) === 2
-            ? (longCal(g) ? seqText(g, 'herb_slopes:2', [slopesW2a, slopesW2b]) : slopesW2a(g)) // v0.11.243 (P15-B, SF: HS): week 2 two texts on the long calendar
+            ? seqText(g, 'herb_slopes:2', [slopesW2a, slopesW2b]) // v0.11.243 (P15-B, SF: HS): week 2 two texts
             : `${tributeLeft(g) <= 1 ? 'It is the last day on the slopes before the tribute. She cuts double what she needs and offers no reason. You ask for none. It needs no saying: should tomorrow go wrong, she will have no next season to cut in.' : 'It is the last week on the slopes before the tribute. She cuts double what she needs and offers no reason. You ask for none. It needs no saying: should the tribute go wrong, she will have no next season to cut in.'} Halfway along the terrace, with her back to you and the knife still working, she asks again what a man who needs none of this is doing up here.
 
 Her father comes up again, briefly. He would walk her up here and get the name of every plant wrong, on purpose, so that she had to put him right.`),

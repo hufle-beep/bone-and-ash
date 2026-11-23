@@ -51,7 +51,7 @@ Open items of section 2, moved word for word in v0.11.178, owner pick U1 (MD: th
 
 ## Placed here in v0.11.240 (owner pick RA1, 2026-11-20 23:29: from the handover's open items, word for word)
 
-- *(new in v0.11.240; open, options later; beside section 2's "the text day (05:00) against the daily reset (04:00)" in `roadmap.md`)* **p13-measure §10's bug:** From p13's measure: on the old calendar a Fallout supper eaten after midnight reads the next story day's text (the Sociable 10 of 10 games, v0.11.238 too: the scene's day starts at midnight, the day records at 05:00; `p13-measure.md` §10). The old calendar is bots and tests only since the flip (v0.11.226).
+- *(new in v0.11.240; open, options later; beside section 2's "the text day (05:00) against the daily reset (04:00)" in `roadmap.md`)* **p13-measure §10's bug:** From p13's measure: on the old calendar a Fallout supper eaten after midnight reads the next story day's text (the Sociable 10 of 10 games, v0.11.238 too: the scene's day starts at midnight, the day records at 05:00; `p13-measure.md` §10). The old calendar is bots and tests only since the flip (v0.11.226). *(v0.11.260, owner pick P28-A, OC6: the old calendar's code is gone, and the mismatch is **not** old-only: on the long calendar a week's last night 00:00–04:59 reads story day d + 1 (`storyDay`, from midnight) against text day d (`textStoryDay`, from 05:00): measured on calendar Days 51 and 58 (00:11, 04:30: 9 / 8 and 10 / 9; 05:00: 9 / 9). Once a story day now instead of every night. Still open, options later, with section 2's text-day line; no fix in v0.11.260.)*
 
 ## Placed here in v0.11.244 (owner pick RO2, 2026-11-21 11:08: t's and KA's open items, word for word)
 

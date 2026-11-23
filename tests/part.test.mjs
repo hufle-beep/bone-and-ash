@@ -68,7 +68,7 @@ function seedState(g, run) {
 }
 for (let run = 0; run < 1000; run++) {
     rs = (4242 + Math.imul(run + 1, 2654435761)) >>> 0; // v0.11.253 (P23-A, WB): each run its own random stream (on the long calendar every run reached fo_letter at the same point of one shared stream, so its second answer, fo_leave_offer, never came)
-    const g = ensureBars(newGame(run + 7, { cal: LONG_CAL })); seedState(g, run); g.scene = ENTRY; const e = S[ENTRY].enter; if (e) e(g);
+    const g = ensureBars(newGame(run + 7, {})); seedState(g, run); g.scene = ENTRY; const e = S[ENTRY].enter; if (e) e(g);
     let steps = 0;
     for (; steps < STEPS; steps++) {
         seen.add(g.scene);

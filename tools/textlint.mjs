@@ -86,14 +86,14 @@ for (const [day, flags] of [[23, { long: true, vday: 1, cal_night: 1 }], [30, { 
     [2, { forest_day: 1 }], [9, { forest_day: 2 }], [16, { forest_day: 3 }], [44, { ya_met: true }], [51, { ya_met: true }], [60, { ya_met: true }],
     [66, { bl_day: 1, bl_n: 1, bl_region: 'rr' }], [69, { bl_day: 2, bl_n: 0, bl_region: 'rr' }], [72, { bl_day: 3, bl_n: 2, bl_region: 'dw' }], [76, { bl_day: 4, bl_n: 1, bl_region: 'ah' }], [79, { bl_day: 5, bl_n: 2, bl_region: 'ah' }],
     [81, {}], [102, {}]]) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, flags); g.minutes = (day - 1) * 1440 + 12 * 60;
+    const g = ensureBars(newGame(1234, { closed: true })); Object.assign(g.flags, flags); g.minutes = (day - 1) * 1440 + 12 * 60;
     SAMPLES.push(ensureBars(g));
 }
 // v0.11.233 (owner pick RV1 after P6-A, LS; the cold review's C M2): the journey talks past their five beats (5–10: the quiet walk, the two old
 // settled texts and the three new), cold and warm, and Mei Lin's with Ya away; and the prologue camp's first night with the fire lit and food,
 // so the talks' cycle of six and Yuki's cooking line are read too
 for (const n of [5, 6, 7, 8, 9, 10, 11, 12, 13, 14] /* v0.11.247 (P17-A, TL4): and beats 11–14 */) for (const a of [0, 80]) for (const [region, day] of [['rr', 2], ['ah', 4]]) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_talks: n, ya_talks: n, mei_party: true, ya_party: true });
+    const g = ensureBars(newGame(1234, { closed: true })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_talks: n, ya_talks: n, mei_party: true, ya_party: true });
     g.rel['Mei Lin'] = { f: 20, a }; g.rel.Ya = { f: 20, a }; g.minutes = 70 * 1440 + 10 * 60;
     SAMPLES.push(ensureBars(g));
 }
@@ -108,18 +108,18 @@ for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
 // (markDaily: imported above)
 const ROOF_SAMPLES = [], ROOF_K = new Map(); // the day index by sample: `dryClone` drops the lines' proxy, so the results loop sets it again
 for (const [vd, ks] of [[2, [0, 1, 2, 3, 4, 5, 6]], [1, [3, 4]], [3, [0, 1, 2, 3, 4, 5, 6]]] /* v0.11.247 (P17-A, SR3): week 2's seventh, week 1's 4–5, week 3's seven */) for (const k of ks) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { long: true, vday: vd, cal_night: 1 }); g.minutes = (vd === 1 ? 22 : vd === 2 ? 29 : 36) * 1440 + 21 * 60;
+    const g = ensureBars(newGame(1234, { closed: true })); Object.assign(g.flags, { long: true, vday: vd, cal_night: 1 }); g.minutes = (vd === 1 ? 22 : vd === 2 ? 29 : 36) * 1440 + 21 * 60;
     onDay(g, k); SAMPLES.push(g); ROOF_SAMPLES.push(g); ROOF_K.set(g, k);
 }
 // v0.11.247 (owner pick P17-A, FH; the measure's RD gap): the far hunt on each of its five days a quarry, so its texts are read at all
 for (const kind of ['wolves', 'bull', 'deer']) for (const k of [0, 1, 2, 3, 4]) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { long: true, vday: 2, far_kind: kind }); g.minutes = 29 * 1440 + 10 * 60;
+    const g = ensureBars(newGame(1234, { closed: true })); Object.assign(g.flags, { long: true, vday: 2, far_kind: kind }); g.minutes = 29 * 1440 + 10 * 60;
     SAMPLES.push(onDay(g, k));
 }
 for (const [region, warm] of [['rr', [[0, 0]]], ['ah', [[80, 80], [0, 80], [80, 0], [0, 0]]]]) for (const [m, y] of warm) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
     if (region === 'ah' && (m || y) && form !== 'cat') continue;
     for (const k of [1, 2, 3, 4] /* v0.11.246 (P16-A, BF): and texts 4–5 */) for (const cooked of [true, false]) {
-        const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+        const g = ensureBars(newGame(1234, { closed: true })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
         Object.assign(g.flags, { bl_day: region === 'ah' ? 4 : 2, bl_region: region, mei_party: true, ya_party: true }); g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y };
         g.minutes = 70 * 1440 + 20 * 60; onDay(g, k); if (cooked) markDaily(g, 'bl_cook');
         SAMPLES.push(ensureBars(g));
@@ -129,37 +129,37 @@ for (const [region, warm] of [['rr', [[0, 0]]], ['ah', [[80, 80], [0, 80], [80, 
 // camp on its later nights as the game reaches them (the Root Road's and the Ashen Hills' fourth and fifth on their second story day, the
 // Drowned Wood's second to fourth, the fourth after the mourning hollow), so every camp text is read, CB5's five with them
 for (const [region, day, ks, more] of [['rr', 2, [3, 4], {}], ['dw', 3, [1, 2, 3], {}], ['ah', 5, [3, 4], { ya_off_done: true }]]) for (const k of ks) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_party: true, ya_party: true, ...more, ...(region === 'dw' && k === 3 ? { bl_n: 2, drowned_done: true } : {}) });
+    const g = ensureBars(newGame(1234, { closed: true })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_party: true, ya_party: true, ...more, ...(region === 'dw' && k === 3 ? { bl_n: 2, drowned_done: true } : {}) });
     g.minutes = 70 * 1440 + 20 * 60; SAMPLES.push(onDay(ensureBars(g), k));
 }
 // v0.11.235 (owner pick P8-A, TG; v0.11.234's measure): the supper's and the sunset walk's cycles of six on each of their days, the village's
 // three weeks, in the three forms (two new texts name Yuki by form), and the Fallout's story days 9 and 10 (`fo_mei`, `fo_ya_time`, their
 // labels) on each day of their sequences of three, so the texts v0.11.232–235 added there are read too
 for (const [vday, day] of [[1, 23], [2, 30], [3, 37]]) for (const k of (vday === 3 ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4, 5, 6]) /* v0.11.243 (P15-B, SN7): and the seventh; RV1 (C L3): not week 3's */) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+    const g = ensureBars(newGame(1234, { closed: true })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
     Object.assign(g.flags, { long: true, vday, cal_night: 1 }); g.minutes = (day - 1) * 1440 + 19 * 60;
     SAMPLES.push(onDay(g, k));
 }
 // v0.11.239 (owner pick P12-A, TG): and the Fallout supper's sequences of six (FS6): story day 8's six in the three forms, day 9's with Ya and without her; v0.11.241 (P13-A): day 10's own six (FS10) with Ya and without, the village's week 3 (SW3) in the loop above
 for (const day of [44, 51, 58]) for (const k of (day === 58 ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4, 5, 6]) /* v0.11.243 (P15-B, SN7); RV1 (C L3): not story day 10's */) for (const [form, realm] of (day === 44 ? [['cat', 0], ['tiger', 2], ['human', 7]] : [['cat', 0]])) for (const ya of (day === 44 ? [true] : [true, false])) { // v0.11.241 (P13-A, FS10): story day 10's lines without Ya too
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; if (ya) g.flags.ya_met = true; g.minutes = (day - 1) * 1440 + 12 * 60;
+    const g = ensureBars(newGame(1234, { closed: true })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; if (ya) g.flags.ya_met = true; g.minutes = (day - 1) * 1440 + 12 * 60;
     SAMPLES.push(onDay(g, k));
 }
 // v0.11.243 RV1 (the cold review's TG-C3): the herb slopes' week 2 with Mei Lin's lip split, both texts
-for (const k of [0, 1]) { const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); Object.assign(g.flags, { long: true, vday: 2, cal_night: 1, mei_bruised: true }); g.minutes = 29 * 1440 + 9 * 60; SAMPLES.push(onDay(g, k)); }
+for (const k of [0, 1]) { const g = ensureBars(newGame(1234, { closed: true })); Object.assign(g.flags, { long: true, vday: 2, cal_night: 1, mei_bruised: true }); g.minutes = 29 * 1440 + 9 * 60; SAMPLES.push(onDay(g, k)); }
 // v0.11.243 (owner picks P15-B, D1; SF: MW): the long calendar's first forest week (`forest_day` 1), so its own morning is linted
-{ const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.flags.forest_day = 1; g.minutes = 1440 + 6 * 60; SAMPLES.push(g); }
+{ const g = ensureBars(newGame(1234, { closed: true })); g.flags.forest_day = 1; g.minutes = 1440 + 6 * 60; SAMPLES.push(g); }
 // v0.11.242 (owner pick RV1 after P14-A; the cold review's C M1, TG-C1): the forest night's later texts (`night`'s `byDay` index 5–14: the first
 // loop reads 0–4), in the three forms with the fire and in the cat without it (the fire line is the same in every form), so NF6's six are linted
 for (const k of [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] /* v0.11.246 (P16-A, NF6): and 16–21 */) for (const [form, realm, fire] of [['cat', 0, true], ['tiger', 2, true], ['human', 7, true], ['cat', 0, false]]) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+    const g = ensureBars(newGame(1234, { closed: true })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
     Object.assign(g.flags, { forest_day: 3, ...(fire ? { fire: true } : {}) }); g.minutes = 15 * 1440 + 21 * 60;
     SAMPLES.push(onDay(g, k));
 }
 // v0.11.246 (owner pick P16-A, TG): the Ashen Hills' hunt on its second stay (story day 15, `s:ah_hunt:15`) on each day, with Ya and away, by form;
 // a kept realm's first dawn (KA (b)) in both acts; the Foundation breakthrough with Old Wen's lesson and not Mei Lin's word (BYb-t)
 for (const k of [0, 1, 2]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const back of [true, false]) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+    const g = ensureBars(newGame(1234, { closed: true })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
     Object.assign(g.flags, { bl_day: 5, bl_region: 'ah', mei_party: true, ya_party: true, ...(back ? { ya_off_done: true } : {}) }); g.minutes = 76 * 1440 + 9 * 60;
     SAMPLES.push(onDay(ensureBars(g), k));
 }
@@ -167,7 +167,7 @@ for (const act of [0, 1]) { const g = ensureBars(newGame(1234, { closed: true })
 { const g = ensureBars(newGame(1234, { closed: true })); g.james.realm = 1; g.yuki.realm = 1; Object.assign(g.flags, { lore_realms: true, bt_return: 'stream' }); g.minutes = 3 * 1440 + 10 * 60; SAMPLES.push(g); }
 // v0.11.246 RV (the cold review's C M2): the first flight by place (the alone sample is the realm-1 one above)
 for (const [back, f] of [['village', {}], ['rr_hub', { bl_region: 'rr' }], ['ah_hub', { bl_region: 'ah', bl_day: 4 }]]) {
-    const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.james.realm = 1; g.yuki.realm = 1; Object.assign(g.flags, { bt_return: back, mei_party: back !== 'village', ya_party: back !== 'village', ...f }); g.minutes = 73 * 1440 + 10 * 60; SAMPLES.push(g);
+    const g = ensureBars(newGame(1234, { closed: true })); g.james.realm = 1; g.yuki.realm = 1; Object.assign(g.flags, { bt_return: back, mei_party: back !== 'village', ya_party: back !== 'village', ...f }); g.minutes = 73 * 1440 + 10 * 60; SAMPLES.push(g);
 }
 const renders = (x) => {
     if (typeof x === 'string') return [x];
@@ -209,9 +209,10 @@ const dayReplies = [];
 for (const list of Object.values(DAY_REPLIES)) for (const t of list) for (const r of renders(t)) if (!dayReplies.includes(r)) dayReplies.push(r);
 // v0.11.139 (owner pick MW1): Old Wen's and the mother's daily scenes, every body and closer (the samples read one slot only)
 const { HT_BODY, HT_CLOSE } = await import(js('story/house_texts.js'));
-// v0.11.224 (TX2, DC12): a body's count slot filled as the screen fills it, on both calendars' first Fallout day (the old 13, the long 59)
+// v0.11.224 (TX2, DC12): a body's count slot filled as the screen fills it, on the first Fallout day (59 to the Elder); v0.11.260 (P28-A, OC2;
+// the cold review's L5): the old calendar's sample (13) went with its code
 const { countsFill } = await import(js('core/calendar.js'));
-const HFILL = [ensureBars(newGame(1234, { closed: true })), ensureBars(newGame(1234, { closed: true, cal: 7 }))]; HFILL[0].minutes = 7 * 1440 + 600; HFILL[1].minutes = 43 * 1440 + 600;
+const HFILL = [ensureBars(newGame(1234, { closed: true }))]; HFILL[0].minutes = 43 * 1440 + 600;
 const houseLines = [...new Set([...Object.values(HT_BODY).flatMap((b) => Object.values(b)).flatMap((t) => HFILL.map((g) => countsFill(g, t))), ...Object.values(HT_CLOSE).flat()])];
 const { LF_DRILL } = await import(js('story/longforest.js')); const { SEASON_LINES } = await import(js('story/prologue.js')); // v0.11.175 (RV1, C4)
 // v0.11.181 (RV1, TG4): the kitchen's and the pot's texts (kitchen_texts.js) as the pool `kitchen`: they show only with a flag or in a result
@@ -267,7 +268,7 @@ POOLS.results = resultLines;
 { const { STOMP } = await import(js('story/power.js')); const st = [];
   for (const id of ['cinder_hawks', 'bone_elk']) for (const d of [2, 3]) for (const k of [0, 1, 2]) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const away of [false, true]) {
       if (away && id !== 'cinder_hawks') continue;
-      const g = ensureBars(newGame(1234, { closed: true, cal: 7 })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
+      const g = ensureBars(newGame(1234, { closed: true })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form;
       Object.assign(g.flags, { bl_day: 4, bl_region: id === 'cinder_hawks' ? 'ah' : 'rr', mei_party: true, ya_party: true, ...(away ? {} : { ya_off_done: true }) }); g.minutes = 73 * 1440 + 10 * 60; onDay(g, k);
       const w = STOMP[id]?.win?.[d]; const t = typeof w === 'function' ? w(g) : w; if (typeof t === 'string' && !st.includes(t)) st.push(t);
   }

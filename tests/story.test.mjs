@@ -36,11 +36,11 @@ const track = process.argv.includes('--track') ? watchGame : () => {};
 let pass = 0, fail = 0;
 const assert = (c, l) => { if (c) { pass++; } else { fail++; console.error('  FAIL ', l); } };
 const kids = launch(import.meta.url); // v0.11.1: the random playthroughs in worker processes
-const fresh = (seed, cal) => newGame(seed, { closed: true, cal }); // v0.11.259 (owner pick OC-A, OC4): the long calendar unless `cal` says 0 (OC2: a check of a rule only the old calendar has)
+const fresh = (seed) => newGame(seed, { closed: true }); // v0.11.259 (owner pick OC-A, OC4): the long calendar; v0.11.260 (owner pick P28-A, OC2): the old calendar's `cal: 0` gone with its code
 /** v0.11.253 (owner pick P23-A, LB): the random games and the walks play the long calendar, as every new game since the flip
  *  (v0.11.226); a walk set on a story day uses `calMinutes` (that day's first calendar day). The hand-built states below keep the
- *  old calendar where they set the clock by its day (open, options later). */
-const freshBot = (seed) => newGame(seed, { closed: true, cal: LONG_CAL });
+ *  old calendar where they set the clock by its day (open, options later). v0.11.260 (owner pick P28-A, OC2): the old calendar gone, every state long. */
+const freshBot = (seed) => newGame(seed, { closed: true });
 const onStoryDay = (g, d, h = 0, m = 0) => { g.minutes = calMinutes(g, d, h, m); return g; };
 /** WB: a stay is a week of calendar days, so four walk families outgrew their steps (17 of 200 full-hammerspace walks, 10 of 20 from
  *  yk_sister_talk); the P23 review's TG5: each about twice its longest measured run on the long calendar (v0.11.253: 2,201, 859, 3,353,
@@ -192,7 +192,7 @@ for (let run = 0; run < 300; run++) {
 }
 // v0.9.6: the warning before a sealing Foundation, and Act 1's Coil at Shen Qiu
 for (let run = 0; run < 40; run++) {
-    const g = ensureBars(newGame(run + 44444, { closed: true, cal: LONG_CAL })); g.james.primaries = 12; g.james.collaterals = 9 * (run % 3); g.james.saturation = 96; g.flags.bt_return = 'stream';
+    const g = ensureBars(newGame(run + 44444, { closed: true })); g.james.primaries = 12; g.james.collaterals = 9 * (run % 3); g.james.saturation = 96; g.flags.bt_return = 'stream';
     assert(walkFrom(g, 'col_warn', new Set(['stream']), 400) === true, `v0.11.21: the seal warning walks back to the stream (run ${run})`);
     const a = ensureBars(freshBot(run + 45454)); a.scene = 'epilogue'; a.flags.ending = 'bluff'; onStoryDay(a, 7, 15);
     choose(a, SCENES, 0); seen.add('fo_start');
@@ -413,7 +413,7 @@ for (let run = 0; run < 6; run++) {
     // RV2 (TG, Fable's review): end to end through the card and the screen's landing: day 2 shows text 2, the wrap on day 3 goes
     // quiet (said this Coil), a thin haul keeps the reply; the dry run and the threat word leave the day record alone
     {
-        const h = ensureBars(fresh(5300, 0 /* OC2: the old calendar's one-go card */)); h.scene = 'wilds'; const d0 = Math.floor(h.minutes / 1440) * 1440 + 2 * 1440 + 9 * 60;
+        const h = ensureBars(fresh(5300)); h.scene = 'wilds'; const d0 = Math.floor(h.minutes / 1440) * 1440 + 2 * 1440 + 9 * 60;
         const L = DAY_REPLIES['wild_forage:2:f'];
         const shown = [0, 1, 2].map((k) => {
             h.minutes = d0 + k * 1440; h.james.hp = 40; h.james.qi = 20; h.james.satiety = 80; h.scene = 'wilds';
@@ -421,7 +421,6 @@ for (let run = 0; run < 6; run++) {
             assert(JSON.stringify(h.lines?.d || {}) === rec, `NC1 (RV2, TG): the dry run leaves the day record alone (day ${k + 1})`);
             const r = runTask(h, SCENES, 'wild_forage:2'); const s2 = landReply(h, splitReply(r.lines).reply, { entry: true }); noteSaid(h, s2); return s2;
         });
-        assert(shown[0].includes(L[0]) && shown[1].includes(L[1]) && !shown[2].includes(L[0]) && !shown[2].includes(L[1]), `NC1 (RV2, TG): the honey card's failure: day 1 the old reply, day 2 the new one, day 3's wrap quiet (${JSON.stringify(shown)})`);
         const p = ensureBars(fresh(5301)); p.scene = 'wilds'; p.james.gu = { tier: 1, level: 4, xp: 0 }; ensureBars(p); p.minutes = d0 + 1440; p.lines = null;
         p.lines = { c: coilStamp(p), p: {}, last: {}, cur: {}, at: null, said: [], d: { 'r:wild_forage:2': [textDay(p) - 1] } };
         assert(cardCheck(p, 'wild_forage:2', SCENES.wild_forage.choices[2]).band === 'partial', 'NC1 (RV2, TG): the honey card is a thin haul at GU T1 L4');
@@ -542,34 +541,8 @@ for (let run = 0; run < 6; run++) {
         assert(!haul.some((h) => yh.includes(h.replace(/^Yuki /, ''))) && !/mild contempt/.test(haul.join(' ')), 'P2A (OT): Yuki\'s haul in the Wilds and the yukihunt reply are different texts');
         assert(!/three good spots/.test(txt('wild_forage', g0)) && !/Two rats/.test(txt('mire_won', g0)), 'P2A (OT): four forage spots, three mire-rats (no wrong count)');
         g0.flags.night_ev = 'rats'; assert(/sleep is left will not be enough/.test(txt('night_won', g0)), 'P2A (OT, rider 1; RV1 L6): a won night says the sleep left is short');
-        // RV1 (TG, Fable's review): TG1 every SW card through the engine (runTask) in each band it can reach: a failure (and a drill's partial) shows no success
-        // text and notes no day; a thin, full or double haul shows the day's text; M1 no text names a count or a whole haul
-        const mkW = (gu, seed) => { const g = ensureBars(fresh(seed, 0 /* OC2: the old calendar's one-go cards, a result the same tap (the long one's week cards carry on) */)); g.scene = 'wilds'; g.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; g.james.gu = { tier: gu[0], level: gu[1], xp: 0 }; ensureBars(g);
-            g.minutes = Math.floor(g.minutes / 1440) * 1440 + 2 * 1440 + 9 * 60; g.james.qi = 99; g.james.hp = 40; return g; };
-        let bands = 0;
-        for (const k of SWK) {
-            const [scene, i] = k.split(':'); const c = SCENES[scene].choices[Number(i)]; const L = DAY_REPLIES[k]; const seen = new Set();
-            for (let t = 1; t <= 3; t++) for (let l = 1; l <= 10; l++) {
-                const g = mkW([t, l], 5610); const band = cardCheck(g, k, c).band; if (seen.has(band)) continue; seen.add(band); bands++;
-                const r = splitReply(runTask(g, SCENES, k).lines); const all = r.reply.concat(r.gains).join(' | ');
-                const failed = band === 'fail' || (band === 'partial' && scene === 'wild_train'); // a drill's partial runs its failure (half XP)
-                if (failed) assert(!L.some((x) => all.includes(x)) && !g.lines?.d?.[`r:${k}`], `P2A (RV1, TG1): ${k} failed: no success text, no day noted (${all})`);
-                else assert(r.reply.some((x) => x.includes(L[0])), `P2A (RV1, TG1): ${k} ${band}: the first day's text (${all})`);
-            }
-            assert(seen.has('partial') && seen.has('full'), `P2A (RV1, TG1): ${k} reached a thin and a full haul (${[...seen]})`);
-        }
-        assert(bands >= 37, `P2A (RV1, TG1): the bands run (${bands})`);
+        // v0.11.260 (P28-A, OC2): TG1 / TG2, each SW card in one go and on two days in a row (the old calendar's), went with its code
         assert(['wild_forage:0', 'wild_hunt:0'].every((k) => DAY_REPLIES[k].every((t) => !/\bfull ring\b|\beach\b|\btwo\b|\bboth\b/i.test(t))), 'P2A (RV1, M1): the ring and hare texts name no count or whole haul');
-        // TG2: a real two days (no faked day record): Day 2 a failure, Day 3 a success shows the first text; Day 4 a success the second
-        {
-            const g = mkW([1, 1], 5611); const k = 'wild_forage:1'; const L = DAY_REPLIES[k];
-            assert(cardCheck(g, k, SCENES.wild_forage.choices[1]).band === 'fail', 'P2A (RV1, TG2): the cress fails at GU T1 L1');
-            const r1 = splitReply(runTask(g, SCENES, k).lines); assert(!r1.reply.concat(r1.gains).some((x) => L.some((y) => x.includes(y))), 'P2A (RV1, TG2): Day 2 failed, no success text');
-            g.james.gu = { tier: 1, level: 5, xp: 0 }; ensureBars(g); g.minutes += 1440; g.scene = 'wilds';
-            const r2 = splitReply(runTask(g, SCENES, k).lines); g.minutes += 1440; g.scene = 'wilds';
-            const r3 = splitReply(runTask(g, SCENES, k).lines);
-            assert(r2.reply.some((x) => x.includes(L[0])) && r3.reply.some((x) => x.includes(L[1])), `P2A (RV1, TG2): the first success shows text 1 (no "yesterday"), the next day text 2 (${r2.reply} | ${r3.reply})`);
-        }
         // TG3: Yuki's watched hunt, both ways, against her own haul lines
         {
             const yk = SCENES.wild_hunt.choices[3]; const outs = new Map();
@@ -694,11 +667,6 @@ for (let run = 0; run < 6; run++) {
         }
         // TG8
         assert(['clinic:0', 'clinic:1'].every((k) => !/purple|burn|first day/i.test(DAY_REPLIES[k][1])), 'P3A (RV1, TG8, M2): the clinic\'s second-day lines name no patient of the queue');
-        for (const [form] of FORMS) {
-            const a = F(seed++, form, 1, 0), b = F(seed++, form, 1, 0); b.flags.ignored = true; // OC2: the old calendar's "Three days"
-            const pa = txt('supper', a).split('\n\n').slice(1).join('\n\n'), pb = txt('supper', b).split('\n\n').slice(1).join('\n\n');
-            assert(pa === pb && /Three days/.test(pa) && !/lower than she did to you/.test(pa), `P3A (RV1, TG8, M1): supper's form paragraph the same after both openings as ${form}`);
-        }
     }
     // v0.11.170 (owner picks NX2, CA1; Fable's rewrite of part 4, the Fallout): SR the hub's repeatable cards speak by day (Days 8–10)
     // and the council has a Day 10 text; YF every Yuki text in every form; CW the six lines on who he is; ST the three fights' stomp
@@ -767,45 +735,7 @@ for (let run = 0; run < 6; run++) {
             }
         }
         assert(rendered === Object.keys(FALLOUT).length * FLAGSETS.length * 3 * 3, `NX2 (render): every Fallout scene rendered (${rendered})`);
-        // RV1 (TG1, Fable's review M1): through the engine (runTask), a real game on each day. A success closes its card for the Coil
-        // (ONCE_MENUS), so the successes go by the story's day: each day's first success shows that day's text, and the card is gone the
-        // next day; a failure leaves the card open, and the failures go by the count of days (Days 8, 9, 10: the first, second, third)
-        const mkG = (seed, hub, d, strong, flags = {}) => { const g = F(seed, 'cat', d, flags, 0 /* OC2: the old calendar's one-go cards (the long one's week cards carry on) */); g.scene = hub; g.minutes = calMinutes(g, d, 8); const sk = () => (strong ? { tier: 4, level: 10, xp: 0 } : { tier: 1, level: 1, xp: 0 }); g.james.gu = sk(); g.james.skills['Convergence Use'] = sk(); g.james.qi = 99; g.james.hp = 40; g.inventory.jade_bracket = 3; return ensureBars(g); };
-        const openCard = (g, id) => taskCards(g, SCENES).some((c) => c.id === id && c.status === 'open');
-        const said = (g, id, w) => { const r = splitReply(runTask(g, SCENES, id).lines); return r.reply.concat(r.gains).some((x) => x.includes(w)); };
-        const pickT = (t, g) => (typeof t === 'function' ? t(g) : t);
-        let flowed = 0;
-        for (const [k, [scene, i, fn]] of Object.entries(SR)) {
-            const id = `${scene}:${i}`;
-            if (fn === 'do') for (const d of [8, 9, 10]) {
-                const g = mkG(7900 + d, 'fo_ashfall', d, true);
-                if (!openCard(g, id)) { assert(false, `NX2 (RV1, TG1): ${id} open on Day ${d}`); continue; }
-                const w = pickT(DAY_REPLIES[k][d - 8], g);
-                assert(said(g, id, w), `NX2 (RV1, TG1): ${id} on Day ${d} shows that day's text (${w})`);
-                g.minutes += 1440; g.scene = 'fo_ashfall';
-                assert(!openCard(g, id), `NX2 (RV1, TG1): ${id} closed for the Coil after a success`);
-                flowed++;
-            } else {
-                const g = mkG(7950, 'fo_ashfall', 8, false);
-                for (const d of [8, 9, 10]) {
-                    if (d > 8) { g.minutes = calMinutes(g, d, 8); g.scene = 'fo_ashfall'; }
-                    const c = SCENES[scene].choices[i];
-                    assert(openCard(g, id) && ['fail', 'partial'].includes(cardCheck(g, id, c).band), `NX2 (RV1, TG1): ${id} open and failing on Day ${d}`); // a partial with nothing in hand runs the failure (the XP of the failures before it can lift a fail to a partial)
-                    assert(said(g, id, pickT(DAY_REPLIES[k][d - 8], g)), `NX2 (RV1, TG1): ${id} failed on its ${d - 7}. day shows text ${d - 7}`);
-                    g.scene = 'fo_ashfall'; flowed++;
-                }
-            }
-        }
-        // RV1 (P3D): the prologue Ashfall's five the same way, by the village day (Day 5: the first text; Day 6: the second)
-        for (const [k, id] of [['clinic:0', 'clinic:0'], ['clinic:1', 'clinic:1'], ['workshop:0', 'workshop:0'], ['drill:0', 'drill:0'], ['drill:1', 'drill:1']]) for (const vd of [2, 3]) {
-            const g = mkG(7980 + vd, 'ashfall', 3 + vd, true, { long: true, vday: vd, healed_try: true }); if (k === 'clinic:1') delete g.inventory.jade_bracket;
-            if (!openCard(g, id)) { assert(false, `P3A (RV1, P3D): ${id} open on village day ${vd} (${taskCards(g, SCENES).map((c) => `${c.id}:${c.status}`).join(' ')})`); continue; }
-            assert(said(g, id, pickT(DAY_REPLIES[k][vd - 2], g)), `P3A (RV1, P3D): ${id} on Day ${3 + vd} shows its day's text`);
-            g.minutes += 1440; g.flags.vday = vd + 1; g.scene = 'ashfall';
-            assert(!openCard(g, id), `P3A (RV1, P3D): ${id} closed for the Coil after a success`);
-            flowed++;
-        }
-        assert(flowed === 8 * 3 + 3 * 3 + 5 * 2, `NX2 (RV1, TG1): every card played (${flowed})`);
+        // v0.11.260 (P28-A, OC2): TG1's one-go cards by day (the old calendar's) went with its code; the long calendar's week cards: W1 and SR
         // RV1 (TG3): the relationship branches render, and the last night reads four ways over the romance and the two affections
         {
             const RELS = [[0, 0], [60, 0], [0, 90], [60, 90]]; const last = new Set();
@@ -822,9 +752,7 @@ for (let run = 0; run < 6; run++) {
             const g = F(seed++, form, d, { romance: true }); g.minutes = calMinutes(g, d, h); let t; try { t = txt(id, g); } catch (e) { t = `THREW ${e.message}`; }
             assert(!bad(t), `NX2 (RV1, TG4): ${id} as ${form} on Day ${d} at ${h}:00`);
         }
-        const at = (id, d, h, flags = {}) => { const g = F(seed++, 'cat', d, flags, 0 /* OC2: the old calendar's day counts (the long one's: TS6) */); g.minutes = calMinutes(g, d, h); return txt(id, g); };
-        assert(/There is no palisade yet/.test(at('fo_night', 8, 21, { palisade: 0 })) && /Thirteen/.test(at('fo_night', 8, 21, { romance: true })) && /Twelve/.test(at('fo_night', 9, 21, { romance: true })), 'NX2 (RV1, TG4/TG5): the loft at night: no palisade on Day 8; thirteen, then twelve');
-        assert(/Twelve days to the Elder/.test(at('fo_morning', 9, 7)) && /eleven days/i.test(at('fo_council', 10, 12)) && /Ten days to the Elder/.test(at('fo_depart', 11, 6)) && /Five days in, maybe six/.test(at('fo_price', 10, 12, { ya_met: true })) && !/Tomorrow I take you to the tree/.test(SRC), 'NX2 (RV1, TG5): the calendar words by day');
+        const at = (id, d, h, flags = {}) => { const g = F(seed++, 'cat', d, flags); g.minutes = calMinutes(g, d, h); return txt(id, g); };
         // RV1 (TG6, M3): each of the six lines once; the mother's names no supper that hasn't happened on Day 8
         for (const frag of ['whoever salted her pot', 'that the best of your bowl ends in hers', 'decided is a hymn', 'the best of the meat before you ate', 'a man watching a child cross a river', 'a boiled egg appears at your elbow']) assert(SRC.split(frag).length === 2, `NX2 (RV1, TG6): "${frag}" once`);
         assert(!/drawing on my table/.test(at('fo_mother', 8, 9)), 'NX2 (RV1, M3): the mother\'s line true from Day 8\'s morning');
@@ -892,14 +820,7 @@ for (let run = 0; run < 6; run++) {
             for (const day of [0, 1, 4]) { const g = B(seed++, 'cat'); g.scene = 'bl_train'; onDay(g, day); const out = c.do(g); assert(out.length === 1 && out[0] === L[day], `P5A (SW): ${key} day ${day + 1} says its line`); }
             { const g = B(seed++, 'cat'); g.scene = 'bl_train'; const out = c.failDo(g); assert(out.length === 1 && out[0] === DAY_REPLIES[`${key}:f`]?.[0], `P5A (SW) → D1 (b1): ${key}'s failure says its first line (it was silent)`); }
         }
-        // CL and LB: five days, not three or four; Ya's tracks ten days back; the three labels
-        { const g = B(seed++, 'cat', 'rr', 1, {}, 0 /* OC2: the old calendar's day counts */); g.scene = 'bl_start'; const t = txt('bl_start', g); assert(/Five days in/.test(t) && !/Three days in|four-day/.test(SRC), 'P5A (CL): the expedition is five days (bl_start, the label)'); }
-        { const g = B(seed++, 'cat', 'rr', 1, {}, 0 /* OC2: the old calendar's day counts */); g.scene = 'rr_scout'; const t = txt('rr_scout', g); assert(/Ten days back, before the village/.test(t) && !/Three days ago/.test(t) && /three nights/i.test(t), 'P5A (CL; v0.11.179 H1): Ya smelled his stream camp ten days back, and followed him three nights'); }
-        // RV1 (M2, TG2): the menu's text is never drawn on a task screen, so the fix and the CW line are in the card's reply, which is
-        { const g = B(seed++, 'cat', 'rr', 1, {}, 0 /* OC2 */); g.scene = 'rr_hub'; const r = runTask(g, SCENES, 'rr_scout:1'); const j = r.lines.join(' '); assert(g.scene === 'rr_hub' && /Ten days back\. Your first camp, by the stream/.test(j) && /You fed the cat first, so: not Sect/.test(j), `P5A (RV1, M2): "You followed me for three nights?" says ten days back and the cat fed first, on the hub (${j.slice(0, 80)})`); }
-        { const g = B(seed++, 'cat', 'rr', 1, {}, 0 /* OC2 */); g.scene = 'rr_hub'; g.james.gu = { tier: 4, level: 10, xp: 0 }; const r = runTask(g, SCENES, 'rr_scout:0'); assert(/Eyes lie\. Ears lie\. Nose doesn't/.test(r.lines.join(' ')), 'P5A (RV1, M2): the lesson\'s first words in its success line'); }
-        const labs = (id) => SCENES[id].choices.map((c) => (typeof c.text === 'function' ? c.text(ensureBars(newGame(1, { closed: true, cal: 0 /* OC2: the old calendar's labels */ }))) : c.text)); // v0.11.224 (TX2, DN11): a label read on the old calendar
-        assert(labs('ya_mocks').includes('Defuse it. "We have a five-day walk and no doctor. Pick a fight with the forest."') && labs('bl_train').includes('Darts at a mark, from farther and farther.') && labs('bl_night').includes('Mei Lin and Ya together; you and a watch-thread after.'), 'P5A (LB): the three labels');
+        // v0.11.260 (P28-A, OC2): CL and LB's old-calendar day counts and labels went with its code (the long calendar's: TS6)
         assert(!/finish what the darts began|Your darts have one of its eyes/.test(SRC) && !/The day after tomorrow you walk inside/.test(SRC), 'P5A (DG, CL): the ape lure needs no darts; the Ashen Hills fireside is true on both nights');
         // YF: the cat-only texts read in every form (the wolves see Yuki; no laugh "of a cat"; the spring; the serpent's "Your cat")
         assert(!/They have seen the cat|sound of a cat laughing|Nobody here but trees and the cat/.test(SRC) && !/"Your cat," Ya says/.test(readFileSync(new URL('../js/story/stomp_act1.js', import.meta.url), 'utf8')), 'P5A (YF): no cat-only text without a switch');
@@ -1048,7 +969,7 @@ for (let run = 0; run < 6; run++) {
             if (stop) { if (c === '{') depth++; if (c === '}') { if (depth === 0) { i++; return out; } depth--; } }
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
         const LABELS = Object.values(HEART).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-        const PIN = { 'act1_heart.js': '9948b2e5b18d7311', /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '5625eeb4e5a8fc05' /* v0.11.251 (RV-A, HL): re-pinned: luHere reads lu_won (Lu Han beaten at the tribute stays away) */ /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
+        const PIN = { 'act1_heart.js': 'fcef2b38c56df6eb', /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (the watch line, the titles) */ /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '5486ba3c7c879cb7' /* v0.11.260 (P28-A, OC2): re-pinned: Ya's old-calendar posture line gone, its template wrapper with it (the cold review's L5) */ /* v0.11.251 (RV-A, HL): re-pinned: luHere reads lu_won (Lu Han beaten at the tribute stays away) */ /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
         const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
         const got = { labels: hash(JSON.stringify(LABELS)) };
         for (const f of ['act1_heart.js', 'stomp_act1.js', 'yuki_time.js']) got[f] = hash(skel(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')));
@@ -1129,11 +1050,13 @@ for (let run = 0; run < 6; run++) {
     assert(rendered === Object.keys(HEART).length * FLAGSETS.length * 3 * 3, `P6A (render): every Heart scene rendered (${rendered})`);
 }
 
-// v0.11.172 (owner picks P5A, RV1; Fable's review TG1, TG8): the Blackroot played for real, three Coils with a real rewind, Days 11 to
+// v0.11.172 (owner picks P5A, RV1; Fable's review TG1, TG8): the Blackroot played for real (v0.11.260, P28-A OC2 and the cold review's M3: on the long calendar's
+// 5-day road, calBl 1, as a save moved in or past the Blackroot plays it; the camps' road: TS9's walks and LG below), three Coils with a real rewind, Days 11 to
 // 16 06:00: every day's Practice card through taskCards / runTask, "Knock it off" through choose, cooking at every camp; what each by-day
 // list showed (the darts and the needles five of five, the cooking four of four, "Knock it off" the Coil's set from its first text)
+const CAL16 = await import('../js/core/calendar.js');
 for (const form of ['cat', 'human']) {
-    const g = ensureBars(newGame(77, { closed: true, cal: 0 /* OC2: the old calendar's 5-day road, a line a day (the long one's camps: TS9) */ }));
+    const g = ensureBars(newGame(77, { closed: true })); g.calBl = 1; /* v0.11.260 (the cold review's M3, TG3): the 5-day road, as a save moved in or past the Blackroot plays it (calBl 1), a line a day */
     g.minutes = calMinutes(g, 8, 6); Object.assign(g.flags, { ending: 'fought', long: true, ya_met: true });
     const strong = () => { const r = { cat: 0, tiger: 2, human: 7 }[form]; g.james.realm = r; g.yuki.realm = r; g.yuki.form = form; g.james.gu = { tier: 4, level: 5, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 4, level: 5, xp: 0 }; ensureBars(g); g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g); g.rel['Mei Lin'] = { f: 60, a: 30 }; g.rel.Ya = { f: 60, a: 30 }; g.inventory.venison = 20; g.james.satiety = 50; };
     strong(); g.scene = 'fo_start'; startActCoil(g, 1);
@@ -1161,7 +1084,7 @@ for (const form of ['cat', 'human']) {
             take(open.find((c) => /^Fight|^Through it|Straight at it|Sleep/.test(c.label)) || open[0]);
         }
         const day = clockParts(g.minutes).day;
-        assert(g.scene === 'ht_start' && day === 16, `P5A (RV1, TG1): the Blackroot walked to the Heart, Day 16 (${form}, Coil ${coil + 1}: ${g.scene}, Day ${day}, ${steps} steps)`);
+        assert(g.scene === 'ht_start' && day === CAL16.calStart(g, 16) && g.calBl === 1, `P5A (RV1, TG1): the Blackroot walked to the Heart on the 5-day road, story day 16 (${form}, Coil ${coil + 1}: ${g.scene}, Day ${day}, ${steps} steps)`);
         const seq = (k, n, off = 0) => JSON.stringify(log[k] || []) === JSON.stringify([...Array(n).keys()].map((i) => i + off));
         assert(seq('bl_train:1', DAY_REPLIES['bl_train:1'].length) && seq('bl_train:2', DAY_REPLIES['bl_train:2'].length), `P5A (RV1, TG1): the darts and the needles show all five lines, Days 11–15 (${form}, Coil ${coil + 1}: ${log['bl_train:1']} / ${log['bl_train:2']})`);
         assert(seq('bl_camp:0', DAY_REPLIES['bl_camp:0'].length), `P5A (RV1, TG1, M1): the cooking shows all four lines at the four camps (${form}, Coil ${coil + 1}: ${log['bl_camp:0']})`);
@@ -1253,7 +1176,7 @@ for (const form of ['cat', 'human']) {
     // TY / FX / YC: the years, nine days, Ya's childhood her way
     { const mt = txt('rt_mei_talk', R(seed++, 'cat', 19)); assert(/six hundred years/.test(mt) && !/thousand/.test(mt), 'P7A (TY): the tree sang six hundred years');
       const end = txt('a1_end', R(seed++, 'cat', 21, { a1_outcome: 'taken' })); assert(/four centuries/.test(end) && !/for a thousand years/.test(end), 'P7A (TY): the Sect four centuries, not a thousand years');
-      assert(/nine days/.test(txt('rt_mother', R(seed++, 'cat', 20, {}, 10, 0 /* OC2: the old calendar's "nine days" */))) && !/four days in the deep forest/.test(RSRC), 'P7A (FX): nine days away, not four');
+      assert(!/four days in the deep forest/.test(RSRC), 'P7A (FX): never "four days in the deep forest" (v0.11.260, OC2: the old calendar\'s "nine days" went with its code)');
       const ft = txt('rt_fire_talk', R(seed++, 'cat', 19, {}, 20)); assert(/wolf den/.test(ft) && /twelve/.test(ft) && /fifteen/i.test(ft) && !/burned village/.test(ft), 'P7A (YC): Ya\'s childhood as she tells it in her talk'); }
     // FB: the woman's lines filled (a brawl lost, a parley failed, a duel lost); a1_end's last line aloud
     for (const id of ['rt_brawl_lost', 'rt_parley_fail', 'rt_duel_lost']) { const [c, , h] = FORMS.map(([form]) => txt(id, R(seed++, form, 21, { log_heard: true })));
@@ -1306,7 +1229,7 @@ for (const form of ['cat', 'human']) {
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
       const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
       const LABELS = Object.values(RETURN).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-      const PIN = { 'act1_return.js': 'f9e84f7a70573a00' /* v0.11.251 (RV-A, HL): luBeaten (Lu Han stays away and the two bled lines once beaten, lu_won) */, labels: '58e59f4e08e64332' }; // v0.11.250 (P20-A, FR; RV-A FY): the code re-pinned (rt_taken reads final_night for Ya's line, a1_end for Yuki's when neither woman likes him; FR_TEXT imported; the labels unchanged) // v0.11.224 (TX2, DN14; RV1 L1, MC): the code re-pinned (the days since the start for the tree from the calendar, the old line kept for the old calendar, rt_dawn's title; the labels unchanged) // v0.11.198 (S1, D1, SX; RV1 L1, M3): the code re-pinned (rt_start, rt_road and rt_ambush read party_flew; the SX block; sxRide; partyCarry imported; the labels unchanged); v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
+      const PIN = { 'act1_return.js': 'ab01d8e4cdb2b649' /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (rt_dawn's title, the mother's "nine days") */ /* v0.11.251 (RV-A, HL): luBeaten (Lu Han stays away and the two bled lines once beaten, lu_won) */, labels: '58e59f4e08e64332' }; // v0.11.250 (P20-A, FR; RV-A FY): the code re-pinned (rt_taken reads final_night for Ya's line, a1_end for Yuki's when neither woman likes him; FR_TEXT imported; the labels unchanged) // v0.11.224 (TX2, DN14; RV1 L1, MC): the code re-pinned (the days since the start for the tree from the calendar, the old line kept for the old calendar, rt_dawn's title; the labels unchanged) // v0.11.198 (S1, D1, SX; RV1 L1, M3): the code re-pinned (rt_start, rt_road and rt_ambush read party_flew; the SX block; sxRide; partyCarry imported; the labels unchanged); v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
       const got = { 'act1_return.js': hash(skel(RSRC)), labels: hash(JSON.stringify(LABELS)) };
       for (const [k, v] of Object.entries(PIN)) assert(got[k] === v, `P7A (RV1, TG1): ${k}'s code and ids as pinned in v0.11.174 (${got[k]}; update the pin only with a push that means to change them)`); }
     // TG2: the mechanical parts of the Return's result lines, exactly
@@ -1322,7 +1245,7 @@ for (const form of ['cat', 'human']) {
       const yrs = (RSRC + returnStomp).match(/(\w+) hundred years/g) || []; assert(yrs.every((y) => /three|four|six|^a hundred/i.test(y)), `P7A (RV1, TG4): every "hundred years" is three (Shen Qiu), four (the Sect, the dead tree) or six (the song) (${[...new Set(yrs)]})`);
       const FSRC = rd('act1_fallout.js'); assert(/in the morning, by the north road, with twelve disciples/.test(FSRC) && /twelve disciples/.test(STSRC.slice(0, STSRC.indexOf('palisade_wolf'))) && !/noon, four disciples|with four disciples/.test(FSRC + STSRC), 'P7A (RV1, TG4, M2): the watcher\'s ledger agrees: the morning, twelve disciples'); }
     // TG5: nine days away, everywhere
-    assert(!/(four|five|six|seven) days in the (Blackroot|deep forest)/i.test(RSRC) && /Nine days/.test(txt('rt_evening', R(seed++, 'cat', 20, {}, 19, 0 /* OC2 */))) /* v0.11.224 (RV1, L1): the old calendar's words as before */ && /five days/.test(txt('rt_start', R(seed++, 'cat', 19, { seed: true }, 6))), 'P7A (RV1, TG5, L5): nine days away; the long way five days');
+    assert(!/(four|five|six|seven) days in the (Blackroot|deep forest)/i.test(RSRC) && /five days/.test(txt('rt_start', R(seed++, 'cat', 19, { seed: true }, 6))), 'P7A (RV1, TG5, L5): nine days away; the long way five days');
     // TG6: Selene never before the log: every Heart scene by day with ship_found and no log_heard, the camp replies, the item notes, the log's place
     { const hits = []; let k = 0;
       for (const id of Object.keys(SCENES).filter((s) => SCENES[s].place && /Inside the Old Tree|Old Tree/.test(String(typeof SCENES[s].place === 'function' ? '' : SCENES[s].place)) || /^(heart_|ship_|ring_|roots_|guardian_|hall_|sect_cut|log_|ht_)/.test(s)).filter((s) => !/^(guardian_|heart_core|ht_leave)/.test(s))) // the guardian, the heart and the way out come only after the log (guardianOpen)
@@ -1928,16 +1851,7 @@ for (const form of ['cat', 'human']) {
         const t2 = sceneView(g, SCENES).text;
         assert(t2.startsWith(HT_BODY[k]['fo_ashfall:3']) && HT_CLOSE[`${k} MID`].some((l) => t2.endsWith(l)) && htPool(g, k) === `${k} MID`, `MW1 (MS, MT): ${k}: Day 10 (Day 9 skipped) reads Day 10's text, a MID closer at ${HT_MID}`);
     }
-    for (const [hub, day, flags, slot] of [['ashfall', 2, { long: true, vday: 2, elder: true }, 'ashfall:1'], ['ashfall', 3, { long: true, vday: 3, elder: true }, 'ashfall:2'], ['fo_ashfall', 9, {}, 'fo_ashfall:2'], ['fo_ashfall', 11, {}, 'fo_ashfall:3'], ['rt_ashfall', 20, {}, 'rt_ashfall:1']]) {
-        const g = MW(65020 + day, hub, day, flags, 0 /* OC2: the old calendar's slot by its day */); choose(g, SCENES, idx(g, 'wen'));
-        assert(htSlot(g, 'wen') === slot && sceneView(g, SCENES).text.startsWith(HT_BODY.wen[slot]), `MW1 (MS): ${hub} on Day ${day} reads ${slot} (${htSlot(g, 'wen')})`);
-    }
-    // MR1 (M4): after the arson night, the mother's eve reads its own text (Wen's is the same)
-    for (const burned of [false, true]) {
-        const g = MW(65030, 'ashfall', 3, { long: true, vday: 3, elder: true, 'supper@2': true, ...(burned ? { loft_burned: true } : {}) }, 0 /* OC2 */);
-        choose(g, SCENES, idx(g, 'mother'));
-        assert(sceneView(g, SCENES).text.startsWith(HT_BODY.mother[burned ? 'ashfall:2-burned' : 'ashfall:2']), `MR1 (M4): the loft ${burned ? 'burned' : 'standing'}: the mother's eve text`);
-    }
+    // v0.11.260 (P28-A, OC2): MS's slots by the old calendar's day and MR1's mother's eve on it went with its code
     assert(Object.keys(HT_BODY.mother).filter((k) => k.endsWith('-burned')).join() === 'ashfall:2-burned,ashfall:2-early-burned' /* v0.11.224 (TX2, DC11) */ && !Object.keys(HT_BODY.wen).some((k) => k.endsWith('-burned')), 'MR1 (M4): one burned text, the mother\'s eve');
     // MB: the gains in the scenes they are already in
     const MB = [['elder', 0, 'Old Wen', 3], ['fo_plan', 0, 'Old Wen', 3], ['fo_farewell', 0, 'Old Wen', 3], ['fo_farewell', 0, 'Mother', 3], ['rt_wen', 0, 'Old Wen', 4], ['supper', 2, 'Mother', 2], ['rt_mother', 0, 'Mother', 4], ['fo_depart', 0, 'Mother', 2]];
@@ -2178,9 +2092,6 @@ for (const form of ['cat', 'human']) {
         const t = sceneView(g, SCENES).text;
         seen.add('mei_raft');
         assert(g.scene === 'mei_raft' && g.flags.romance === true && g.flags.mei_raft === true && g.rel['Mei Lin'].a === a0 + 10 && g.rel['Mei Lin'].f === f0 + 5 && !/Tonight I guard/.test(t) && /Let it hear/.test(t), `EQ1 (D1): her night, +5 / +10, without Ya's lead-in (${g.scene})`);
-        // OC2: the old calendar's camp night every night (the long one's camp days: TS9); the raft itself above on the long calendar
-        { const o = LG(54100, { bl_region: 'dw' }, [80, 10], 0, 0); o.minutes = calMinutes(o, 14, 21); goTo(o, SCENES, 'bl_fireside'); pick(o, /^When the fire burns low, follow Mei Lin/);
-          assert(walkFrom(o, o.scene, new Set(['bl_night']), 5, true) === true, 'EQ1 (D1): from the raft to the night'); }
         const b = LG(54101, { bl_region: 'dw' }, [80, 80], 0); goTo(b, SCENES, 'mei_raft');
         assert(/Tonight I guard/.test(sceneView(b, SCENES).text), 'EQ1 (D1): Ya\'s lead-in when both like him');
         for (const [fl, rel, why] of [[{ bl_region: 'ah' }, [80, 10], 'the Ashen Hills'], [{ bl_region: 'rr' }, [80, 10], 'the Root Road'], [{ bl_region: 'dw' }, [71, 10], 'Mei Lin 71'], [{ bl_region: 'dw', mei_raft: true }, [80, 10], 'a second time']]) {
@@ -2438,7 +2349,7 @@ for (const form of ['cat', 'human']) {
     for (const [id, flags, ...want] of CASES) {
         assert(!!SCENES[id], `FM1: scene ${id} exists`);
         ['cat', 'tiger', 'human'].forEach((form, i) => {
-            const g = FM(57000 + n++, form, flags, undefined, ['village_morning', 'fo_council'].includes(id) ? 0 /* OC2: the old calendar's morning and council (the long ones: TS6, P18-A) */ : undefined); goTo(g, SCENES, id);
+            if (['village_morning', 'fo_council'].includes(id)) return; /* v0.11.260 (P28-A, OC2): their old-calendar texts went with its code (the long ones: TS6, P18-A) */ const g = FM(57000 + n++, form, flags); goTo(g, SCENES, id);
             const t = sceneView(g, SCENES).text;
             assert(want[i].test(t) && want.filter((re) => re.test(t)).length === 1, `FM1: ${id} as ${form} (${t.slice(0, 80)}…)`);
         });
@@ -2646,7 +2557,7 @@ for (const form of ['cat', 'human']) {
     ];
     for (const [id, flags, min, ...want] of NR) {
         ['cat', 'tiger', 'human'].forEach((form, i) => {
-            const g = FM(60000 + n++, form, flags, flags.romance ? [80, 10] : [40, 40], id === 'fo_council' ? 0 /* OC2: the old calendar's council text */ : undefined); if (min) g.minutes = min; goTo(g, SCENES, id);
+            if (id === 'fo_council') return; /* v0.11.260 (P28-A, OC2): the old calendar's council text went with its code */ const g = FM(60000 + n++, form, flags, flags.romance ? [80, 10] : [40, 40]); if (min) g.minutes = min; goTo(g, SCENES, id);
             Object.assign(g.flags, flags);
             const t = sceneView(g, SCENES).text;
             const same = want.filter((re) => re.source === want[i].source).length;
@@ -3344,12 +3255,11 @@ const rareMissed = RARE.filter((k) => !seen.has(k)); // v0.11.151 (RV1, RL; Fabl
 // v0.11.34 (cold review): an old Story Mode save may sit on one of them; each walks on with no dead end, open meridians (as an old save) and closed
 const ACT1 = (k) => /^(fo_|ring_|roots_|rt_)/.test(k);
 for (const k of [...storyOnly, ...rare]) for (let run = 0; run < 30; run++) { // v0.11.151 (SO): the rare scenes walk on as old saves too
-    const g = ensureBars(run % 2 ? newGame(run + 51515, { closed: true, cal: 0 }) : newGame(run + 51515, { cal: 0 })); // OC4: an old save, moved on load as the game does (flipFill below)
-    if (ACT1(k)) { g.scene = 'epilogue'; g.flags.ending = ['fought', 'bluff', 'paid'][run % 3]; g.minutes = 6 * 1440 + 900; choose(g, SCENES, 0); g.minutes = (k.startsWith('rt_') ? 18 : k.startsWith('fo_') ? 9 : 15) * 1440 + 8 * 60; Object.assign(g.flags, { mei_party: true, ya_party: true, ya_met: true }); }
+    const g = ensureBars(run % 2 ? newGame(run + 51515, { closed: true }) : newGame(run + 51515, {})); // v0.11.260 (P28-A, OC2): a save as it plays after the load's move (the move itself: tests/saves.test.mjs FP1); open meridians as an old save's
+    if (ACT1(k)) { g.scene = 'epilogue'; g.flags.ending = ['fought', 'bluff', 'paid'][run % 3]; g.minutes = calMinutes(g, 7, 15); choose(g, SCENES, 0); g.minutes = calMinutes(g, k.startsWith('rt_') ? 19 : k.startsWith('fo_') ? 10 : 16, 8); Object.assign(g.flags, { mei_party: true, ya_party: true, ya_met: true }); }
     else if (k === 'lf_trial_lost') Object.assign(g.flags, { longforest: true, lf_active: true, bone_ok: true });
-    else { g.flags.long = true; g.flags.forest_day = 2; g.minutes += 1440; }
+    else { g.flags.long = true; g.flags.forest_day = 2; g.minutes += calMinutes(g, 2) - calMinutes(g, 1); }
     g.flags.mer_return = 'stream'; g.flags.bt_return = 'stream';
-    flipFill(g); // OC4: main.js checkScene moves every loaded old save to the long calendar
     const before = seen.has(k);
     const r = walkFrom(g, k, new Set(['fo_start', 'bl_start', 'ht_start', 'a1_end', 'coil_end', 'arrival', 'dawn', 'stream', 'wilds', 'lf_hub']), 1500);
     if (!before) seen.delete(k); // these walks start on the scene: they don't count as reaching it
@@ -3671,12 +3581,12 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
 
 // v0.11.179 (LB1, X1, D1, F1): the full read's finds (Fable's wordings, F1's cuts), O2's "It", O3's tic, O4's three nights.
 {
-    const LB = (seed, form, cal) => { const g = ensureBars(fresh(seed, cal)); const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0; g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return ensureBars(g); };
+    const LB = (seed, form) => { const g = ensureBars(fresh(seed)); const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0; g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return ensureBars(g); };
     const say = (c, g) => (typeof c.text === 'function' ? c.text(g) : c.text);
-    const has = (id, want, form = 'cat') => (SCENES[id].choices || []).some((c) => { try { return say(c, LB(6, form, id === 'rr_scout' ? 0 /* OC2: the old calendar's "three nights" */ : undefined)) === want; } catch { return false; } });
+    const has = (id, want, form = 'cat') => (SCENES[id].choices || []).some((c) => { try { return say(c, LB(6, form)) === want; } catch { return false; } });
     const NEW = [
         ['rt_evening', 'Call the cat off the stove, and follow Mei Lin up to the loft.', 'cat'], ['rt_evening', 'Call the cat off the floor, and follow Mei Lin up the ladder.', 'tiger'], ['rt_evening', 'Ask Yuki up off the bench, and follow Mei Lin to the loft.', 'human'],
-        ['rt_evening', 'Go after Ya to the grove, and leave the door open.'], ['rr_scout', '"You followed me for three nights?"'], ['ya_offended', 'Track her. Nose first, since that\'s how she\'d do it.'],
+        ['rt_evening', 'Go after Ya to the grove, and leave the door open.'], ['rr_scout', '"You followed me for weeks?"'] /* v0.11.260 (OC2): the long calendar's label (the old "three nights?" went with its code) */, ['ya_offended', 'Track her. Nose first, since that\'s how she\'d do it.'],
         ['rt_road', 'Let the other two get ahead, and keep Yuki at your elbow.', 'human'], ['fo_drill', 'Run the line: bone in front, spears through the gaps, no one out on their own.'],
         ['fo_drill', 'Go a round with Yuki while they watch, and let them count what they missed.'], ['rt_hunters', 'Drill them hard: line tight, spears set, a shoulder on either side of everyone.'],
         ['rr_roots', 'Cultivate on the root. The song knows its way in.'], ['rt_grove', 'Cultivate in the grove, and let the song do the rest.'],
@@ -3686,10 +3596,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     ];
     for (const [id, want, form] of NEW) assert(has(id, want, form), `LB1 (FR): ${id} offers "${want}"${form ? ` as ${form}` : ''}`);
     assert(YT_LABEL.HUMAN === 'Keep Yuki company.' && YT_LABEL.CAT === 'Sit with Yuki.' && YT_LABEL.GREAT === 'Lean on Yuki a while.', 'LB1 (FR, W6): Yuki time\'s human label, the other two unchanged');
-    const scout = SCENES.rr_scout; const sg = LB(7, 'cat', 0 /* OC2: the old calendar's counts (the long one's: TS6) */);
-    assert(/Three nights it took me, working out what you were\./.test(say({ text: scout.text }, sg)) && !/Two days I followed/.test(say({ text: scout.text }, sg)), 'LB1 (O4): Ya followed three nights, as in the Fallout');
-    const sc = scout.choices.find((c) => /three nights\?/.test(say(c, sg))); // RV2 TG: a missing label fails here, it doesn't throw
-    assert(!!sc && /^"Ten days back\. Your first camp, by the stream/.test(sc.do(LB(8, 'cat', 0 /* OC2 */))[0]), 'LB1 (H1): the card\'s answer keeps the calendar fact (the menu\'s text is never drawn in task mode)');
+    const scout = SCENES.rr_scout; const sg = LB(7, 'cat');
+    assert(/Weeks it took me, working out what you were\./.test(say({ text: scout.text }, sg)) && !/Two days I followed/.test(say({ text: scout.text }, sg)), 'LB1 (O4): Ya followed for weeks (v0.11.260, OC2: the old calendar\'s three nights went with its code), as in the Fallout');
+    const sc = scout.choices.find((c) => /for weeks\?/.test(say(c, sg))); // RV2 TG: a missing label fails here, it doesn't throw
+    assert(!!sc && /^"From the start\. Your first camp, by the stream/.test(sc.do(LB(8, 'cat'))[0]), 'LB1 (H1): the card\'s answer keeps the calendar fact (the menu\'s text is never drawn in task mode)');
     const all = readdirSync(new URL('../js/story/', import.meta.url)).filter((f) => f.endsWith('.js')).map((f) => readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')).join('\n');
     for (const old of ['Gold eyes, level', 'You followed me for two days', 'Two days I followed', 'like she taught you', 'wait for Yuki to drop back', 'Sit down beside Yuki', 'nobody alone.\', check: { skill: \'GU\', dc: 4', 'what fast looks like', 'Let the song in. Cultivate', 'Sit among them and cultivate', 'Kiss her, there on the path', 'Kiss her before the path straightens', 'tugs you toward the dark, go', '(A season passes.)', 'Bandage it.', 'give one to Mei Lin, too', 'Later. First: the clearing', 'The cat is already up there', 'Yuki follows you.\'']) assert(!all.includes(old), `LB1 (FR): "${old}" is gone`);
     // O2: a save on the win screen with no fight on record reads "It", never "The it"
@@ -3828,10 +3738,17 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         let days = 0, withLine = 0, twice = 0, bad = 0; let s = 7; const shownKeys = new Set(); // RV1 (TG1): every line shows in a real game
         const rnd = (n) => { s = (s * 1103515245 + 12345) >>> 0; return (s >>> 8) % n; };
         const songsSeen = {}, beforeSong = {}; let afterSong = 0, dupSong = 0; // v0.11.183 (SG2; RV1 TG1)
-        for (let n = 0; n < 160; n++) {
-            const gameSongs = [];
-            const g = ensureBars(fresh(78000 + n, 0 /* OC2: the old calendar's shorter game reaches every stage's lines in 6,000 steps; the long one's 160 games don't (open: OC2's push) */)); const per = {};
-            for (let st = 0; st < 6000; st++) { // v0.11.251 (P21-E, TK): 3000 → 6000, a lost tribute now ends the Coil (more Coils before the Fallout)
+        // v0.11.260 (owner pick P28-A, T1; the v0.11.259 review's M2): on the long calendar, as every game since the flip. A stay is a
+        // week, so the 160 games from Day 1 reach the Fallout's later lines, the journey's and the return's too seldom (20 of 65 never,
+        // measured); each later stage gets walks from a state the first walks reached: B, from the first Fallout morning of 40 games,
+        // each played on Act 1 Coils 1–3 (the `from` lines) and in three friendship bands (as reached, Mei Lin and her mother low, mid);
+        // C, from the first return supper of 30 games in the low, mid and high bands (Mei Lin, her mother, Ya). Measured: 65 of 65.
+        const snapsB = [], snapsC = [];
+        const play = (g, n, steps, snap) => {
+            const gameSongs = [], per = {};
+            for (let st = 0; st < steps; st++) {
+                if (snap && snapsB.length < 40 && g.scene === 'fo_start' && g.coil?.act === 1 && !snap.b) { snap.b = 1; snapsB.push(JSON.stringify(g)); }
+                if (snapsC.length < 30 && g.scene === 'rt_evening' && !snap?.c && snap !== null) { if (snap) snap.c = 1; snapsC.push(JSON.stringify(g)); }
                 if (g.scene === 'collectors_lost' && n % 4 === 0) { SCENES.collectors_lost.choices[0].do(g); goTo(g, SCENES, 'epilogue'); } // v0.11.251 (P21-E, TK): a quarter of the games go on as an old save's accepted loss did ("Get up.", now hidden), so the low-friendship Fallout lines keep their players
                 const v = sceneView(g, SCENES); if (v.end) break;
                 const av = againView(g, v); // RV1 (TG3): newVisit passed as main.js does
@@ -3851,14 +3768,19 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
             }
             for (const e0 of Object.values(per)) { const e = [...e0].filter((x) => x !== 'song' && !x.startsWith('song.')); days++; if (e.length) withLine++; if (e.length > 1) twice++; }
             if (new Set(gameSongs).size !== gameSongs.length) dupSong++;
-        }
-        assert(dupSong === 0 && afterSong === 0, `CM3 (ON-S, DU): 160 random games: no song twice in a game (${dupSong}), no music line after an evening song the same day (${afterSong})`);
-        assert(Object.keys(songsSeen).length === 13, `CM3 (PL; RV1 TG2): all 13 songs show in 160 random games (${Object.keys(songsSeen).length}: ${Object.keys(songsSeen).map((k) => k.slice(5)).join(', ')})`);
+        };
+        const band = (g, f, who) => { for (const w of who) g.rel[w] = { ...(g.rel[w] || { a: 0 }), f }; return g; };
+        for (let n = 0; n < 160; n++) play(ensureBars(fresh(78000 + n)), n, 6000, {});
+        snapsB.forEach((sj, j) => { for (const k of [0, 1, 2]) { const g = JSON.parse(sj); g.coil.n += k; const f = [null, 10, 50][j % 3]; play(f == null ? g : band(g, f, ['Mei Lin', 'Mother']), 1, 3000, { b: 1 }); } });
+        snapsC.forEach((sj, j) => play(band(JSON.parse(sj), [10, 50, 90][j % 3], ['Mei Lin', 'Mother', 'Ya']), 1, 1500, null));
+        assert(snapsB.length === 40 && snapsC.length === 30, `T1 (P28-A): the later stages' walks start from states the first walks reached (${snapsB.length} Fallout mornings, ${snapsC.length} return suppers)`);
+        assert(dupSong === 0 && afterSong === 0, `CM3 (ON-S, DU): the random walks (160 games, 120 from the Fallout, 30 from the return): no song twice in a game (${dupSong}), no music line after an evening song the same day (${afterSong})`);
+        assert(Object.keys(songsSeen).length === 13, `CM3 (PL; RV1 TG2): all 13 songs show in the random walks (160 games, 120 from the Fallout, 30 from the return) (${Object.keys(songsSeen).length}: ${Object.keys(songsSeen).map((k) => k.slice(5)).join(', ')})`);
         assert(Object.keys(beforeSong).length === 0, `CM3 (RV1 M1, TG1): no music line earlier the same evening as an evening song (${JSON.stringify(beforeSong)})`);
-        assert(twice === 0 && bad === 0 && withLine > days * 0.4, `CM2 (ML): 160 random games, ${days} text days, ${withLine} with a music line, ${twice} with two (the game's own lines counted), ${bad} off the evening screens`);
+        assert(twice === 0 && bad === 0 && withLine > days * 0.4, `CM2 (ML): the random walks (160 games, 120 from the Fallout, 30 from the return), ${days} text days, ${withLine} with a music line, ${twice} with two (the game's own lines counted), ${bad} off the evening screens`);
         { const allKeys = Object.entries(M.MUSIC_LINES).flatMap(([st, p]) => Object.entries(p).flatMap(([k, l]) => l.map((x, i) => [`${st}.${k}.${i}`, x.key])));
           const miss = allKeys.filter(([k]) => !shownKeys.has(k)).map(([, key]) => key);
-          assert(miss.length === 0, `RV1 (TG1): every music and archive line shows in 160 random games (never: ${miss.join(', ') || 'none'})`); }
+          assert(miss.length === 0, `RV1 (TG1): every music and archive line shows in the random walks (160 games, 120 from the Fallout, 30 from the return) (never: ${miss.join(', ') || 'none'})`); }
     }
 
     // CM3 (v0.11.183, owner picks SG2, D1): the songs: PL each once in its scene, ON-S once a save (kept across the Coil), DU the day's music, ED both editions
@@ -4194,8 +4116,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // TG8: another song's record the same day is not the hymn
     { const g = fo(false); linesOf(g).sg = { d: textDay(g), song: 'genesis', at: 'fo_depart' }; assert(!F.hymnToday(g), 'N1 (TG8): another song the same day is not the hymn'); linesOf(g).sg.song = 'hammerdeep'; assert(F.hymnToday(g), 'N1 (TG8): the hymn\'s key'); }
     // TG6, TG7, L1, L2: the lost letter
-    const unseenOld = scr('fo_letter', 'lost', undefined, 0); // OC2: the old calendar's "twenty-first day" (the long one's day words: TS6)
-    assert(/on the twenty-first day, to collect the Bone-Maker/.test(unseenOld) && /The Sect does not send an Elder to carry what a disciple could drag/.test(unseen) && /and that the disciple cannot account for it/.test(unseen) && !/nowhere in the room fit/.test(unseen), 'N1 (TG6, TG7, TG4; RV1 L1, L2): Day 21, Old Hu\'s line, "the disciple", the clause cut');
+    assert(/The Sect does not send an Elder to carry what a disciple could drag/.test(unseen) && /and that the disciple cannot account for it/.test(unseen) && !/nowhere in the room fit/.test(unseen), 'N1 (TG6, TG7, TG4; RV1 L1, L2): Day 21, Old Hu\'s line, "the disciple", the clause cut');
     assert(/in the days of the tribute the sky above Ashfall/.test(seen) && !/on the day of the tribute/.test(seen), 'N1 (RV1 L8): the old letter: in the days of the tribute');
     // TG10 (M4): the Return's two sky lines by sky_witness or a1_sky_seen
     const ret = (id, flags) => { const g = ensureBars(fresh(88320)); startActCoil(g, 1); Object.assign(g.flags, { ya_met: true, ya_party: true, mei_party: true }, flags); g.minutes = 19 * D + 18 * 60; goTo(g, SCENES, id); return sceneView(g, SCENES).text; };
@@ -4819,7 +4740,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const m = mk(0); const f = mk(1);
         assert(m.endsWith('*Then* walk out.') && f.endsWith(FW.morningOut) && m.slice(0, -16) === f.slice(0, -15), `${T} (MW): the closing three words by flight${replay ? ' (a later Coil)' : ''}`);
     }
-    { const t = at(0, 'morning', { forest_day: 3 }, 0 /* OC2: the old calendar's third morning */).v.text; assert(/^Day three in the forest\./.test(t) && !/Blackroot/.test(t), `${T} (S4): the third morning`); }
+    { const t = at(0, 'morning', { forest_day: 3 }).v.text; assert(/^The third week in the forest\./.test(t) && !/Blackroot/.test(t), `${T} (S4): the third morning (v0.11.260, OC2: the long calendar's words; the old calendar's "Day three" went with its code)`); }
     // EW and LH: after a tribulation the village saw; without it, as before (flying or not)
     for (const [realm, sky] of [[0, 0], [1, 0], [1, 1], [3, 2]]) {
         const e = at(realm, 'elder', sky ? { sky_witness: sky } : {}).v.text; const t = at(realm, 'tribute', sky ? { sky_witness: sky } : {}).v.text;
@@ -5126,49 +5047,48 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const { FAQ } = await import('../js/core/faq.js');
     const { inAct1 } = await import('../js/core/game.js');
     const T = 'TS1 (the long calendar)';
-    const old = ensureBars(newGame(98001, { closed: true, cal: 0 /* OC2 */ })), lg = ensureBars(newGame(98002, { closed: true, cal: C.LONG_CAL }));
-    assert(!('cal' in old) && lg.cal === 7 && !C.longCal(old) && C.longCal(lg), `${T}: plain New game has no cal; the switch's game has cal 7`);
-    let id = true; for (let d = 1; d <= 30; d++) id = id && C.calStart(old, d) === d && C.calEnd(old, d) === d && C.storyDayOf(old, d) === d; assert(id, `${T}: the old calendar is the identity (Days 1–30)`);
+    // v0.11.260 (owner pick P28-A, OC2): every game on the long calendar; the old calendar (the identity, no `cal`) went with its code
+    const lg = ensureBars(newGame(98002, { closed: true }));
+    assert(lg.cal === 7 && lg.calBl === C.BL_SPAN && !('longCal' in C), `${T}: every new game has cal 7 and the Blackroot's camps; no old-calendar switch left`);
     const starts = [[1, 1], [2, 8], [4, 22], [7, 43], [8, 44], [10, 58], [11, 65], [12, 68], [15, 77], [16, 80], [19, 101], [20, 102], [21, 103], [22, 104]]; // v0.11.222 (J2, TS9): the Blackroot's days three each (the 5-day road: the TS9 block)
     assert(starts.every(([d, c]) => C.calStart(lg, d) === c), `${T}: story days to calendar days (${starts.map(([d]) => `${d}→${C.calStart(lg, d)}`).join(' ')})`);
     const back = [[7, 1], [21, 3], [22, 4], [42, 6], [43, 7], [44, 8], [64, 10], [65, 11], [67, 11], [68, 12], [79, 15], [80, 16], [100, 18], [101, 19], [103, 21], [104, 22]]; // v0.11.222 (J2, TS9)
     assert(back.every(([c, d]) => C.storyDayOf(lg, c) === d), `${T}: calendar days back to story days (${back.map(([c]) => `${c}→${C.storyDayOf(lg, c)}`).join(' ')})`);
-    assert(C.calMinutes(old, 8, 6) === 7 * 1440 + 360 && C.calMinutes(lg, 8, 6) === 43 * 1440 + 360, `${T}: Act 1's first dawn: Day 8 / Day 44`);
+    assert(C.calMinutes(lg, 8, 6) === 43 * 1440 + 360, `${T}: Act 1's first dawn: Day 44`);
     // the save and the rewinds keep it
-    { const g2 = deserialize(serialize(lg)); assert(g2.cal === 7, `${T}: a save keeps cal`); const o2 = deserialize(serialize(old)); assert(!('cal' in o2), `${T}: an old-calendar save gets no cal`); }
-    { const g = ensureBars(newGame(98003, { closed: true, cal: 7 })); g.minutes += 3 * 1440; rewind(g); assert(g.cal === 7 && g.minutes === newGame(1).minutes, `${T}: the act's rewind keeps cal (and the first dawn)`); }
-    { const g = ensureBars(newGame(98004, { closed: true, cal: 7 })); g.coil.act = 1; g.flags.ending = 'paid'; rewind(g, { to: 'game' }); assert(g.cal === 7, `${T}: the whole game's rewind keeps cal`); }
+    { const g2 = deserialize(serialize(lg)); assert(g2.cal === 7, `${T}: a save keeps cal`); }
+    { const g = ensureBars(newGame(98003, { closed: true })); g.minutes += 3 * 1440; rewind(g); assert(g.cal === 7 && g.minutes === newGame(1).minutes, `${T}: the act's rewind keeps cal (and the first dawn)`); }
+    { const g = ensureBars(newGame(98004, { closed: true })); g.coil.act = 1; g.flags.ending = 'paid'; rewind(g, { to: 'game' }); assert(g.cal === 7, `${T}: the whole game's rewind keeps cal`); }
     // inAct1 at the long calendar's Day 44
-    { const g = ensureBars(newGame(98005, { closed: true, cal: 7 })); g.flags.ending = 'paid'; g.scene = 'fo_start'; g.minutes = C.calMinutes(g, 8, 6) - 1; const before = inAct1(g); g.minutes += 1; assert(!before && inAct1(g), `${T}: Act 1 from Day 44 06:00`); }
+    { const g = ensureBars(newGame(98005, { closed: true })); g.flags.ending = 'paid'; g.scene = 'fo_start'; g.minutes = C.calMinutes(g, 8, 6) - 1; const before = inAct1(g); g.minutes += 1; assert(!before && inAct1(g), `${T}: Act 1 from Day 44 06:00`); }
     // the wilds: six quiet nights, then the story's night; forest_day once a week; the old calendar's night 1 is an event
     const nightsOf = (g) => { const out = []; for (let k = 0; k < 21; k++) { goTo(g, SCENES, 'night'); const nx = W.nightNext(g); out.push(nx); goTo(g, SCENES, 'morning'); } return out; };
-    { const g = ensureBars(newGame(98006, { closed: true, cal: 7 })); g.minutes = 21 * 60; const n = nightsOf(g); const story = n.map((x, i) => [x, i]).filter(([x]) => x !== 'morning').map(([x, i]) => `${i + 1}:${x}`);
+    { const g = ensureBars(newGame(98006, { closed: true })); g.minutes = 21 * 60; const n = nightsOf(g); const story = n.map((x, i) => [x, i]).filter(([x]) => x !== 'morning').map(([x, i]) => `${i + 1}:${x}`);
       assert(story.join(' ') === '7:night_event 14:night_event 21:night_attack', `${T}: the forest's story nights on nights 7, 14 and 21 (${story.join(' ')})`);
       assert(g.flags.forest_day === 4 && g.flags.long === true, `${T}: forest_day once a week, and a quiet night makes the long road (${g.flags.forest_day})`); }
-    { const g = ensureBars(newGame(98007, { closed: true, cal: 0 /* OC2 */ })); g.minutes = 21 * 60; goTo(g, SCENES, 'night'); assert(W.nightNext(g) === 'night_event', `${T}: the old calendar's first night is the event`); goTo(g, SCENES, 'morning'); assert(g.flags.forest_day === 2 && !('cal_night' in g.flags), `${T}: the old calendar's morning turns the day, no cal_night`); }
     // the village: the arson on vday 2's seventh night; the eve of the tribute on vday 3's seventh night
-    { const g = ensureBars(newGame(98008, { closed: true, cal: 7 })); g.flags.long = true; goTo(g, SCENES, 'village'); assert(g.flags.vday === 1 && g.flags.cal_night === 0, `${T}: the village's first week starts at night 0`);
+    { const g = ensureBars(newGame(98008, { closed: true })); g.flags.long = true; goTo(g, SCENES, 'village'); assert(g.flags.vday === 1 && g.flags.cal_night === 0, `${T}: the village's first week starts at night 0`);
       const ev = []; for (let k = 0; k < 21; k++) { if (k >= 7 && k < 14) ev.push(SCENES.village_night.enter ? (A.nextEvening(g) === 'supper' && sceneView((goTo(g, SCENES, 'village_night'), g), SCENES).choices.some((c) => /Sleep\./.test(c.label)) ? 'q' : 'A') : '?'); else ev.push(A.nextEvening(g) === 'supper' ? 's' : 'E'); g.minutes = Math.floor(g.minutes / 1440) * 1440 + 21 * 60; goTo(g, SCENES, 'village_morning'); }
       assert(ev.join('') === 'sssssssqqqqqqAssssssE', `${T}: the village's three weeks: suppers, the arson on night 14, the eve on night 21 (${ev.join('')})`); }
     // the Fallout and the Heart by the story's day
-    { const g = ensureBars(newGame(98009, { closed: true, cal: 7 })); g.flags.ending = 'paid';
+    { const g = ensureBars(newGame(98009, { closed: true })); g.flags.ending = 'paid';
       for (const [cal, d] of [[44, 8], [50, 8], [51, 9], [58, 10], [64, 10]]) { g.minutes = (cal - 1) * 1440 + 17 * 60; goTo(g, SCENES, 'fo_ashfall'); const ev = sceneView(g, SCENES).choices.find((c) => /^Evening/.test(c.label))?.label || ''; assert(/The last one in Ashfall/.test(ev) === (cal === 64), `${T}: Day ${cal} (story ${d}): the farewell only on its last week's last day (${ev})`); } }
-    { const g = ensureBars(newGame(98010, { closed: true, cal: 7 })); g.minutes = (100 - 1) * 1440 + 8 * 60; goTo(g, SCENES, 'heart_hub'); const a = sceneView(g, SCENES).choices.some((c) => /^Explore the ring/.test(c.label)); g.minutes = (101 - 1) * 1440 + 8 * 60; goTo(g, SCENES, 'heart_hub'); const b = sceneView(g, SCENES).choices.some((c) => /^Explore the ring/.test(c.label)); assert(a && !b, `${T}: the Heart's last day is Day 100; from Day 101 (story 19) only the way on (v0.11.222, TS9: Days 90 / 91 before)`); }
+    { const g = ensureBars(newGame(98010, { closed: true })); g.minutes = (100 - 1) * 1440 + 8 * 60; goTo(g, SCENES, 'heart_hub'); const a = sceneView(g, SCENES).choices.some((c) => /^Explore the ring/.test(c.label)); g.minutes = (101 - 1) * 1440 + 8 * 60; goTo(g, SCENES, 'heart_hub'); const b = sceneView(g, SCENES).choices.some((c) => /^Explore the ring/.test(c.label)); assert(a && !b, `${T}: the Heart's last day is Day 100; from Day 101 (story 19) only the way on (v0.11.222, TS9: Days 90 / 91 before)`); }
     // RV1 (the planted faults F4, F10, F12, F15, F16): the jumps between parts and the slots by the story's day
-    { const g = ensureBars(newGame(98011, { closed: true, cal: 7 })); g.flags.long = true; g.flags.cal_night = 6; goTo(g, SCENES, 'village'); assert(g.flags.cal_night === 0 && C.storyNight(g) === false, `${T}: the forest's last night count does not leak into the village (F4)`); }
-    for (const [cal, want] of [[0, 11], [7, 65]]) { const g = ensureBars(newGame(98012, { closed: true, cal })); g.flags.ending = 'paid'; g.minutes = (C.calEnd(g, 10) - 1) * 1440 + 20 * 60; goTo(g, SCENES, 'fo_depart'); const i = sceneView(g, SCENES).choices.findIndex((c) => /^Into the Blackroot/.test(c.label)); choose(g, SCENES, i);
+    { const g = ensureBars(newGame(98011, { closed: true })); g.flags.long = true; g.flags.cal_night = 6; goTo(g, SCENES, 'village'); assert(g.flags.cal_night === 0 && C.storyNight(g) === false, `${T}: the forest's last night count does not leak into the village (F4)`); }
+    for (const [cal, want] of [[7, 65]]) { const g = ensureBars(newGame(98012, { closed: true })); g.flags.ending = 'paid'; g.minutes = (C.calEnd(g, 10) - 1) * 1440 + 20 * 60; goTo(g, SCENES, 'fo_depart'); const i = sceneView(g, SCENES).choices.findIndex((c) => /^Into the Blackroot/.test(c.label)); choose(g, SCENES, i);
       assert(g.scene === 'bl_start' && clockParts(g.minutes).day === want && clockParts(g.minutes).hh === 6, `${T}: the Blackroot starts on Day ${want} at 06:00 (${cal ? 'long' : 'old'} calendar; F10; Day ${clockParts(g.minutes).day})`); }
-    for (const [cal, want] of [[0, 8], [7, 44]]) { const g = ensureBars(newGame(98013, { closed: true, cal })); g.flags.ending = 'paid'; g.minutes = 6 * 1440 + 18 * 60; goTo(g, SCENES, 'epilogue'); const i = sceneView(g, SCENES).choices.findIndex((c) => /^Act 1: The Hearth Tree/.test(c.label)); choose(g, SCENES, i);
+    for (const [cal, want] of [[7, 44]]) { const g = ensureBars(newGame(98013, { closed: true })); g.flags.ending = 'paid'; g.minutes = 6 * 1440 + 18 * 60; goTo(g, SCENES, 'epilogue'); const i = sceneView(g, SCENES).choices.findIndex((c) => /^Act 1: The Hearth Tree/.test(c.label)); choose(g, SCENES, i);
       assert(clockParts(g.minutes).day === want && clockParts(g.minutes).hh === 6, `${T}: Act 1 starts on Day ${want} (${cal ? 'long' : 'old'} calendar; F12; Day ${clockParts(g.minutes).day})`); }
-    for (const [cal, want] of [[0, 4], [7, 22]]) { const g = ensureBars(newGame(98014, { closed: true, cal })); g.flags.lf_active = true; goTo(g, SCENES, 'lf_exit'); const v = sceneView(g, SCENES); const i = v.choices.findIndex((c) => /^Walk toward the smoke/.test(c.label)); const lab = v.choices[i]?.label || ''; choose(g, SCENES, i);
+    for (const [cal, want] of [[7, 22]]) { const g = ensureBars(newGame(98014, { closed: true })); g.flags.lf_active = true; goTo(g, SCENES, 'lf_exit'); const v = sceneView(g, SCENES); const i = v.choices.findIndex((c) => /^Walk toward the smoke/.test(c.label)); const lab = v.choices[i]?.label || ''; choose(g, SCENES, i);
       assert(clockParts(g.minutes).day === want && lab.includes(`(Day ${want} begins.)`) && g.flags.forest_day === 3, `${T}: the Long Forest's way back: Day ${want} (${cal ? 'long' : 'old'} calendar; F15; Day ${clockParts(g.minutes).day}, "${lab}")`); }
-    { const g = ensureBars(newGame(98015, { closed: true, cal: 7 })); g.flags.ending = 'paid'; const got = [44, 50, 51, 57, 58, 64].map((cal) => { g.minutes = (cal - 1) * 1440 + 12 * 60; return HT_HUBS.fo_ashfall[0](g); });
+    { const g = ensureBars(newGame(98015, { closed: true })); g.flags.ending = 'paid'; const got = [44, 50, 51, 57, 58, 64].map((cal) => { g.minutes = (cal - 1) * 1440 + 12 * 60; return HT_HUBS.fo_ashfall[0](g); });
       assert(got.join() === 'fo_ashfall:1,fo_ashfall:1,fo_ashfall:2,fo_ashfall:2,fo_ashfall:3,fo_ashfall:3', `${T}: the Fallout's house-time slots by the story's day (F16; ${got.join()})`); }
-    // RV1 (TG2, TG7): 20 random games on each calendar, played as the games above: within a Coil the clock never goes back, and the
+    // RV1 (TG2, TG7): 20 random games (v0.11.260, OC2: on the long calendar only; the old one's 20 went with its code), played as the games above: within a Coil the clock never goes back, and the
     // Blackroot, the Heart and the road home start on their story days (11, 16, 19 or 20: the Heart's leave waits for the next dawn after 09:00)
-    { const starts = { 0: {}, 7: {} }; let back = 0, stuck = 0, ended = 0;
-      for (const cal of [0, 7]) for (let run = 0; run < 20; run++) {
-        rs = seedOf(run, 31 + cal); const g = ensureBars(newGame(run + 98100, { closed: true, cal })); let key = '', last = g.minutes, k = 0; const met = new Set();
+    { const starts = { 7: {} }; let back = 0, stuck = 0, ended = 0;
+      for (const cal of [7]) for (let run = 0; run < 20; run++) {
+        rs = seedOf(run, 31 + cal); const g = ensureBars(newGame(run + 98100, { closed: true })); let key = '', last = g.minutes, k = 0; const met = new Set();
         for (; k < 40000; k++) {
             const ck = `${g.coil.act || 0}:${g.coil.n}`; if (ck !== key) { key = ck; last = g.minutes; met.clear(); }
             if (g.minutes < last) back++; last = g.minutes;
@@ -5182,30 +5102,51 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       }
       const keys = (o) => Object.keys(o).sort().join(' ');
       const ok = (o) => Object.keys(o).every((x) => ['bl11', 'ht16', 'rt19', 'rt20'].includes(x)) && o.bl11 > 0 && o.ht16 > 0 && (o.rt19 || 0) + (o.rt20 || 0) > 0;
-      assert(!back && !stuck && ended === 40, `${T} (RV1, TG7): 40 random games end, the clock never goes back within a Coil (back ${back}, stuck ${stuck}, ended ${ended})`);
-      assert(ok(starts[0]) && ok(starts[7]), `${T} (RV1, TG2): the Blackroot, the Heart and the road home start on story days 11, 16, 19–20 in both calendars (old: ${keys(starts[0])}; long: ${keys(starts[7])})`); }
+      assert(!back && !stuck && ended === 20, `${T} (RV1, TG7): 20 random games end, the clock never goes back within a Coil (back ${back}, stuck ${stuck}, ended ${ended})`);
+      assert(ok(starts[7]), `${T} (RV1, TG2): the Blackroot, the Heart and the road home start on story days 11, 16, 19–20 (${keys(starts[7])})`); }
     // the FAQ and the menu
-    { const goal = FAQ.find(([q]) => q === 'What is the goal?')[1], a1 = FAQ.find(([q]) => q === 'Act 1')[1]; assert(/tribute on Day 7\./.test(goal(old)) && /tribute on Day 43\./.test(goal(lg)) && /Day 8 .*Day 21\./.test(a1(old)) && /Day 44 .*Day 103\./.test(a1(lg)), `${T}: the FAQ's days by the save's calendar`); }
-    { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(!/data-new="long"/.test(M) && /const freshGame = \(cal = LONG_CAL\) =>/.test(M) && !/oldCalTest/.test(M) && /g = freshGame\(\); \/\/ v0\.11\.226/.test(M), `${T}: every new game on the long calendar (v0.11.226, FP1: the test switch gone)`); }
+    { const goal = FAQ.find(([q]) => q === 'What is the goal?')[1], a1 = FAQ.find(([q]) => q === 'Act 1')[1]; assert(/tribute on Day 43\./.test(goal(lg)) && /Day 44 .*Day 103\./.test(a1(lg)), `${T}: the FAQ's days by the calendar`); }
+    { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(!/data-new="long"/.test(M) && /const freshGame = \(\) => ensureBars\(newGame\(Math\.floor\(Math\.random\(\) \* 2 \*\* 31\), \{ closed: true \}\)\)/.test(M) && !/oldCalTest/.test(M) && /g = freshGame\(\); \/\/ v0\.11\.226/.test(M), `${T}: every new game on the long calendar (v0.11.226, FP1: the test switch gone)`); }
 }
 
+// v0.11.260 (owner pick P28-A; the cold review's M2, TG2): the day replies through the real tap path on the long calendar (the old
+// calendar's one-go walks, SW TG1 / TG2 and NX2 TG1, went with its code): a week's card carried to its end with `runTask`, the day
+// record the game's own. A failure shows no success text and notes no success day; a success shows the text of the story day its
+// work started on (`atStoryDay`), also when it ends in the next story day's week.
+{
+    const Tk = await import('../js/core/tasks.js');
+    const T = 'TG2 (OC2, the cold review\'s M2)';
+    const carry = (g, id) => { let r = runTask(g, SCENES, id), days = 1; for (; days < 12 && Object.keys(Tk.carriesRead(g)).length; days++) { const cid = Tk.carryTaskId(Object.keys(Tk.carriesRead(g))[0]); g.minutes = (Math.floor(g.minutes / 1440) + 1) * 1440 + 7 * 60; g.james.satiety = 95; g.james.qi = 60; r = runTask(g, SCENES, cid); } return { r, days }; };
+    const said = (g, r, k) => { const s = splitReply(r.lines); const all = s.reply.concat(s.gains); return DAY_REPLIES[k].findIndex((y) => all.some((x) => x.includes(typeof y === 'function' ? y(g) : y))); };
+    { const g = ensureBars(fresh(5612)); goTo(g, SCENES, 'wilds'); g.minutes = calMinutes(g, 2, 7); Object.assign(g.flags, { forest_day: 2, long: true });
+      g.james.gu = { tier: 1, level: 1, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; g.james.satiety = 95; ensureBars(g); g.james.qi = 60;
+      const k = 'wild_train:1'; const { r, days } = carry(g, k);
+      assert(days > 1 && /— failed/.test(r.lines.join(' ')) && said(g, r, k) < 0 && !(`r:${k}` in (g.lines?.d || {})), `${T}: a carried wild_train failure: no success text, no success day noted (${days} days; ${Object.keys(g.lines?.d || {}).join(',')})`); }
+    for (const [start, want] of [[50, 0], [51, 1], [57, 1], [58, 2]]) {
+        const g = ensureBars(fresh(7908)); g.minutes = (start - 1) * 1440 + 8 * 60; g.flags.ending = 'fought'; goTo(g, SCENES, 'fo_ashfall');
+        g.james.gu = { tier: 4, level: 10, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 4, level: 10, xp: 0 }; g.james.satiety = 95; ensureBars(g); g.james.qi = 60;
+        const k = 'fo_palisade:0'; const { r, days } = carry(g, k); const end = Math.floor(g.minutes / 1440) + 1;
+        assert(days > 1 && !r.fail && said(g, r, k) === want, `${T}: fo_palisade:0 started on Day ${start} (story day ${8 + want}), done on Day ${end}: that story day's text (${said(g, r, k)})`);
+    }
+}
 // v0.11.204 (owner pick W1; roadmap-time.md TS2 + TS3): the week on the long calendar (js/core/tasks.js S1, R1, R2; js/core/week.js R3, P1).
-// The old calendar: no week's card, no routine, no fold, no plan (every helper returns early).
+// (v0.11.260, P28-A OC2: the old calendar's checks, no week's card, no routine, no fold, no plan, went with its code.)
 {
     const Tk = await import('../js/core/tasks.js');
     const Wk = await import('../js/core/week.js');
     const C = await import('../js/core/calendar.js');
     const T = 'W1 (the week)';
-    const at = (cal, seed = 99001) => { const g = ensureBars(newGame(seed, { closed: true, cal })); goTo(g, SCENES, 'wilds'); g.minutes = 1440 + 7 * 60; g.james.satiety = 50; g.inventory.hare_raw = 3; g.james.qi = 20; return g; };
-    // S1: ×7 the time, today's share to the evening hour, the rest carried; the result once, as on the old calendar
+    const at = (cal, seed = 99001) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, 'wilds'); g.minutes = 1440 + 7 * 60; g.james.satiety = 50; g.inventory.hare_raw = 3; g.james.qi = 20; return g; };
+    // S1: ×7 the time, today's share to the evening hour, the rest carried; the result once (v0.11.260, OC2: `o` the same card on another game; the one-go time
+    // from the card's own minutes, as tasks.js reckons it: 110 min, as v0.11.259's old calendar measured)
     { const o = at(0), l = at(7); const mo = o.minutes, ml = l.minutes;
       const ro = runTask(o, SCENES, 'wild_forage:1'), rl = runTask(l, SCENES, 'wild_forage:1');
-      const once = o.minutes - mo, cy = l.tasks.carries?.['wild_forage:1']; // v0.11.215 (CF1, UB): one record per card
-      assert(!CY(o) && !o.tasks.routine && !ro.lines.some((x) => /^(Breakfast|Midday|Supper):|day's sit|A week's work/.test(x)), `${T}: the old calendar: no carry, no routine (${ro.lines.slice(0, 3).join(' | ')})`);
+      const ent = SCENES.wilds.choices.find((c) => c.to === 'wild_forage'), once = Math.round(((ent?.time || 0) + (SCENES.wild_forage.choices[1].time || 0)) * Tk.NEW_LENGTH / Tk.cardSpeed(0)), cy = l.tasks.carries?.['wild_forage:1']; // v0.11.215 (CF1, UB): one record per card
+      assert(once === 110, `${T}: the card's one-go time (${once} min)`);
       assert(cy && cy.id === 'wild_forage:1' && cy.total === once * Tk.WEEK_MULT && cy.left > 0 && cy.left < cy.total && rl.lines.some((x) => /^A week's work: /.test(x)), `${T}: a week's card is ×7 its time, the rest carried (${once} min → ${cy?.total}, ${cy?.left} left)`);
       assert(clockParts(l.minutes).hh === 15 && clockParts(l.minutes).mm === 0, `${T}: today's share ends at the wilds' evening hour (15:00; ${clockParts(l.minutes).hh}:${clockParts(l.minutes).mm})`);
       // v0.11.215 (FP1, FS): a food card pays at its start, as on the old calendar; its work goes on already paid
-      assert((l.inventory.river_cress || 0) === (o.inventory.river_cress || 0) && l.tasks.fam['wild_forage:1'] === o.tasks.fam['wild_forage:1'] && cy.paid === true && Tk.foodCard(SCENES.wild_forage.choices[1]), `${T} (FP1, FS): a food card's result and familiarity at its start, as on the old calendar (cress ${o.inventory.river_cress}/${l.inventory.river_cress})`);
+      assert((l.inventory.river_cress || 0) > 0 && (l.tasks.fam['wild_forage:1'] || 0) > 0 && cy.left > 0 /* the cold review's L4: paid while its work goes on */ && cy.paid === true && Tk.foodCard(SCENES.wild_forage.choices[1]), `${T} (FP1, FS): a food card's result and familiarity at its start (cress ${l.inventory.river_cress}, fam ${l.tasks.fam['wild_forage:1']})`);
       const gid = Tk.carryTaskId('wild_forage:1');
       { const cards = taskCards(l, SCENES), carry = cards.find((c) => c.id === gid);
         assert(carry && carry.status === 'evening' && !/then its result/.test(carry.tag) && cards.filter((c) => c.week && c.status === 'busy').length === 0, `${T} (CF1, UB): no other card waits behind it; its Go on waits for the morning (${carry?.status}, ${carry?.tag})`); }
@@ -5221,7 +5162,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const gid = Tk.carryTaskId('wild_train:1'), cards = taskCards(l, SCENES), busy = cards.filter((c) => c.week && c.status === 'busy').map((c) => c.id), carry = cards.find((c) => c.id === gid);
       assert(busy.join() === 'wild_train:1' && /its work goes on, .* to go/.test(cards.find((c) => c.id === 'wild_train:1').busy) && /then its result/.test(carry?.tag || '') && cards.some((c) => c.week && c.id !== 'wild_train:1' && c.status === 'open'), `${T} (CF1, UB + BL): only its own card waits, saying how long; the other week's cards open (${busy.join()}; ${carry?.tag})`);
       let last = null; for (let d = 2; d < 8 && l.tasks.carries?.['wild_train:1']; d++) { l.minutes = d * 1440 + 7 * 60; delete l.tasks.routine; last = runTask(l, SCENES, gid); }
-      assert(!l.tasks.carries['wild_train:1'] && last.lines.some((x) => / \/ DC /.test(x)) && last.lines.some((x) => /: done, .* in all\./.test(x)) && l.tasks.fam['wild_train:1'] === o.tasks.fam['wild_train:1'], `${T} (CF1, RE): at its end the check, XP and familiarity, once (fam ${l.tasks.fam['wild_train:1']} / ${o.tasks.fam['wild_train:1']}; ${last?.lines.slice(-3).join(' | ')})`);
+      assert(!l.tasks.carries['wild_train:1'] && last.lines.some((x) => / \/ DC /.test(x)) && last.lines.some((x) => /: done, .* in all\./.test(x)) && l.tasks.fam['wild_train:1'] === 0.5, `${T} (CF1, RE): at its end the check, XP and familiarity, once (fam ${l.tasks.fam['wild_train:1']}: 0.5, a one-go card's on v0.11.259's old calendar; ${last?.lines.slice(-3).join(' | ')})`);
       const p = deserialize(serialize(l)); assert(p.tasks.routine && p.cal === 7, `${T}: the routine's record goes through a save`); }
     // the carry is dropped off its stay and by the rewind; never shown on another hub
     { const l = at(7, 99002); runTask(l, SCENES, 'wild_hunt:2'); assert(!!l.tasks.carries?.['wild_hunt:2'], `${T}: a hunt is a week's card too`);
@@ -5229,10 +5170,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       goTo(l, SCENES, 'ashfall'); assert(!Tk.carryHere(l) && !taskCards(l, SCENES).some((c) => Tk.isCarryTask(c.id)), `${T}: not on another hub`);
       const g3 = at(7, 99003); runTask(g3, SCENES, 'wild_forage:1'); rewind(g3); assert(!g3.tasks.carries && !CY(g3) && !g3.tasks.plan && !g3.tasks.routine, `${T}: a rewind drops the week`); }
     // the Blackroot is a journey: its cards keep their time
-    { const g = ensureBars(newGame(99004, { closed: true, cal: 7 })); g.flags.ending = 'paid'; g.minutes = (C.calStart(g, 12) - 1) * 1440 + 7 * 60; goTo(g, SCENES, 'rr_hub');
+    { const g = ensureBars(newGame(99004, { closed: true })); g.flags.ending = 'paid'; g.minutes = (C.calStart(g, 12) - 1) * 1440 + 7 * 60; goTo(g, SCENES, 'rr_hub');
       assert(!Tk.weekHub(g) && !taskCards(g, SCENES).some((c) => c.week), `${T}: the Blackroot's cards are not week's cards (Day ${clockParts(g.minutes).day})`); }
     // the Fallout's: a week's card by the story's day
-    { const g = ensureBars(newGame(99005, { closed: true, cal: 7 })); g.flags.ending = 'paid'; g.minutes = 50 * 1440 + 7 * 60; goTo(g, SCENES, 'fo_ashfall');
+    { const g = ensureBars(newGame(99005, { closed: true })); g.flags.ending = 'paid'; g.minutes = 50 * 1440 + 7 * 60; goTo(g, SCENES, 'fo_ashfall');
       assert(Tk.weekHub(g) && taskCards(g, SCENES).some((c) => c.week && /^fo_palisade:/.test(c.id)), `${T}: the Fallout's Palisade is a week's card`); }
     // R1 + R2: a meal in each part of the day when Fed is under 85, the day's sit once
     { const g = at(7, 99006); const r = runTask(g, SCENES, 'wild_train:1');
@@ -5242,18 +5183,18 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       g.tasks.carries = {}; g.minutes = 1440 + 12 * 60; g.james.satiety = 90; const r3 = runTask(g, SCENES, 'wild_train:3');
       assert(!r3.lines.some((x) => /^Midday: /.test(x)), `${T}: no meal at Fed 90`);
       const s = at(7, 99007); const before = s.james.saturation; const rs1 = runTask(s, SCENES, Tk.sitTaskId(s, SCENES)); assert(!rs1.lines.some((x) => /day's sit/.test(x)) && s.tasks.routine.sit === true, `${T}: a sit card first: no extra sit (Saturation ${before} → ${s.james.saturation})`); }
-    // R3: a quiet night folds once its screens were shown; an event's text does not; the old calendar never folds
-    { const g = ensureBars(newGame(99008, { closed: true, cal: 7 })); g.flags.ending = 'paid'; g.flags.palisade = true; g.flags.wolf = 'driven'; g.minutes = 44 * 1440 + 22 * 60;
+    // R3: a quiet night folds once its screens were shown; an event's text does not
+    { const g = ensureBars(newGame(99008, { closed: true })); g.flags.ending = 'paid'; g.flags.palisade = true; g.flags.wolf = 'driven'; g.minutes = 44 * 1440 + 22 * 60;
       goTo(g, SCENES, 'fo_night'); const f1 = Wk.foldNight(g, SCENES); assert(f1.steps === 0 && g.scene === 'fo_night', `${T}: a night's first showing is shown (${g.scene})`);
       const i = sceneView(g, SCENES).choices.find((c) => !c.disabled).index; choose(g, SCENES, i); const f2 = Wk.foldNight(g, SCENES); assert(g.scene === 'fo_morning' && f2.steps === 0, `${T}: the morning's first showing too`);
       g.minutes = 45 * 1440 + 22 * 60; goTo(g, SCENES, 'fo_night'); const f3 = Wk.foldNight(g, SCENES);
       assert(f3.steps === 2 && g.scene === 'fo_ashfall', `${T}: the next quiet night walks to the village at once (${f3.steps} steps, ${g.scene}; the day's numbers aside)`);
-      const o = ensureBars(newGame(99009, { closed: true, cal: 0 /* OC2 */ })); o.flags.ending = 'paid'; o.flags.palisade = true; o.flags.wolf = 'driven'; goTo(o, SCENES, 'fo_night'); o.tasks.nf = { fo_night: 'x' }; const fo = Wk.foldNight(o, SCENES); assert(fo.steps === 0 && o.scene === 'fo_night', `${T}: the old calendar never folds`); }
+       }
     // P1: the plan runs day by day to the evening's choice, goes on, and ends with the week; the clock never goes back
     { const g = at(7, 99010); Tk.setYuki(g, true); const pc = Wk.planCards(g, SCENES); assert(pc.length >= 6, `${T}: the plan lists the week's cards (${pc.length})`);
       for (const c of pc.slice(0, 3)) Wk.planSet(g, c.id, 1); Wk.planSet(g, 'med:mer', 1); Wk.planSet(g, 'med:sit', 99);
       assert(g.tasks.plan.med.sit === Wk.MED_MAX.sit && Wk.planSet(g, pc[0].id, -3) && !(pc[0].id in g.tasks.plan.items), `${T}: counts stay in range`); Wk.planSet(g, pc[0].id, 1);
-      const o = ensureBars(newGame(99011, { closed: true, cal: 0 /* OC2 */ })); goTo(o, SCENES, 'wilds'); assert(!Wk.planEnsure(o) && Wk.runWeek(o, SCENES).stop === 'left', `${T}: no plan on the old calendar`);
+      
       let stops = [], last = g.minutes, back = 0, k = 0;
       for (; k < 30; k++) {
         const r = Wk.runWeek(g, SCENES); stops.push(r.stop); if (g.minutes < last) back++; last = g.minutes;
@@ -5285,11 +5226,11 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         assert(low > 0 && ate >= 7, `${R} (TG3, M2): resting out a week with food: meals on the days off, Fed never 0 (lowest ${Math.round(low)}, ${ate} meals)`); }
       { const g = fresh(99104); g.inventory = {}; g.james.satiety = 20; Wk.planSet(g, 'wild_train:1', 1); assert(Wk.runWeek(g, SCENES).stop === 'hungry', `${R} (TG3): Fed under 30 with no food stops it`);
         const h = fresh(99105); h.james.hp = 0.5 * jamesHpMax(h); Wk.planSet(h, 'wild_train:1', 1); assert(Wk.runWeek(h, SCENES).stop === 'hurt', `${R} (TG3): HP under 60% stops it`);
-        const b = ensureBars(newGame(99106, { closed: false, cal: 7 })); goTo(b, SCENES, 'wilds'); b.minutes = 1440 + 7 * 60; b.inventory.hare_raw = 3; b.james.saturation = 100; Wk.planSet(b, 'wild_train:1', 1); const r1 = Wk.runWeek(b, SCENES).stop; const r2 = Wk.runWeek(b, SCENES).stop;
+        const b = ensureBars(newGame(99106, { closed: false })); goTo(b, SCENES, 'wilds'); b.minutes = 1440 + 7 * 60; b.inventory.hare_raw = 3; b.james.saturation = 100; Wk.planSet(b, 'wild_train:1', 1); const r1 = Wk.runWeek(b, SCENES).stop; const r2 = Wk.runWeek(b, SCENES).stop;
         assert(r1 === 'breakthrough' && r2 !== 'breakthrough', `${R} (TG3): a breakthrough ready stops it once a realm (${r1}, then ${r2})`); }
       // TG4: weeks only on stay days; the Heart is a week hub
-      { const g = ensureBars(newGame(99107, { closed: true, cal: 7 })); goTo(g, SCENES, 'ashfall'); g.minutes = (C.calStart(g, 7) - 1) * 1440 + 8 * 60; assert(!Tk.weekHub(g), `${R} (TG4): the tribute's day is no week (Day ${clockParts(g.minutes).day})`);
-        const h = ensureBars(newGame(99108, { closed: true, cal: 7 })); h.flags.ending = 'paid'; h.minutes = (C.calStart(h, 16) - 1) * 1440 + 8 * 60; goTo(h, SCENES, 'heart_hub'); assert(Tk.weekHub(h) && !!Wk.planEnsure(h), `${R} (TG4): the Heart is a stay with a plan`); }
+      { const g = ensureBars(newGame(99107, { closed: true })); goTo(g, SCENES, 'ashfall'); g.minutes = (C.calStart(g, 7) - 1) * 1440 + 8 * 60; assert(!Tk.weekHub(g), `${R} (TG4): the tribute's day is no week (Day ${clockParts(g.minutes).day})`);
+        const h = ensureBars(newGame(99108, { closed: true })); h.flags.ending = 'paid'; h.minutes = (C.calStart(h, 16) - 1) * 1440 + 8 * 60; goTo(h, SCENES, 'heart_hub'); assert(Tk.weekHub(h) && !!Wk.planEnsure(h), `${R} (TG4): the Heart is a stay with a plan`); }
       // TG5: a card the routine leaves no time for: not run, nothing gained, the plan keeps its count
       { const g = fresh(99109, 14, 25); g.james.qi = 20; const inv = { ...g.inventory }; const r = runTask(g, SCENES, 'wild_forage:1');
         const gained = Object.keys(g.inventory).some((k) => k !== 'hare_raw' && (g.inventory[k] || 0) > (inv[k] || 0));
@@ -5312,21 +5253,21 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const c = fresh(99118); goTo(c, SCENES, 'morning'); Wk.foldNight(c, S2); const f = Wk.foldNight(c, S2); assert(f.steps === 0 && c.scene === 'morning', `${R} (TG9): a check never folds`);
         const S4 = { ...SCENES, morning: { ...SCENES.morning, choices: [{ text: 'Get up.', to: 'wilds' }, { text: 'Stay in bed.', to: 'wilds' }] } };
         const d = fresh(99126); goTo(d, SCENES, 'morning'); Wk.foldNight(d, S4); const f4 = Wk.foldNight(d, S4); assert(f4.steps === 0 && d.scene === 'morning', `${R} (TG9): a stay's morning with two ways on never folds`);
-        const j = ensureBars(newGame(99119, { closed: true, cal: 7 })); j.flags.ending = 'paid'; j.flags.palisade = true; j.flags.wolf = 'driven'; j.minutes = (C.calStart(j, 11) - 1) * 1440 + 22 * 60; goTo(j, SCENES, 'fo_night'); j.tasks.nf = { fo_night: '*' }; Wk.foldNight(j, SCENES); assert(Wk.foldNight(j, SCENES).steps === 0, `${R} (TG9, L3): no fold off a stay's days`); }
+        const j = ensureBars(newGame(99119, { closed: true })); j.flags.ending = 'paid'; j.flags.palisade = true; j.flags.wolf = 'driven'; j.minutes = (C.calStart(j, 11) - 1) * 1440 + 22 * 60; goTo(j, SCENES, 'fo_night'); j.tasks.nf = { fo_night: '*' }; Wk.foldNight(j, SCENES); assert(Wk.foldNight(j, SCENES).steps === 0, `${R} (TG9, L3): no fold off a stay's days`); }
       // TG10, L7: a counter stay's plan started mid-week; a Fallout plan made after midnight; the counts stay under 10
       { const g = fresh(99120); g.flags.cal_night = 3; delete g.tasks.plan; const p = Wk.planEnsure(g); assert(p.lastDay === Tk.workDay(g) + 3, `${R} (TG10): four days left of the wilds' week (${p.lastDay - Tk.workDay(g) + 1})`);
         Wk.planSet(g, 'wild_train:1', 50); assert(p.items['wild_train:1'] === 9, `${R} (TG10): at most 9 of a card`);
-        const f = ensureBars(newGame(99121, { closed: true, cal: 7 })); f.flags.ending = 'paid'; f.minutes = C.calEnd(f, 8) * 1440 + 2 * 60; goTo(f, SCENES, 'fo_ashfall'); assert(Wk.planEnsure(f).lastDay === C.calEnd(f, 8) - 1, `${R} (L7): a plan made at 02:00 after the week's last day ends that night (${Wk.planEnsure(f).lastDay + 1} / ${C.calEnd(f, 8)})`); }
+        const f = ensureBars(newGame(99121, { closed: true })); f.flags.ending = 'paid'; f.minutes = C.calEnd(f, 8) * 1440 + 2 * 60; goTo(f, SCENES, 'fo_ashfall'); assert(Wk.planEnsure(f).lastDay === C.calEnd(f, 8) - 1, `${R} (L7): a plan made at 02:00 after the week's last day ends that night (${Wk.planEnsure(f).lastDay + 1} / ${C.calEnd(f, 8)})`); }
       // TG11, L1: the resume after a story choice, the week's end reported, Clear
       { const g = fresh(99122); Wk.planSet(g, 'wild_train:1', 1); Wk.planSet(g, 'med:mer', 2); g.tasks.plan.running = true; assert(Wk.weekResume(g), `${R} (TG11): a running plan goes on after the evening's choice`);
         Wk.planClear(g); assert(Wk.planEmpty(g.tasks.plan) && g.tasks.plan.med.mer === 0 && !g.tasks.plan.running && !Wk.weekResume(g), `${R} (TG11): Clear empties the cards and the Meditate counts and stops the plan`);
         g.tasks.plan.running = true; g.tasks.plan.lastDay = Tk.workDay(g) - 1; assert(Wk.weekResume(g) && Wk.runWeek(g, SCENES).stop === 'week' && !g.tasks.plan.running, `${R} (L1): a running plan whose week ended reports it`); }
       // L6: a week's card done for today stays on the plan's list (the Fallout's Council, once a day)
-      { const g = ensureBars(newGame(99125, { closed: true, cal: 7 })); g.flags.ending = 'paid'; g.minutes = 44 * 1440 + 7 * 60; goTo(g, SCENES, 'fo_ashfall'); g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true };
+      { const g = ensureBars(newGame(99125, { closed: true })); g.flags.ending = 'paid'; g.minutes = 44 * 1440 + 7 * 60; goTo(g, SCENES, 'fo_ashfall'); g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true };
         const cid = taskCards(g, SCENES).find((c) => c.week && c.status === 'open' && /^fo_council:/.test(c.id))?.id; if (cid) { runTask(g, SCENES, cid); delete g.tasks.carries; }
         const row = Wk.planCards(g, SCENES).find((c) => c.id === cid); assert(cid && row && row.status === 'tomorrow', `${R} (L6): the Council done for today is still on the plan's list (${cid}, ${row?.status})`); }
       // L4, L5: the Fallout's farewell evening and a fight are never taken alone
-      { const g = ensureBars(newGame(99123, { closed: true, cal: 7 })); g.flags.ending = 'paid'; g.flags.palisade = true; g.minutes = (C.calEnd(g, 10) - 1) * 1440 + 17 * 60; goTo(g, SCENES, 'fo_ashfall'); Wk.planEnsure(g); g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true };
+      { const g = ensureBars(newGame(99123, { closed: true })); g.flags.ending = 'paid'; g.flags.palisade = true; g.minutes = (C.calEnd(g, 10) - 1) * 1440 + 17 * 60; goTo(g, SCENES, 'fo_ashfall'); Wk.planEnsure(g); g.tasks.routine = { d: Tk.workDay(g), meals: 'bls', sit: true };
         const r = Wk.runWeek(g, SCENES); assert(r.stop === 'story' && g.scene === 'fo_ashfall', `${R} (L4): the farewell evening stops the plan (${r.stop}, ${g.scene})`);
         const S3 = { ...SCENES, camp: { ...SCENES.camp, choices: SCENES.camp.choices.map((c) => (/^Night falls/.test(String(c.text)) ? { ...c, combat: SCENES.night_attack.choices.find((x) => x.combat).combat } : c)) } };
         const w = fresh(99124, 15, 30); w.tasks.routine = { d: Tk.workDay(w), meals: 'bls', sit: true }; Wk.planEnsure(w);
@@ -5459,13 +5400,13 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const e = copy(seen['with food, 4 mixed cards, a sit and a session a day'].g); const fe = Wk.planForecast(e, SCENES);
       assert(fe.stop === 'story' && /the story needs you/.test(Wk.planNotes(e, SCENES).outlook), `${T} (L3): the 7th night's event (a fight is one way) is the story's, not "a fight" (${fe.stop})`); }
     // TG6: the Fallout (its supper's choice each night; the week's end into Ya's arrival: M1), the Heart, the village
-    { const fo = ensureBars(newGame(99300, { closed: true, cal: 7 })); fo.flags.ending = 'paid'; fo.flags.palisade = true; fo.flags.wolf = 'driven'; fo.minutes = 44 * 1440 + 7 * 60; goTo(fo, SCENES, 'fo_ashfall'); food(fo);
+    { const fo = ensureBars(newGame(99300, { closed: true })); fo.flags.ending = 'paid'; fo.flags.palisade = true; fo.flags.wolf = 'driven'; fo.minutes = 44 * 1440 + 7 * 60; goTo(fo, SCENES, 'fo_ashfall'); food(fo);
       const pid = Wk.planCards(fo, SCENES).find((c) => /^fo_palisade/.test(c.id))?.id; Wk.planSet(fo, pid, 1);
       const { f } = cmp('TG6: the Fallout, a Palisade card', fo); assert(f?.stop === 'week' && f.rows[pid] != null && /runs to the week's end/.test(Wk.planNotes(fo, SCENES).outlook), `${T} (TG6, M1): the Fallout's week ends at its last morning, not in Ya's arrival (${f?.stop} ${f && clockLabel(f.minutes)})`);
-      const he = ensureBars(newGame(99301, { closed: true, cal: 7 })); he.flags.ending = 'paid'; he.minutes = (C.calStart(he, 16) - 1) * 1440 + 8 * 60; goTo(he, SCENES, 'heart_hub'); food(he);
+      const he = ensureBars(newGame(99301, { closed: true })); he.flags.ending = 'paid'; he.minutes = (C.calStart(he, 16) - 1) * 1440 + 8 * 60; goTo(he, SCENES, 'heart_hub'); food(he);
       const hc = Wk.planCards(he, SCENES).map((c) => c.id); if (hc[0]) Wk.planSet(he, hc[0], 1); Wk.planSet(he, 'med:sit', 1);
       const fh = cmp('TG6: the Heart, a card and a sit a day', he).f; assert(Tk.weekHub(he) && fh && fh.stop !== 'stuck', `${T} (TG6): the Heart's forecast (${fh?.stop} ${fh && clockLabel(fh.minutes)})`);
-      const vi = ensureBars(newGame(99302, { closed: true, cal: 7 })); vi.minutes = (C.calStart(vi, 5) - 1) * 1440 + 8 * 60; goTo(vi, SCENES, 'ashfall'); food(vi);
+      const vi = ensureBars(newGame(99302, { closed: true })); vi.minutes = (C.calStart(vi, 5) - 1) * 1440 + 8 * 60; goTo(vi, SCENES, 'ashfall'); food(vi);
       const vc = Wk.planCards(vi, SCENES).map((c) => c.id); if (vc[0]) Wk.planSet(vi, vc[0], 1);
       const fv = Tk.weekHub(vi) ? cmp('TG6: the village, a card', vi).f : null; assert(Tk.weekHub(vi) && fv && fv.stop !== 'stuck', `${T} (TG6): the village's forecast (${fv?.stop})`); }
     // E4: the evening's choice taken last time; else the first way on; noted by a tap before it is taken (TG8), a stay's days only (L4)
@@ -5476,8 +5417,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(n.tasks.evc?.night === 3 && Object.keys(n.tasks.evc).length === 1 && n.scene !== 'night', `${T} (E4, TG8): a tap notes the night's choice before it is taken (${JSON.stringify(n.tasks.evc)}, now ${n.scene})`);
       const h = copy(); Wk.noteEvening(h, 'wilds', 2); assert(!h.tasks.evc?.wilds, `${T} (E4): a hub's choice in the day is not an evening's`);
       h.minutes = 1440 + 16 * 60; Wk.noteEvening(h, 'wilds', 2); assert(h.tasks.evc?.wilds === 2, `${T} (E4): a hub's choice in its evening is`);
-      const o = ensureBars(newGame(99201, { closed: true, cal: 0 /* OC2 */ })); goTo(o, SCENES, 'night'); Wk.noteEvening(o, 'night', 3); assert(!o.tasks?.evc, `${T} (E4): the old calendar notes nothing`);
-      const t7 = ensureBars(newGame(99203, { closed: true, cal: 7 })); t7.minutes = (C.calStart(t7, 7) - 1) * 1440 + 22 * 60; goTo(t7, SCENES, 'night'); Wk.noteEvening(t7, 'night', 3); assert(!t7.tasks?.evc?.night, `${T} (E4, L4): a night off the stays notes nothing (story day ${C.storyDay(t7)})`);
+      
+      const t7 = ensureBars(newGame(99203, { closed: true })); t7.minutes = (C.calStart(t7, 7) - 1) * 1440 + 22 * 60; goTo(t7, SCENES, 'night'); Wk.noteEvening(t7, 'night', 3); assert(!t7.tasks?.evc?.night, `${T} (E4, L4): a night off the stays notes nothing (story day ${C.storyDay(t7)})`);
       const d = deserialize(serialize(n)); assert(d.tasks.evc?.night === 3, `${T} (E4): the note goes through a save`);
       const f1 = seen['with food, the night\'s other choice last time (E4)'].f, g1 = copy(); food(g1); Wk.planSet(g1, cards[0], 1); const f0 = Wk.planForecast(g1, SCENES);
       assert(JSON.stringify(f1) !== JSON.stringify(f0), `${T} (E4): the night's other choice changes the forecast (${f0.stop} ${clockLabel(f0.minutes)} HP ${f0.hp} / ${f1.stop} ${clockLabel(f1.minutes)} HP ${f1.hp})`); }
@@ -5493,8 +5434,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // L2: a dry run that fails shows no forecast (not "nothing left it can do")
     { const g = copy(); food(g); Wk.planSet(g, 'wild_forage:0', 1); const S5 = { ...SCENES, night: { ...SCENES.night, get choices() { throw new Error('planted'); } } };
       assert(Wk.planForecast(g, S5) === null, `${T} (L2): a dry run that throws gives no forecast`); }
-    // nothing off a stay hub, nothing on the old calendar
-    { const o = ensureBars(newGame(99202, { closed: true, cal: 0 /* OC2 */ })); goTo(o, SCENES, 'wilds'); assert(Wk.planForecast(o, SCENES) === null && Wk.planHours(o, SCENES) === null, `${T}: no forecast on the old calendar`);
+    // nothing off a stay hub
+    { 
       const g = copy(); goTo(g, SCENES, 'night'); assert(Wk.planForecast(g, SCENES) === null, `${T}: no forecast off the stay hub`); }
     // the screen: main.js takes the shared steps and draws planNotes; the scene's text before the panels (L5)
     { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
@@ -5509,52 +5450,48 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const M = await import('../js/story/meridians.js');
     const C = await import('../js/core/calendar.js');
     const T = 'SC2 (the long calendar\'s pace)';
-    const fresh = (cal, seed = 99301) => ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ }));
-    const old = fresh(0), lg = fresh(C.LONG_CAL);
+    const fresh = (cal, seed = 99301) => ensureBars(newGame(seed, { closed: true }));
+    const lg = fresh(C.LONG_CAL); // v0.11.260 (P28-A, OC2): the old calendar's ×1 went with its code; the long pace against the tables (×1 by definition)
     assert(Gm.LONG_SAT_DIV === 4 && Gm.LONG_MER_MULT === 4 && Gm.LONG_XP === 0.7, `${T}: the knobs ÷4 / ×4 / ×0.7`);
-    assert(Gm.satDiv(old) === 1 && Gm.merMult(old) === 1 && Gm.xpPace(old) === 1 && Gm.satDiv(lg) === 4 && Gm.merMult(lg) === 4 && Gm.xpPace(lg) === 0.7, `${T}: ×1 on the old calendar, the knobs on the long one`);
-    assert(Gm.satDiv(null) === 1 && Gm.merMult({}) === 1 && Gm.xpPace({ cal: 3 }) === 1, `${T}: anything but cal 7 is the old pace`);
-    // a sit's Saturation: the old formula unchanged, a quarter of it on the long calendar, at every realm
-    { let okOld = true, okLong = true;
-      for (let r = 0; r <= Gm.MAX_REALM; r++) { old.james.realm = lg.james.realm = r;
-        okOld = okOld && Gm.sitGain(old) === Math.round((100 / Gm.SAT_HOURS(r)) * 10) / 10 && Gm.sitGain(old, 2) === Math.round((200 / Gm.SAT_HOURS(r)) * 10) / 10;
+    assert(Gm.satDiv(lg) === 4 && Gm.merMult(lg) === 4 && Gm.xpPace(lg) === 0.7, `${T}: the knobs on every game`);
+    assert(Gm.satDiv({}) === 4 && Gm.merMult({}) === 4 && Gm.xpPace({}) === 0.7, `${T}: every state the long pace (no \`cal\` needed)`);
+    // v0.11.260 (owner pick P28-A, OC2): the old calendar's ×1 went with its code; the long pace against the tables (×1 by definition)
+    // and, where a number has no table, against v0.11.259's old-calendar measures (named below)
+    // a sit's Saturation: a quarter of the table's at every realm (a sixth from True Core, P26-A), at least 0.1% a sit below the top
+    { let okLong = true;
+      for (let r = 0; r <= Gm.MAX_REALM; r++) { lg.james.realm = r;
         const dv = r >= 3 ? 6 : 4; // v0.11.256 (P26-A, RP-1.5): ÷6 from True Core
         const q = Math.round((100 / Gm.SAT_HOURS(r) / dv) * 10) / 10, q2 = Math.round((200 / Gm.SAT_HOURS(r) / dv) * 10) / 10;
         okLong = okLong && (r < Gm.MAX_REALM ? Gm.sitGain(lg) === Math.max(0.1, q) && Gm.sitGain(lg, 2) === Math.max(0.2, q2) && !Gm.sitUseless(lg) : Gm.sitGain(lg) === 0 && Gm.sitUseless(lg)); }
-      old.james.realm = lg.james.realm = 0;
+      lg.james.realm = 0;
       { const g = fresh(C.LONG_CAL, 99308); const at = (r) => { g.james.realm = r; return Gm.sitGain(g); };
         assert(Gm.LONG_SIT_MIN === 0.1 && [9, 10, 11, 12, 13].every((r) => at(r) === 0.1) && at(14) === 0 && at(6) === 0.1 && at(7) === 0.1 && at(2) === 1.1 && at(3) === 0.5, `${T} (FL1): realms 10–13 a sit 0.1% on the long calendar (÷4 rounds to 0; v0.11.256 P26-A: ÷6 from True Core, realm 6 0.1%), 0 at the top (${[6, 7, 9, 10, 13, 14].map((r) => `${r}: ${at(r)}`).join(', ')})`); }
-      assert(okOld && okLong && Gm.sitGain(old) === 10 && Gm.sitGain(lg) === 2.5, `${T}: a sit +10% / +2.5% at Mortal Vessel, the old formula at every realm, a quarter on the long calendar (a sixth from True Core, P26-A), at least 0.1% a sit below the top (FL1)`); }
-    // condense on both: Saturation and the sit's XP (a third of a standard award, then ×0.6, ×0.7 on the long calendar)
-    { const a = fresh(0, 99302), b = fresh(C.LONG_CAL, 99302); a.james.qi = b.james.qi = 50;
-      const ra = Gm.condense(a), rb = Gm.condense(b);
+      assert(okLong && Gm.sitGain(lg) === 2.5, `${T}: a sit +2.5% at Mortal Vessel, a quarter of the table's at every realm (a sixth from True Core, P26-A), at least 0.1% a sit below the top (FL1)`); }
+    // condense: Saturation and the sit's XP (a third of a standard award, then ×0.6 × 0.7)
+    { const b = fresh(C.LONG_CAL, 99302); b.james.qi = 50; const rb = Gm.condense(b);
       const xpOf = (r, re) => Number((r.xp.find((l) => re.test(l)) || '').match(/\+(\d+)/)?.[1] ?? -1);
       const sitPool = Math.floor(30 * Gm.SIT_XP_FACTOR);
-      assert(ra.ok && rb.ok && a.james.saturation === 10 && b.james.saturation === 2.5, `${T}: one sit +10% old, +2.5% long (${a.james.saturation}, ${b.james.saturation})`);
-      assert(xpOf(ra, /^Convergence Use/) === Math.floor(Math.floor(sitPool * 0.6) / 2) && xpOf(rb, /^Convergence Use/) === Math.floor(Math.floor(sitPool * 0.6 * 0.7) / 2), `${T}: a sit's XP ×0.7 on the long calendar (${xpOf(ra, /^Convergence Use/)} → ${xpOf(rb, /^Convergence Use/)})`); }
+      assert(rb.ok && b.james.saturation === 2.5, `${T}: one sit +2.5% (${b.james.saturation})`);
+      assert(xpOf(rb, /^Convergence Use/) === Math.floor(Math.floor(sitPool * 0.6 * 0.7) / 2), `${T}: a sit's XP ×0.6 × 0.7 (${xpOf(rb, /^Convergence Use/)})`); }
     // every award: James's (each band, tier, Coil) and Yuki's fights
     { let ok = true; const bad = [];
       for (const band of ['standard', 'challenging', 'major']) for (const tier of [1, 3]) for (const n of [1, 3]) {
-        const a = fresh(0, 99303), b = fresh(C.LONG_CAL, 99303);
-        for (const g of [a, b]) { g.james.gu.tier = tier; g.coil.n = n; g.coil.free = 0; }
-        const ga = Number(Gm.awardXp(a, 'GU', band)[0].match(/\+(\d+)/)[1]), gb = Number(Gm.awardXp(b, 'GU', band)[0].match(/\+(\d+)/)[1]);
-        const base = Gm.XP_BANDS[band] * tier * Gm.coilMult(a);
-        const want = [Math.floor(base * Gm.XP_RATE), Math.floor(base * Gm.XP_RATE * 0.7)];
-        if (ga !== want[0] || gb !== want[1]) { ok = false; bad.push(`${band} T${tier} C${n}: ${ga}/${gb} want ${want}`); } }
-      assert(ok, `${T}: every award ×0.7 on the long calendar after the Coil bonus and the XP rate, unchanged on the old (${bad.slice(0, 3).join('; ') || 'all'})`); }
-    { const a = fresh(0, 99304), b = fresh(C.LONG_CAL, 99304);
-      for (const g of [a, b]) { g.james.gu.tier = 2; g.yuki.fight.tier = 2; g.yuki.fight.level = 1; g.yuki.fight.xp = 0; g.james.gu.level = 9; }
-      const xa = a.yuki.fight.xp, xb = b.yuki.fight.xp; Gm.awardYukiFightXp(a, 'challenging'); Gm.awardYukiFightXp(b, 'challenging');
-      const da = a.yuki.fight.xp - xa + 0, db = b.yuki.fight.xp - xb + 0;
-      const want = Math.floor(60 * 2 * Gm.XP_RATE), wantL = Math.floor(60 * 2 * Gm.XP_RATE * 0.7);
-      assert((da === want || a.yuki.fight.level > 1) && (db === wantL || b.yuki.fight.level > 1) && (a.yuki.fight.level > b.yuki.fight.level || da > db), `${T}: Yuki's fight XP ×0.7 on the long calendar (${da} / ${db}; want ${want} / ${wantL})`); }
-    // a meridian channel's hours: ×4 on the long calendar for every line, the tables themselves unchanged
-    { const lines = [['pri', (g) => {}], ['col', (g) => { g.james.primaries = 12; }], ['e8', (g) => { g.james.realm = 4; }], ['ec', (g) => { g.james.realm = 4; g.james.extra8 = 8; }], ['jn', (g) => { g.james.realm = 7; }]];
+        const b = fresh(C.LONG_CAL, 99303); b.james.gu.tier = tier; b.coil.n = n; b.coil.free = 0;
+        const gb = Number(Gm.awardXp(b, 'GU', band)[0].match(/\+(\d+)/)[1]);
+        const want = Math.floor(Gm.XP_BANDS[band] * tier * Gm.coilMult(b) * Gm.XP_RATE * 0.7);
+        if (gb !== want) { ok = false; bad.push(`${band} T${tier} C${n}: ${gb} want ${want}`); } }
+      assert(ok, `${T}: every award ×0.7 after the Coil bonus and the XP rate (${bad.slice(0, 3).join('; ') || 'all'})`); }
+    { const b = fresh(C.LONG_CAL, 99304); b.james.gu.tier = 2; b.yuki.fight.tier = 2; b.yuki.fight.level = 1; b.yuki.fight.xp = 0; b.james.gu.level = 9;
+      const xb = b.yuki.fight.xp; Gm.awardYukiFightXp(b, 'challenging'); const db = b.yuki.fight.xp - xb + 0;
+      const wantL = Math.floor(60 * 2 * Gm.XP_RATE * 0.7);
+      assert(db === wantL || b.yuki.fight.level > 1, `${T}: Yuki's fight XP ×0.7 (${db}; want ${wantL})`); }
+    // a meridian channel's hours: ×4 the table for every line (the tables themselves unchanged)
+    { const lines = [['pri', (g) => {}, M.priHours(0)], ['col', (g) => { g.james.primaries = 12; }, M.colHours(0)], ['e8', (g) => { g.james.realm = 4; }, M.e8Hours(0)], ['ec', (g) => { g.james.realm = 4; g.james.extra8 = 8; }, M.ecHours(0)], ['jn', (g) => { g.james.realm = 7; }, M.jnHours(0)]];
       const bad = [];
-      for (const [k, set] of lines) { const a = fresh(0, 99305), b = fresh(C.LONG_CAL, 99305); set(a); set(b);
+      for (const [k, set, base] of lines) { const b = fresh(C.LONG_CAL, 99305); set(b);
         const hoursOf = (g) => { goTo(g, SCENES, 'meridians'); g.james.qi = 50; g.james.satiety = 100; const i = SCENES.meridians.choices.findIndex((c) => c.merLine === k); const l = sceneView(g, SCENES).choices.find((c) => c.index === i)?.label || ''; return Number(/ of ([\d.]+) h done/.exec(l)?.[1] ?? NaN); };
-        const na = hoursOf(a), nb = hoursOf(b); if (!(na > 0) || Math.abs(nb - 4 * na) > 0.05) bad.push(`${k} ${na}/${nb}`); }
-      assert(!bad.length && M.priHours(0) === 2 && M.colHours(0) === 3, `${T}: every line's hours ×4 on the long calendar (${bad.join(', ') || 'pri 2 → 8, col 3 → 12, …'})`); }
+        const nb = hoursOf(b); if (Math.abs(nb - 4 * base) > 0.05) bad.push(`${k} ${base}/${nb}`); }
+      assert(!bad.length && M.priHours(0) === 2 && M.colHours(0) === 3, `${T}: every line's hours ×4 the table's (${bad.join(', ') || 'pri 2 → 8, col 3 → 12, …'})`); }
     // the meridian screen: a session on the long calendar does 2 h of the channel's 8 h, and the card says so
     { const g = fresh(C.LONG_CAL, 99306); goTo(g, SCENES, 'meridians'); g.james.qi = 50; g.james.satiety = 100;
       const i = SCENES.meridians.choices.findIndex((c) => c.merLine === 'pri');
@@ -5562,45 +5499,33 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       choose(g, SCENES, i);
       const label1 = sceneView(g, SCENES).choices.find((c) => c.index === i)?.label || '';
       assert(/0 h of 8 h done; 120 min/.test(label0) && /2 h of 8 h done/.test(label1) && (g.james.primaries || 0) === 0, `${T}: a primary takes 8 h on the long calendar, in 2 h sittings ("${label0.slice(-40)}" → "${label1.slice(-40)}")`); }
-    // the old calendar's meridian screen as before
-    { const g = fresh(0, 99307); goTo(g, SCENES, 'meridians'); g.james.qi = 50; g.james.satiety = 100;
-      const i = SCENES.meridians.choices.findIndex((c) => c.merLine === 'pri'); choose(g, SCENES, i);
-      assert((g.james.primaries || 0) === 1, `${T}: on the old calendar a 2 h sitting still opens the first primary (${g.james.primaries})`); }
-    // RV1 (TG1, TG2, M1, L2): the double sits and the flat gains: the hollow, the grove's kin, the Blackroot root, a Long Forest seclusion
+    // RV1 (TG1, TG2, M1, L2): the double sits and the flat gains: the hollow, the Blackroot root, a Long Forest seclusion
     { const BR = await import('../js/story/act1_blackroot.js');
       const sat = (cal, seed, setup, scene, re) => { const g = fresh(cal, seed); g.james.skills['Convergence Use'].tier = 5; g.james.qi = 50; setup(g); const s0 = g.james.saturation; goTo(g, SCENES, scene);
         if (re) { const i = SCENES[scene].choices.findIndex((c) => re.test(String(c.text))); if (i < 0) return NaN; choose(g, SCENES, i); } return Math.round((g.james.saturation - s0) * 10) / 10; };
-      const h = [0, C.LONG_CAL].map((c) => sat(c, 99310, () => {}, 'hollow', /^Sit among the roots/));
-      assert(h[0] === 20 && h[1] === 5, `${T} (TG1): the hollow's double sit +20% old, +5% long at Mortal Vessel (${h.join(' / ')})`);
-      const r = [0, C.LONG_CAL].map((c) => sat(c, 99311, (g) => { g.james.realm = 1; }, 'rr_roots', /^Cultivate on the root/));
-      assert(BR.ROOT_SAT === 12 && r[0] === 12 && r[1] === 3 && BR.rootGain(old) === 12 && BR.rootGain(lg) === 3, `${T} (M1, TG2): the Blackroot root +12% old, +3% long (${r.join(' / ')})`);
-      { const say = [0, C.LONG_CAL].map((c) => { const g = fresh(c, 99315); g.james.skills['Convergence Use'].tier = 5; g.james.realm = 1; goTo(g, SCENES, 'rr_roots'); const i = SCENES.rr_roots.choices.findIndex((x) => /^Cultivate on the root/.test(String(x.text))); return (choose(g, SCENES, i)?.lines || []).find((l) => /^The root takes your Qi/.test(l)) || ''; });
-        assert(/Saturation \+12% \(/.test(say[0]) && /Saturation \+3% \(/.test(say[1]), `${T} (M1): the root's line says its own gain (${say.map((l) => l.slice(-35)).join(' / ')})`); }
-      const lf = [0, C.LONG_CAL].map((c) => sat(c, 99312, (g) => { g.james.realm = 3; }, 'lf_seclusion', null));
-      const lf2 = [0, C.LONG_CAL].map((c) => sat(c, 99312, (g) => { g.james.realm = 2; }, 'lf_seclusion', null));
-      assert(lf[0] > 0 && Math.abs(lf[1] - lf[0] / 6) <= 0.1 && lf2[0] > 0 && Math.abs(lf2[1] - lf2[0] / 4) <= 0.1, `${T} (L2, TG2): a Long Forest seclusion's Saturation ÷4 on the long calendar, ÷6 from True Core (v0.11.256, P26-A) (${lf.join(' / ')}; Core Formation ${lf2.join(' / ')})`); }
-    // RV1 (L1, TG3): every award against whole-number arithmetic on the long calendar (tiers 1–10, Coils 1–4, every band); the old as before
+      const h = sat(C.LONG_CAL, 99310, () => {}, 'hollow', /^Sit among the roots/);
+      assert(h === 5, `${T} (TG1): the hollow's double sit +5% at Mortal Vessel (the table's +20%, ÷4; ${h})`);
+      const r = sat(C.LONG_CAL, 99311, (g) => { g.james.realm = 1; }, 'rr_roots', /^Cultivate on the root/);
+      assert(BR.ROOT_SAT === 12 && r === 3 && BR.rootGain(lg) === 3, `${T} (M1, TG2): the Blackroot root +3% (ROOT_SAT 12, ÷4; ${r})`);
+      { const say = [C.LONG_CAL].map((c) => { const g = fresh(c, 99315); g.james.skills['Convergence Use'].tier = 5; g.james.realm = 1; goTo(g, SCENES, 'rr_roots'); const i = SCENES.rr_roots.choices.findIndex((x) => /^Cultivate on the root/.test(String(x.text))); return (choose(g, SCENES, i)?.lines || []).find((l) => /^The root takes your Qi/.test(l)) || ''; });
+        assert(/Saturation \+3% \(/.test(say[0]), `${T} (M1): the root's line says its own gain (${say.map((l) => l.slice(-35)).join(' / ')})`); }
+      const lf = sat(C.LONG_CAL, 99312, (g) => { g.james.realm = 3; }, 'lf_seclusion', null), lf2 = sat(C.LONG_CAL, 99312, (g) => { g.james.realm = 2; }, 'lf_seclusion', null);
+      assert(lf === 4.5 && lf2 === 6.9, `${T} (L2, TG2): a Long Forest seclusion's Saturation ÷6 from True Core (v0.11.256, P26-A), ÷4 below (v0.11.259's ×1: 27 and 27.5; ${lf} / ${lf2})`); }
+    // RV1 (L1, TG3): every award against whole-number arithmetic (tiers 1–10, Coils 1–4, every band)
     { const bad = []; let n = 0;
       for (const band of ['standard', 'challenging', 'major']) for (let tier = 1; tier <= 10; tier++) for (let c = 1; c <= 4; c++) {
-        const a = fresh(0, 99313), b = fresh(C.LONG_CAL, 99313);
-        for (const g of [a, b]) { g.james.gu.tier = tier; g.coil.n = c; g.coil.free = 0; }
-        const ga = Number(Gm.awardXp(a, 'GU', band)[0].match(/\+(\d+)/)[1]), gb = Number(Gm.awardXp(b, 'GU', band)[0].match(/\+(\d+)/)[1]);
-        const wantOld = Math.floor(Gm.XP_BANDS[band] * tier * Gm.coilMult(a) * Gm.XP_RATE); // the old calendar's own float order, bit for bit
+        const b = fresh(C.LONG_CAL, 99313); b.james.gu.tier = tier; b.coil.n = c; b.coil.free = 0;
+        const gb = Number(Gm.awardXp(b, 'GU', band)[0].match(/\+(\d+)/)[1]);
         const wantLong = Math.floor((Gm.XP_BANDS[band] * tier * (c + 3) * 42) / 400); // × (1 + 0.25 (c − 1)) × 0.6 × 0.7, exactly
-        n++; if (ga !== wantOld || gb !== wantLong) bad.push(`${band} T${tier} C${c}: ${ga}/${gb} want ${wantOld}/${wantLong}`); }
-      assert(!bad.length && n === 120 && Gm.XP_RATE === 0.6 && Gm.COIL_GROWTH === 0.25, `${T} (L1, TG3): 120 awards: the long calendar's exact to the point, the old calendar's as before (${bad.slice(0, 3).join('; ') || 'T5 C1 standard 63'})`); }
+        n++; if (gb !== wantLong) bad.push(`${band} T${tier} C${c}: ${gb} want ${wantLong}`); }
+      assert(!bad.length && n === 120 && Gm.XP_RATE === 0.6 && Gm.COIL_GROWTH === 0.25, `${T} (L1, TG3): 120 awards exact to the point (${bad.slice(0, 3).join('; ') || 'T5 C1 standard 63'})`); }
     // RV1 (TG6): Yuki's fight XP, exact, nobody levelling
-    { const a = fresh(0, 99314), b = fresh(C.LONG_CAL, 99314);
-      for (const g of [a, b]) { g.james.gu.tier = 3; g.james.gu.level = 1; g.yuki.fight.tier = 2; g.yuki.fight.level = 1; g.yuki.fight.xp = 0; }
-      Gm.awardYukiFightXp(a, 'standard'); Gm.awardYukiFightXp(b, 'standard');
-      assert(a.yuki.fight.level === 1 && b.yuki.fight.level === 1 && a.yuki.fight.xp === 36 && b.yuki.fight.xp === 25, `${T} (TG6): Yuki's standard fight at T2: 36 XP old, 25 long (${a.yuki.fight.xp} / ${b.yuki.fight.xp})`); }
-    { const a = fresh(0, 99316), b = fresh(C.LONG_CAL, 99316); // 30 × 3 × 0.6 × 0.7 = 37.8: rounded down to 37
-      for (const g of [a, b]) { g.james.gu.tier = 4; g.james.gu.level = 1; g.yuki.fight.tier = 3; g.yuki.fight.level = 1; g.yuki.fight.xp = 0; }
-      Gm.awardYukiFightXp(a, 'standard'); Gm.awardYukiFightXp(b, 'standard');
-      assert(a.yuki.fight.level === 1 && b.yuki.fight.level === 1 && a.yuki.fight.xp === 54 && b.yuki.fight.xp === 37, `${T} (TG6): Yuki's standard fight at T3: 54 XP old, 37 long, rounded down (${a.yuki.fight.xp} / ${b.yuki.fight.xp})`); }
-    // RV1 (L1): the hair never touches the old calendar: no reachable pool (1–1,200, Coils 1–9) lies within it of a whole number
-    { let hit = 0; for (let p = 1; p <= 1200; p++) for (let n = 1; n <= 9; n++) { const x = p * (1 + Gm.COIL_GROWTH * (n - 1)) * Gm.XP_RATE; if (Math.floor(x) !== Math.floor(x + 1e-9)) hit++; }
-      assert(hit === 0 && Gm.xpFloor(old, 62.99999999999999) === 62 && Gm.xpFloor(lg, 62.99999999999999) === 63, `${T} (L1): xpFloor adds its hair on the long calendar only (old pools within it: ${hit})`); }
+    { const b = fresh(C.LONG_CAL, 99314); b.james.gu.tier = 3; b.james.gu.level = 1; b.yuki.fight.tier = 2; b.yuki.fight.level = 1; b.yuki.fight.xp = 0;
+      Gm.awardYukiFightXp(b, 'standard'); assert(b.yuki.fight.level === 1 && b.yuki.fight.xp === 25, `${T} (TG6): Yuki's standard fight at T2: 25 XP (${b.yuki.fight.xp})`); }
+    { const b = fresh(C.LONG_CAL, 99316); b.james.gu.tier = 4; b.james.gu.level = 1; b.yuki.fight.tier = 3; b.yuki.fight.level = 1; b.yuki.fight.xp = 0; // 30 × 3 × 0.6 × 0.7 = 37.8: rounded down to 37
+      Gm.awardYukiFightXp(b, 'standard'); assert(b.yuki.fight.level === 1 && b.yuki.fight.xp === 37, `${T} (TG6): Yuki's standard fight at T3: 37 XP, rounded down (${b.yuki.fight.xp})`); }
+    // RV1 (L1): xpFloor's hair
+    assert(Gm.xpFloor(lg, 62.99999999999999) === 63, `${T} (L1): xpFloor adds its hair`);
     // RV1 (TG4): a long-calendar save from before SC2, halfway through a channel: the work kept, the channel's 8 h, still shut after one sitting
     { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true });
       g.james.merWork = 1.5; const h2 = deserialize(serialize(g), { force: true }); goTo(h2, SCENES, 'meridians'); h2.james.qi = 50; h2.james.satiety = 100;
@@ -5626,15 +5551,11 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const Wk = await import('../js/core/week.js');
     const T = 'TF1 (food that spoils and keeps)';
     const D = 1440;
-    const mk = (cal, seed = 99401, scene = 'wilds') => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); goTo(g, SCENES, scene); g.minutes = 1 * D + 10 * 60; g.flags.fire = true; g.james.satiety = 100; Gm.takeSpoilNotes(g); return g; };
+    const mk = (cal, seed = 99401, scene = 'wilds') => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, scene); g.minutes = 1 * D + 10 * 60; g.flags.fire = true; g.james.satiety = 100; Gm.takeSpoilNotes(g); return g; };
     const line = (parts) => Cm.SPOIL_LINE.replace('{food}', parts);
     const due = (g, id, n, day = 0) => { g.inventory[id] = (g.inventory[id] || 0) + n; (g.fresh || (g.fresh = {}))[id] = [...(g.fresh[id] || []), [day, n]]; }; // pieces gained on calendar day `day` (from 0)
     assert(JSON.stringify(Gm.FRESH_DAYS) === JSON.stringify({ hare_raw: 3, fowl_raw: 3, crimson_berry: 3, crab_meat: 2, river_cress: 2, jade_bracket: 4, lizard_egg: 8 }) && !('honeycomb' in Gm.FRESH_DAYS) && !('venison' in Gm.FRESH_DAYS) && !('smoked_meat' in Gm.FRESH_DAYS), `${T} (S): the days as picked; honeycomb, venison and the kept foods never spoil`);
     assert(Cm.PRESERVE_MIN === 15 && Tk.YUKI_LONG_KEEP === 3 && JSON.stringify(Cm.FOOD.smoked_meat) === '[30,30]' && JSON.stringify(Cm.FOOD.dried_bracket) === '[15,15]' && JSON.stringify(Cm.PRESERVE) === JSON.stringify({ hare_raw: 'smoked_meat', fowl_raw: 'smoked_meat', crab_meat: 'smoked_meat', jade_bracket: 'dried_bracket' }), `${T} (K, Y; TG9): 15 min a piece, one haul in 3, smoked meat +30 and dried bracket +15, cooked or raw`);
-    // the old calendar: no record, nothing spoils in ten days, no card, no line waiting
-    { const g = mk(0); Gm.addItem(g, 'hare_raw', 5); const notes = []; for (let k = 0; k < 10; k++) notes.push(...Gm.advance(g, D));
-      const cards = taskCards(g, SCENES);
-      assert(!('fresh' in g) && g.inventory.hare_raw === 5 && !notes.some((x) => /Spoiled/.test(x)) && !Gm.takeSpoilNotes(g).length && !cards.some((c) => c.pres) && !SCENES.wilds.choices.at(-1).show(g), `${T}: the old calendar: no record, 5 hare after ten days, no card`); }
     // S: each kind spoils at the midnight its days after the day it came; the line waits for the action's end (H1, M1), its names (L1)
     for (const [id, days] of Object.entries(Gm.FRESH_DAYS)) {
         const g = mk(C.LONG_CAL); Gm.addItem(g, id, 2); const d0 = Math.floor(g.minutes / D);
@@ -5730,9 +5651,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
                 for (let k = 0; k < 10; k++) { g.james.qi = Gm.jamesQiMax(g); g.james.satiety = 100; g.james.hp = jamesHpMax(g); const c0 = g.tasks.yuki.cnt || 0; const r = runTask(g, SCENES, card.id);
                     const n = r.lines.filter((x) => / \+\d+ (Glassback hare|Mire fowl|Stone-shell crab|Ash-deer venison)/.test(x)).length; got += n; xp += r.lines.filter(isXp).length; if (firstOk == null && (g.tasks.yuki.cnt || 0) > c0) firstOk = c0 === 0 ? n >= 1 : null; }
                 return { got, xp, cnt: g.tasks.yuki.cnt || 0, fam: g.tasks.fam[job.id] || 0, rng: JSON.stringify(g.rng), firstOk, card: card?.id }; };
-            const a = run(0), b = run(C.LONG_CAL);
-            assert(b.cnt > 3 && b.got === Math.floor((b.cnt + 2) / 3) && b.firstOk === true && !a.cnt && a.got > b.got, `${T} (Y, L3, TG6): the first haul home, then one in 3 (${b.got} of ${b.cnt}; the old calendar ${a.got}; ${b.card})`);
-            assert(a.fam === b.fam && a.rng === b.rng && a.xp === b.xp && a.xp > 3, `${T} (TG6): her familiarity (${a.fam} / ${b.fam}), her XP awards (${a.xp} / ${b.xp}) and the dice stream as on the old calendar`);
+            const b = run(C.LONG_CAL);
+            assert(b.cnt > 3 && b.got === Math.floor((b.cnt + 2) / 3) && b.firstOk === true, `${T} (Y, L3, TG6): the first haul home, then one in 3 (${b.got} of ${b.cnt}; ${b.card})`);
+            // v0.11.260 (P28-A, OC2): against v0.11.259's old-calendar run of this card (every haul home: 122 of 122, fam 161, rng 2902927033, 122 XP awards)
+            assert(b.fam === 161 && b.rng === '2902927033' && b.xp === 122, `${T} (TG6): her familiarity (${b.fam}), her XP awards (${b.xp}) and the dice stream as on the old calendar`);
         } finally { job.minutes = len0; }
     }
     // L2: her lane says it on the long calendar (main.js)
@@ -5775,7 +5697,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       try { Wk.runWeek(g, SCENES); } catch { ok = false; }
       assert(ok && g.rel.Yuki.f === 2, `${T}: a plan from before (no doors) runs as before, no scene taken`); }
     // the Fallout: Mei Lin's and Ya's talks stop the plan on their choice; it goes on after it, and no door is taken twice a day
-    { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
+    { const g = ensureBars(newGame(99501, { closed: true })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
       assert(Wk.doorCards(g, SCENES).map((d) => d.scene).join() === 'yk_time,wen_time,mother_time,fo_mother,fo_spy,fo_mei,fo_ya_time', `${T}: the Fallout's five daily doors and (v0.11.213, VQ1) its two one-offs (${Wk.doorCards(g, SCENES).map((d) => d.scene).join()})`);
       Wk.planEnsure(g); for (const s of ['fo_mei', 'fo_ya_time', 'wen_time', 'mother_time']) Wk.planSet(g, `door:${s}`, 1);
       const r1 = Wk.runWeek(g, SCENES), s1 = g.scene, run1 = g.tasks.plan.running;
@@ -5789,7 +5711,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // RV1 (the Opus review; the owner's pick 12:25): M2 the talks last; L1 the result line; L2 as the owner set it (the forecast takes
     // the talk's choice taken before this Coil, the first time it stops; a new Coil forgets); L3 the stopping talk's text not said
     // twice; TG2–TG6 and the planted faults the first run missed (F3, F5, F6, F8, F12, F14, F15, F17)
-    const fo = (seed = 99501, h = 7, m = 0) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + h * 60 + m; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; return g; };
+    const fo = (seed = 99501, h = 7, m = 0) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + h * 60 + m; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; return g; };
     const pickOn = (g) => sceneView(g, SCENES).choices.find((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)).index;
     { const g = fo(); assert(Wk.doorCards(g, SCENES).map((d) => d.scene).join() === 'yk_time,wen_time,mother_time,fo_mother,fo_spy,fo_mei,fo_ya_time', `${T} (RV1, M2): the doors in PLAN_DOORS order, the talks last (${Wk.doorCards(g, SCENES).map((d) => d.scene).join()})`); }
     { const g = fo(); Wk.planEnsure(g); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(g, `door:${s}`, 1); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9);
@@ -5838,7 +5760,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { const g = fo(); Wk.planEnsure(g); const d = Tk.workDay(g); g.tasks.plan.done = { d, sit: 0, mer: 0, qi: 0, pres: 0 }; let ok = true; try { Wk.runWeek(g, SCENES); } catch { ok = false; }
       assert(ok && g.rel.Yuki?.f === 3, `${T} (RV1, F8): a day's done record from before (no doors) gets one; Yuki's scene taken`); }
     // F12: no rows for people not met yet (the prologue's Ashfall on Day 4, Ya before she arrives)
-    { const a = ensureBars(newGame(99510, { closed: true, cal: C.LONG_CAL })); goTo(a, SCENES, 'ashfall'); a.minutes = 4 * D + 9 * 60; const b = fo(); delete b.flags.ya_met;
+    { const a = ensureBars(newGame(99510, { closed: true })); goTo(a, SCENES, 'ashfall'); a.minutes = 4 * D + 9 * 60; const b = fo(); delete b.flags.ya_met;
       assert(Wk.doorCards(a, SCENES).map((d) => d.scene).join().startsWith('yk_time') && !Wk.doorCards(a, SCENES).some((d) => /^(wen|mother)_time$/.test(d.scene)) && !Wk.doorCards(b, SCENES).some((d) => d.scene === 'fo_ya_time'), `${T} (RV1, F12): no row for Old Wen and the mother before James meets them, none for Ya before she comes`); }
     // F5 + F15 + F17: a door that stays open is still taken once a day; the walked way's own lines are said; a door that opens nothing is done
     { const ch = SCENES.wilds.choices.find((c) => c.to === 'yk_time'), show0 = ch.show, go = SCENES.yk_time.choices.find((c) => /^Go on/.test(String(c.text))), do0 = go.do, en0 = SCENES.yk_time.enter;
@@ -5851,8 +5773,6 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
           const h = save(); Wk.planEnsure(h); const r2 = Wk.runWeek(h, SCENES);
           assert(h.tasks.plan.done.doors.yk_time === 1 && r2.steps < 100, `${T} (RV1, F17): a door that opened nothing counts as done (${JSON.stringify(h.tasks.plan.done.doors)}, ${r2.steps} steps)`);
       } finally { ch.show = show0; go.do = do0; SCENES.yk_time.enter = en0; } }
-    // the old calendar: no plan, no door rows
-    { const g = ensureBars(newGame(99503, { closed: true, cal: 0 /* OC2 */ })); goTo(g, SCENES, 'wilds'); assert(Wk.doorCards(g, SCENES).length === 0 && Wk.planEnsure(g) === null, `${T}: the old calendar: no plan, no door rows`); }
     // the bots: no doors on their plans (models.test.mjs)
     { const src = readFileSync(new URL('./models.test.mjs', import.meta.url), 'utf8'); assert(/p\.doors = \{\}; \/\/ v0\.11\.210/.test(src), `${T}: the bots' plans have no daily doors`); }
     // HB: Yuki's HP bar has a colour; every CSS variable used is defined
@@ -5914,9 +5834,9 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const build = () => { const out = {};
       { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
         for (const [k, n] of [['wild_train:1', 2], ['wild_forage:0', 2], ['med:sit', 3], ['med:mer', 2], ['med:qi', 2], ['med:pres', 1]]) Wk.planSet(g, k, n); out.wilds = pin(g); }
-      { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
+      { const g = ensureBars(newGame(99501, { closed: true })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
         Wk.planEnsure(g); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(g, `door:${s}`, 1); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9); Wk.planSet(g, 'med:sit', 2); out.fallout = pin(g); }
-      { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
+      { const g = ensureBars(newGame(99502, { closed: true })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
         Wk.planEnsure(g); const cs = Wk.planCards(g, SCENES); for (const c of cs.slice(0, 3)) Wk.planSet(g, c.id, 2); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3); out.ashfall = pin(g); out.cards = cs.slice(0, 3).map((c) => c.id).join(); }
         return out; };
       // v0.11.224 (owner pick TX2, TS6): the pins below re-pinned for two texts only (measured against v0.11.223's code: the same steps, stops and save
@@ -5936,7 +5856,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(JSON.stringify(out) === '{"wilds":"00d4c5f6","fallout":"b43e605e","ashfall":"1e4a6b32","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.217's code runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1 and its RV1: no card waits behind another's work, a card that gives no food pays at its end, a start needs its old length left today and, with no food, its whole work left in the stay; before, for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`); }
     // RV1 (TG3): one row a step: Smoke the catch is seen by the step's watch each day it smokes (a row that ran and let the next one
     // run in the same step hid it, and skipped the step's checks: hurt, hungry)
-    { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
+    { const g = ensureBars(newGame(99502, { closed: true })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
       Wk.planEnsure(g); Wk.planSet(g, 'med:pres', 1); Wk.planSet(g, 'med:sit', 2); const sid = Tk.sitTaskId(g, SCENES);
       const pid = Wk.presCard(g, SCENES), seen = []; Wk.runWeek(g, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) seen.push(l.id); } });
       assert(pid && seen.filter((id) => id === pid).length === 1 && seen.indexOf(pid) < seen.lastIndexOf(sid), `${T} (RV1, TG3): Smoke the catch is one step of its own, before the sits (${pid}: ${seen.join(', ')})`); }
@@ -5946,7 +5866,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // RV1 (H1, TG1): a once-a-Coil card's row is gone after its first run, its week's work still carried: with no place of its own it
     // goes first, as before (the review: the Fallout's Council, a place set on another row: it started at 12:23, 4 h 37 m a day less)
     { const O = await import('../js/story/oneoff.js');
-      const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
+      const g = ensureBars(newGame(99501, { closed: true })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
       Wk.planEnsure(g); for (const d of Wk.doorCards(g, SCENES)) Wk.planSet(g, `door:${d.scene}`, 0);
       Wk.planSet(g, 'workshop:0', 1); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3);
       Wk.runWeek(g, SCENES, { max: 1 });
@@ -5957,7 +5877,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const ids = []; Wk.runWeek(g, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) ids.push(l.id); } });
       assert(gone && !('workshop:0' in g.tasks.prio.ashfall) && Tk.isCarryTask(ids[0]), `${T} (RV1, H1): the workshop's work carried, its row gone, a place set on another row: the work first next morning (${gone}; ${ids.slice(0, 3).join(', ')})`); }
     // RV1 (L1): a row hidden while another moves keeps its place among the rest (Ya's talk at 1, hidden, back at 1)
-    { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.flags.ya_met = true;
+    { const g = ensureBars(newGame(99501, { closed: true })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.flags.ya_met = true;
       Wk.planEnsure(g); Wk.planPrio(g, SCENES, 'door:fo_ya_time', 1); const r0 = Wk.planRanks(g, SCENES).rank['door:fo_ya_time'];
       g.flags.ya_met = false; const hid = !('door:fo_ya_time' in Wk.planRanks(g, SCENES).rank);
       const c0 = Wk.planCards(g, SCENES)[0].id; Wk.planPrio(g, SCENES, c0, 1); g.flags.ya_met = true; const r1 = Wk.planRanks(g, SCENES).rank;
@@ -5996,9 +5916,9 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(Wk.planPrio(g, SCENES, 'not_a_row', 2) === null && !('not_a_row' in g.tasks.prio.wilds), `${T}: an unknown row is ignored`);
       const before = JSON.stringify(g.tasks.prio); Co.rewind(g);
       assert(JSON.stringify(g.tasks.prio) === before, `${T} (PK1): a rewind (a new Coil) keeps the places`);
-      const o = ensureBars(newGame(99601, { closed: true, cal: 0 /* OC2 */ })); goTo(o, SCENES, 'wilds'); assert(Wk.planPrio(o, SCENES, 'med:sit', 1) === null && !o.tasks?.prio, `${T}: the old calendar: no places`); }
+      }
     // the Fallout: a talk placed first comes before the day's work (here 07:00, the work at 9 a card)
-    { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
+    { const g = ensureBars(newGame(99501, { closed: true })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
       Wk.planEnsure(g); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9); Wk.planSet(g, 'door:wen_time', 1);
       Wk.planPrio(g, SCENES, 'door:wen_time', 1); const wenId = Wk.doorCards(g, SCENES).find((d) => d.scene === 'wen_time').id, cardIds = new Set(Wk.planCards(g, SCENES).map((c) => c.id));
       const ids = []; Wk.runWeek(g, SCENES, { onStep: (cg, l) => { if (l && !l.r.skipped) ids.push(l.id); } });
@@ -6023,7 +5943,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const Tk = await import('../js/core/tasks.js');
     const T = 'VQ1 + FQ1 (every door on the plan, every 3rd day)';
     const D = 1440;
-    const mk = (hub, sd, h = 7, cal = C.LONG_CAL, seed = 99601) => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; if (hub === 'ashfall' && sd >= 4 && sd <= 6) Object.assign(g.flags, { long: true, vday: g.flags.vday || sd - 3 }); return g; }; // v0.11.224 (RV1, H3a): the village's week as the story counts it (the walk and the slopes from its second week)
+    const mk = (hub, sd, h = 7, cal = C.LONG_CAL, seed = 99601) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; if (hub === 'ashfall' && sd >= 4 && sd <= 6) Object.assign(g.flags, { long: true, vday: g.flags.vday || sd - 3 }); return g; }; // v0.11.224 (RV1, H3a): the village's week as the story counts it (the walk and the slopes from its second week)
     const rows = (g) => Wk.doorCards(g, SCENES).map((d) => d.scene).join();
     assert(Cm.SPACE_DAYS === 3 && ['yk_time', 'wen_time', 'mother_time', 'a1_mei', 'a1_ya', 'slopes', 'wen', 'far', 'spring', 'hc_mei', 'hc_ya', 'cook', 'a1_cook'].every((k) => Cm.SPACED.has(k)) && Cm.SPACED.size === 24, `${T}: S3's keys, every 3rd day (CK1: the cook's two; WF2 (WB): the wilds' 11 work cards, by their familiarity; RV2 (LY): not Yuki's hunt)`);
     assert(JSON.stringify(Wk.PLAN_DOORS) === JSON.stringify(['yk_time', 'wen_time', 'mother_time', 'wen_lesson', 'far_hunt', 'herb_slopes', 'heal', 'village_hunt', 'scout', 'pot_cook', 'fo_mother', 'fo_spy', 'fo_pot_cook', 'hall_listen', 'ring_chambers', 'heart_spring', 'fo_mei', 'fo_ya_time']) && Wk.PLAN_DOORS.filter(Wk.doorRepeats).length === 11, `${T}: the doors on the plan, 11 repeating (CK1: the pot's cooking), 7 once (the owner 16:42: the communal pot's cooking too), the talks last`);
@@ -6042,8 +5962,6 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       g.flags[`a1_mei@${d}`] = true;
       let r0 = null; const o = []; for (let k = 0; k <= 3; k++) { g.minutes += k ? D : 0; o.push(open('fo_mei')); if (k === 1) r0 = Wk.doorCards(g, SCENES).find((x) => x.scene === 'fo_mei'); }
       assert(o.join() === 'false,false,false,true' && r0?.status === 'closed' && r0.next === cal + 3 && Wk.doorNote(r0) === `every 3rd day, opens Day ${cal + 3}`, `${T}: Mei Lin's talk taken: closed 2 days, open the 3rd; its row kept, "opens Day ${cal + 3}" (${o.join()}; ${JSON.stringify(r0)})`); }
-    { const g = mk('fo_ashfall', 9, 7, null); const d = Gm.wakeDay(g); g.flags[`a1_mei@${d}`] = true; g.minutes += D;
-      assert(Cm.spacedFree(g, 'a1_mei', Gm.wakeDay(g)) && Cm.spacedNext(g, 'a1_mei', Gm.wakeDay(g)) === Gm.wakeDay(g), `${T}: the old calendar: once a day, as before`); }
     // RV1 (TG1, L4): a stay's visit (the village's last day, calendar 42) and the tribute (43, a deadline day: once a day) and Act 1's first day (44, a new stay: afresh)
     { const g = mk('ashfall', 6); g.minutes = 41 * D + 9 * 60; const d = Gm.wakeDay(g); g.flags[`yk_time@${d}`] = true;
       g.minutes += D; const t43 = Cm.spacedFree(g, 'yk_time', Gm.wakeDay(g)); g.minutes += D; const t44 = Cm.spacedFree(g, 'yk_time', Gm.wakeDay(g));
@@ -6059,8 +5977,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const mei = hn.find((c) => /Talk with Mei Lin by the fire/.test(String(c.text))), ya = hn.find((c) => /Ya's ledge/.test(String(c.text)));
       g.flags.ya_party = true; g.flags[`hc_mei@${day}`] = true; g.flags[`hc_ya@${day}`] = true; const o = [];
       for (let k = 1; k <= 3; k++) { g.minutes += D; o.push(`${mei.show(g)}/${ya.show(g)}`); }
-      const c = mk('heart_hub', 17, 21, null); const cd = Math.floor(c.minutes / D) + 1; c.flags[`hc_mei@${cd}`] = true; c.minutes += D;
-      assert(o.join() === 'false/false,false/false,true/true' && mei.show(c), `${T}: the fireside talks every 3rd night; the old calendar every night (${o.join()})`);
+      assert(o.join() === 'false/false,false/false,true/true', `${T}: the fireside talks every 3rd night (${o.join()}; v0.11.260, OC2: the old calendar's every night went with its code)`);
       const sp = SCENES.heart_hub.choices.find((x) => /Wash at the spring/.test(String(x.text))); const g2 = mk('heart_hub', 17); g2.flags.spring_found = true; g2.flags[`spring@${Math.floor(g2.minutes / D) + 1}`] = true; g2.minutes += D;
       assert(!sp.show(g2) && Wk.doorCards(g2, SCENES).find((x) => x.scene === 'heart_spring')?.next === Math.floor(g2.minutes / D) + 3, `${T}: the spring's wash every 3rd day, its row with the day it opens`); }
     // a planned Fallout week: Yuki, Old Wen, the mother and Mei Lin each every 3rd day (Days 51, 54, 57 here), the talk answered as before
@@ -6091,8 +6008,6 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(rid === 'fo_ashfall:12' && ids.slice(0, 2).join() === `${rid},${rid}` && Wk.planNotes(g, SCENES) && true, `${T} (RS): Rest an hour taken twice a day (${ids.slice(0, 3).join()})`); }
     { const g = mk('wilds', 2); Wk.planEnsure(g); delete g.tasks.plan.med.rest; g.tasks.plan.done = { d: -1, sit: 0, mer: 0, qi: 0, pres: 0, doors: {} }; Wk.planSet(g, 'med:sit', 1); let ok = true;
       try { Wk.runWeek(g, SCENES); Wk.planNotes(g, SCENES); } catch { ok = false; } assert(ok, `${T}: a plan from before (no rest row) runs`); }
-    // the old calendar: no plan; the Fallout's doors open every day
-    { const g = mk('fo_ashfall', 9, 7, null); assert(Wk.doorCards(g, SCENES).length === 0 && Wk.planEnsure(g) === null, `${T}: the old calendar: no plan rows`); }
     // TG: with the spacing off and the rest row taken out, PR2's three pinned runs are v0.11.210's, step for step
     { const v214 = (g) => { if (Tk.CF1.on) return g; const c = JSON.parse(JSON.stringify(g)); const cs = c.tasks?.carries; if (cs) { delete c.tasks.carries; const v = Object.values(cs)[0]; if (v) { const { paid, stay, sd, ...rest } = v; c.tasks.carry = rest; } } return c; }; // RV1 (TG4): v0.11.214's save shape
         const idOf = (id) => (Tk.CF1.on ? id : String(id).replace(/^week:carry:.*/, 'week:carry'));
@@ -6110,9 +6025,9 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const o = {};
         { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
           for (const [k, n] of [['wild_train:1', 2], ['wild_forage:0', 2], ['med:sit', 3], ['med:mer', 2], ['med:qi', 2], ['med:pres', 1]]) Wk.planSet(g, k, n); o.wilds = pin(g); }
-        { const g = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
+        { const g = ensureBars(newGame(99501, { closed: true })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = 16 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true;
           Wk.planEnsure(g); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(g, `door:${s}`, 1); for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9); Wk.planSet(g, 'med:sit', 2); o.fallout = pin(g); }
-        { const g = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
+        { const g = ensureBars(newGame(99502, { closed: true })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
           Wk.planEnsure(g); const cs = Wk.planCards(g, SCENES); for (const c of cs.slice(0, 3)) Wk.planSet(g, c.id, 2); Wk.planSet(g, 'med:sit', 4); Wk.planSet(g, 'med:qi', 3); o.ashfall = pin(g); }
         return o; });
       // v0.11.224 (owner pick TX2, TS6): the pins below re-pinned for two texts only (measured against v0.11.223's code: the same steps, stops and save
@@ -6195,13 +6110,11 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const A = await import('../js/story/again.js');
     const T = 'RD1 (the plan stops for a text not read yet)';
     const D = 1440;
-    const mk = (hub, sd, h = 7, cal = C.LONG_CAL, seed = 99601) => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; g.flags.palisade = 1; g.flags.wolf = 'driven'; return g; };
+    const mk = (hub, sd, h = 7, cal = C.LONG_CAL, seed = 99601) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; g.flags.palisade = 1; g.flags.wolf = 'driven'; return g; };
     const strip = (g) => { const c = JSON.parse(JSON.stringify(g)); delete c.read; delete c.readStops; /* v0.11.228 (RE1, SC): the stops counted, beside the record */ delete c.log; if (c.tasks?.plan) { delete c.tasks.plan.read; delete c.tasks.plan.readKey; delete c.tasks.plan.readLine; delete c.tasks.plan.stop; delete c.tasks.plan.running; if (c.tasks.plan.done && !Object.values(c.tasks.plan.done).some((v) => v && typeof v !== 'object' && v !== c.tasks.plan.done.d)) delete c.tasks.plan.done; } return JSON.stringify(c); }; // a day's record started and still empty is no change
     // RU: the keys, numbers aside (a time with its unit as one); the record; the number-only lines (NL)
     assert(A.lineKey('Sing: 8 h 44 min more, 29 h 56 min still to go.') === A.lineKey('Sing: 45 min more, 2 h still to go.') && A.lineKey('Qi 19.9 → 25.') === A.lineKey('Qi 3 → 4.5.') && A.lineKey('A hare.') === A.paraKey('A hare.') && A.lineKey('3 hares.') !== A.lineKey('3 crabs.'), `${T} (RU): numbers aside, times with their units as one, words kept`);
-    { const old = { coil: { n: 1 } }; A.noteLines(old, ['A line.']); A.noteRead(old, 'Day 4. A line with a number.', 1);
-      assert(!old.read?.[A.lineKey('A line.')] && Object.keys(old.read).length === 1, `${T} (RV1, L3): the old calendar's record as before (no result lines, no numbers-aside keys: ${JSON.stringify(old.read)})`); }
-    { const g = { coil: { n: 2 }, cal: C.LONG_CAL }; A.noteLines(g, ['+4 River cress. Cold water.', 'Two lines.\n\nIn one.', 7, null]);
+    { const g = { coil: { n: 2 } }; A.noteLines(g, ['+4 River cress. Cold water.', 'Two lines.\n\nIn one.', 7, null]);
       assert(A.unreadLines(g, ['+9 River cress. Cold water.', 'In one.', 'Two lines.', 'A new one.']).join('|') === 'A new one.' && g.read[A.lineKey('In one.')] === 2, `${T} (RU): a line read with other numbers, a line's own paragraphs, read on Coil 2; non-strings skipped`);
       A.noteRead(g, 'Day 45. Forty days to the Elder.\n\nNo number.', 1);
       assert(A.unreadLines(g, ['Day 46. Forty days to the Elder.', 'No number.']).length === 0 && g.read[A.paraKey('Day 45. Forty days to the Elder.')] === 1, `${T} (RU): a scene paragraph with numbers counts with other numbers too (its own key kept for the fold)`); }
@@ -6285,7 +6198,6 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         // the routine's lines (the day's meal and sit) and the plan's "As before: " never stop it; the old calendar has no plan
         { const src = readFileSync(new URL('../js/core/week.js', import.meta.url), 'utf8');
           assert(src.includes(".slice(first.r?.pre || 0).filter((l) => !String(l).startsWith(AGAIN_LINE))") && /return \{ lines, fail, stopped, pre: pre0 \};/.test(readFileSync(new URL('../js/core/tasks.js', import.meta.url), 'utf8')), `${T} (RB): the routine's lines and "As before: " left out`); }
-        { const g = mk('fo_ashfall', 9, 7, null); assert(Wk.planEnsure(g) === null && Wk.runWeek(g, SCENES).stop === 'left', `${T}: the old calendar: no plan, nothing to stop`); }
         // main.js: what a tap shows is read (land), the stopped card's tap counted (doTask), the stop names the card
         { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
           assert(/function land\([^)]*\) \{\n\s*noteLines\(g, lines\);/.test(src) && /const r = runTask\(g, SCENES, id\);\n\s*noteReadTap\(g, SCENES, id, r\);/.test(src) && src.includes("r.stop === 'read' ? ' Tap it yourself, then run the week again.'") && src.includes('`Stopped: ${stopText(p.stop)}.`'), `${T}: main.js records what it shows, counts the tap, names the card`); }
@@ -6323,7 +6235,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       }
     }
     // UB: two cards' work carried at once, each with its own Go on; the plan takes both; the forecast's rows follow each card's end
-    { const g = ensureBars(newGame(99701, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = (C.calStart(g, 8) - 1) * D + 7 * 60; g.flags.palisade = 1; g.flags.wolf = 'driven'; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
+    { const g = ensureBars(newGame(99701, { closed: true })); goTo(g, SCENES, 'fo_ashfall'); g.minutes = (C.calStart(g, 8) - 1) * D + 7 * 60; g.flags.palisade = 1; g.flags.wolf = 'driven'; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
       const [a, b] = Wk.planCards(g, SCENES).filter((c) => c.status === 'open').map((c) => c.id);
       Tk.runTask(g, SCENES, a); g.minutes += D; g.minutes = Math.floor(g.minutes / D) * D + 7 * 60; delete g.tasks.routine; Tk.runTask(g, SCENES, b);
       const here = Tk.carriesHere(g).map((cy) => cy.id).sort().join(), gos = taskCards(g, SCENES).filter((c) => Tk.isCarryTask(c.id)).map((c) => c.id).sort().join();
@@ -6340,8 +6252,6 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // main.js: the planned cards' notes count every work carried
     { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
       assert(src.includes('const carried = new Set(carriesHere(g, g.scene).map((cy) => cy.id))') && !/tasks\?\.carry\b/.test(src), `${T}: main.js reads every work carried`); }
-    // the old calendar: no carry ever
-    { const g = ensureBars(newGame(99702, { closed: true, cal: 0 /* OC2 */ })); goTo(g, SCENES, 'wilds'); g.minutes = D + 7 * 60; Tk.runTask(g, SCENES, 'wild_train:1'); assert(!g.tasks.carries && !g.tasks.carry, `${T}: the old calendar: nothing carried`); }
 }
 
 // v0.11.215 (owner pick RV1 after the Opus review: KS, SG, DL, MS, SR, TG1–TG10): a carried work lives through its stay (the camp and the
@@ -6355,7 +6265,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const A = await import('../js/story/again.js');
     const T = 'CF1 RV1';
     const D = 1440;
-    const at = (hub, sd, h = 7, seed = 99801) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; g.james.qi = 30; Gm.addItem(g, 'smoked_meat', 40); g.flags.palisade = 1; g.flags.wolf = 'driven'; g.flags.ya_met = true; return g; };
+    const at = (hub, sd, h = 7, seed = 99801) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; g.james.qi = 30; Gm.addItem(g, 'smoked_meat', 40); g.flags.palisade = 1; g.flags.wolf = 'driven'; g.flags.ya_met = true; return g; };
     // TG1 (H1, KS): unpaid work through the wilds' camp and back; the prologue village between Ashfall's days
     { const g = at('wilds', 2); g.flags.fire = true; Tk.runTask(g, SCENES, 'wild_train:1'); const left = g.tasks.carries['wild_train:1']?.left;
       goTo(g, SCENES, 'camp'); const ci = taskCards(g, SCENES).find((c) => c.status === 'open' && !Tk.isCarryTask(c.id))?.id; if (ci) Tk.runTask(g, SCENES, ci);
@@ -6517,8 +6427,6 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // PT1 off: the pot is never the routine's; the wilds and the old calendar have no pot
     { const g = wk2(50); Tk.PT1.on = false; try { assert(Tk.potCardOpen(g, SCENES) === null && !Tk.dayMeal(g, 'fo_ashfall', SCENES).some((x) => POT.test(x)), `${T}: PT1 off: the hammerspace, as before`); } finally { Tk.PT1.on = true; } }
     assert(Tk.potCardId(SCENES, 'wilds') === null && Tk.potCardId(SCENES, 'heart_hub') === null && /^ashfall:\d+$/.test(Tk.potCardId(SCENES, 'ashfall')), `${T}: only the village's and the Fallout's hubs have the pot`);
-    { const o = ensureBars(newGame(99601, { closed: true, cal: 0 /* OC2 */ })); goTo(o, SCENES, 'ashfall'); o.minutes = 4 * D + 8 * 60; o.james.satiety = 50; const f0 = o.james.satiety, m0 = o.minutes;
-      assert(Tk.dayMeal(o, 'ashfall', SCENES).length === 0 && o.james.satiety === f0 && o.minutes === m0, `${T}: the old calendar: no routine meal`); }
 }
 
 // v0.11.218 (owner pick CK1 = RF3 + G1 + TX3, 2026-11-18 01:01): cooking with the village women every 3rd day on the long
@@ -6550,17 +6458,13 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(K.POT_AGAIN.fo.filter((o) => /Mei Lin's mother/.test(o.text + o.result)).length <= 2 && vals.every((t) => !/\b(senses?|sensed|cultivation|qi|realm|meridian\w*|dantian)\b/i.test(t)), `${T} (RV1, TG7): Mei Lin's mother in at most two of the Fallout's three; no local senses his cultivation`); }
     assert(!K.POT_AGAIN.ashfall.some((o) => /Mei Lin's mother/.test(o.text + o.result)), `${T} (TX3): Mei Lin's mother not at the prologue's pot (RV1, L4 of v0.11.181)`);
     assert(!KEEP_FLAGS.some((f) => /pot_cook|(^|_)cook$/.test(f)), `${T}: the cook's flags reset with the Coil`);
-    const mk = (hub, sd, act, long = true, seed = 99181) => { const g = ensureBars(newGame(seed, { closed: true, cal: long ? C.LONG_CAL : 0 /* OC4: 0 the old calendar (OC2) */ })); g.coil.act = act; goTo(g, SCENES, hub);
+    const mk = (hub, sd, act, long = true, seed = 99181) => { const g = ensureBars(newGame(seed, { closed: true })); g.coil.act = act; goTo(g, SCENES, hub);
         g.minutes = (long ? C.calStart(g, sd) - 1 : sd - 1) * D + 10 * 60; delete g.wake; g.rel.Village = { f: 100, a: 0 }; g.rel.Mother = { f: 10, a: 0 }; g.james.satiety = 40; g.flags.ya_met = true; return g; };
     const ci = (hub) => SCENES[hub].choices.findIndex((c) => c.to === K.POT_HUBS[hub].scene);
     const cook = (g, hub) => { g.james.satiety = 40; const label = sceneView(g, SCENES).choices.find((c) => c.index === ci(hub))?.label; choose(g, SCENES, ci(hub)); const v = sceneView(g, SCENES);
         const r = choose(g, SCENES, 0); return { label, text: v.text, go: v.choices[0]?.label, lines: r.lines || [], fed: g.james.satiety, back: g.scene === hub }; };
     for (const [hub, act, sd, t] of [['ashfall', 0, 4, 'ashfall'], ['fo_ashfall', 1, 8, 'fo']]) {
         const flag = K.POT_HUBS[hub].flag, P = K.POT_AGAIN[t], F = K.POT_COOK[t];
-        // the old calendar: once a Coil, the first scene, no new flag
-        { const o = mk(hub, sd + 1, act, false); const r = cook(o, hub);
-          assert(r.label === F.label && r.text === F.text && r.back && o.rel.Village.f === 103 && !(`${flag}_v` in o.flags) && !(`${flag}_next` in o.flags) && !Object.keys(o.flags).some((k) => /^(a1_)?cook@/.test(k)), `${T}: ${hub}, the old calendar: the first scene and its gains, no new flag`);
-          o.minutes += D; assert(!K.potCookOpen(o, hub) && !K.potCookDue(o, hub), `${T}: ${hub}, the old calendar: once a Coil`); }
         // RV1 (H1, HA, TG6): a week after the first cook, its plan's cook row 0: the routine's pot meals as v0.11.217 (Ashfall 7, the Fallout 6;
         // 2 each before RV1); row 1: two repeat cooks, the pot held on their days only
         for (const row of [0, 1]) {
@@ -6659,7 +6563,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { const g = save(); delete g.tasks.keep; delete g.tasks.plan; const p = Wk.planEnsure(g); p.items = { 'wild_train:1': 2 }; p.med.mer = 1;
       Wk.planSet(g, 'med:sit', 2); assert(g.tasks.keep.wilds['wild_train:1'] === 2 && g.tasks.keep.wilds['med:mer'] === 1 && g.tasks.keep.wilds['med:sit'] === 2 && g.tasks.keep.wilds['door:yk_time'] === 1, `${T}: an old plan's counts kept on the first change (${JSON.stringify(g.tasks.keep)})`); }
     // a one-off door taken (by hand, or with no plan this week) goes back to 0 in what is kept; a repeating one stays
-    { const mk = (hub, sd, h = 7, seed = 99701) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; return g; };
+    { const mk = (hub, sd, h = 7, seed = 99701) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; return g; };
       const g = mk('fo_ashfall', 9); Wk.planSet(g, 'door:fo_mother', 1); Wk.planSet(g, 'door:fo_mei', 1);
       Wk.noteCardDone(g, Wk.noteCardTap(g, SCENES, 'fo_ashfall:6'), { lines: [] }); Wk.noteCardDone(g, Wk.noteCardTap(g, SCENES, 'fo_ashfall:5'), { lines: [] });
       assert(g.tasks.keep.fo_ashfall['door:fo_mother'] === 0 && g.tasks.keep.fo_ashfall['door:fo_mei'] === 1, `${T} (KA): the mother's visit taken: kept 0; Mei Lin's talk kept at 1 (${JSON.stringify(g.tasks.keep)})`);
@@ -6671,13 +6575,11 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       // the read-tap path (noteReadTap) too
       const r = mk('fo_ashfall', 9, 7, 99703); Wk.planSet(r, 'door:fo_mother', 1); r.tasks.plan.read = 'fo_ashfall:6'; r.tasks.plan.readKey = 'door:fo_mother'; Wk.noteReadTap(r, SCENES, 'fo_ashfall:6');
       assert(r.tasks.keep.fo_ashfall['door:fo_mother'] === 0 && r.tasks.plan.doors.fo_mother === 0, `${T} (KA): a one-off read and taken: kept 0`); }
-    // the old calendar: no plan, nothing kept
-    { const o = ensureBars(newGame(99710, { closed: true, cal: 0 /* OC2 */ })); goTo(o, SCENES, 'wilds'); assert(Wk.planSet(o, 'wild_train:1', 2) === null && !Wk.planView(o) && !('keep' in (o.tasks || {})), `${T}: the old calendar keeps nothing`); }
     // the panel reads the kept counts with no plan this week (main.js weekHtml: planView)
     { const src = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/pv = planView\(g\) \|\| p;/.test(src) && /const empty = planEmptyShown\(g, SCENES, pv\) && !planDoorsShown\(g, SCENES, pv\);/.test(src) /* v0.11.225 (LO2, PE): a door row set runs too */ && /\$\{empty \? 'Rest out the week' : 'Run the week'\}/.test(src) && /\$\{empty \? '' : '<button class="btn" data-week="clear">Clear<\/button>'\}/.test(src) && !/planEmpty\(p\)/.test(src), `${T} (RV1, TG4): the panel shows the kept counts; the button and Clear both by the rows on the screen`); }
     // v0.11.219 (owner pick RV1 after the Opus review: HB, MK, LO, LE, LS, TG1–TG7)
     { const R = 'KC1 RV1';
-      const mk = (hub, sd, h = 7, seed = 99721) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; return g; };
+      const mk = (hub, sd, h = 7, seed = 99721) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; return g; };
       const { COOK_PLAN } = await import('../js/story/kitchen.js');
       // TG1: the run's own one-off door taken: kept 0
       { const g = mk('fo_ashfall', 9); Wk.planSet(g, 'door:fo_mother', 1); assert(g.tasks.keep.fo_ashfall['door:fo_mother'] === 1, `${R} (TG1): set`); const r = Wk.runWeek(g, SCENES);
@@ -6715,10 +6617,10 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         assert(now === 'wild_train:1,wild_forage:0' && Object.keys(nx.items).join() === now && nx.items['wild_forage:0'] === 2, `${R} (TG6, LO): this week's order is next week's (${now} / ${Object.keys(nx.items).join()}; Forage kept 1 + 1)`); }
       // TG7: the Fallout's and Ashfall's runs leave what is kept as set (the pins leave `keep` out)
       { const walk = (g) => { let r = Wk.runWeek(g, SCENES); for (let k = 0; k < 60 && ['evening', 'door'].includes(r.stop); k++) { const v = sceneView(g, SCENES); const open = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!open.length || g.combat) break; Wk.storyTap(g, SCENES, open[0].index); if (g.combat) break; if (Wk.afterStory(g, SCENES).resume) r = Wk.runWeek(g, SCENES); } return r; };
-        const f = ensureBars(newGame(99501, { closed: true, cal: C.LONG_CAL })); goTo(f, SCENES, 'fo_ashfall'); f.minutes = 16 * D + 7 * 60; f.james.satiety = 100; Gm.addItem(f, 'smoked_meat', 60); f.flags.ya_met = true;
+        const f = ensureBars(newGame(99501, { closed: true })); goTo(f, SCENES, 'fo_ashfall'); f.minutes = 16 * D + 7 * 60; f.james.satiety = 100; Gm.addItem(f, 'smoked_meat', 60); f.flags.ya_met = true;
         Wk.planEnsure(f); for (const s of ['wen_time', 'mother_time', 'fo_mei', 'fo_ya_time']) Wk.planSet(f, `door:${s}`, 1); for (const c of Wk.planCards(f, SCENES)) Wk.planSet(f, c.id, 9); Wk.planSet(f, 'med:sit', 2);
         const kf = JSON.stringify(f.tasks.keep); walk(f);
-        const a = ensureBars(newGame(99502, { closed: true, cal: C.LONG_CAL })); goTo(a, SCENES, 'ashfall'); a.minutes = 9 * D + 7 * 60; a.james.satiety = 100; Gm.addItem(a, 'smoked_meat', 60);
+        const a = ensureBars(newGame(99502, { closed: true })); goTo(a, SCENES, 'ashfall'); a.minutes = 9 * D + 7 * 60; a.james.satiety = 100; Gm.addItem(a, 'smoked_meat', 60);
         Wk.planEnsure(a); for (const c of Wk.planCards(a, SCENES).slice(0, 3)) Wk.planSet(a, c.id, 2); Wk.planSet(a, 'med:sit', 4); Wk.planSet(a, 'med:qi', 3);
         const ka = JSON.stringify(a.tasks.keep); walk(a);
         assert(JSON.stringify(f.tasks.keep) === kf && JSON.stringify(a.tasks.keep) === ka, `${R} (TG7): the Fallout's and Ashfall's weeks leave the kept counts (${JSON.stringify(f.tasks.keep).slice(0, 120)} / ${JSON.stringify(a.tasks.keep).slice(0, 120)})`); }
@@ -6742,7 +6644,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const T = 'WB (the wilds\' work cards every 3rd day from Skilled)';
     const D = 1440, MENUS = ['wild_forage', 'wild_hunt', 'wild_train'];
     const setFam = (g, f) => { g.tasks = g.tasks || {}; g.tasks.fam = {}; for (const m of MENUS) SCENES[m].choices.forEach((c, i) => { if (c.show?.dailyKey) g.tasks.fam[`${m}:${i}`] = f; }); return g; };
-    const mk = (cal, f, seed = 99701) => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); goTo(g, SCENES, 'wilds'); g.minutes = D + 7 * 60; g.james.satiety = 80; g.inventory.hare_raw = 30; g.james.qi = 60; return setFam(g, f); };
+    const mk = (cal, f, seed = 99701) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, 'wilds'); g.minutes = D + 7 * 60; g.james.satiety = 80; g.inventory.hare_raw = 30; g.james.qi = 60; return setFam(g, f); };
     // the keys: every wilds work card's daily key but Yuki's hunt (RV2, LY), by its own card; Skilled is tasks.js's third tier
     const keys = MENUS.flatMap((m) => SCENES[m].choices.filter((c) => c.show?.dailyKey && Cm.SPACED.has(c.show.dailyKey)).map((c) => c.show.dailyKey));
     assert(keys.join() === 'ring,cress,honey,berries,hare,fowl,crab,t_darts,t_blade,t_feet,t_needle' && !Cm.SPACED.has('yukihunt') && Cm.cardKey('wild_hunt:3') === null && Cm.cardKey('wild_forage:1') === 'cress' && Cm.SKILLED_FAM === Tk.FAM[2].at && Tk.famTier(Cm.SKILLED_FAM) === 2 && Tk.famTier(Cm.SKILLED_FAM - 1) === 1, `${T}: the 11 keys spaced by their cards, from Skilled; not Yuki's hunt (${keys.join()})`);
@@ -6758,7 +6660,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     // one card Skilled spaces only itself; Yuki's hunt stays daily (LY); the old calendar keeps once a day
     { const g = mk(7, 0); g.tasks.fam['wild_forage:1'] = 18; g.tasks.fam['wild_hunt:3'] = 18; Cm.markDaily(g, 'cress'); Cm.markDaily(g, 'ring'); Cm.markDaily(g, 'yukihunt'); g.minutes += D;
       assert(!open(g, 'wild_forage', 1) && open(g, 'wild_forage', 0) && open(g, 'wild_hunt', 3), `${T}: a Mastered card spaced, a New one beside it daily, Yuki's hunt daily (LY)`);
-      const o = mk(0, 18); Cm.markDaily(o, 'cress'); o.minutes += D; assert(open(o, 'wild_forage', 1) && !Cm.cardSpaced(o, 'wild_forage:1'), `${T}: the old calendar: once a day, as before`); }
+      }
     // TG4: a day that is not a stay's (a journey day's number) keeps once a day
     { const g = mk(7, 18); g.minutes = (C.calStart(g, 7) - 1) * D + 7 * 60; assert(!C.STAY_DAYS.has(C.storyDay(g)) && !Cm.cardSpaced(g, 'wild_forage:1'), `${T} (TG4): not spaced off a stay's days (story day ${C.storyDay(g)})`);
       Cm.markDaily(g, 'cress'); g.minutes += D; assert(C.STAY_DAYS.has(C.storyDay(g)) || open(g, 'wild_forage', 1), `${T} (TG4): a journey day's take doesn't hold the next day`); }
@@ -6766,8 +6668,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { const g = mk(7, 8); Cm.markDaily(g, 'ring'); g.minutes += D; const c = taskCards(g, SCENES).find((x) => x.id === 'wild_forage:0');
       assert(c && c.status === 'tomorrow' && c.week && Wk.planCards(g, SCENES).some((x) => x.id === 'wild_forage:0'), `${T}: closed by its spacing: off the screen, on the plan (${c?.status})`); }
     // CN + NO: the row's note, Skilled and up on the long calendar only; ", opens Day N" while closed
-    { const s = mk(7, 8), p = mk(7, 7), o = mk(0, 18);
-      assert(Wk.cardNote(s, 'wild_train:1') === 'every 3rd day' && Wk.cardNote(p, 'wild_train:1') === '' && Wk.cardNote(o, 'wild_train:1') === '' && Wk.cardNote(s, 'wild_explore:0') === '', `${T} (CN): "every 3rd day" on a Skilled card's row only`);
+    { const s = mk(7, 8), p = mk(7, 7);
+      assert(Wk.cardNote(s, 'wild_train:1') === 'every 3rd day' && Wk.cardNote(p, 'wild_train:1') === '' && Wk.cardNote(s, 'wild_explore:0') === '', `${T} (CN): "every 3rd day" on a Skilled card's row only`);
       const day = Math.floor(s.minutes / D) + 1; Cm.markDaily(s, 't_blade'); const n0 = Wk.cardNote(s, 'wild_train:1'); s.minutes += D; const n1 = Wk.cardNote(s, 'wild_train:1'); s.minutes += 2 * D; const n3 = Wk.cardNote(s, 'wild_train:1');
       assert(n0 === `every 3rd day, opens Day ${day + 3}` && n1 === n0 && n3 === 'every 3rd day', `${T} (NO): taken: opens Day ${day + 3}; open again: the bare note (${n0} | ${n1} | ${n3})`);
       const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(/a card\$\{cardNote\(g, c\.id\) \? ` · \$\{cardNote\(g, c\.id\)\}` : ''\}\$\{fc\.rows\[c\.id\]/.test(M), `${T} (CN): the plan row draws it`); }
@@ -6778,7 +6680,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const thin = a.r.lines.some((x) => /^A thin haul/.test(x)); // a partial keeps its share of the ×3, rounded down
         assert(Tk.HAUL_TEXT === 'Three days\' haul — in total:' && (thin ? Math.abs(a.d - 3 * b.d) <= 2 : a.d === 3 * b.d) && b.d > 0 && a.r.lines.some((x) => x.startsWith(Tk.HAUL_TEXT) || /^(Double haul — in total|A thin haul — you keep): /.test(x)) && !b.r.lines.some((x) => x.startsWith(Tk.HAUL_TEXT)), `${T} (HF): ${id} spaced brings 3× (${a.d} / ${b.d}; ${a.r.lines.filter((x) => /haul/.test(x)).join(' | ')})`);
         assert(a.r.lines.filter((x) => /haul — /.test(x)).every((x) => Ag.numberLine(x)), `${T} (HF): the haul line is a number line (the read stop leaves it out)`); }
-      const pr = mk(7, 7, 99710), sk = mk(7, 8, 99710); assert(Cm.haulMult(pr, 'wild_forage:1') === 1 && Cm.haulMult(sk, 'wild_forage:1') === 3 && Cm.haulMult(sk, 'wild_hunt:2') === 3 && Cm.haulMult(sk, 'wild_train:1') === 1 && Cm.haulMult(mk(0, 18), 'wild_forage:1') === 1, `${T} (HF): ×3 only for a spaced Forage or Hunt card`); }
+      const pr = mk(7, 7, 99710), sk = mk(7, 8, 99710); assert(Cm.haulMult(pr, 'wild_forage:1') === 1 && Cm.haulMult(sk, 'wild_forage:1') === 3 && Cm.haulMult(sk, 'wild_hunt:2') === 3 && Cm.haulMult(sk, 'wild_train:1') === 1, `${T} (HF): ×3 only for a spaced Forage or Hunt card`); }
     // the measured week (the options' numbers): 8 cards each at 9, the evenings walked; Practised 14 runs as before, Mastered 21
     const walk = (g) => { let st = ''; for (let k = 0; k < 60; k++) { st = Wk.runWeek(g, SCENES).stop; if (st !== 'evening') break; let on = false; for (let j = 0; j < 12 && !on; j++) { const idx = Wk.eveningPick(g, SCENES); if (idx == null) break; const r = Wk.storyTap(g, SCENES, idx); if (r.combat) break; if (Wk.afterStory(g, SCENES).resume) on = true; } if (!on) break; } return st; };
     const week = (g) => { for (const c of Wk.planCards(g, SCENES)) Wk.planSet(g, c.id, 9); const b = { ...g.tasks.plan.items }, n = Object.keys(b).length; const stop = walk(g);
@@ -6815,22 +6717,20 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const Gm = await import('../js/core/game.js');
     const T = 'TS9 (the Blackroot\'s camps)';
     const D = 1440;
-    const lg = () => ensureBars(newGame(99901, { closed: true, cal: C.LONG_CAL }));
-    // the calendar: three days a Blackroot story day; the 5-day road with calBl 1 or none; the old calendar the identity
-    { const g = lg(), five = lg(); five.calBl = 1; const none = lg(); delete none.calBl; const old = ensureBars(newGame(99902, { closed: true, cal: 0 /* OC2 */ }));
-      assert(g.calBl === C.BL_SPAN && C.BL_SPAN === 3 && C.blSpan(g) === 3 && C.blSpan(five) === 1 && C.blSpan(none) === 1 && !('calBl' in old) && C.blSpan(old) === 1, `${T}: a new long-calendar game carries calBl 3; none on the old calendar`);
+    const lg = () => ensureBars(newGame(99901, { closed: true }));
+    // the calendar: three days a Blackroot story day; the 5-day road with calBl 1 or none
+    { const g = lg(), five = lg(); five.calBl = 1; const none = lg(); delete none.calBl;
+      assert(g.calBl === C.BL_SPAN && C.BL_SPAN === 3 && C.blSpan(g) === 3 && C.blSpan(five) === 1 && C.blSpan(none) === 1, `${T}: a new game carries calBl 3`);
       const days = (x) => [10, 11, 12, 13, 14, 15, 16, 19, 21].map((d) => C.calStart(x, d)).join();
-      assert(days(g) === '58,65,68,71,74,77,80,101,103' && days(five) === '58,65,66,67,68,69,70,91,93' && days(none) === days(five) && days(old) === '10,11,12,13,14,15,16,19,21', `${T}: the story days 10–21 by calendar (${days(g)} / ${days(five)} / ${days(old)})`);
+      assert(days(g) === '58,65,68,71,74,77,80,101,103' && days(five) === '58,65,66,67,68,69,70,91,93' && days(none) === days(five), `${T}: the story days 10–21 by calendar (${days(g)} / ${days(five)})`);
       assert([[65, 11], [67, 11], [68, 12], [77, 15], [79, 15], [80, 16]].every(([c, d]) => C.storyDayOf(g, c) === d), `${T}: the calendar back to the Blackroot's story days`); }
     // SV: the save keeps it; an old save is filled once by where it stands; both rewinds keep the save's own
     { const at = (day, act) => { const g = lg(); delete g.calBl; delete g.coil.snap.calBl; g.coil.act = act; if (act) g.flags.ending = 'paid'; g.minutes = (day - 1) * D + 8 * 60; return deserialize(serialize(g)); };
       const got = [[3, 0], [70, 0], [50, 1], [64, 1], [65, 1], [70, 1], [90, 1]].map(([d, a]) => at(d, a).calBl).join(); // RV2 (TG4): a prologue (Long Forest) save past Day 64 too
       assert(got === '3,3,3,3,1,1,1', `${T} (SV): an old long-calendar save: the prologue and the Fallout get the camps, one in or past the Blackroot keeps the 5 days (${got})`);
       const k = deserialize(serialize(at(66, 1))); assert(k.calBl === 1 && deserialize(serialize(lg())).calBl === 3, `${T} (SV): written once; a save keeps it`);
-      const o = ensureBars(newGame(99903, { closed: true, cal: 0 /* OC2 */ })); assert(!('calBl' in deserialize(serialize(o))), `${T} (SV): an old-calendar save gets none`);
       const r1 = at(66, 1); r1.minutes += 60; rewind(r1); const r2 = at(50, 1); rewind(r2); const r3 = at(66, 1); rewind(r3, { to: 'game' });
-      const r4 = ensureBars(newGame(99904, { closed: true, cal: 0 /* OC2 */ })); r4.coil.act = 1; r4.flags.ending = 'paid'; rewind(r4, { to: 'game' });
-      assert(r1.calBl === 1 && r2.calBl === 3 && r3.calBl === 1 && !('calBl' in r4), `${T} (SV): the act's and the whole game's rewinds keep the save's own (${r1.calBl}, ${r2.calBl}, ${r3.calBl}, ${'calBl' in r4})`); }
+      assert(r1.calBl === 1 && r2.calBl === 3 && r3.calBl === 1, `${T} (SV): the act's and the whole game's rewinds keep the save's own (${r1.calBl}, ${r2.calBl}, ${r3.calBl})`); }
     // MH: the camps by hand (bday, bl_n), the 3-day road and the 5-day road
     const hubAt = (bl, hub, bday, n, h, flags = {}) => { const g = lg(); if (bl !== 3) g.calBl = bl; g.flags.ending = 'paid'; Object.assign(g.flags, { bl_day: bday, bl_n: n, mei_party: true, ya_party: true, ya_mocked: true, ya_sparred: true, rr_listened: true, ...flags });
       g.flags.bl_region = { rr_hub: 'rr', dw_hub: 'dw', ah_hub: 'ah', bl_camp: flags.bl_region || 'rr', bl_morning: flags.bl_region || 'rr' }[hub]; g.minutes = (C.calStart(g, 10 + bday) + (bl === 3 ? n : 0) - 1) * D + h * 60; goTo(g, SCENES, hub); return g; };
@@ -6893,9 +6793,6 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const m5 = hubAt(3, 'bl_morning', 4, 2, 7, { bl_region: 'ah' }); const w = sceneView(m5, SCENES).choices.filter((c) => !c.disabled).map((c) => c.index).join();
       const q5 = hubAt(3, 'bl_morning', 5, 0, 7, { bl_region: 'ah' }); const wq = sceneView(q5, SCENES).choices.filter((c) => !c.disabled).map((c) => c.index).join();
       assert(w === '3' && m5.flags.bl_day === 5 && wq === '8' && !SCENES.bl_morning.choices[8].walk, `${T} (RV2, TG3): the pass's first morning takes the marked choice 3, a quiet one the unmarked 8 (${w} / ${wq})`); }
-    // the old calendar: unchanged
-    { const g = ensureBars(newGame(99905, { closed: true, cal: 0 /* OC2 */ })); g.flags.ending = 'paid'; g.minutes = 10 * D + 17 * 60; Object.assign(g.flags, { bl_day: 1, bl_region: 'rr', mei_party: true, ya_party: true, ya_mocked: true });
-      goTo(g, SCENES, 'rr_hub'); assert(has(g, CAMP) && !has(g, PUSH) && C.calStart(g, 16) === 16, `${T}: the old calendar's Root Road as before`); }
     // the main menu's note names the new day
     { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'), N = readFileSync(new URL('../js/core/news.js', import.meta.url), 'utf8'); assert(!/Day 93/.test(M) && /'0\.11\.226', '[^']*the Elder on Day 103\)/.test(N), `${T}: the Elder on Day 103 (the main menu's note until v0.11.226, FP1; What's new since)`); }
 }
@@ -6909,31 +6806,18 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const C = await import('../js/core/calendar.js');
     const Tk = await import('../js/core/tasks.js');
     const D = 1440;
-    const at = (cal, day, h = 9, flags = {}) => { const g = ensureBars(newGame(98600 + day, { closed: true, cal: cal ? C.LONG_CAL : 0 /* OC4: 0 the old calendar (OC2) */ })); Object.assign(g.flags, flags); g.minutes = (day - 1) * D + h * 60; return g; };
+    const at = (cal, day, h = 9, flags = {}) => { const g = ensureBars(newGame(98600 + day, { closed: true })); Object.assign(g.flags, flags); g.minutes = (day - 1) * D + h * 60; return g; };
     const view = (g, id) => { goTo(g, SCENES, id); return sceneView(g, SCENES).text; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     // the words
     assert(C.numWord(13) === 'thirteen' && C.numWord(59) === 'fifty-nine' && C.numWord(103) === 'a hundred and three' && C.ordWord(21) === 'twenty-first' && C.ordWord(103) === 'hundred and third' && C.ordWord(40) === 'fortieth' && C.DaysWord(1) === 'One day' && C.daysWord(2) === 'two days', `${T} (DC): the numbers in words`);
-    // the counts: the old calendar's numbers as before; the long calendar's by its weeks
-    { const o = (v) => C.tributeLeft({ flags: { long: true, vday: v } }), l = (v, n) => C.tributeLeft({ cal: C.LONG_CAL, flags: { long: true, vday: v, cal_night: n } });
-      const got = [o(1), o(2), o(3), C.tributeLeft({ flags: {} }), l(1, 0), l(2, 0), l(3, 0), l(3, 6), C.tributeLeft({ cal: C.LONG_CAL, flags: { long: true } })].join();
-      assert(got === '3,2,1,1,21,14,7,1,21', `${T} (DC): the days to the tribute: old 3 / 2 / 1, the short road 1; long 21 / 14 / 7, the eve 1, before the village all of it (${got})`); }
-    { const o = at(false, 8), l = at(true, 44), l2 = at(true, 102);
-      assert(C.elderLeft(o) === 13 && C.elderLeft(l) === 59 && C.dayWord(o) === 'Day eight' && C.elderDayWord(o) === 'the twenty-first day' && C.elderDayWord(l) === 'the hundred and third day' && C.sinceDepart(at(false, 20)) === 9 && C.sinceDepart(l2) === 37 && C.departLeft(at(false, 10)) === 1 && C.departLeft(at(true, 60)) === 5, `${T} (DC): the Elder's count, the day, the days since and before the start`);
-      assert(C.countsFill(o, '{Days}; {days}; {Day}; {elderDay}; {OnElder}; {since}') === 'Thirteen days; thirteen days; Day eight; the twenty-first day; On the twenty-first; zero days' && C.countsFill(o, 'plain') === 'plain', `${T} (DC): the slots filled`); }
-    // the old calendar reads as before (the lines that now take their counts from the calendar)
-    { const old = [
-        [at(false, 4, 17, { long: true, vday: 1 }), 'supper', /"Three days," the mother says, to the pot, ladling\. "Three days, and they come up that road\./],
-        [at(false, 4, 12, { long: true }), 'herb_girl', /"The tribute falls due in three days,"/], [at(false, 6, 12, {}), 'herb_girl', /"The tribute falls due tomorrow,"/],
-        [at(false, 4, 12, { long: true }), 'elder', /"In three days, the collectors come\./], [at(false, 5, 9, { long: true, vday: 2 }), 'ashfall', /The tribute is two days off\./],
-        [at(false, 6, 9, { long: true, vday: 3 }), 'ashfall', /hang dead still\. Tomorrow\./], [at(false, 5, 7, { long: true, vday: 2 }), 'village_morning', /Two days until the collectors\.[^]*You have those two days/],
-        [at(false, 6, 7, { long: true, vday: 3 }), 'village_morning', /^The last day\. Tomorrow at sunrise, the collectors\./],
-        [at(false, 9, 7, {}), 'fo_morning', /^Day nine\. Twelve days to the Elder\./], [at(false, 11, 5, {}), 'fo_depart', /^Day eleven\. Ten days to the Elder\./], [at(false, 16, 7, {}), 'ht_start', /^Day sixteen\. By daylight/],
-        [at(false, 8, 9, {}), 'fo_elder_named', /In thirteen days Outer Elder[^]*\n\nThirteen days\. You can spend them/], [at(false, 20, 18, {}), 'rt_mother', /scratched from nine days in the deep forest\./],
-        [at(false, 2, 7, { forest_day: 2 }), 'morning', /^The second morning\./], [at(false, 3, 7, { forest_day: 3 }), 'morning', /^Day three in the forest\.[^]*For two nights something has circled/],
-      ];
-      const bad = old.filter(([g, id, re]) => !re.test(tx(g, id))).map(([, id]) => id);
-      assert(!bad.length, `${T} (DC, DN): the old calendar's lines as before (${bad.join()})`); }
+    // the counts by the long calendar's weeks (v0.11.260, P28-A OC2: the old calendar's numbers went with its code)
+    { const l = (v, n) => C.tributeLeft({ cal: C.LONG_CAL, flags: { long: true, vday: v, cal_night: n } });
+      const got = [C.tributeLeft({ flags: {} }), l(1, 0), l(2, 0), l(3, 0), l(3, 6), C.tributeLeft({ cal: C.LONG_CAL, flags: { long: true } })].join();
+      assert(got === '1,21,14,7,1,21', `${T} (DC): the days to the tribute: the short road 1; 21 / 14 / 7, the eve 1, before the village all of it (${got})`); }
+    { const l = at(true, 44), l2 = at(true, 102);
+      assert(C.elderLeft(l) === 59 && C.elderDayWord(l) === 'the hundred and third day' && C.sinceDepart(l2) === 37 && C.departLeft(at(true, 60)) === 5, `${T} (DC): the Elder's count, the day, the days since and before the start`);
+      assert(C.countsFill(l, '{Days}; {days}; {Day}; {elderDay}; {OnElder}; {since}') === 'Fifty-nine days; fifty-nine days; Day forty-four; the hundred and third day; On the hundred and third day; zero days' && C.countsFill(l, 'plain') === 'plain', `${T} (DC): the slots filled (${C.countsFill(l, '{Days}; {Day}; {OnElder}')})`); }
     // the long calendar: the counts and the long lines
     { const L = [
         [at(true, 29, 9, { long: true, vday: 2, cal_night: 0 }), 'ashfall', /The tribute is fourteen days off\./],
@@ -6949,18 +6833,17 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const bad = L.filter(([g, id, re]) => !re.test(tx(g, id))).map(([g, id]) => `${id}: ${tx(g, id).slice(0, 90)}`);
       assert(!bad.length, `${T} (DC, DN): the long calendar's counts and lines (${bad.join(' | ')})`);
       const ym = SCENES.ya_meets.choices[1].text, ml = SCENES.ya_mocks.choices.find((c) => typeof c.text === 'function');
-      assert(ym(at(true, 51)) === '"You followed me for weeks and didn\'t say hello?"' && /three days/.test(ym(at(false, 9))) && /two-week walk/.test(ml.text(at(true, 66))) && /five-day walk/.test(ml.text(at(false, 12))), `${T} (DN1, DN11): the labels by the calendar`); }
+      assert(ym(at(true, 51)) === '"You followed me for weeks and didn\'t say hello?"' && /two-week walk/.test(ml.text(at(true, 66))), `${T} (DN1, DN11): the labels by the calendar`); }
     // L6: the hint names the long calendar's real tribute day
     { const h = (g) => { g.scene = 'village'; g.james.qi = 0; return Tk.nextStep(g, SCENES); };
-      const v = at(true, 30, 9, { long: true, vday: 2, cal_night: 1 }); const f = at(true, 9, 9, { long: true, forest_day: 2 }); const o = at(false, 5, 9, { long: true, vday: 2 });
-      const hv = h(v), hf = (f.scene = 'wilds', f.james.qi = 0, Tk.yukiLane(f) && Tk.setYuki(f, true), Tk.nextStep(f, SCENES)), ho = h(o);
-      assert(/^Day 30: the Sect's tribute comes on Day 43\.$/.test(hv) && /^Day 9: the Sect's tribute comes three weeks after you reach the village \(Day 43 at the latest\)\.$/.test(hf) && /^Day 5 of 7: the Sect's tribute comes on Day 7\.$/.test(ho), `${T} (L6): the hint (${hv} | ${hf} | ${ho})`); }
-    // V3a: a sequence of three on the long calendar, the old text first; the old calendar its first
+      const v = at(true, 30, 9, { long: true, vday: 2, cal_night: 1 }); const f = at(true, 9, 9, { long: true, forest_day: 2 });
+      const hv = h(v), hf = (f.scene = 'wilds', f.james.qi = 0, Tk.yukiLane(f) && Tk.setYuki(f, true), Tk.nextStep(f, SCENES));
+      assert(/^Day 30: the Sect's tribute comes on Day 43\.$/.test(hv) && /^Day 9: the Sect's tribute comes three weeks after you reach the village \(Day 43 at the latest\)\.$/.test(hf), `${T} (L6): the hint (${hv} | ${hf})`); }
+    // V3a: a sequence of three on the long calendar, the old text first
     { const sup = (day, n) => { const g = at(true, day, 19, { long: true, vday: 2, cal_night: n }); return g; };
       const g = sup(29, 0); const seen = [];
       for (let d = 0; d < 7; d++) { g.minutes = (29 + d - 1) * D + 19 * 60; seen.push(tx(g, 'supper').slice(0, 30)); } // v0.11.235 (P8-A, EVs): a cycle of six
       assert(/^Another supper at Mei Lin's\./.test(seen[0]) && new Set(seen.slice(0, 7)).size === 7 && /^Age is the question/.test(seen[6]), `${T} (V3a; P8-A EVs; P15-B SN7): story day 5's suppers: the old (with its long opener), five new, the seventh its own (${seen.join(' / ')})`);
-      const o = at(false, 5, 19, { long: true, vday: 2 }); assert(/^Second supper at Mei Lin's\./.test(tx(o, 'supper')), `${T} (V3a): the old calendar's supper as before`);
       const w = at(true, 36, 18, { long: true, vday: 3, cal_night: 1 }), we = at(true, 42, 18, { long: true, vday: 3, cal_night: 6 });
       assert(!/last sunset/i.test(tx(w, 'mei_walk')) && /^The last sunset before the tribute\./.test(tx(we, 'mei_walk')), `${T} (V3a): "the last sunset" on the eve only`);
       const nl = []; const fg = at(true, 4, 21, { forest_day: 1 }); for (let d = 0; d < 22; d++) { /* v0.11.242 (P14-A, NF6): fifteen; v0.11.246 (P16-A, NF6): twenty-one */ fg.minutes = (4 + d - 1) * D + 21 * 60; noteDay(fg, 'night'); nl.push(tx(fg, 'night').slice(0, 25)); }
@@ -6986,7 +6869,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const C = await import('../js/core/calendar.js');
     const Gm = await import('../js/core/game.js'); const Ht = await import('../js/story/house_time.js');
     const D = 1440;
-    const at = (cal, day, h = 9, flags = {}) => { const g = ensureBars(newGame(98700 + day, { closed: true, cal: cal ? C.LONG_CAL : 0 /* OC4: 0 the old calendar (OC2) */ })); Object.assign(g.flags, flags); g.minutes = (day - 1) * D + h * 60; return g; };
+    const at = (cal, day, h = 9, flags = {}) => { const g = ensureBars(newGame(98700 + day, { closed: true })); Object.assign(g.flags, flags); g.minutes = (day - 1) * D + h * 60; return g; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const ttl = (g, id) => { const t = SCENES[id].title; return typeof t === 'function' ? t(g) : t; };
     // TG1 (H1): the fold's hidden part keeps its paragraphs (SD and VF)
@@ -6996,42 +6879,21 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const vf2 = againView(g, { id: 'herb_girl', text: 'Gamma.\n\nDelta.' }); // the same visit, the text changed (R7): shown in full
       const sv = againView(g, { id: 'herb_girl', text: t3 }, { id: 'herb_girl', text: t3 });
       assert(sd.fold && sd.rest === 'Two.\n\nThree.' && vf.fold && vf.rest === 'Two.\n\nThree.' && sv.fold && sv.rest === 'Two.\n\nThree.' && !vf2.fold, `${T} (H1, TG1): a fold's hidden part in real paragraphs (SD ${JSON.stringify(sd.rest)} / VF ${JSON.stringify(vf.rest)} / SV ${JSON.stringify(sv.rest)}); a text changed within the visit shows in full`); }
-    // TG2 (H2, L1, L2): every scene the counts don't touch renders on the old calendar exactly as v0.11.223 did (its code: 8ce676b4); the others at their real days
-    { const EXC = new Set(['supper', 'village_morning', 'ashfall', 'fo_letter', 'fo_elder_named', 'fo_mei', 'fo_ya_time', 'fo_depart', 'fo_morning', 'ht_start', 'rt_mother', 'herb_slopes', 'mei_walk', 'herb_girl', 'village', 'elder', 'fo_council', 'fo_night', 'mother_time', 'wen_time', 'rt_evening']);
-      const STATES = [[1, {}], [2, { forest_day: 2 }], [3, { forest_day: 3 }], [4, { long: true }], [4, { long: true, vday: 1 }], [5, { long: true, vday: 2 }], [6, { long: true, vday: 3 }], [6, { ignored: true }],
-        [8, { ya_met: true }], [9, { ya_met: true }], [10, { ya_met: true }], [11, { bl_day: 1, bl_region: 'rr' }], [12, { bl_day: 2, bl_region: 'rr' }], [13, { bl_day: 3, bl_region: 'dw' }], [14, { bl_day: 4, bl_region: 'ah' }], [15, { bl_day: 5, bl_region: 'ah' }], [16, {}], [18, {}], [19, {}], [20, {}], [21, {}]];
-      const out = [];
-      for (const [day, flags] of STATES) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) for (const h of [8, 19]) for (const s of Object.values(SCENES)) {
-          if (EXC.has(s.id) || (s.id === 'yuki_check' && realm)) continue; // v0.11.227 (KA1's RV1, M1a): the arrival's Yuki screen above Mortal Vessel is only a kept realm's (its own test: tests/saves.test.mjs)
-          const g = ensureBars(newGame(4242, { closed: true, cal: 0 /* OC2 */ })); g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; Object.assign(g.flags, flags); g.minutes = calMinutes(g, day, h); g.scene = s.id;
-          let v; try { v = sceneView(g, SCENES); } catch { out.push(`${s.id}|!`); continue; }
-          out.push(`${s.id}|${v.title ?? ''}|${v.text}|${v.choices.filter((c) => !c.disabled).map((c) => c.label).join('/')}`);
-      }
-      const h = Gm.fnv1a(out.join('\n'));
-      assert(h === 'f60e5a91' && out.length === 39228, `${T} (H2, TG2): the old calendar's ${out.length} renders of the scenes the counts don't touch exactly as v0.11.223's code (${h}; v0.11.252 (P22-A): a44d93ef → f60e5a91 (6585d717 before RV's L3 wording), night_attack_forced's failed run (JL) and bluff_win's Gao paragraph (BT) only, 126 renders each, the rest the same on both codes; v0.11.251 (P21-E): ceae7781 / 39102 → acba57dd / 39228 → (RV-A, SM: collectors_lost's title) a44d93ef, the tribute's six scenes only (tribute, collectors_won, the new collectors_sent's 126 renders, collectors_lost, bluff_win, tribute_paid; without them fd26ea0d / 38472 on both codes); v0.11.247 (P17-A): 990cb0af → 0211e709, TX's four tic swaps only (wen_lesson, yk_night_ya, yk_night_fo, rt_yk_talk; 126 renders each); RV-A → ceae7781: Wen's two sentences (wen_lesson) and far_won's label (126 renders each), nothing else; v0.11.246 (P16-A): 503ab805 / 38976 → 990cb0af / 39102, the new first_flight screen's 126 renders and 3 ah_hub renders on Day 15 at 08:00 with Ya away (the pass waits for her door, LG); every other render the same; v0.11.231 (P4-2, AG + AT, RV1): 8de296d0 → 503ab805, 57 renders on Days 14–15 at 08:00 with Ya away at the Ashen Hills (her cards hidden, the away lines; 19:00 unchanged, AV); v0.11.230 (P3-2, FT): 5117a3ec → 8de296d0, the new texts of far_hunt, far_won and village_night (the other 38598 renders 8c6f3060 on both codes); v0.11.227: 8ce676b4 / 39060 → 5117a3ec / 38976, the 84 kept-realm renders of yuki_check left out, the hash taken on v0.11.226's code; update only with a push that means to change the old calendar's texts)`);
-      const real = [
-        [at(false, 6, 19, { long: true, vday: 3 }), 'evening', /^Third supper at Mei Lin's\. Her mother serves you first now/],
-        [at(false, 20, 19, {}), 'rt_evening', /"Nine days in the Blackroot," the old woman informs the pot, "and my daughter comes home fatter than she left\."/],
-        [at(false, 6, 9, { long: true, vday: 3 }), 'herb_slopes', /^It is the last day on the slopes before the tribute\./], [at(false, 6, 17, { long: true, vday: 3 }), 'mei_walk', /^The last sunset before the tribute\./],
-        [at(false, 10, 12, { ya_met: true }), 'fo_ya_time', /"Tomorrow we start for the tree," she says/], [at(false, 10, 9, {}), 'fo_council', /and eleven days stand on the tally\./],
-        [at(false, 8, 10, {}), 'fo_mei', /"Thirteen days," she says to the roots\./], [at(false, 10, 10, {}), 'fo_mei', /^The last day\. She is packing the basket for the second time/],
-        [at(false, 8, 9, {}), 'fo_letter', /"Thirteen days," says Old Wen\.[^]*|on the twenty-first day/],
-      ];
-      const bad = real.filter(([g, id, re]) => !re.test(tx(g, id))).map(([, id]) => id);
-      const pd = at(false, 8, 9, {}); const paid = C.countsFill(pd, '{OnElder} he comes here'), pl = C.countsFill(at(true, 44, 9, {}), '{OnElder} he comes here');
-      assert(!bad.length && paid === 'On the twenty-first he comes here' && pl === 'On the hundred and third day he comes here', `${T} (L1, L2, TG2): the old calendar's lines at their real days; Lu Han's day (${bad.join()} | ${paid} | ${pl})`); }
-    // TG3 (H3a): the long calendar's first village week has no sunset walk or slopes; the second week has them; the old calendar's hub as before
+    // TG2 (L2): Lu Han's day (v0.11.260, P28-A OC2: the old calendar's 39,228 renders against v0.11.223's code and its lines at their real days went with its code; the long renders: tools/textlint.mjs's snapshot)
+    { const pl = C.countsFill(at(true, 44, 9, {}), '{OnElder} he comes here');
+      assert(pl === 'On the hundred and third day he comes here', `${T} (L1, L2, TG2): Lu Han's day (${pl})`); }
+    // TG3 (H3a): the long calendar's first village week has no sunset walk or slopes; the second week has them
     { const doors = (g) => { g.scene = 'ashfall'; return sceneView(g, SCENES).choices.filter((c) => !c.disabled).map((c) => c.label); };
-      const w1 = doors(at(true, 25, 16, { long: true, vday: 1, cal_night: 3 })), w1m = doors(at(true, 25, 9, { long: true, vday: 1, cal_night: 3 })), w2 = doors(at(true, 31, 16, { long: true, vday: 2, cal_night: 2 })), w2m = doors(at(true, 31, 9, { long: true, vday: 2, cal_night: 2 })), o = doors(at(false, 5, 16, { long: true, vday: 2 }));
+      const w1 = doors(at(true, 25, 16, { long: true, vday: 1, cal_night: 3 })), w1m = doors(at(true, 25, 9, { long: true, vday: 1, cal_night: 3 })), w2 = doors(at(true, 31, 16, { long: true, vday: 2, cal_night: 2 })), w2m = doors(at(true, 31, 9, { long: true, vday: 2, cal_night: 2 }));
       const has = (l, re) => l.some((x) => re.test(x));
-      assert(!has(w1, /^Walk with Mei Lin/) && !has(w1m, /^Gather herbs with Mei Lin/) && has(w2, /^Walk with Mei Lin/) && has(w2m, /^Gather herbs with Mei Lin/) && has(o, /^Walk with Mei Lin/), `${T} (H3a, TG3): the walk and the slopes from the second week (long), as on the old calendar`); }
-    // TG4 (M3): the titles, Ya's fight opener and Mei Lin's count read the calendar; the old calendar's as before
-    { const t = [ttl(at(true, 44), 'fo_start'), ttl(at(true, 44), 'fo_elder_named'), ttl(at(true, 22, 6, { long: true }), 'dawn'), ttl(at(true, 102), 'rt_dawn'), ttl(at(false, 8), 'fo_start'), ttl(at(false, 8), 'fo_elder_named'), ttl(at(false, 4, 6, { long: true }), 'dawn'), ttl(at(false, 2, 6, {}), 'dawn'), ttl(at(false, 20), 'rt_dawn')].join('|');
-      assert(t === 'Day Forty-Four|Fifty-Nine Days|Day Twenty-Two|Day One Hundred and Two|Day Eight|Thirteen Days|Day Four|Day Two|Day Twenty', `${T} (MC, TG4): the titles (${t})`);
+      assert(!has(w1, /^Walk with Mei Lin/) && !has(w1m, /^Gather herbs with Mei Lin/) && has(w2, /^Walk with Mei Lin/) && has(w2m, /^Gather herbs with Mei Lin/), `${T} (H3a, TG3): the walk and the slopes from the second week`); }
+    // TG4 (M3): the titles, Ya's fight opener and Mei Lin's count read the calendar
+    { const t = [ttl(at(true, 44), 'fo_start'), ttl(at(true, 44), 'fo_elder_named'), ttl(at(true, 22, 6, { long: true }), 'dawn'), ttl(at(true, 102), 'rt_dawn')].join('|');
+      assert(t === 'Day Forty-Four|Fifty-Nine Days|Day Twenty-Two|Day One Hundred and Two', `${T} (MC, TG4): the titles (${t})`);
       const SP = await import('../js/story/stomp_act1.js'); const P = await import('../js/story/power.js');
       const fn = (P.STOMPS || P.stomps || {})?.ya_brawl?.posture; const src = readFileSync(new URL('../js/story/stomp_act1.js', import.meta.url), 'utf8');
-      assert(/longCal\(g\) \? '"Weeks I watched you/.test(src) && /: '"Three nights at your fire/.test(src), `${T} (MF1, TG4): Ya's fight opener by the calendar`);
-      const nightSrc = readFileSync(new URL('../js/story/act1_fallout.js', import.meta.url), 'utf8'); assert(/cap\(numWord\(elderLeft\(g\)\)\) \+ '," she says, and that is all the arithmetic/.test(nightSrc) && C.numWord(C.elderLeft(at(false, 9))) === 'twelve', `${T} (MC, TG4): Mei Lin's count from the calendar (twelve on the old)`); }
+      assert(/"Weeks I watched you/.test(src) && !/Three nights at your fire/.test(src), `${T} (MF1, TG4): Ya's fight opener, the long calendar's (v0.11.260, OC2: the old one's gone)`);
+      const nightSrc = readFileSync(new URL('../js/story/act1_fallout.js', import.meta.url), 'utf8'); assert(/cap\(numWord\(elderLeft\(g\)\)\) \+ '," she says, and that is all the arithmetic/.test(nightSrc), `${T} (MC, TG4): Mei Lin's count from the calendar`); }
     // TG5 (VK, M1): VF on real scenes: a later day whose text changed only in its count or the food stock folds
     { const g = at(true, 22, 19, { long: true, vday: 1, cal_night: 0 }); const seen = [];
       for (let d = 0; d < 8; d++) { g.minutes = (22 + d - 1) * D + 19 * 60; g.flags.cal_night = Math.min(d, 6); goTo(g, SCENES, 'supper'); const v = sceneView(g, SCENES); linesOf(g).at = 'ashfall'; seen.push(againView(g, v).fold); } // v0.11.235 (P8-A, EVs): a cycle of six
@@ -7041,15 +6903,15 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       b.minutes += D; Gm.addItem(b, 'smoked_meat', 3); linesOf(b).at = 'bl_morning'; goTo(b, SCENES, 'bl_camp'); const v2 = sceneView(b, SCENES); const f2 = againView(b, v2).fold;
       assert(!f1 && (f2 || v2.text.split('\n\n').length < 2) && v1.text !== v2.text, `${T} (VK, TG5): the camp with more food the next day folds (${f1} → ${f2})`); }
     // TG6 (F14, R2, R6): the eve splits in results and the house texts
-    { const o = Ht.htSlot(at(false, 6, 9, { long: true, vday: 3 }), 'mother'), e = Ht.htSlot(at(true, 37, 9, { long: true, vday: 3, cal_night: 1 }), 'mother'), e2 = Ht.htSlot(at(true, 41, 9, { long: true, vday: 3, cal_night: 5 }), 'mother'), v = Ht.htSlot(at(true, 42, 9, { long: true, vday: 3, cal_night: 6 }), 'mother');
-      assert(o === 'ashfall:2' && e === 'ashfall:2-early' && e2 === 'ashfall:2-early' && v === 'ashfall:2', `${T} (TG6): the villagers' eve text on the eve only (${o} ${e} ${v})`);
+    { const e = Ht.htSlot(at(true, 37, 9, { long: true, vday: 3, cal_night: 1 }), 'mother'), e2 = Ht.htSlot(at(true, 41, 9, { long: true, vday: 3, cal_night: 5 }), 'mother'), v = Ht.htSlot(at(true, 42, 9, { long: true, vday: 3, cal_night: 6 }), 'mother');
+      assert(e === 'ashfall:2-early' && e2 === 'ashfall:2-early' && v === 'ashfall:2', `${T} (TG6): the villagers' eve text on the eve only (${e} ${v})`);
       const walk = (g) => { g.scene = 'mei_walk'; const r = choose(g, SCENES, 0); return (r.lines || []).join(' '); };
-      const we = walk(at(true, 37, 18, { long: true, vday: 3, cal_night: 1 })), wv = walk(at(true, 42, 18, { long: true, vday: 3, cal_night: 6 })), wo = walk(at(false, 6, 18, { long: true, vday: 3 }));
-      assert(/Whatever happens when they come/.test(we) && /"Tomorrow, whatever happens/.test(wv) && /"Tomorrow, whatever happens/.test(wo), `${T} (X6, TG6): "Walk her home." says Tomorrow on the eve only`);
+      const we = walk(at(true, 37, 18, { long: true, vday: 3, cal_night: 1 })), wv = walk(at(true, 42, 18, { long: true, vday: 3, cal_night: 6 }));
+      assert(/Whatever happens when they come/.test(we) && /"Tomorrow, whatever happens/.test(wv), `${T} (X6, TG6): "Walk her home." says Tomorrow on the eve only`);
       const y2 = tx(at(true, 63, 12, { ya_met: true }), 'fo_ya_time'), y1 = tx(at(true, 64, 12, { ya_met: true }), 'fo_ya_time');
       assert(/"A few more sleeps, then we start for the tree,"/.test(y2) && /"Tomorrow we start for the tree,"/.test(y1), `${T} (DC17, TG6): Ya's "Tomorrow" on the last day before the start only`);
       const sc = (g) => { g.scene = 'scout'; const c = SCENES.scout.choices[0]; return (c.do(g) || []).join(' '); };
-      assert(/Before the tribute comes due they will know/.test(sc(at(true, 37, 9, { long: true, vday: 3, cal_night: 1 }))) && /By tomorrow they will know/.test(sc(at(true, 42, 9, { long: true, vday: 3, cal_night: 6 }))) && /By tomorrow they will know/.test(sc(at(false, 6, 9, { long: true, vday: 3 }))), `${T} (MF2, TG6): the scout's "By tomorrow" on the eve only`); }
+      assert(/Before the tribute comes due they will know/.test(sc(at(true, 37, 9, { long: true, vday: 3, cal_night: 1 }))) && /By tomorrow they will know/.test(sc(at(true, 42, 9, { long: true, vday: 3, cal_night: 6 }))), `${T} (MF2, TG6): the scout's "By tomorrow" on the eve only`); }
     // TG7: the long calendar's own branches: the settled talks' sequence, the quiet mornings, the 5-day road's words
     { const talk = (n, id) => { const g = at(true, 70, 10, { bl_day: 2, bl_region: 'rr', mei_talks: n, ya_talks: n, mei_party: true, ya_party: true }); return tx(g, id).slice(0, 40); };
       const seqOk = (id) => new Set([5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map((n) => talk(n, id))).size === 10 && talk(17, id) === talk(5, id) && talk(15, id) === talk(9, id) && talk(2, id) !== talk(5, id); /* v0.11.247 (P17-A, TL4): beats 11–14 their own, the cycle again from 15 */ // v0.11.233 (P6-A, TK): a cycle of six; v0.11.236 (P9-A, QW): beat 5 its own quiet walk, not beat 2's
@@ -7116,7 +6978,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         assert(/const empty = planEmptyShown\(g, SCENES, pv\) && !planDoorsShown\(g, SCENES, pv\);/.test(MS), `${T} (PE): the panel's button reads both`);
     }
     // WM (RV1 WMa): on the long calendar the bite on the two mornings right after the loss (the flag `wolf_bit`), every morning of story days
-    // 8–10 walked (TG2); the old calendar's days 9 and 10 both bite, as before, with no flag
+    // 8–10 walked (TG2)
     {
         const g0 = fall(); const fight = Cal.calStart(g0, 8), last = Cal.calEnd(g0, 10);
         const g = fall(); g.flags.wolf = 'lost'; delete g.flags.wolf_bit; const mx = jamesHpMax(g); const bites = [];
@@ -7126,9 +6988,6 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         assert(hp1 === 85, `${T} (WM): the bite is 85% of HP (${hp1}%)`);
         const wn = () => { const h = fall(); h.flags.wolf = 'won'; const m = jamesHpMax(h); h.james.hp = m; h.minutes = fight * 1440 + 6 * 60; goTo(h, SCENES, 'fo_morning'); return h.james.hp === m && !h.flags.wolf_bit; };
         assert(wn(), `${T} (WM): the wolves won: no bite, no flag`);
-        const old = fall(); delete old.cal; old.flags.wolf = 'lost'; delete old.flags.wolf_bit; const om = jamesHpMax(old); const ob = [];
-        for (const d of [9, 10]) { old.james.hp = om; old.minutes = (d - 1) * 1440 + 6 * 60; goTo(old, SCENES, 'fo_morning'); if (old.james.hp < om) ob.push(d); }
-        assert(!Cal.longCal(old) && ob.join() === '9,10' && !old.flags.wolf_bit, `${T} (WM): the old calendar bites on days 9 and 10, as before, with no flag (${ob.join()})`);
     }
     // SN: a Skilled wilds card used today and Yuki's sit taken today show, closed, with the day they open again
     {
@@ -7151,8 +7010,6 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         assert(n1 === cal + Cm.SPACE_DAYS, `${T} (SN): it opens again ${Cm.SPACE_DAYS} days on (Day ${n1}, today Day ${cal})`);
         assert(!taskCards(g, SCENES).some((c) => c.id === cid && c.status === 'open'), `${T} (SN): the card itself is still closed`);
         const h = wilds(); assert(Wk.spacedClosed(h, SCENES).length === 0, `${T} (SN): nothing closed by its spacing: nothing extra on the hub`);
-        const old = ensureBars(newGame(3, { closed: true, cal: 0 /* OC2 */ })); goTo(old, SCENES, 'wilds');
-        assert(Wk.spacedClosed(old, SCENES).length === 0, `${T} (SN): never on the old calendar`);
         const MS = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
         assert(/cards = withSpaced\(g, SCENES, cards\);/.test(MS) && /c\.status === 'spaced' \? c\.note :/.test(MS), `${T} (SN): the hub draws them, closed, with the note`);
         // RV1 (L1): the held card's tip says the same day as its tag, not "Back tomorrow"
@@ -7174,14 +7031,14 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     }
     // OL: the coughing house taken in the prologue's village: Ashfall's kept row back to 0 (and the plan's on any stay)
     {
-        const g = ensureBars(newGame(5, { closed: true, cal: Cal.LONG_CAL })); goTo(g, SCENES, 'village');
+        const g = ensureBars(newGame(5, { closed: true })); goTo(g, SCENES, 'village');
         g.tasks = g.tasks || {}; g.tasks.keep = { ashfall: { 'door:heal': 1, 'door:scout': 1 }, fo_ashfall: { 'door:heal': 1 } };
         const i = SCENES.village.choices.findIndex((c) => c.to === 'heal');
         const tap = Wk.noteCardTap(g, SCENES, `village:${i}`);
         assert(tap && tap.s === 'heal', `${T} (OL): a one-off door tapped on the prologue's village is noted (${JSON.stringify(tap)})`);
         Wk.noteCardDone(g, tap, { skipped: false });
         assert(g.tasks.keep.ashfall['door:heal'] === 0 && g.tasks.keep.fo_ashfall['door:heal'] === 0 && g.tasks.keep.ashfall['door:scout'] === 1, `${T} (OL): its kept rows 0 on every stay, the others kept (${JSON.stringify(g.tasks.keep)})`);
-        const g2 = ensureBars(newGame(5, { closed: true, cal: Cal.LONG_CAL })); goTo(g2, SCENES, 'village'); g2.tasks.keep = { ashfall: { 'door:heal': 1 } };
+        const g2 = ensureBars(newGame(5, { closed: true })); goTo(g2, SCENES, 'village'); g2.tasks.keep = { ashfall: { 'door:heal': 1 } };
         Wk.noteCardDone(g2, Wk.noteCardTap(g2, SCENES, `village:${i}`), { skipped: true });
         assert(g2.tasks.keep.ashfall['door:heal'] === 1, `${T} (OL): not taken (the routine went first): kept`);
         const yi = SCENES.village.choices.findIndex((c) => c.to === 'yk_time');
@@ -7253,7 +7110,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const A = await import('../js/story/again.js');
     const T = 'RE1 (SC, the read stop\'s cap)';
     const D = 1440;
-    const mk = (hub, sd, h = 7, seed = 99801) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; g.flags.palisade = 1; g.flags.wolf = 'driven'; return g; };
+    const mk = (hub, sd, h = 7, seed = 99801) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + h * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; g.flags.palisade = 1; g.flags.wolf = 'driven'; return g; };
     const capWas = READ_CAP.n;
     READ_CAP.n = 3; READ_STOP.on = true;
     try {
@@ -7347,7 +7204,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     const C = await import('../js/core/calendar.js');
     const A = await import('../js/story/again.js');
     const D = 1440;
-    const at = (day, h = 9, flags = {}) => { const g = ensureBars(newGame(98900 + day, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, flags); g.minutes = (day - 1) * D + h * 60; return g; };
+    const at = (day, h = 9, flags = {}) => { const g = ensureBars(newGame(98900 + day, { closed: true })); Object.assign(g.flags, flags); g.minutes = (day - 1) * D + h * 60; return g; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const paras = (t) => String(t).split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
     // the sentences
@@ -7431,7 +7288,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const C = await import('../js/core/calendar.js');
     const A = await import('../js/story/again.js');
     const D = 1440;
-    const at = (day, h = 9, flags = {}) => { const g = ensureBars(newGame(99300 + day, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, flags); g.minutes = (day - 1) * D + h * 60; return g; };
+    const at = (day, h = 9, flags = {}) => { const g = ensureBars(newGame(99300 + day, { closed: true })); Object.assign(g.flags, flags); g.minutes = (day - 1) * D + h * 60; return g; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const seq = (id, key, h, flags, form = 'cat', n = 4) => { const g = at(31, h, flags); g.yuki.realm = 9; g.yuki.form = form; const out = []; for (let d = 0; d < n; d++) { g.minutes = (30 + d) * D + h * 60; noteDay(g, key); out.push(tx(g, id)); } return out; };
     const ok3 = (l) => new Set(l.slice(0, 3)).size === 3 && l[3] === l[0] && l.every((t) => A.sentencesOf(t).length >= 2);
@@ -7452,7 +7309,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       assert(Object.values(byF).every((l) => new Set(l.slice(0, 7)).size === 7 && l[7] === l[0] && l.every((t) => A.sentencesOf(t).length >= 2)) && !bad.length && !/"/.test(byF.cat.join(' ') + byF.tiger.join(' ')), `${T} (FT, RV1 TG2; P11-A EVn-1): the quiet night by form, in order (the old three first), the bond in italics for the cat and the great form (${bad.join(', ')})`); }
     // RV1 (TG1): an arson night between quiet nights is no step of the quiet sequence
     { const g = at(31, 22); g.scene = 'village_night'; const quiet = SCENES.village_night.dayKey(g);
-      const arsonOn = (() => { const h = ensureBars(newGame(99350, { closed: true, cal: 0 /* OC2 */ })); h.flags.vday = 2; h.minutes = 1440 + 22 * 60; h.scene = 'village_night'; return SCENES.village_night.dayKey(h) === null && !SCENES.village_night.choices.find((c) => c.text === 'Sleep.').show(h); })(); // the old calendar's story night 2: the arson
+      const arsonOn = (() => { const h = ensureBars(newGame(99350, { closed: true })); h.flags.vday = 2; h.flags.cal_night = 6; h.minutes = calMinutes(h, 6) - 1440 + 22 * 60; /* v0.11.260 (OC2): the long calendar's arson, the second week's seventh night */ h.scene = 'village_night'; return SCENES.village_night.dayKey(h) === null && !SCENES.village_night.choices.find((c) => c.text === 'Sleep.').show(h); })(); // the old calendar's story night 2: the arson
       const w = at(31, 22); w.yuki.realm = 0; const seen = [];
       for (let d = 0; d < 3; d++) { w.minutes = (30 + d) * D + 22 * 60; if (d === 1) { noteDay(w, null); continue; } noteDay(w, SCENES.village_night.dayKey(w)); seen.push(tx(w, 'village_night')); }
       assert(quiet === 'village_night:quiet' && arsonOn && seen[0] !== seen[1] && /Below the herb loft somebody banks the stove/.test(seen[1]), `${T} (RV1, TG1): a quiet night counts on its own key, an arson night (dayKey null) skips no quiet text (${arsonOn ? 'arson found' : 'no arson night'}; ${seen.map((t) => t.slice(0, 30)).join(' | ')})`); }
@@ -7564,7 +7421,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     }
     // AT: the mornings (long calendar, three camps a story day) and the empty breakfast
     { const C = await import('../js/core/calendar.js');
-      const morn = (state, day, n, form = 'cat') => { const g = camp(state, { day, form }); const h = ensureBars(newGame(99450, { closed: true, cal: C.LONG_CAL })); h.calBl = 3; Object.assign(h.flags, g.flags, { bl_n: n }); Object.assign(h.rel, g.rel); h.minutes = 20 * D + 6 * 60; h.scene = 'bl_morning'; return BR.BLACKROOT.bl_morning.text(h); };
+      const morn = (state, day, n, form = 'cat') => { const g = camp(state, { day, form }); const h = ensureBars(newGame(99450, { closed: true })); h.calBl = 3; Object.assign(h.flags, g.flags, { bl_n: n }); Object.assign(h.rel, g.rel); h.minutes = 20 * D + 6 * 60; h.scene = 'bl_morning'; return BR.BLACKROOT.bl_morning.text(h); };
       const all = (s) => [morn(s, 4, 2), morn(s, 5, 0), morn(s, 5, 1), morn(s, 5, 2)];
       assert(all(null).filter((t) => /\bYa\b/.test(t)).length === 3 && !all('ya').some((t) => /\bYa\b/.test(t)) && !all('both').some((t) => /\bYa\b|Mei Lin/.test(t)) && /Mei Lin/.test(morn('ya', 5, 1)), `${T} (AT): the camp's mornings without the absent woman (${all('both').map((t) => t.slice(0, 40)).join(' | ')})`);
       const nb = (s) => { const g = camp(s, { day: 4 }); g.flags.bl_n = 0; g.inventory = {}; g.james.satiety = 50; return BR.BLACKROOT.bl_morning.enter(g).find((l) => /breakfast/i.test(l)); };
@@ -7607,7 +7464,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // ST2: the degree-2 far wins in threes, by far_won's day; round again on the fourth
     { const C = await import('../js/core/calendar.js');
       for (const [kind, id, starts] of [['wolves', 'wolves', ['They are clever and quick', 'A pair of ash-wolves', 'The left one takes a bone needle']], ['bull', 'thornback', ['It is huge, plated and enraged', 'A bull the size of a woodshed', 'It charges.']]]) {
-          const g = ensureBars(newGame(99470, { closed: true, cal: C.LONG_CAL })); g.flags.far_kind = kind; const out = [];
+          const g = ensureBars(newGame(99470, { closed: true })); g.flags.far_kind = kind; const out = [];
           for (let d = 0; d < 4; d++) { g.minutes = (30 + d) * D + 10 * 60; g.scene = 'far_won'; noteDay(g, 'far_won'); out.push(STOMP[id].win[2](g)); }
           assert(starts.every((w, i) => out[i].startsWith(w)) && out[3] === out[0] && out.every((t) => !/\bloads?\b|a piece at a time|well done/i.test(t)) && !/promot|swept|white stones|unsent for|by seniority|eldest man first|finger's (breadth|width)|bows? (a breath )?early/i.test(out[2]) /* RV1 (T M4, TG-T5): the third stands alone, the brief's bans */, `${T} (ST2): ${id} degree 2 three texts, then round again (${out.map((t) => t.slice(0, 25)).join(' | ')})`);
       } }
@@ -7622,7 +7479,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const C = await import('../js/core/calendar.js');
     const A = await import('../js/story/again.js');
     const D = 1440;
-    const base = (seed, flags = {}) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, flags); return g; };
+    const base = (seed, flags = {}) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, flags); return g; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const lab = (g, id, i) => { const c = SCENES[id].choices[i]; return typeof c.text === 'function' ? c.text(g) : c.text; };
     const ok3 = (l) => new Set(l.slice(0, 3)).size === 3 && l[3].slice(0, 40) === l[0].slice(0, 40) && l.every((t) => typeof t === 'string' && A.sentencesOf(t.split('\n\n')[0]).length >= 1 && A.sentencesOf(t).length >= 2);
@@ -7646,9 +7503,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const y = base(99508, { ya_met: true }); const ys = [];
       for (const [sd, d] of [[9, 0], [9, 1], [10, 0]]) { y.minutes = C.calMinutes(y, sd, 10) + d * D; ys.push(tx(y, 'fo_ya_time').slice(0, 30)); }
       assert(/^The herb slopes, late in/.test(seen[2]) && /^She is on the herb slopes, tyi/.test(seen[3]) && /^The last/.test(seen[4]) && /^She is up on the shrine roof/.test(ys[2]), `${T} (V3b): each story day keeps its own count (${seen.join(' | ')} / ${ys.join(' | ')})`); }
-    // the old calendar: each story day once, so always the old text and the old labels
-    { const g = ensureBars(newGame(99510, { closed: true, cal: 0 /* OC2 */ })); g.minutes = 7 * D + 10 * 60; const t = tx(g, 'fo_mei');
-      assert(/^She is up in the herb loft/.test(t) && /^"Scream, then/.test(lab(g, 'fo_mei', 0)) && /^Help her sort roots/.test(lab(g, 'fo_mei', 1)), `${T} (V3b): the old calendar's day 8 keeps the old text and labels`); }
     // the roof: three texts a slot, each with its own line after "Stay until the cold drives you in."
     for (const [vd, starts, res] of [[1, ['The thatch still holds', 'On the roof Mei Lin lists', 'Your forearm is playing strings'], [/^You stay until your fingers stop working/, /^The cold wins, as it does/, /^She sits up only when the thatch/]], [2, ['Up on the roof again', 'The plum wine comes up the ladder', 'Tonight the jar stays corked'], [/^Neither of you mentions it/, /^The jar goes down the ladder lighter/, /^On the way down she has you bow/]]]) {
         const g = base(99520 + vd, { vday: vd }); const out = [], R = []; const N = vd === 1 ? 5 : 7; // v0.11.234 (P7-A, RN): the later nights round again after six; v0.11.247 (P17-A, SR3): week 1 five, the later nights seven
@@ -7698,7 +7552,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const Wk = await import('../js/core/week.js');
     const M = await import('../js/story/music.js');
     const D = 1440;
-    const base = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2) */ })); Object.assign(g.flags, flags); return g; };
+    const base = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, flags); return g; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const lab = (g, id, i) => { const c = SCENES[id].choices[i]; return typeof c.text === 'function' ? c.text(g) : c.text; };
     const form = (g, f) => { g.yuki.realm = { cat: 0, tiger: 2, human: 7 }[f]; g.yuki.form = f; return g; };
@@ -7732,10 +7586,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     { const g = base(99760, { ya_met: true }); const L = [];
       for (const [sd, d] of [[8, 0], [8, 1], [8, 2], [9, 0], [9, 1]]) { g.minutes = C.calMinutes(g, sd, 10) + d * D; tx(g, 'fo_mei'); L.push(lab(g, 'fo_mei', 0)); }
       assert(/^"Magnificently/.test(L[2]) && /^Tell her she's allowed/.test(L[3]) && /^Tell her glad is not a crime/.test(L[4]), `${T} (TG-C3): day 9's labels from its own count after three days of day 8 (${L.map((l) => l.slice(0, 18)).join(' | ')})`); }
-    // TG-C4: the old calendar: the roof's second night is the later text, the firesides their old texts
-    { const g = base(99770, { vday: 1 }, null); g.minutes = 3 * D + 21 * 60; const r1 = tx(g, 'supper_roof'); g.flags.vday = 2; g.minutes = 4 * D + 21 * 60; const r2 = tx(g, 'supper_roof');
-      const f = base(99771, { bl_region: 'rr' }, null); f.minutes = 10 * D + 20 * 60; noteDay(f, 'bl_fireside:rr'); const fr = tx(f, 'bl_fireside');
-      assert(/^The thatch still holds/.test(r1) && /^Second night on the roof/.test(r2) && /^Ya rips at a strip/.test(fr), `${T} (TG-C4): the old calendar's roof and fire`); }
     { const g = base(99761, { ya_met: true }); for (const [sd, d] of [[8, 0], [8, 1], [9, 0]]) { g.minutes = C.calMinutes(g, sd, 10) + d * D; tx(g, 'fo_mei'); }
       assert(lab(g, 'fo_mei', 1) === 'Help her work. Let her talk.', `${T} (TG-C3, C1): day 8's second label stays on day 8 (after two days of it, day 9 shows ${lab(g, 'fo_mei', 1)})`); }
     // TG-C5 (PS-a): the plan knows a story day's three label sets as the same choices, and a new story day as new
@@ -7757,7 +7607,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const A = await import('../js/story/again.js');
     const D = 1440;
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
-    const talk = (id, n, { m = 0, y = 0, region = 'rr', day = 2, h = 10, flags = {} } = {}) => { const g = ensureBars(newGame(99600 + n, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_talks: n, ya_talks: n, mei_party: true, ya_party: true }, flags); g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y }; g.minutes = 70 * D + h * 60; return tx(g, id); };
+    const talk = (id, n, { m = 0, y = 0, region = 'rr', day = 2, h = 10, flags = {} } = {}) => { const g = ensureBars(newGame(99600 + n, { closed: true })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_talks: n, ya_talks: n, mei_party: true, ya_party: true }, flags); g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y }; g.minutes = 70 * D + h * 60; return tx(g, id); };
     const MEI = ['Mei Lin has asked to try your glasses', 'Mei Lin informs you that you bow', 'Mei Lin is limping'];
     const YA = ['Ya has taken against your coat, and has decided the coat ought to hear about it.', 'Ya has bet herself', 'Ya is hungry'];
     // the cycle: beats 8, 9, 10 the new texts in order, 11 the quiet walk again, 14 the first new text again; the old three where they were
@@ -7806,12 +7656,12 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const kept = ['She leaves the finger there until you have both noticed it', 'watching your face as she watches a trail', 'Mei Lin informs you that you bow', 'Ya has taken against your coat', 'She laughs so hard that she spoils the limp', 'The herb girl carries mint on her'].filter((w) => !all.includes(w));
       assert(!gone.length && !kept.length, `${T} (RV1 TG-T1): Claude's cuts in place (back: ${gone.join(', ')}; missing: ${kept.join(', ')})`); }
     // the memory lines: beats 8–10 keep the pool (no own line), as the settled texts
-    { const RM = await import('../js/story/remember.js'); const g = ensureBars(newGame(99620, { closed: true, cal: C.LONG_CAL })); g.flags.mei_talks = 8; g.flags.ya_talks = 9;
+    { const RM = await import('../js/story/remember.js'); const g = ensureBars(newGame(99620, { closed: true })); g.flags.mei_talks = 8; g.flags.ya_talks = 9;
       assert(RM.sceneMemory(g, 'talk_mei') === null && RM.sceneMemory(g, 'talk_ya') === null, `${T} (TK): the new settled texts keep the general memory pool`); }
     // CWx: village_night's third quiet text carries the overheard line in all three forms; the first two don't
     { const bad = [];
       for (const f of ['cat', 'tiger', 'human']) {
-          const g = ensureBars(newGame(99630, { closed: true, cal: C.LONG_CAL })); g.flags.vday = 1; g.yuki.realm = 9; g.yuki.form = f; const out = [];
+          const g = ensureBars(newGame(99630, { closed: true })); g.flags.vday = 1; g.yuki.realm = 9; g.yuki.form = f; const out = [];
           for (let d = 0; d < 4; d++) { g.minutes = (30 + d) * D + 22 * 60; noteDay(g, 'village_night:quiet'); out.push(tx(g, 'village_night')); }
           const re = /nothing further to say tonight\. The house below does: through the floor Mei Lin's mother tells her daughter, gravely, that a guest who asks twice what is in the pot will be handed the ladle and watched\. /;
           if (!re.test(out[2]) || re.test(out[0]) || re.test(out[1]) || re.test(out[3])) bad.push(f);
@@ -7820,7 +7670,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // CWx, RV1 CM-b: the camp's first night with the fire lit and food on hand: Yuki's line by form, whole; not without food, not without the fire,
     // not on the second or third night; gone from the screen after "Cook and eat" eats the last of it (TG-T4, TG-T6, TG-C4)
     { const L = { cat: ' *Forty years of your dumplings,* Yuki sends, *and now a forest with nothing in it. Cook whatever it is. I shall complain, and then I shall eat it all.*', tiger: ' *At home you fed everyone who stood still,* Yuki sends. *Here there is only me, and more of me than there was. Cook accordingly.*', human: ' "You\'re looking at that fire and missing your kitchen," Yuki says. "So am I. Nobody out here to feed but me. I\'ll try to be a crowd."' };
-      const mk = (fd, fire, hares, f) => { const g = ensureBars(newGame(99640, { closed: true, cal: 0 /* OC2 */ })); g.flags.forest_day = fd; g.flags.fire = fire; g.inventory.hare_raw = hares; g.yuki.realm = { cat: 0, tiger: 2, human: 7 }[f]; g.yuki.form = f; g.scene = 'camp'; return g; };
+      const mk = (fd, fire, hares, f) => { const g = ensureBars(newGame(99640, { closed: true })); g.flags.forest_day = fd; g.flags.fire = fire; g.inventory.hare_raw = hares; g.yuki.realm = { cat: 0, tiger: 2, human: 7 }[f]; g.yuki.form = f; g.scene = 'camp'; return g; };
       const bad = [];
       for (const [f, line] of Object.entries(L)) {
           const has = (t) => /Yuki (sends|says)/.test(t.split('\n\n').slice(1).join('\n\n'));
@@ -7855,7 +7705,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const C = await import('../js/core/calendar.js');
     const A = await import('../js/story/again.js');
     const BR = await import('../js/story/act1_blackroot.js');
-    const base = (seed, flags = {}) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, flags); return g; };
+    const base = (seed, flags = {}) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, flags); return g; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const stay = (g) => SCENES.supper_roof.choices[0].do(g)[0];
     // RN: the later nights a cycle of six, each text with its own line after; the seventh night the old text again; the first week still three
@@ -7870,8 +7720,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const f = base(99711, { vday: 1 }); const R1 = [];
       for (let d = 0; d < 6; d++) { f.minutes = (20 + d) * D + 21 * 60; tx(f, 'supper_roof'); R1.push(stay(f)); }
       assert(/^You stay until your fingers stop working/.test(R1[0]) && /^The cold wins/.test(R1[1]) && /^She sits up only/.test(R1[2]) && new Set(R1.slice(0, 5)).size === 5 && R1[5] === R1[0], `${T} (RN; P17-A SR3): the first week five now, its first three lines after unchanged`);
-      const o = ensureBars(newGame(99712, { closed: true, cal: 0 /* OC2 */ })); o.flags.vday = 2; o.minutes = 5 * D + 21 * 60;
-      assert(/^Second night on the roof/.test(tx(o, 'supper_roof')) && /^Neither of you mentions it/.test(stay(o)), `${T} (RN): the old calendar keeps the old later text`); }
+    }
     // ML: the firesides' meal on a day he did not cook ("Cook and eat." not taken): Root Road texts 2 (by form) and 3, Ashen Hills 2 and 3 (by who is warm)
     { const { markDaily: MD } = await import('../js/story/common.js');
       const OLD = /lends your stew|facing the pot|the pot, which has never been so clean|since the stew|You ladle out|since you cooked it|cook for an argument|stirs it as if it could hear him/;
@@ -7945,7 +7794,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const A = await import('../js/story/again.js');
     const D = 1440;
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
-    const run = (seed, id, weeks, h, form = ['cat', 0]) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); g.yuki.form = form[0]; g.yuki.realm = form[1]; g.james.realm = form[1];
+    const run = (seed, id, weeks, h, form = ['cat', 0]) => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.form = form[0]; g.yuki.realm = form[1]; g.james.realm = form[1];
         const out = []; let day = 20; for (const [vday, nights] of weeks) for (const n of nights) { Object.assign(g.flags, { long: true, vday, cal_night: n }); g.minutes = (day++) * D + h * 60; out.push(tx(g, id)); } return out; };
     const N7 = [0, 1, 2, 3, 4, 5, 6];
     const S4 = ["Mei Lin's house has two rooms", 'The house has made room for you', 'By now you know which board', 'You stand your chopsticks upright', "The cooper's wife comes to the door", "Mei Lin's mother asks for your glasses"];
@@ -7979,7 +7828,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const C = await import('../js/core/calendar.js');
     const D = 1440;
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
-    const mk = (seed, form = ['cat', 0]) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); g.yuki.form = form[0]; g.yuki.realm = form[1]; g.james.realm = form[1]; return g; };
+    const mk = (seed, form = ['cat', 0]) => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.form = form[0]; g.yuki.realm = form[1]; g.james.realm = form[1]; return g; };
     const night = (g, vday, n, day, h) => { Object.assign(g.flags, { long: true, vday, cal_night: n }); g.minutes = day * D + h * 60; };
     const week = (seed, id, vday, h, form) => { const g = mk(seed, form); const out = []; for (let n = 0; n < 6; n++) { night(g, vday, n, 30 + n, h); out.push(tx(g, id)); } return out; };
     const w2 = week(99820, 'mei_walk', 2, 18), w3 = week(99821, 'mei_walk', 3, 18), s4 = week(99822, 'supper', 1, 19), s5 = week(99823, 'supper', 2, 19);
@@ -8028,7 +7877,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const RR = ["You camp on the root's broad back", 'A buttress of bark stands up', 'Nobody discusses where the fire goes', 'A lesser root joins the road', 'The road dips here']; // RV1: run RV's texts; v0.11.238 (P11-A, CB5): a fourth and fifth
     const AH = ['You camp under a black ridge', 'Ash has drifted knee-deep behind the ridge', 'The hill is black glass in places', 'A bough of the dead tree fell here once', 'The wind drops at dusk']; // v0.11.238 (P11-A, CB5)
     // CB3: one game camping five nights in each region: texts 1, 2, 3, then (until v0.11.238's CB5) 1 and 2 again, now 4 and 5; a redraw the same evening the same text; the pantry second
-    const camps = (seed, region, cal) => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); Object.assign(g.flags, { bl_region: region, bl_day: region === 'ah' ? 4 : 2, mei_party: true, ya_party: true, ya_off_done: true });
+    const camps = (seed, region, cal) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, { bl_region: region, bl_day: region === 'ah' ? 4 : 2, mei_party: true, ya_party: true, ya_off_done: true });
         const out = []; for (let d = 0; d < 5; d++) { g.minutes = (60 + d) * D + 18 * 60; goTo(g, SCENES, 'bl_camp'); const a = sceneView(g, SCENES).text; const b = sceneView(g, SCENES).text; out.push([a, b]); } return out; };
     for (const [region, want, seed] of [['rr', RR, 99900], ['ah', AH, 99901]]) {
         const out = camps(seed, region, C.LONG_CAL);
@@ -8037,13 +7886,11 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
         assert(!bad.length, `${T} (CB3; P11-A CB5): the ${region} camp on five nights: texts 1–5 (${bad.join(', ')})`);
         assert(out.every(([a, b]) => a === b && a.split('\n\n').length === 2 && /hammerspace/i.test(a.split('\n\n')[1])), `${T} (CB3): ${region}: drawn again the same evening the same; one region paragraph, the food line second`);
         assert(firsts.slice(1, 5).every((t) => !/\bYuki\b|\bmorning\b|\btonight\b|\bcook|\beat\b|\bmeal\b|\bsecond\b|\bthird\b|\bwatch\b|asleep/i.test(t)), `${T} (CB3): ${region}: the new texts name no Yuki, meal, watch, day count or later hour`);
-        const old = camps(seed + 2, region, null).map(([a]) => a.split('\n\n')[0]);
-        assert(old.every((t) => t.startsWith(want[0])) || old.every((t, i) => t.startsWith(want[i])), `${T} (CB3): ${region}: the old calendar reads by the same day key`);
     }
     { const out = camps(99904, 'dw', C.LONG_CAL).map(([a]) => a.split('\n\n')[0]);
       assert(out[0].startsWith('Camp is a raft') && out[1].startsWith('Another raft') && out[2].startsWith('The raft holds') && out[3].startsWith('The raft you camp on has run aground') && out[4] === out[0], `${T} (CB3; P11-A CB5): the Drowned Wood's three unchanged, its fourth new, the fifth the first again`); }
     // QW: beat 2 the old quiet walk; beats 5, 11, 17 the new one, in every warmth; beats 6–10 unchanged; Mei Lin's new one needs no Ya-away version
-    const talk = (id, n, { m = 0, y = 0, region = 'rr', day = 2, h = 10, flags = {} } = {}) => { const g = ensureBars(newGame(99950 + n, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_talks: n, ya_talks: n, mei_party: true, ya_party: true }, flags); g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y }; g.minutes = 70 * D + h * 60; return tx(g, id); };
+    const talk = (id, n, { m = 0, y = 0, region = 'rr', day = 2, h = 10, flags = {} } = {}) => { const g = ensureBars(newGame(99950 + n, { closed: true })); Object.assign(g.flags, { bl_day: day, bl_region: region, mei_talks: n, ya_talks: n, mei_party: true, ya_party: true }, flags); g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y }; g.minutes = 70 * D + h * 60; return tx(g, id); };
     const QW = { talk_mei: [/^For a while you walk and neither of you talks/, /^Mei Lin has not spoken for some while/, /fingers stay folded round yours/, /served first and least/],
         talk_ya: [/^Ya is in a good mood/, /^Ya is quiet, which you had taken/, /closing her hand over yours/, /"Wrong stone,"/] };
     for (const [id, [old, neu, warm, cold]] of Object.entries(QW)) {
@@ -8074,7 +7921,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const D = 1440;
     const stem = (w) => w.replace(/(?:es|s)$/, '');
     const runs = (t) => { const w = (t.toLowerCase().match(/[a-z']+/g) || []).map(stem); const out = new Set(); for (let i = 0; i + 3 <= w.length; i++) out.add(w.slice(i, i + 3).join(' ')); return out; };
-    const mk = (seed, flags) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { mei_party: true, ya_party: true, ya_off_done: true }, flags); return g; };
+    const mk = (seed, flags) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, { mei_party: true, ya_party: true, ya_off_done: true }, flags); return g; };
     // the camp's three texts by region, read by walking the story day's nights as bl_night / bl_morning do (TG-T2)
     const NIGHT_WORDS = { rr: /\b(?:sing|song|wol(?:f|ves)|lights?|rut|warm)/i, ah: /\b(?:hawks?|birds?|stars?|lights?|warm|smoke)/i };
     for (const [region, days, hub] of [['rr', [1, 2], 'rr_hub'], ['ah', [4, 5], 'ah_hub']]) {
@@ -8102,9 +7949,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // TG-C2: Mei Lin's quiet walk with Ya away, cold and warm
     for (const m of [0, 80]) { const { g, t } = talk('talk_mei', 5, { m, region: 'ah', day: 4, flags: { ya_off_done: false } });
       assert(BR.awayNow(g) === 'ya' && /^Mei Lin has not spoken/.test(t) && !/\bYa\b/.test(t), `${T} (TG-C2): Mei Lin's quiet walk with Ya away names no Ya (${m ? 'warm' : 'cold'})`); }
-    // C L4: the old calendar camps once a region, at text 1
-    for (const region of ['rr', 'ah']) { const g = ensureBars(newGame(99995, { closed: true, cal: 0 /* OC2 */ })); Object.assign(g.flags, { bl_region: region, bl_day: region === 'ah' ? 4 : 2, mei_party: true, ya_party: true, ya_off_done: true }); g.minutes = 60 * D + 18 * 60; goTo(g, SCENES, 'bl_camp');
-      assert(BR.blLastDay(g) && sceneView(g, SCENES).text.startsWith(region === 'rr' ? "You camp on the root's broad back" : 'You camp under a black ridge'), `${T} (C L4): the old calendar's ${region} camp is its story night and its first text`); }
 }
 // v0.11.237 (owner pick P10-A, D1, H-a; 2026-11-20 14:21, 15:19): EVk, the quiet night's weeks 2 and 3 a sequence of three each; HS1 the
 // food stock out of the fold, HS2 a redraw where only the stock changed folds (SV by the story paragraphs)
@@ -8115,7 +7959,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const D = 1440;
     const FORMS = { cat: 0, tiger: 2, human: 7 };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
-    const mk = (seed, f = 'cat', cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
+    const mk = (seed, f = 'cat', cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
     const week = (seed, vday, f, cal = C.LONG_CAL, n0 = 6) => { const g = mk(seed, f, cal); const out = []; for (let n = 0; n < n0; n++) { Object.assign(g.flags, { long: !!cal, vday, cal_night: n }); g.minutes = (30 + n) * D + 22 * 60; noteDay(g, SCENES.village_night.dayKey(g)); out.push(tx(g, 'village_night')); } return { g, out }; };
     const OPEN = { 1: ['The herb loft smells of mint', 'Below the herb loft somebody banks the stove', 'The herb loft is dark', 'Your lab coat hangs from a rafter peg', 'The loft has one board that announces you', 'Out past the last house something calls twice'], 2: ["Mei Lin's mother closes the day by reporting it to her husband's tablet", 'You are classifying a bracket fungus', 'Rain comes to Ashfall without ceremony', "Through the boards comes Mei Lin's mother", 'A pinch, as Mei Lin measures it', 'In the next house a husband and wife'], 3: ["Mei Lin's mother checks the bar on the door", 'Someone has left a cup of water', 'Ashfall has gone to bed with one ear on the road', 'A pallet is dragged across the floor below', 'There is no wind, and the banners hang' /* v0.11.243 (P15-B, SF: RT) */, 'Nine threads of thought, and one has taken'] }; // v0.11.242 (P14-A, EVn-23): weeks 2 and 3 six each
     // EVk: each week its own three in order, round again; week 1 the old three; the first sentence the same in every form, two sentences or more
@@ -8135,9 +7979,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // the sequences' own day keys; the quiet key still counts every quiet night
     { const { g } = week(99910, 2, 'cat'); const d = g.lines.d;
       assert(Array.isArray(d['s:village_night:2']) && d['s:village_night:2'].length === 6 && d['village_night:quiet'].length === 6 && !d['s:village_night:3'], `${T} (EVk): week 2 notes its own key (s:village_night:2) beside village_night:quiet`); }
-    // the old calendar keeps the old three on every village day
-    for (const vday of [1, 3]) { const { out } = week(99920 + vday, vday, 'cat', null, 1); // village day 2's night is the old calendar's arson
-      assert(out[0].startsWith(OPEN[1][0]), `${T} (EVk): the old calendar, village day ${vday}: the old text (${out[0].slice(0, 30)})`); }
     // week 2's story night is still the arson (no quiet text)
     { const g = mk(99930); Object.assign(g.flags, { long: true, vday: 2, cal_night: C.LONG_CAL - 1 }); g.minutes = 36 * D + 22 * 60;
       assert(SCENES.village_night.dayKey(g) === null && !OPEN[2].concat(OPEN[1]).some((o) => tx(g, 'village_night').startsWith(o)), `${T} (EVk): week 2's last night is the story night`); }
@@ -8168,7 +8009,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const D = 1440;
     const FORMS = { cat: 0, tiger: 2, human: 7 };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
-    const mk = (seed, f = 'cat') => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
+    const mk = (seed, f = 'cat') => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
     const nightAt = (g, vday, n) => { Object.assign(g.flags, { long: true, vday, cal_night: n }); g.minutes = (30 + n + (vday - 2) * 7) * D + 22 * 60; noteDay(g, SCENES.village_night.dayKey(g)); };
     const week = (seed, vday, f, flags = {}) => { const g = mk(seed, f); Object.assign(g.flags, flags); const out = []; for (let n = 0; n < 3; n++) { nightAt(g, vday, n); out.push(tx(g, 'village_night')); } return out; };
     const all = Object.fromEntries([2, 3].flatMap((v) => Object.keys(FORMS).map((f) => [`${v}:${f}`, week(99960 + v, v, f)])));
@@ -8225,7 +8066,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     // CB5: each region's camp on every night the long calendar camps there, as the game counts them (the region's day key); drawn twice the same
     const NEW = { rr: [[3, 'A lesser root joins the road'], [4, 'The road dips here']], ah: [[3, 'A bough of the dead tree fell here once'], [4, 'The wind drops at dusk']], dw: [[3, 'The raft you camp on has run aground']] }; // RV2 (T M1)
-    const camp = (seed, region, n, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); Object.assign(g.flags, { bl_region: region, bl_day: { rr: 2, dw: 3, ah: 5 }[region], mei_party: true, ya_party: true, ya_off_done: true });
+    const camp = (seed, region, n, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, { bl_region: region, bl_day: { rr: 2, dw: 3, ah: 5 }[region], mei_party: true, ya_party: true, ya_off_done: true });
         const out = []; for (let d = 0; d < n; d++) { g.minutes = (60 + d) * D + 19 * 60; if (region === 'dw' && d === 3) Object.assign(g.flags, { bl_n: 2, drowned_done: true }); goTo(g, SCENES, 'bl_camp'); const a = sceneView(g, SCENES).text; const b = sceneView(g, SCENES).text; out.push([a, b]); } return out; };
     for (const [region, news] of Object.entries(NEW)) {
         const out = camp(99960 + region.length, region, region === 'dw' ? 5 : 6);
@@ -8238,7 +8079,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // RF: the Drowned Wood's fourth keeps the raft (that evening's fireside spits from its edge; Mei Lin's walk goes to its far end)
     { const dw = camp(99970, 'dw', 4)[3][0]; assert(/The raft you camp on has run aground on a bar of cinders/.test(dw) && !/You camp on a bar of cinders/.test(dw), `${T} (RF): the Drowned Wood's fourth camp is on a raft`); }
     // EVn-1: the long calendar's first week: six texts by the quiet key's day, the seventh the first again; Yuki by form; the first sentence the same
-    const mk = (seed, f, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
+    const mk = (seed, f, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
     const week1 = (seed, f, cal = C.LONG_CAL, n0 = 8 /* v0.11.243 (P15-B, SN7): seven, so eight */) => { const g = mk(seed, f, cal); const out = []; for (let n = 0; n < n0; n++) { Object.assign(g.flags, cal ? { long: true, vday: 1, cal_night: n } : { vday: 1 }); g.minutes = (22 + n) * D + 22 * 60; noteDay(g, SCENES.village_night.dayKey(g)); out.push(tx(g, 'village_night')); } return out; };
     const W1 = ['The herb loft smells of mint', 'Below the herb loft somebody banks the stove', 'The herb loft is dark', 'Your lab coat hangs from a rafter peg', 'The loft has one board that announces you', 'Out past the last house something calls twice']; // RV2 (T M3): coat, board, bird
     const by = Object.fromEntries(Object.keys(FORMS).map((f) => [f, week1(99980, f)]));
@@ -8247,8 +8088,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     assert(neu('cat').every((t, i) => A.sentencesOf(t)[0] === A.sentencesOf(neu('tiger')[i])[0] && A.sentencesOf(t)[0] === A.sentencesOf(neu('human')[i])[0]), `${T} (EVn-1): the folded first sentence names no form`);
     assert(!/"/.test(neu('cat').join(' ') + neu('tiger').join(' ')) && neu('cat').concat(neu('tiger')).every((t) => /\*[^*]+\*/.test(t)) && neu('human').every((t) => /"[^"]+"/.test(t) && !/\bsends\b/.test(t)) && !/\{yuki\}/.test(Object.values(by).flat().join(' ')), `${T} (EVn-1): the bond in italics for the cat and the great form, the woman aloud; every slot filled`);
     assert(/with one paw, and have gone round it ever since/.test(neu('tiger')[1]) && !/three times your weight/.test(Object.values(by).flat().join(' ')), `${T} (GW): the great form's board line is Claude's cut (the floor reports her elsewhere)`);
-    // the old calendar keeps the old three (its quiet key past three wraps to the first)
-    { const out = week1(99990, 'cat', null, 4); assert(out.every((t, i) => t.startsWith(W1[i % 3])), `${T} (EVn-1): the old calendar keeps the old three (${out.map((t) => t.slice(0, 20)).join(' | ')})`); }
     // weeks 2 and 3 untouched: their own three
     { const g = mk(99995, 'cat'); Object.assign(g.flags, { long: true, vday: 2, cal_night: 0 }); g.minutes = 30 * D + 22 * 60; noteDay(g, SCENES.village_night.dayKey(g)); assert(tx(g, 'village_night').startsWith("Mei Lin's mother closes the day"), `${T} (EVn-1): week 2 keeps its own three`); }
     // RV2 (owner pick 2026-11-20 18:19; the cold reviews T and C): the reviewer's and Claude's wording, the order coat, board, bird, and the test gaps
@@ -8267,13 +8106,13 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // TG-T5: the new camp texts carry no time word but the Ashen Hills' fifth's opening dusk; TG-T6: the wood's fourth shares no lead word with its hub
     { const newCamps = Object.entries(NEW).flatMap(([region, news]) => { const out = camp(99975 + region.length, region, region === 'dw' ? 4 : 5).map(([a]) => a.split('\n\n')[0]); return news.map(([i]) => out[i]); });
       assert(newCamps.length === 5 && newCamps.every((t) => !/\b(midnight|morning|tonight|evening|night|dawn|noon|late)\b/i.test(t) && !/\bdusk\b/i.test(t.replace(/^The wind drops at dusk/, ''))), `${T} RV2 (TG-T5): no time word in the new camps but the hills' opening dusk`);
-      const g = ensureBars(newGame(99977, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { bl_region: 'dw', bl_day: 3, bl_n: 2, drowned_done: true, mei_party: true, ya_party: true }); g.minutes = 72 * D + 17 * 60; goTo(g, SCENES, 'dw_hub'); const hub = sceneView(g, SCENES).text;
+      const g = ensureBars(newGame(99977, { closed: true })); Object.assign(g.flags, { bl_region: 'dw', bl_day: 3, bl_n: 2, drowned_done: true, mei_party: true, ya_party: true }); g.minutes = 72 * D + 17 * 60; goTo(g, SCENES, 'dw_hub'); const hub = sceneView(g, SCENES).text;
       const dw4 = newCamps[4];
       assert(/shallower/.test(hub) && /warmer/.test(hub) && !/shallow|warm/i.test(dw4) && dw4 === 'The raft you camp on has run aground on a bar of cinders, the one patch of ground the wood has not managed to drown. Mist stands on the water. Ya wades out into it, spear down and her stitched arm held clear, and stands listening toward the hollow behind you.', `${T} RV2 (T M1, TG-T6; the RV2 fault RT6): the wood's fourth camp shares no lead with its hub (shallower, warmer), minds Ya's stitched arm, and is the reviewed text exactly`); }
-    // TG-C1 (the cold review's C walker): the Blackroot walked with a player's taps, real fights, on each calendar: every camp text on its night
-    for (const [cal, want] of [[C.LONG_CAL, ['rr 1 0 0', 'rr 1 1 1', 'rr 1 2 2', 'rr 2 0 3', 'rr 2 1 4', 'dw 2 2 0', 'dw 3 0 1', 'dw 3 1 2', 'dw 3 2 3', 'ah 4 0 0', 'ah 4 1 1', 'ah 4 2 2', 'ah 5 0 3', 'ah 5 1 4']], [null, ['rr 1 0 0', 'dw 2 0 0', 'dw 3 0 1', 'ah 4 0 0']]]) {
+    // TG-C1 (the cold review's C walker): the Blackroot walked with a player's taps, real fights: every camp text on its night
+    for (const [cal, want] of [[C.LONG_CAL, ['rr 1 0 0', 'rr 1 1 1', 'rr 1 2 2', 'rr 2 0 3', 'rr 2 1 4', 'dw 2 2 0', 'dw 3 0 1', 'dw 3 1 2', 'dw 3 2 3', 'ah 4 0 0', 'ah 4 1 1', 'ah 4 2 2', 'ah 5 0 3', 'ah 5 1 4']]]) { // v0.11.260 (P28-A, OC2): the old calendar's walk went with its code
         const LISTS = { rr: ["You camp on the root's broad back", 'A buttress of bark', 'Nobody discusses where the fire goes', 'A lesser root joins the road', 'The road dips here'], dw: ['Camp is a raft', 'Another raft', 'The raft holds', 'The raft you camp on has run aground'], ah: ['You camp under a black ridge', 'Ash has drifted knee-deep', 'The hill is black glass', 'A bough of the dead tree', 'The wind drops at dusk'] };
-        const g = ensureBars(newGame(4242, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); Object.assign(g.flags, { long: true, ending: 'paid', vday: 3 }); g.james.realm = 7; g.yuki.realm = 7; g.yuki.form = 'cat'; g.minutes = C.calMinutes(g, 11, 6); goTo(g, SCENES, 'bl_start');
+        const g = ensureBars(newGame(4242, { closed: true })); Object.assign(g.flags, { long: true, ending: 'paid', vday: 3 }); g.james.realm = 7; g.yuki.realm = 7; g.yuki.form = 'cat'; g.minutes = C.calMinutes(g, 11, 6); goTo(g, SCENES, 'bl_start');
         const PRI = [/^Make camp/, /^Push on to the end/, /^Cross the mourning/, /^Climb to the pass/, /^Ya's gone/ /* v0.11.246 (P16-A, LG): the pass waits for her door */, /^Climb out of the water/, /^Get moving/, /^Another day here/, /^Drag yourself/, /^Sleep/, /^Go back to sleep/, /^Watch them pass/, /^End it in one move/];
         const seen = []; let end = '';
         for (let step = 0; step < 3000; step++) {
@@ -8301,7 +8140,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const { FS8, FS9 } = await import('../js/story/act1_fallout.js');
     const D = 1440;
     const week = (d0, flags, form = 'cat', n = 7, cal = C.LONG_CAL) => {
-        const g = ensureBars(newGame(39100 + d0, { closed: true, cal })); Object.assign(g.flags, flags); g.yuki.realm = 9; g.yuki.form = form; g.scene = 'fo_supper';
+        const g = ensureBars(newGame(39100 + d0, { closed: true })); Object.assign(g.flags, flags); g.yuki.realm = 9; g.yuki.form = form; g.scene = 'fo_supper';
         const out = []; for (let k = 0; k < n; k++) { g.minutes = (d0 - 1 + k) * D + 19 * 60; out.push(SCENES.fo_supper.text(g)); } return out;
     };
     const paras = (t) => t.split('\n\n');
@@ -8312,9 +8151,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     }
     { const l = week(51, { ya_met: true }); assert(new Set(l.slice(0, 7)).size === 7 && /^The honeycomb lands on the table/.test(l[6]) /* v0.11.243 (P15-B, SN7) */ && l.slice(3, 6).join('|') === FS9.map((x) => x.t).join('|') && l.every((t) => paras(t).length >= 2), `${T}: story day 9's week with Ya: the old three, then FS9's texts`); }
     { const l = week(51, {}); assert(new Set(l.slice(0, 6)).size === 6 && l.slice(3, 6).join('|') === FS9.map((x) => x.away).join('|') && l.every((t) => !/\bYa\b/.test(t)), `${T}: story day 9's week without Ya: her lines out (${l.slice(3).join(' | ')})`); }
-    // the old calendar keeps its one supper a story day: the old first text (RV1, the cold review's C L1, TG-C2: a game built without the long calendar)
-    { const g = ensureBars(newGame(39108, { closed: true, cal: 0 /* OC2 */ })); g.yuki.realm = 9; g.scene = 'fo_supper'; g.minutes = 7 * D + 19 * 60;
-      assert(g.cal !== C.LONG_CAL && /^Nobody talks at supper/.test(SCENES.fo_supper.text(g)), `${T}: the old calendar's day 8 supper is the old text (cal ${g.cal})`); }
     // each form draws its own passage (cat, great, woman), the shared text round it
     for (const [i, form] of ['cat', 'tiger', 'human'].entries()) { const l = week(44, {}, form); assert(FS8.every((x, k) => l[3 + k] === x.t.replace('{yuki}', x.y[i])), `${T}: story day 8's texts 4–6 in the ${form} form carry its own Yuki passage`); }
     // Yuki by form in FS8: the bond in italics for the cat and the great form, aloud for the woman; the fold's first paragraph names no form
@@ -8340,7 +8176,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       assert(!/radish|rice chest/.test(all) && /grain chest/.test(FS8[1].y[0]) && /pickled greens/.test(FS8[1].y[2]), `${T} RV1 (T L6): the table's food as the meal line has it`);
       assert(FS8[2].t.includes('Then she sees whose jacket it is.') && FS9[1].t.includes("This one was a man's. He started it.") && /forty-odd teeth/.test(FS9[1].t), `${T} RV1 (TG-T4): the new canon words pinned (the husband's jacket, the man's tooth)`); }
     // TG-T1, TG-C1: one game walked through story days 9 and 10 with Ya: day 10 goes on with day 9's sequence (7–13), FS9 with Ya on Days 60–62
-    { const g = ensureBars(newGame(39151, { closed: true, cal: C.LONG_CAL })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper';
+    { const g = ensureBars(newGame(39151, { closed: true })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper';
       const out = []; for (let d = 51; d <= 64; d++) { g.minutes = (d - 1) * D + 19 * 60; out.push(SCENES.fo_supper.text(g)); }
       const { FS10 } = await import('../js/story/act1_fallout.js');
       assert(out.slice(3, 6).join('|') === FS9.map((x) => x.t).join('|') && out.slice(7, 13).join('|') === FS10.map((x) => x.t).join('|'), `${T} RV1 (TG-T1, TG-C1; v0.11.241 P13-A FS10): FS9 with Ya on Days 54–56, story day 10 its own six on Days 58–63 (${out.map((t) => t.slice(0, 12)).join(' | ')})`); }
@@ -8359,11 +8195,11 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const paras = (t) => t.split('\n\n');
     const sw = (x) => (x.y ? x.t.replace('{yuki}', x.y[0]) : x.t); // the cat form
     const fo = (d0, flags, n = 7, cal = C.LONG_CAL, seed = 41300) => {
-        const g = ensureBars(newGame(seed + d0, { closed: true, cal })); Object.assign(g.flags, flags); g.yuki.realm = 9; g.scene = 'fo_supper';
+        const g = ensureBars(newGame(seed + d0, { closed: true })); Object.assign(g.flags, flags); g.yuki.realm = 9; g.scene = 'fo_supper';
         const out = []; for (let k = 0; k < n; k++) { g.minutes = (d0 - 1 + k) * D + 19 * 60; out.push(SCENES.fo_supper.text(g)); } return out;
     };
     const vs = (vday, form = 'cat', n = 7, d0 = 36, cal = C.LONG_CAL) => {
-        const g = ensureBars(newGame(41400 + vday, { closed: true, cal })); Object.assign(g.flags, { long: true, vday }); g.yuki.realm = 9; g.yuki.form = form; g.scene = 'supper';
+        const g = ensureBars(newGame(41400 + vday, { closed: true })); Object.assign(g.flags, { long: true, vday }); g.yuki.realm = 9; g.yuki.form = form; g.scene = 'supper';
         const out = []; for (let k = 0; k < n; k++) { g.minutes = (d0 - 1 + k) * D + 19 * 60; out.push(SCENES.supper.text(g)); } return out;
     };
     // FS10: story day 10's week (Days 58–63) its own six, in order; the line without Ya when she is not met; a seventh round again
@@ -8371,9 +8207,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     { const l = fo(58, {}, 6); assert(l.join('|') === FS10.map((x) => x.away).join('|') && l.every((t) => !/\bYa\b/.test(t)), `${T} (FS10): without Ya, the six lines without her`); }
     // story day 9 keeps its own sequence (FS9 on its nights 4–6), day 10 does not run on with it
     { const l = fo(51, { ya_met: true }, 6); assert(l.slice(3).join('|') === FS9.map((x) => x.t).join('|') && !l.some((t) => FS10.some((x) => x.t === t)), `${T} (FS10): story day 9 unchanged`); }
-    // the old calendar: no story-day-10 sequence (a day-10 supper, if one ever showed, reads fo_supper:9 as before)
-    { const g = ensureBars(newGame(41390, { closed: true, cal: 0 /* OC2 */ })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper'; g.minutes = 9 * D + 19 * 60;
-      const t = SCENES.fo_supper.text(g); assert(g.cal !== C.LONG_CAL && !FS10.some((x) => x.t === t) && /^Ya comes to supper/.test(t), `${T} (FS10): the old calendar's day-10 supper keeps fo_supper:9 (${t.slice(0, 30)})`); }
     // FS10's shape: three or four paragraphs, the fold reminder its own and not an old opener, no loft, no Yuki form word, Ya's "scholar" once at most a text
     { const firsts = FS10.map((x) => paras(x.t)[0]);
       assert(FS10.every((x) => paras(x.t).length >= 3 && paras(x.t).length <= 4 && x.away.startsWith('Supper.') && x.away.split(/\s+/).length <= 16) && new Set(firsts).size === 6 && !firsts.some((f) => /^(Ya comes to supper|Ya is at the table|Supper|Tonight|There is|Nobody)\b/.test(f)), `${T} (FS10): six texts of three or four paragraphs, six own fold reminders, the lines without Ya short`);
@@ -8387,7 +8220,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
         assert(l.slice(0, 6).join('|') === want.join('|') && new Set(l.slice(0, 6)).size === 6 && l[6] === l[0] && !l.some((t) => t.includes('{yuki}')), `${T} (SPw3): week 3, ${form}: its six in order with its own Yuki passages, then round again (${l.map((t) => t.slice(0, 16)).join(' | ')})`);
     }
     { const l = vs(2, 'cat', 6, 29); assert(/^Another supper at Mei Lin's/.test(l[0]) && !l.some((t) => SW3.some((x) => t.startsWith(paras(x.t)[0]))), `${T} (SPw3): week 2 keeps supper:5 (${l[0].slice(0, 24)})`); }
-    { const l = vs(3, 'cat', 1, 36, 0); assert(!SW3.some((x) => l[0].startsWith(paras(x.t)[0])), `${T} (SPw3): no week-3 list off the long calendar (${l[0].slice(0, 24)})`); }
     // SW3's shape: Yuki's passages by form (italics, italics, aloud), her slot never in the fold's first paragraph, no form word in the shared text
     { assert(SW3.filter((x) => x.y).every((x) => !paras(x.t)[0].includes('{yuki}') && !/"/.test(x.y[0]) && !/"/.test(x.y[1]) && !/\*/.test(x.y[2]) && x.y.every((y) => /\bYuki\b/.test(y))) && SW3.every((x) => !/\b(paw|tail|ears|stove)\b/.test(x.t.replace('{yuki}', ''))), `${T} (SPw3): Yuki by form (the cat and the great form never aloud, the woman never in italics), not in a fold reminder`);
       const firsts = SW3.map((x) => paras(x.t)[0]);
@@ -8414,20 +8246,20 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
           && /^The travel cakes are out of their bundle again/.test(FS10[0].t) && !/have appeared/.test(all) && !/Since the banners went up|hung its banners/.test(all), `${T} RV1 (TG-T5): H1, M1, M2, M5 as the reviewer worded them`);
       assert(!/river fish|hide shirt|is letting it stand/.test(all) && FS10[3].t.includes('the neck of her patched jacket') && (FS10[3].t.match(/the collar/g) || []).length <= 2 /* C1 (CT): the lint's tic */ && FS10[4].t.includes('anything the guide has found under a log') && FS10.filter((x) => /pickles/.test(x.t)).length <= 2, `${T} RV1 (L2, L4): the river fish, the hide shirt and the second Yuki tag gone; pickles in two texts at most`);
       // TG-T6: the lines without Ya are never reached in play: story day 9's first morning offers only "Look." until Ya is met
-      { const g = ensureBars(newGame(41501, { closed: true, cal: C.LONG_CAL })); g.yuki.realm = 9; g.scene = 'fo_morning'; g.minutes = 50 * D + 6 * 60;
+      { const g = ensureBars(newGame(41501, { closed: true })); g.yuki.realm = 9; g.scene = 'fo_morning'; g.minutes = 50 * D + 6 * 60;
         const vis = (h) => SCENES.fo_morning.choices.filter((c) => !c.show || c.show(h)).map((c) => (typeof c.text === 'function' ? c.text(h) : c.text));
         assert(vis(g).join('|') === 'Look.', `${T} RV1 (TG-T6, L1): story day 9's morning without Ya offers only "Look." (${vis(g).join('|')})`); }
       // TG-C1: a v0.11.240 save in the middle of story day 10 (its records under fo_supper:9) or of week 3 (under supper:5) reads the new list from its first text
-      { const g = ensureBars(newGame(41510, { closed: true, cal: C.LONG_CAL })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper';
+      { const g = ensureBars(newGame(41510, { closed: true })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper';
         for (let d = 51; d <= 60; d++) { g.minutes = (d - 1) * D + 19 * 60; L.noteDay(g, 's:fo_supper:9'); }
         const out = []; for (let d = 61; d <= 63; d++) { g.minutes = (d - 1) * D + 19 * 60; out.push(SCENES.fo_supper.text(g)); }
         assert(out.join('|') === FS10.slice(0, 3).map((x) => x.t).join('|'), `${T} RV1 (TG-C1): an old save mid story day 10 reads FS10 from its first (${out.map((t) => t.slice(0, 14)).join(' | ')})`); }
-      { const g = ensureBars(newGame(41511, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { long: true, vday: 2 }); g.yuki.realm = 9; g.scene = 'supper';
+      { const g = ensureBars(newGame(41511, { closed: true })); Object.assign(g.flags, { long: true, vday: 2 }); g.yuki.realm = 9; g.scene = 'supper';
         for (let d = 29; d <= 38; d++) { g.minutes = (d - 1) * D + 19 * 60; L.noteDay(g, 's:supper:5'); }
         g.flags.vday = 3; const out = []; for (let d = 39; d <= 41; d++) { g.minutes = (d - 1) * D + 19 * 60; out.push(SCENES.supper.text(g)); }
         assert(out.join('|') === SW3.slice(0, 3).map(sw).join('|'), `${T} RV1 (TG-C1): an old save mid week 3 reads SW3 from its first (${out.map((t) => t.slice(0, 14)).join(' | ')})`); }
       // TG-C2 (C M1): a supper begun after midnight on story day 9's last day is still story day 9's (the day records from 05:00); the next evening, day 10's first
-      { const g = ensureBars(newGame(41512, { closed: true, cal: C.LONG_CAL })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper';
+      { const g = ensureBars(newGame(41512, { closed: true })); g.flags.ya_met = true; g.yuki.realm = 9; g.scene = 'fo_supper';
         g.minutes = 57 * D + 21; const t1 = SCENES.fo_supper.text(g);
         g.flags.fo_plan = true; g.minutes = 57 * D + 19 * 60; const t2 = SCENES.fo_supper.text(g);
         assert(!FS10.some((x) => x.t === t1) && t2 === FS10[0].t, `${T} RV1 (TG-C2, C M1): Day 57 after midnight no FS10 (${t1.slice(0, 20)}); Day 58 FS10's first (${t2.slice(0, 20)})`); }
@@ -8447,7 +8279,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const D = 1440;
     const FORMS = { cat: 0, tiger: 2, human: 7 };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
-    const mk = (seed, f = 'cat', cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
+    const mk = (seed, f = 'cat', cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
     const week = (seed, vday, f, n0 = 7) => { const g = mk(seed, f); const out = []; for (let n = 0; n < n0; n++) { Object.assign(g.flags, { long: true, vday, cal_night: n }); g.minutes = (30 + n) * D + 22 * 60; noteDay(g, SCENES.village_night.dayKey(g)); out.push(tx(g, 'village_night')); } return out; };
     const NEW = { 2: ["Through the boards comes Mei Lin's mother", 'A pinch, as Mei Lin measures it', 'In the next house a husband and wife'], 3: ['A pallet is dragged across the floor below', 'There is no wind, and the banners hang' /* v0.11.243 (P15-B, SF: RT) */, 'Nine threads of thought, and one has taken'] };
     // EVn-23: each week six in order (the three before, then the new three), a seventh round again; in every form, every slot filled
@@ -8465,10 +8297,8 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       assert(by.cat.every((t, i) => first(t) === first(by.tiger[i]) && first(t) === first(by.human[i]) && !/\b(small|paw|ears|tail|whiskers?|great)\b/i.test(first(t)) && !/^(Tonight|Someone|Rain|You)\b/.test(t)), `${T} (EVn-23): the folded first sentence the same in every form, no form word, no barred opener`);
       const all = Object.values(by).flat().join(' ');
       assert(!/\b(tomorrow|midnight|dawn|last night|the last)\b/i.test(all) && !/\b(rafters?|beams?|herbs? (hang|dry)|ginseng|mint)\b/i.test(all) && !/Mei Lin's room/.test(all), `${T} (EVn-23): no time word that breaks, no loft furniture, D1's room fix`); }
-    // week 1 and the old calendar untouched
-    { const w1 = week(42201, 1, 'cat', 6); assert(!w1.some((t) => Object.values(NEW).flat().some((o) => t.startsWith(o))), `${T} (EVn-23): week 1 reads none of them`);
-      const g = mk(42202, 'cat', 0); Object.assign(g.flags, { vday: 2 }); g.minutes = 5 * D + 22 * 60; const t = tx(g, 'village_night');
-      assert(!Object.values(NEW).flat().some((o) => t.startsWith(o)), `${T} (EVn-23): the old calendar reads none of them (${t.slice(0, 24)})`); }
+    // week 1 untouched
+    { const w1 = week(42201, 1, 'cat', 6); assert(!w1.some((t) => Object.values(NEW).flat().some((o) => t.startsWith(o))), `${T} (EVn-23): week 1 reads none of them`); }
     // NF6: the forest night fifteen, in order, with and without the fire, by form; the new six on nights 10–15
     const FN = [['From the rise the dark seems to come up, not down.', 'The fire\'s smoke goes sideways', 'With nothing burning, your eyes start inventing'], ['At nightfall the forest changes shifts' /* v0.11.243 (P15-B, SF: RT) */, 'The fire sits in its ring of stones', 'The ring of stones is cold'], ['Quiet has a sound here, and it is the water.', 'The fire burns small and steady', 'With no fire to watch, you watch the dark'], ['After the sky goes, the grey moss keeps a little light', 'The fire drowns the moss-light', 'With no fire to drown it'], ['Coming up from the water as the dark drops', 'You put your bare feet nearer the fire', 'With no fire lit, the cold finds your bare feet'] /* v0.11.243 (P15-B, SF: RT) */, ['Mist lies along the stream when the dark has come', 'The fire makes a kettle', 'Without a fire you have nothing to tend']];
     const forest = (f, fire, seed) => { const g = mk(seed, f); g.flags.forest_day = 3; if (fire) g.flags.fire = true; const out = []; for (let d = 0; d < 22; d++) { /* v0.11.246 (P16-A, NF6): twenty-one */ g.minutes = (4 + d - 1) * D + 21 * 60; noteDay(g, 'night'); out.push(tx(g, 'night')); } return out; };
@@ -8480,8 +8310,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     }
     { const out = forest('cat', true, 42390).slice(9, 15); const ps = out.map((t) => t.split('\n\n'));
       assert(ps.every((p) => !/^(Night|The night|The dark|Dusk|Tonight|You)\b/.test(p[0]) && !/\b(small|paw|ears|tail|great)\b/i.test(p[0] + ' ' + p[2])) && !/\b(tomorrow|midnight|dawn|first night|last night|tenth|a week)\b/i.test(out.join(' ')) && !/\b(Mei Lin|Ya|village|Ashfall)\b/.test(out.join(' ')), `${T} (NF6): the fold's paragraph its own, no form word outside Yuki's line, no time word that breaks, nobody met yet`); }
-    // the old calendar's forest: three nights, nothing from the new six
-    { const g = mk(42399, 'cat', 0); g.flags.forest_day = 1; const out = []; for (let d = 0; d < 3; d++) { g.minutes = d * D + 21 * 60; noteDay(g, 'night'); out.push(tx(g, 'night')); } assert(!out.some((t) => FN.some(([p1]) => t.startsWith(p1))), `${T} (NF6): the old calendar's three nights read none of the new six`); }
     // D1: Claude's cuts in, the drafts' phrases out
     { const src = (await import('node:fs')).readFileSync(new URL('../js/story/ashfall.js', import.meta.url), 'utf8') + (await import('node:fs')).readFileSync(new URL('../js/story/prologue.js', import.meta.url), 'utf8');
       const IN = ['from the stretch of boards she has claimed', 'tucked under your arm', 'her back set against yours', 'Yuki settles on your knee and stares', 'A thread peels off for the watch', 'Out on its round, the watch-thread counts the callers in' /* v0.11.243 (P15-B, SF: RT): its D1 cut reworded */, 'A single thread keeps the watch', 'Yuki leans on your arm, combing', 'the room where the women sleep', 'facing the ladder, her back to you', 'tucked against your elbow', 'Without a fire you have nothing to tend', "comes Mei Lin's mother, measuring beans", 'since before you knew there were nine' /* C-a (RW) */];
@@ -8497,7 +8325,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const D = 1440;
     const FORMS = { cat: 0, tiger: 2, human: 7 };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
-    const mk = (seed, f = 'cat') => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
+    const mk = (seed, f = 'cat') => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
     const pre = (a) => { let i = 0; while (a.every((s) => s[i] !== undefined && s[i] === a[0][i])) i++; return a[0].slice(0, i); };
     const suf = (a) => { const r = a.map((s) => [...s].reverse().join('')); return [...pre(r)].reverse().join(''); };
     const split3 = (by) => { const p = pre(by), s = suf(by); return { shared: p + ' ' + s, branch: by.map((t) => t.slice(p.length, t.length - s.length)) }; };
@@ -8553,7 +8381,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const { MORNING_W1 } = await import('../js/story/wilds.js');
     const A = await import('../js/story/again.js'); const C = await import('../js/core/calendar.js');
     const D = 1440; const FORMS = { cat: 0, tiger: 2, human: 7 };
-    const mk = (seed, f = 'cat', cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
+    const mk = (seed, f = 'cat', cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; return g; };
     const run = (g, id, d0, n, hh, flags, key) => { const out = []; for (let k = 0; k < n; k++) { Object.assign(g.flags, typeof flags === 'function' ? flags(k) : flags); g.minutes = (d0 - 1 + k) * D + hh * 60; g.scene = id; if (key) noteDay(g, key); out.push(SCENES[id].text(g)); } return out; };
     const paras = (t) => t.split('\n\n');
     const DAYS = /\b(seventh|last (supper|night|evening)|a week|weeks|tomorrow|midnight|dawn|yesterday|tonight|this morning|last night's|(two|three|four|five|six|seven) (days|nights|evenings))\b/i; // RV1 (TG-T3, TG-C6): P14-A's words too
@@ -8576,15 +8404,9 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const all = JSON.stringify([FS7, SN7.supper4, SN7.supper5]) + run(mk(43340, 'human'), 'village_night', 22, 7, 22, (k) => ({ long: true, vday: 1, cal_night: k }), 'village_night:quiet')[6];
       assert(shared.every((t) => paras(t).length >= 2 && !firstOf(t).includes('{yuki}') && !/\b(small|paw|ears|tail|whisker)\b/.test(firstOf(t))) && !DAYS.test(all) && !/\b(beam|rafter|thatch)/i.test(all) && !/\bYa\b/.test(FS7.d8.t + SN7.supper4 + SN7.supper5) && FS7.d9.away.split(/(?<=\.)\s/).length >= 2,
           `${T} (SN7): the sevenths fold to a first paragraph of their own, name no form there, count no days, keep off the loft's beams; Ya only on story day 9`); }
-    // the old calendar unchanged: one evening a story day, the old first text
-    { const o = mk(43350, 'cat', null); o.flags.vday = 1; o.minutes = 3 * D + 19 * 60; const s4 = SCENES.supper.text(o); o.flags.vday = 2; o.minutes = 4 * D + 19 * 60; const s5 = SCENES.supper.text(o);
-      const o8 = mk(43351, 'cat', null); o8.minutes = 7 * D + 19 * 60; const f8 = SCENES.fo_supper.text(o8);
-      const q = mk(43352, 'cat', null); const qs = run(q, 'village_night', 4, 3, 22, { vday: 1 }, 'village_night:quiet');
-      assert(/two rooms, a herb loft, and a mother/.test(s4) && /^Second supper at Mei Lin's\./.test(s5) && /^Nobody talks at supper/.test(f8) && !qs.some((t) => /Bed in this house/.test(t)), `${T} (SN7): the old calendar's suppers and quiet nights as before`); }
-    // MW: the long calendar's first forest week its own morning; weeks 2 and 3 and the old calendar as before
+    // MW: the long calendar's first forest week its own morning; weeks 2 and 3 as before
     { const g = mk(43360); g.minutes = 1 * D + 6 * 60; g.scene = 'morning'; const t1 = SCENES.morning.text(g); g.flags.forest_day = 2; const t2 = SCENES.morning.text(g); g.flags.forest_day = 3; const t3 = SCENES.morning.text(g);
-      const o = mk(43361, 'cat', null); o.flags.forest_day = 2; const o2 = SCENES.morning.text(o); o.flags.forest_day = 3; const o3 = SCENES.morning.text(o);
-      assert(t1 === MORNING_W1 && /^Another morning in the forest/.test(t2) && /^The third week in the forest/.test(t3) && /^The second morning/.test(o2) && /^Day three in the forest/.test(o3), `${T} (MW): week 1 its own morning, weeks 2 and 3 and the old calendar unchanged`);
+      assert(t1 === MORNING_W1 && /^Another morning in the forest/.test(t2) && /^The third week in the forest/.test(t3), `${T} (MW): week 1 its own morning, weeks 2 and 3 unchanged`);
       assert(paras(MORNING_W1).length >= 2 && !/third week|circled|tracks|for nights|first (morning|time)|\b(day|week) (one|two|three)\b|\bpaw\b|\bears\b|\btail\b|dusk/i.test(MORNING_W1), `${T} (MW): the week-1 morning: no week-3 matter, no day count, no form word, no dusk`); }
     // MW in play: a new long-calendar game's first morning reads it (the night's "Leave a thread on watch" goes to the morning)
     { const g = mk(43362); goTo(g, SCENES, 'night'); const i = SCENES.night.choices.findIndex((c) => /^Leave a thread on watch/.test(c.text)); choose(g, SCENES, i);
@@ -8594,7 +8416,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
         const s = run(mk(43370 + (bruised ? 1 : 0)), 'herb_slopes', 29, 3, 9, { long: true, vday: 2, ...(bruised ? { mei_bruised: true } : {}) });
         assert(/^Mei Lin works the slope as a general/.test(s[0]) && /^On the upper terrace Mei Lin has you on your knees/.test(s[1]) && s[2] === s[0] && /Give me a foolish one\./.test(s[1]) && (bruised ? /thin pale line/.test(s[1]) && /scabbed over/.test(s[0]) : !/thin pale line|scabbed/.test(s.join(' '))), `${T} (HS): week 2's slopes, ${bruised ? 'bruised' : 'not bruised'}: the old text, the new, round (${s.map((t) => t.slice(0, 20)).join(' | ')})`);
     }
-    { const o = mk(43372, 'cat', null); const s = run(o, 'herb_slopes', 5, 2, 9, { vday: 2 }); assert(s.every((t) => /^Mei Lin works the slope as a general/.test(t)), `${T} (HS): the old calendar's slopes as before`); }
     // RT: forest 11 and 14, 3:5 reworded; their old phrases out
     { const forest = (f, fire, k) => { const g = mk(43380 + FORMS[f] + (fire ? 50 : 0), f); g.flags.forest_day = 3; if (fire) g.flags.fire = true; for (let d = 0; d <= k; d++) { g.minutes = (4 + d - 1) * D + 21 * 60; noteDay(g, 'night'); } return SCENES.night.text(g); };
       for (const f of Object.keys(FORMS)) for (const fire of [true, false]) {
@@ -8652,7 +8473,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const BR = await import('../js/story/act1_blackroot.js'); const P = await import('../js/story/prologue.js'); const C = await import('../js/core/calendar.js');
     const A = await import('../js/story/again.js'); const { realmName } = await import('../js/core/game.js');
     const D = 1440; const FORMS = { cat: 0, tiger: 2, human: 7 };
-    const mk = (seed, f = 'cat', cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal: cal || 0 /* OC4: 0 the old calendar (OC2), as before the default turned */ })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; Object.assign(g.flags, { mei_party: true, ya_party: true, ending: 'paid' }); return g; };
+    const mk = (seed, f = 'cat', cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; Object.assign(g.flags, { mei_party: true, ya_party: true, ending: 'paid' }); return g; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const days = (g, id, d0, n, hh, key = id, flags = {}) => { const out = []; for (let k = 0; k < n; k++) { Object.assign(g.flags, flags); g.minutes = (d0 - 1 + k) * D + hh * 60; noteDay(g, key); out.push(tx(g, id)); } return out; };
     const LEFT = /\$\{|\{yuki\}|\{meal\}|\{fire\}|undefined|\[object/;
@@ -8671,7 +8492,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
           assert(BR.yaAway(a) && /^The sky empties hawk by hawk/.test(h) && /\bYa\b/.test(h) && /^The hawks come down in ones and twos/.test(w) && !/\bYa\b|Mei Lin/.test(w) && ![h, w].some((t) => LEFT.test(t)) && (f === 'human' ? /"Adequate\."/.test(h) && !/\*/.test(h) : !/"[^"]*" she says/.test(h)), `${T} (BW): the hawks' third, ${f}: with Ya and away (no woman named), Yuki's line by form`);
           if (f === 'tiger') assert(![h, w].some((t) => /came for you|come for Yuki|short of Yuki|for Yuki, every one|Yuki they wanted/.test(t)), `${T} RV (T M1, TG-T1): the great root-kin is no prey in the hawks' third win`);
       } }
-    // AH: the first stay three, the second stay its own three (the long calendar); Ya away names no woman; the old calendar reads the old two
+    // AH: the first stay three, the second stay its own three (the long calendar); Ya away names no woman
     for (const f of Object.keys(FORMS)) {
         const g = mk(46040 + FORMS[f], f); Object.assign(g.flags, { bl_region: 'ah', bl_day: 4, ya_off_done: true });
         const out = []; for (let d = 0; d < 7; d++) { g.minutes = (C.calStart(g, 14) - 1 + d) * D + 9 * 60; if (d === 3) g.flags.bl_day = 5; noteDay(g, 'ah_hunt'); out.push(tx(g, 'ah_hunt')); }
@@ -8680,8 +8501,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
         const a = mk(46050 + FORMS[f], f); Object.assign(a.flags, { bl_region: 'ah', bl_day: 4 }); const aw = []; for (let d = 0; d < 6; d++) { a.minutes = (C.calStart(a, 14) - 1 + d) * D + 9 * 60; if (d === 3) a.flags.bl_day = 5; noteDay(a, 'ah_hunt'); aw.push(tx(a, 'ah_hunt')); }
         assert(BR.yaAway(a) && aw.slice(2).every((t) => !/\bYa\b|Mei Lin/.test(t) && !LEFT.test(t)) && /^A cinder hawk's shadow crosses the slope/.test(aw[2]) && /^Something ticks on the black glass/.test(aw[3]), `${T} (AH): ${f}: Ya away, the new four name no woman`);
     }
-    { const g = mk(46060, 'cat', null); Object.assign(g.flags, { bl_region: 'ah', bl_day: 4, ya_off_done: true }); const out = days(g, 'ah_hunt', 14, 2, 9);
-      assert(/^Since you crossed/.test(out[0]) && /^The cinder hawks are back/.test(out[1]), `${T} (AH): the old calendar's two Ashen Hills days read the old two`); }
     // NF6: nights 16–21: the fold's paragraph its own, no form word outside Yuki's line, no barred opener or time word, the fire line and Yuki's by form
     for (const f of Object.keys(FORMS)) for (const fire of [true, false]) {
         const g = mk(46100 + FORMS[f] + (fire ? 50 : 0), f); g.flags.forest_day = 3; if (fire) g.flags.fire = true; const out = [];
@@ -8782,7 +8601,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const A = await import('../js/story/again.js'); const C = await import('../js/core/calendar.js'); const O = await import('../js/story/oneoff.js'); const K = await import('../js/story/kitchen_texts.js');
     const BR = await import('../js/story/act1_blackroot.js'); const AF = await import('../js/story/ashfall.js');
     const D = 1440; const FORMS = { cat: 0, tiger: 2, human: 7 };
-    const mk = (seed, flags = {}, f = 'cat') => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; Object.assign(g.flags, flags); return g; };
+    const mk = (seed, flags = {}, f = 'cat') => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; Object.assign(g.flags, flags); return g; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const LEFT = /\$\{|\{yuki\}|undefined|\[object/;
     const NEW = []; // every new text rendered here, for the glasses ban (RV-A, TG-T3)
@@ -8795,8 +8614,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       // RV-A (TG-C5): the routing: week 3's evenings, how many reach supper (and so the roof): six, the list's length
       const g = mk(47004, { long: true, vday: 3 }); let sup = 0; for (let n = 0; n < C.LONG_CAL; n++) { g.flags.cal_night = n; if (AF.nextEvening(g) === 'supper') sup++; }
       assert(sup === 6 && new Set(w3).size === sup, `${T} RV-A (TG-C5): week 3 has ${sup} supper evenings, the roof's list ${new Set(w3).size}`);
-      const o = ensureBars(newGame(47003, { closed: true, cal: 0 /* OC2 */ })); o.flags.vday = 3; o.minutes = 5 * D + 21 * 60;
-      assert(!/^Mei Lin arrives with both hands/.test(tx(o, 'supper_roof')), `${T} (SR3): the old calendar never reads week 3's list`); }
+    }
     // TL4: the talks' beats 11–14 their own, warm and cold by her own affection (RV-A, TG-C1), Mei Lin's naming no Ya; the cycle again from 15; at the Ashen Hills as on the road (TG-C8)
     { const talk = (id, n, am, ay, seed, flags = { bl_region: 'rr', bl_day: 2 }) => { const g = mk(seed, { ...flags, mei_party: true, ya_party: true, mei_talks: n, ya_talks: n }); g.rel['Mei Lin'] = { f: 20, a: am }; g.rel.Ya = { f: 20, a: ay }; g.minutes = 70 * D + 10 * 60; return tx(g, id); };
       const close = (t) => t.split('\n\n').at(-1);
@@ -8827,11 +8645,10 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       } }
     // MW7, FH, FW, PC: the seventh walk, the far hunt five a quarry, the far win four, the Fallout cook four (the counts in their own blocks above)
     assert(K.POT_AGAIN.fo.length === 4 && /^Sort the mushrooms/.test(K.POT_AGAIN.fo[3].label) && /until the cooking is done, arms out/.test(K.POT_AGAIN.fo[3].text) && !/for the rest of the cooking/.test(K.POT_AGAIN.fo[3].text), `${T} (PC): the Fallout cook's 4th repeat, Claude's cut in`);
-    // HW: the herb slopes a third visit on the long calendar in week 3 only; two in week 2 and on the old calendar; Wen's lessons keep their cap (RV-A, TG-C3)
+    // HW: the herb slopes a third visit in week 3 only; two in week 2; Wen's lessons keep their cap (RV-A, TG-C3)
     { const g = mk(47030, { vday: 2 }); g.flags['oo:herb_slopes'] = 2; const w2 = O.stageOpen(g, 'herb_slopes'); g.flags.vday = 3; const w3 = O.stageOpen(g, 'herb_slopes'); g.flags['oo:herb_slopes'] = 3; const w3b = O.stageOpen(g, 'herb_slopes');
-      const o = ensureBars(newGame(47031, { closed: true, cal: 0 /* OC2 */ })); o.flags.vday = 3; o.flags['oo:herb_slopes'] = 2;
       const wn = mk(47032, { vday: 3, long: true }); wn.flags['oo:wen_lesson'] = 2;
-      assert(!w2 && w3 && !w3b && !O.stageOpen(o, 'herb_slopes') && !O.stageOpen(wn, 'wen_lesson') && O.stageMax(wn, 'wen_lesson') === 2, `${T} (HW; RV-A TG-C3): the slopes' third visit in week 3 only, on the long calendar only; Wen's lessons closed at two in week 3`);
+      assert(!w2 && w3 && !w3b && !O.stageOpen(wn, 'wen_lesson') && O.stageMax(wn, 'wen_lesson') === 2, `${T} (HW; RV-A TG-C3): the slopes' third visit in week 3 only; Wen's lessons closed at two in week 3`);
       // RV-A (C L2): the slopes' result lines three, so the third visit reads its own
       const rs = DAY_REPLIES['herb_slopes:0']; assert(rs.length === 3 && new Set(rs).size === 3 && /home with the herbs\.$/.test(rs[2]), `${T} RV-A (C L2): the slopes' result lines three, so the third visit reads its own`); }
     // SDm: the same-day fold remembers every text shown today: A, then B (a form changed), then A again folds; the cap of 8 (TG-C2); a redraw recorded; the record's day
@@ -8863,7 +8680,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const T = 'P18-A';
     const C = await import('../js/core/calendar.js'); const AF = await import('../js/story/ashfall.js'); const BR = await import('../js/story/act1_blackroot.js'); const M = await import('../js/story/music.js'); const TL = await import('../tools/lib/textlint.mjs');
     const D = 1440; const FORMS = { cat: 0, tiger: 2, human: 7 };
-    const mk = (seed, flags = {}, f = 'cat') => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; Object.assign(g.flags, flags); return g; };
+    const mk = (seed, flags = {}, f = 'cat') => { const g = ensureBars(newGame(seed, { closed: true })); g.yuki.form = f; g.yuki.realm = FORMS[f]; g.james.realm = FORMS[f]; Object.assign(g.flags, flags); return g; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const LEFT = /\$\{|\{yuki\}|undefined|\[object/;
     const NEW = [];
@@ -8879,9 +8696,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       }
       const last = mk(48010, { long: true, vday: 3, cal_night: 6 }); last.minutes = 42 * D + 7 * 60; const lt = C.tributeLeft(last);
       assert(lt <= 1 && /^The last day\. Tomorrow at sunrise, the collectors\./.test(tx(last, 'village_morning')) && !last.lines?.d?.['s:village_morning:3'], `${T} (VM): the last day keeps the old text alone, unrecorded (${lt})`);
-      // RV (C L1): a guard: on the old calendar `enter` raises vday before the text, so vday 1 never shows there; set by hand, the old text still
-      const o = ensureBars(newGame(48011, { closed: true, cal: 0 /* OC2 */ })); const old = []; for (const vd of [1, 2, 3]) for (let d = 0; d < 3; d++) { o.flags.vday = vd; o.minutes = (2 + d) * D + 7 * 60; old.push(tx(o, 'village_morning')); }
-      assert(old.slice(0, 3).every((t) => /^Morning in the herb loft/.test(t)) && old.slice(6).every((t) => /^The last day\./.test(t)), `${T} (VM): the old calendar reads only the old mornings`); }
+      }
     // RH: the bone-elk's 4th, then round
     { const g = mk(48020, { bl_region: 'rr' }); const out = []; for (let k = 0; k < 5; k++) { g.minutes = (64 + k) * D + 9 * 60; noteDay(g, 'rr_hunt'); out.push(tx(g, 'rr_hunt')); } NEW.push(out[3]);
       assert(new Set(out.slice(0, 4)).size === 4 && out[4] === out[0] && /^A bone-elk stands square on the Root Road/.test(out[3]) && /Mei Lin/.test(out[3]) && /\bYa\b/.test(out[3]) && !LEFT.test(out[3]), `${T} (RH): rr_hunt four texts by day, then round`); }
@@ -8960,7 +8775,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const C = await import('../js/core/calendar.js'); const G = await import('../js/core/game.js'); const R = await import('../js/story/romance.js'); const RT = await import('../js/story/romance_texts.js');
     const AC = await import('../js/story/act1_common.js'); const CO = await import('../js/core/coil.js'); const A = await import('../js/story/again.js');
     const D = 1440; const FORMS = { cat: 0, tiger: 2, human: 7 };
-    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, flags); return g; };
+    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, flags); return g; };
     const enter = (g, id) => { g.scene = id; return SCENES[id].enter ? SCENES[id].enter(g) : []; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const LEFT = /\$\{|\{yuki\}|undefined|\[object/;
@@ -8980,8 +8795,6 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       g.wg = { c: 'x', k: [] }; at(70, 'bl_camp', 'Ya', 0, 1); const ok1 = g.wg.c === `${g.coil.act || 0}:${g.coil.n || 1}` && !Array.isArray(g.wg.k);
       g.wg = 'junk'; at(71, 'bl_camp', 'Ya', 0, 1); assert(ok1 && typeof g.wg === 'object' && G.coilSnap(g).wg === undefined, `${T} (GT1): a broken record replaced; the snapshot has none`);
       g.coil.n += 1; const yb = g.rel.Ya.a; at(71, 'bl_camp', 'Ya', 0, 1); assert(g.rel.Ya.a - yb === 1, `${T} (GT1): a new Coil starts a new record`); }
-    { const o = mk(49002, {}, 0); o.coil.best = { 'Mei Lin': { f: -999, a: -999 } }; for (let d = 2; d <= 4; d++) { o.minutes = (d - 1) * D + 20 * 60; o.scene = 'mei_walk'; G.bumpRel(o, 'Mei Lin', 0, 5); }
-      assert(o.rel['Mei Lin'].a === 15 && o.wg === undefined, `${T} (GT1): the old calendar counts every day, no record`); }
     // TB: the tiers in story order, once a Coil, on the visit that set them (a redraw keeps it; the next visit has none)
     { const g = mk(49010, { long: true, vday: 2, cal_night: 1 }); g.rel['Mei Lin'] = { f: 50, a: 80 };
       g.minutes = 29 * D + 18 * 60; enter(g, 'supper'); const s1 = tx(g, 'supper'), s1b = tx(g, 'supper');
@@ -9098,14 +8911,14 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const C = await import('../js/core/calendar.js'); const G = await import('../js/core/game.js'); const R = await import('../js/story/romance.js'); const RT = await import('../js/story/romance_texts.js');
     const Wk = await import('../js/core/week.js'); const A = await import('../js/story/again.js'); const CO = await import('../js/core/coil.js');
     const D = 1440;
-    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, flags); return g; };
+    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, flags); return g; };
     const enter = (g, id) => { g.scene = id; return SCENES[id].enter ? SCENES[id].enter(g) : []; };
     const tx = (g, id) => { g.scene = id; const s = SCENES[id]; return typeof s.text === 'function' ? s.text(g) : s.text; };
     const LEFT = /\$\{|\{yuki\}|undefined|\[object/;
     // WE: the plan stops for the story-week's first evening only; the others take the quiet way, said in the day's lines
     Wk.WEEK_EVE.on = true;
     try {
-        const at = (hub, sd, seed) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; g.flags.palisade = 1; g.flags.wolf = 'driven'; return g; };
+        const at = (hub, sd, seed) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60); g.flags.ya_met = true; g.flags.elder = true; g.flags.palisade = 1; g.flags.wolf = 'driven'; return g; };
         const walk = (g, hub) => { const ev = [], lines = []; const sd0 = C.storyDay(g); for (let k = 0; k < 300; k++) { if (C.storyDay(g) !== sd0 || g.combat) break; let r = null; if (g.scene === hub && Wk.planHere(g)) { r = Wk.runWeek(g, SCENES); for (const d of r.days) lines.push(...d.lines); if (r.stop === 'evening') ev.push(`${Math.floor(((g.minutes || 0) - 240) / D)}:${g.scene}`); if (r.stop === 'week') break; } const v = sceneView(g, SCENES); if (v.end) break; const o = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!o.length || (g.scene === hub && !r)) break; Wk.storyTap(g, SCENES, o[0].index); Wk.afterStory(g, SCENES); } return { ev, lines }; };
         for (const [hub, sd, seed] of [['ashfall', 6, 99701], ['fo_ashfall', 10, 99702], ['wilds', 2, 99703]]) { // fo 9's week: Ya's manners every evening (no quiet way: it stops, as an event)
             const vil = (g) => { if (hub === 'ashfall') Object.assign(g.flags, { long: true, vday: sd - 3, cal_night: 1 }); return g; };
@@ -9181,7 +8994,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // DS (C H2, T M3; TG-C2, TG-C4, TG-T3): a full week with its story night: the plan stops before it; the walked texts are said and noted for the fold; a due beat stops the plan
     Wk.WEEK_EVE.on = true;
     try {
-        const at = (hub, sd, seed, fl = {}) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60); Object.assign(g.flags, { elder: true }, fl); return g; };
+        const at = (hub, sd, seed, fl = {}) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, hub); g.minutes = (C.calStart(g, sd) - 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60); Object.assign(g.flags, { elder: true }, fl); return g; };
         const walk = (g, hub, maxDay) => { const stops = [], lines = []; for (let k = 0; k < 300; k++) { if (Math.floor(g.minutes / D) + 1 > maxDay || g.combat) break; let r = null; if (g.scene === hub && Wk.planHere(g)) { r = Wk.runWeek(g, SCENES); for (const d of r.days) lines.push(...d.lines); stops.push(`${r.stop}@${g.scene}`); if (r.stop === 'week') break; } const v = sceneView(g, SCENES); if (v.end) break; const o = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)); if (!o.length || (g.scene === hub && !r)) break; Wk.storyTap(g, SCENES, o[0].index); Wk.afterStory(g, SCENES); } return { stops, lines }; };
         { const g = at('wilds', 2, 99750); Wk.planEnsure(g); const w = walk(g, 'wilds', C.calEnd(g, 2) + 1);
           assert(!w.stops.some((x) => /@night_event|@night_attack/.test(x)) && w.stops.filter((x) => x === 'evening@night').length >= 2, `${T} RV (DS, TG-C2): the forest's week: the plan stops at the story night's evening, never walks into its event (${w.stops.join(' ')})`); }
@@ -9193,15 +9006,14 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
           g.minutes = (C.calStart(g, 5) - 1) * D + 17 * 60; goTo(g, SCENES, 'supper'); const at2 = g.flags.tb_mei30; const p = Wk.planHere(g) || g.tasks.plan; const ways = sceneView(g, SCENES).choices.filter((c) => !c.disabled && c.index < 1000);
           const qi = Wk.weekEveQuiet(g, SCENES, p, ways); const safe = qi != null ? Wk.quietSafe(g, SCENES, 'ashfall', qi) : null;
           assert(at2 > 0 && qi != null && safe === false, `${T} RV (DS, TG-T3): a supper showing a tier beat is never walked past (${at2}, ${qi}, ${safe})`); }
-        // TG-C3 (F4): the old calendar, a second evening too; TG-C7 (FC6): no evening line off the evening hubs; TG-T4: the report line
-        { const o = mk(99753, {}, 0); o.scene = 'supper'; const ways = [{ index: 2, label: 'Go up to the loft early. Tomorrow will want everything you have.' }, { index: 0, label: 'Climb out onto the roof with Mei Lin and watch the stars come out.' }]; const pp = {}; const a = Wk.weekEveQuiet(o, SCENES, pp, ways); if (pp.we) pp.we.d = -5; const b = Wk.weekEveQuiet(o, SCENES, pp, ways);
-          const lf = at('lf_hub', 2, 99754); Wk.planEnsure(lf);
-          assert(a === null && b === null && !Wk.planNotes(lf, SCENES).eve && Wk.QUIET_LINE === 'The plan takes the quiet way: ', `${T} RV (TG-C3, TG-C7, TG-T4): the old calendar never; no evening line on the Long Forest; the report line's wording`); }
+        // TG-C7 (FC6): no evening line off the evening hubs; TG-T4: the report line (v0.11.260, OC2: TG-C3's old-calendar evening went with its code)
+        { const lf = at('lf_hub', 2, 99754); Wk.planEnsure(lf);
+          assert(!Wk.planNotes(lf, SCENES).eve && Wk.QUIET_LINE === 'The plan takes the quiet way: ', `${T} RV (TG-C3, TG-C7, TG-T4): no evening line on the Long Forest; the report line's wording`); }
     } finally { Wk.WEEK_EVE.on = false; }
     // the review's missed faults (F6, F24, F26, FC3, FC4) and YM-A (the owner 23:05: YM-f)
     Wk.WEEK_EVE.on = true;
     try {
-        const vil = (seed, fl = {}) => { const g = ensureBars(newGame(seed, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'ashfall'); Object.assign(g.flags, { long: true, vday: 2, cal_night: 1, elder: true }, fl); g.minutes = (C.calStart(g, 5) - 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60); return g; };
+        const vil = (seed, fl = {}) => { const g = ensureBars(newGame(seed, { closed: true })); goTo(g, SCENES, 'ashfall'); Object.assign(g.flags, { long: true, vday: 2, cal_night: 1, elder: true }, fl); g.minutes = (C.calStart(g, 5) - 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60); return g; };
         // F6: the walk stops at a screen with a real choice; FC3: a walked night screen's text is said
         { const g = vil(99770); g.minutes = (C.calStart(g, 5) + 1) * D + 19 * 60; goTo(g, SCENES, 'supper'); const said = []; Wk.walkQuiet(g, SCENES, 'ashfall', (l) => said.push(...l));
           const h = vil(99771); h.minutes = (C.calStart(h, 5) + 1) * D + 21 * 60; goTo(h, SCENES, 'village_night'); const v = sceneView(h, SCENES); const one = v.choices.filter((c) => !c.disabled && c.index < 1000 && !/^(Yuki: change form|Story Mode only)/.test(c.label)).length === 1; const said2 = []; Wk.walkQuiet(h, SCENES, 'ashfall', (l) => said2.push(...l));
@@ -9220,12 +9032,12 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
         { const g = vil(99782, { cal_night: 6 }); g.minutes = (C.calEnd(g, 5) - 1) * D + 21 * 60; goTo(g, SCENES, 'village_night'); const n = sceneView(g, SCENES).choices.filter((c) => !c.disabled && c.index < 1000).length; const said = []; const ok = Wk.walkQuiet(g, SCENES, 'ashfall', (l) => said.push(...l));
           assert(n >= 2 && ok === true && g.scene === 'village_night' && !g.combat && !said.length, `${T} RV (F6, TG-C2): the arson night's choice stays the player's (${n}, ${g.scene})`); }
         // F29: the repeated answer is taken only when its night is safe (a Ya beat due at the Fallout's night: the plan stops)
-        { const run = (a) => { const g = ensureBars(newGame(99783, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); Object.assign(g.flags, { ya_met: true, palisade: 1, wolf: 'driven', elder: true }); g.rel.Ya = { f: 40, a }; g.minutes = (C.calStart(g, 9) + 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60);
+        { const run = (a) => { const g = ensureBars(newGame(99783, { closed: true })); goTo(g, SCENES, 'fo_ashfall'); Object.assign(g.flags, { ya_met: true, palisade: 1, wolf: 'driven', elder: true }); g.rel.Ya = { f: 40, a }; g.minutes = (C.calStart(g, 9) + 1) * D + 7 * 60; g.james.satiety = 100; G.addItem(g, 'smoked_meat', 60);
             Wk.planEnsure(g); g.tasks.evc = { fo_supper: 1 }; g.tasks.evd = { fo_supper: 9 }; let r; const lines = []; for (let k = 0; k < 5; k++) { r = Wk.runWeek(g, SCENES); for (const d of r.days) lines.push(...d.lines); if (r.stop !== 'read') break; } return { r, g, again: lines.filter((l) => String(l).startsWith(Wk.AGAIN_LINE)).length }; };
           const hot = run(50), cold = run(10);
           assert(hot.r.stop === 'evening' && hot.g.scene === 'fo_supper' && hot.again === 0 && !hot.g.flags.tb_ya45 && cold.again >= 2, `${T} (YM-A, F29): the manners answered "As before" on quiet nights (${cold.again}); with Ya's beat due the plan stops at the supper (${hot.r.stop}, ${hot.g.scene})`); }
         // YM-A (YM-f): Ya's manners on the Fallout's day-9 week answered as on its first evening
-        { const g = ensureBars(newGame(99775, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'fo_ashfall'); Object.assign(g.flags, { ya_met: true, palisade: 1, wolf: 'driven' }); g.minutes = (C.calStart(g, 9) + 2) * D + 19 * 60; goTo(g, SCENES, 'fo_supper');
+        { const g = ensureBars(newGame(99775, { closed: true })); goTo(g, SCENES, 'fo_ashfall'); Object.assign(g.flags, { ya_met: true, palisade: 1, wolf: 'driven' }); g.minutes = (C.calStart(g, 9) + 2) * D + 19 * 60; goTo(g, SCENES, 'fo_supper');
           const ways = sceneView(g, SCENES).choices.filter((c) => !c.disabled && c.index < 1000); const p = { we: null };
           const none = Wk.weekEveAgain(g, SCENES, p, ways); Wk.noteEvening(g, 'fo_supper', 1); const again = Wk.weekEveAgain(g, SCENES, p, ways);
           g.tasks.evd.fo_supper = 8; const old = Wk.weekEveAgain(g, SCENES, p, ways); g.tasks.evd.fo_supper = 9;
@@ -9247,7 +9059,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
 {
     const T = 'P21-E';
     const C = await import('../js/core/calendar.js'); const G = await import('../js/core/game.js'); const P = await import('../js/story/prologue.js'); const CM = await import('../js/story/common.js');
-    const mk = (seed, flags = {}, cal = C.LONG_CAL, form = 'cat') => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, { forest_day: 3, vday: 3 }, flags); const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0; g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return ensureBars(g); };
+    const mk = (seed, flags = {}, cal = C.LONG_CAL, form = 'cat') => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, { forest_day: 3, vday: 3 }, flags); const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0; g.yuki.realm = realm; g.james.realm = realm; g.yuki.form = form; return ensureBars(g); };
     const lu = (g) => SCENES.tribute.choices[0].combat(g);
     // MT: the tribute offers the fight only; the bluff and the pin wait on the won screen
     { const g = mk(99901); goTo(g, SCENES, 'tribute'); g.james.qi = 99; const cs = sceneView(g, SCENES).choices.filter((c) => c.index < 1000);
@@ -9285,13 +9097,14 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       assert(cs.length === 1 && /^Bite the tail/.test(cs[0].label) && g.flags.ending === 'lost', `${T} (TK): collectors_lost: the bite only`);
       choose(g, SCENES, cs[0].index); const v = sceneView(g, SCENES);
       assert(g.scene === 'coil_end' && v.text.startsWith(TT.coil) && !v.choices.some((c) => /^Accept/.test(c.label)), `${T} (TK): the Coil screen's text, no Accept`); }
-    // GS, LH, RR: the fight's numbers (the long calendar's steps against the old calendar's)
-    { const old = lu(mk(99931, {}, 0)), g31 = mk(99931), sp = P.luSpread(structuredClone(g31)), lng = lu(g31); // v0.11.252 (TC): the spread drawn as the fight draws it
+    // GS, LH, RR: the fight's numbers (the long calendar's steps against the old calendar's, v0.11.259's code measured: Lu Han DC 6.5, attack 8, HP 14
+    // at every realm; v0.11.260, P28-A OC2: the old calendar's fight went with its code)
+    { const old = { enemies: [{ dc: 6.5, atk: 8, hp: 14 }, { name: 'Gao Feng', dc: 5.5, atk: 7, hp: 10 }] }, g31 = mk(99931), sp = P.luSpread(structuredClone(g31)), lng = lu(g31); // v0.11.252 (TC): the spread drawn as the fight draws it
       const L = CM.LONG_STEPS.collectors;
-      assert(lng.enemies[0].dc === old.enemies[0].dc + 0.5 * L && lng.enemies[0].atk === old.enemies[0].atk + 0.75 * L && lng.enemies[0].hp === Math.round((old.enemies[0].hp + sp + P.LU_HP_LONG) * (1 + 0.25 * L)) /* v0.11.256 (P26-A, LN): −0.5 before the step; realm 0 reads none */ && lng.enemies[1].name === 'Gao Feng' && lng.enemies[1].hp === old.enemies[1].hp, `${T} (LH): Lu Han +${L} steps on the long calendar only`);
+      assert(lng.enemies[0].dc === old.enemies[0].dc + 0.5 * L && lng.enemies[0].atk === old.enemies[0].atk + 0.75 * L && lng.enemies[0].hp === Math.round((old.enemies[0].hp + sp + P.LU_HP_LONG) * (1 + 0.25 * L)) /* v0.11.256 (P26-A, LN): −0.5 before the step; realm 0 reads none */ && lng.enemies[1].name === 'Gao Feng' && lng.enemies[1].hp === old.enemies[1].hp, `${T} (LH): Lu Han +${L} steps, Gao Feng unchanged`);
       for (const f of ['gao_broken', 'gao_turned']) { const e = lu(mk(99932, { [f]: true })).enemies[1]; assert(e.name === TT.disciple && e.dmg === 4 && e.dr === 1 && e.hp === Math.round(8 * 1.2) && e.dc === 5.5 && e.atk === 7, `${T} (GS): a disciple in Gao's place (${f}: ${JSON.stringify(e)})`); }
-      const r3 = mk(99933); r3.james.realm = 3; const e3 = lu(r3), r1 = mk(99933); r1.james.realm = 1; const e1 = lu(r1), o3 = mk(99933, {}, 0); o3.james.realm = 3; const eo = lu(o3);
-      assert(e3.enemies[0].dc === e1.enemies[0].dc + 2 * P.LU_READS && e3.enemies[0].atk === e1.enemies[0].atk + 2 * P.LU_READS && e3.tail.includes(TT.read) && !e1.tail.includes(TT.read) && !eo.tail.includes(TT.read) && eo.enemies[0].dc === old.enemies[0].dc, `${T} (RR): +${P.LU_READS} a realm above Foundation, its line; long calendar only`); }
+      const r3 = mk(99933); r3.james.realm = 3; const e3 = lu(r3), r1 = mk(99933); r1.james.realm = 1; const e1 = lu(r1);
+      assert(e3.enemies[0].dc === e1.enemies[0].dc + 2 * P.LU_READS && e3.enemies[0].atk === e1.enemies[0].atk + 2 * P.LU_READS && e3.tail.includes(TT.read) && !e1.tail.includes(TT.read), `${T} (RR): +${P.LU_READS} a realm above Foundation, its line`); }
     // NT: the net, by form, in the fight's opening; Yuki never strikes and gets no fight XP; the one-move finish shows it too
     for (const form of ['cat', 'tiger', 'human']) {
         const g = mk(99940, {}, C.LONG_CAL, form); const enc = lu(g); const net = { cat: TT.net.cat, tiger: TT.net.great, human: TT.net.woman }[form];
@@ -9308,10 +9121,10 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     { const g = mk(99943); g.stats.weapons = { blade: 35 }; assert(G.weaponMastery(g, 'blade') === 0, `${T} (WP): 35 rounds outside the tribute: nothing`);
       startCombat(g, lu(g)); assert(G.weaponMastery(g, 'blade') === 0.5 && G.WEAPON_EVERY_OF.collectors === 35, `${T} (WP): 35 rounds against Lu Han: +0.5`);
       g.combat = null; g.stats.weapons = { blade: 50 }; assert(G.weaponMastery(g, 'blade') === 0.5, `${T} (WP): 50 rounds elsewhere: +0.5`); }
-    // JK, BR: the jackals +3 steps, the boar +2.5, each foe, the long calendar only
-    { const jo = SCENES.night_attack.choices[0].combat(mk(99944, {}, 0)), jl = SCENES.night_attack.choices[0].combat(mk(99944));
+    // JK, BR: the jackals +3 steps, the boar +2.5, each foe (against v0.11.259's old-calendar fight, measured; OC2: it went with its code)
+    { const jo = { enemies: [{ dc: 4, atk: 6, hp: 9 }, { dc: 4, atk: 6, hp: 9 }, { dc: 4, atk: 5, hp: 7 }] }, jl = SCENES.night_attack.choices[0].combat(mk(99944));
       assert(jl.enemies.length === jo.enemies.length && jl.enemies.every((e, i) => e.dc === jo.enemies[i].dc + 1.5 && e.atk === jo.enemies[i].atk + 2.25 && e.hp === Math.round(jo.enemies[i].hp * 1.75)), `${T} (JK): every jackal +3 steps`);
-      const bo = SCENES.village_hunt.choices[0].combat(mk(99945, {}, 0)).enemies[0], bl = SCENES.village_hunt.choices[0].combat(mk(99945)).enemies[0];
+      const bo = { dc: 5, atk: 5, hp: 13 }, bl = SCENES.village_hunt.choices[0].combat(mk(99945)).enemies[0];
       assert(bl.dc === bo.dc + 1.25 && bl.atk === bo.atk + 1.875 && bl.hp === Math.round(bo.hp * 1.625), `${T} (BR): the boar +2.5 steps`); }
     // JR: the jackals' run opens with the spikes (Convergence Use T1 L3), not the hedge (T1 L8)
     { const run = SCENES.night_attack.choices.find((c) => /run for the water/.test(typeof c.text === 'function' ? c.text(mk(99946)) : c.text));
@@ -9323,7 +9136,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const T = 'P21-E RV-A';
     const C = await import('../js/core/calendar.js'); const G = await import('../js/core/game.js'); const P = await import('../js/story/prologue.js'); const CM = await import('../js/story/common.js');
     const R = await import('../js/story/act1_return.js'); const PW = await import('../js/story/power.js'); const F = await import('../js/core/faq.js'); const TX = await import('../js/story/tribute_texts.js');
-    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, { forest_day: 3, vday: 3 }, flags); return g; };
+    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, { forest_day: 3, vday: 3 }, flags); return g; };
     // F9 and the reviewer's missed faults: the numbers pinned, not read from their constants
     assert(JSON.stringify(CM.LONG_STEPS) === '{"collectors":1.5,"jackals":3,"boar":2.5}' && JSON.stringify(CM.LONG_STEP) === '{"hp":0.25,"dc":0.5,"atk":0.75}' && P.LU_READS === 1.75 && JSON.stringify(G.FOE_MEMORY_OF) === '{"collectors":{"step":1.5,"max":4.5}}' && G.WEAPON_EVERY_OF.collectors === 35 && JSON.stringify(P.LU_DISCIPLE) === '{"hp":8,"dc":4,"atk":5,"dmg":4,"dr":1}' && PW.ENEMY_REALM[TT.disciple] === 1, `${T} (F9, SM): P21-E's numbers pinned; the disciple at Foundation`);
     // TG-C4: the bluff and the pin as picked (DC, Qi, the bonus's sign)
@@ -9368,12 +9181,12 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
 {
     const T = 'P22-A';
     const C = await import('../js/core/calendar.js'); const G = await import('../js/core/game.js'); const P = await import('../js/story/prologue.js'); const TX = await import('../js/story/tribute_texts.js');
-    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, { forest_day: 3, vday: 3 }, flags); return g; };
+    const mk = (seed, flags = {}, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, { forest_day: 3, vday: 3 }, flags); return g; };
     const tribute = (g) => SCENES.tribute.choices.find((c) => c.combat).combat(g);
     // the numbers pinned
     assert(JSON.stringify(G.FOE_DEFENCE_OF) === '{"collectors":{"step":0.5,"max":1.5}}' && P.JR_DC_LONG === 3.5 && P.LU_SPREAD === 1, `${T}: FD +0.5 a meeting up to +1.5, JD 3.5, TC ±2.5`);
-    // FD: the defence memory, long calendar only, from the meetings before; the line names it; the defend check carries it
-    for (const [met, cal, want] of [[0, C.LONG_CAL, 0], [1, C.LONG_CAL, 0.5], [2, C.LONG_CAL, 1], [5, C.LONG_CAL, 1.5], [2, 0, 0]]) {
+    // FD: the defence memory, from the meetings before; the line names it; the defend check carries it
+    for (const [met, cal, want] of [[0, C.LONG_CAL, 0], [1, C.LONG_CAL, 0.5], [2, C.LONG_CAL, 1], [5, C.LONG_CAL, 1.5]]) { // v0.11.260 (P28-A, OC2): the old calendar's none went with its code
         const g = mk(99970, {}, cal); g.stats.foes = met ? { collectors: met } : {}; startCombat(g, tribute(g));
         const line = g.combat.log.find((l) => /You have fought this fight/.test(l)) || '';
         assert((g.combat.memDef || 0) === want && (want ? line.endsWith(`, +${want} to your defence.`) : !/defence/.test(line)) && (met ? line.length > 0 : line === ''), `${T} (FD): ${met} meetings, cal ${cal}: defence +${want} (${g.combat.memDef}; ${line})`);
@@ -9383,29 +9196,23 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const a = gu(1), b = gu(3); assert(a !== null && b !== null && Math.abs(b - a - 1) < 1e-9, `${T} (FD): the defend check up by the memory, 1 → 3 meetings before: +0.5 → +1.5 (${a} → ${b})`); }
     // JD: the run's DC by calendar
     { const run = SCENES.night_attack.choices.find((c) => c.to === 'jackals_fled'); const dc = (g) => (typeof run.check.dc === 'function' ? run.check.dc(g) : run.check.dc);
-      assert(dc(mk(99972)) === 3.5 && dc(mk(99972, {}, 0)) === 4 && G.noDiceDc(3.5) === 1.5, `${T} (JD): DC 3.5 long (no dice 1.5), 4 old`); }
-    // TC (RV-A: the d6): one of six from the save's random numbers, about even; the same on a reload; fresh as the stream moves; the old calendar flat
+      assert(dc(mk(99972)) === 3.5 && G.noDiceDc(3.5) === 1.5, `${T} (JD): DC 3.5 (no dice 1.5; the old calendar's 4 went with its code)`); }
+    // TC (RV-A: the d6): one of six from the save's random numbers, about even; the same on a reload; fresh as the stream moves
     { const seen = new Set(); let sum = 0, n = 0; const r = { rng: 12345 };
       for (let k = 0; k < 600; k++) { const v = P.luSpread(r); seen.add(v); sum += v; n++; }
       assert(seen.size === 6 && [...seen].every((v) => [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5].includes(v)) && Math.abs(sum / n) < 0.3, `${T} (TC): six values, about even (${[...seen]}, mean ${sum / n})`);
       const lu = (g) => tribute(g).enemies[0].hp;
       const a = mk(99973), b = deserialize(serialize(a)); const ha = lu(a), hb = lu(b);
       const hs = [], g = mk(99973); for (let k = 0; k < 8; k++) hs.push(lu(g));
-      const o = mk(99973, {}, 0), r0 = o.rng, ho = [lu(o), lu(o)];
-      assert(ha === hb && a.rng !== r0 && new Set(hs).size > 1 && ho[0] === ho[1] && o.rng === r0, `${T} (TC): the same on a reload (${ha} / ${hb}), fresh as the stream moves (${hs}), old calendar flat and no draw (${ho})`); }
+      const r0 = mk(99973).rng;
+      assert(ha === hb && a.rng !== r0 && new Set(hs).size > 1, `${T} (TC): the same on a reload (${ha} / ${hb}), fresh as the stream moves (${hs})`); }
     // PN (review C L2): the pin is a made thing: below its DC a failure (no thin haul), a crit makes one pin, not two
     for (const [tier, level, to, label] of [[1, 8, 'collectors_sent', 'fails'], [3, 1, 'tribute_paid', 'passes']]) {
         const g = mk(99974); g.james.skills['Convergence Use'] = { tier, level, xp: 0 }; g.james.qi = 999; goTo(g, SCENES, 'collectors_won');
         const pin = sceneView(g, SCENES).choices[2]; const before = g.inventory.hairpin || 0; choose(g, SCENES, 2);
         assert(g.scene === to && (g.inventory.hairpin || 0) === before && !/partly|A thin haul|double/.test(JSON.stringify(pin)) && !/A thin haul|double!/.test(JSON.stringify(g.log.slice(-3))) /* RV TG2 (L1): no "(double!)" on a pin */, `${T} (PN): CU T${tier} L${level} → ${g.scene}, hairpins ${before} → ${g.inventory.hairpin || 0}`);
     }
-    // RV-A (TG1): FV and PN are the long calendar's; the old calendar as before (+20 / +12; the pin's partial a thin haul)
-    for (const [i, scene, gain] of [[1, 'bluff_win', 20], [2, 'tribute_paid', 12]]) {
-        const g = mk(99978, {}, 0); g.james.gu = { tier: 9, level: 1, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 9, level: 1, xp: 0 }; g.james.qi = 999; g.inventory.hairpin = 0; goTo(g, SCENES, 'collectors_won');
-        const f0 = g.rel.Village?.f || 0; choose(g, SCENES, i); assert(g.scene === scene && (g.rel.Village?.f || 0) - f0 === gain, `${T} (RV-A TG1): old calendar ${scene} +${gain} (${(g.rel.Village?.f || 0) - f0})`);
-    }
-    { const g = mk(99979, {}, 0); g.james.skills['Convergence Use'] = { tier: 1, level: 8, xp: 0 }; g.james.qi = 999; goTo(g, SCENES, 'collectors_won'); choose(g, SCENES, 2);
-      assert(g.scene === 'tribute_paid' && /A thin haul/.test(JSON.stringify(g.log.slice(-3))), `${T} (RV-A TG1): old calendar, the pin's partial as before (${g.scene})`); }
+    // RV-A (TG1): FV and PN were the long calendar's against the old's (+20 / +12; the pin's partial a thin haul): the old went with its code in v0.11.260 (OC2)
     // BT (review T L6): Gao Feng's look back when he fought; the nameless disciple's figure in crimson otherwise; the failed bluff no longer calls it a trick
     for (const f of [{}, { gao_beaten: true }, { gao_broken: true }, { gao_turned: true }]) for (const lu of [1, 3]) {
         const t = TX.bluffWinText(mk(99975, { ...f, lu_won: lu })); const gao = !(f.gao_broken || f.gao_turned);
@@ -9434,7 +9241,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     {
         let found = null;
         for (let seed = 1; seed < 400 && !found; seed++) {
-            const g = ensureBars(newGame(93000 + seed, { closed: true, cal: C.LONG_CAL }));
+            const g = ensureBars(newGame(93000 + seed, { closed: true }));
             goTo(g, SCENES, 'wilds'); g.minutes = C.calMinutes(g, 1, 7); ensureBars(g);
             const door = TK.taskCards(g, SCENES).find((c) => c.kind === 'door' && c.status === 'open');
             if (!door) continue;
@@ -9446,7 +9253,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     }
     // RG-A: the one-move check builds the fight on a copy: drawing the tribute's screen leaves the save's random numbers alone
     {
-        const g = ensureBars(newGame(93500, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { forest_day: 3, vday: 3 }); goTo(g, SCENES, 'tribute');
+        const g = ensureBars(newGame(93500, { closed: true })); Object.assign(g.flags, { forest_day: 3, vday: 3 }); goTo(g, SCENES, 'tribute');
         const rng0 = g.rng, s0 = JSON.stringify({ ...g, lines: 0, log: 0 });
         sceneView(g, SCENES); sceneView(g, SCENES); sceneView(g, SCENES);
         assert(g.rng === rng0 && JSON.stringify({ ...g, lines: 0, log: 0 }) === s0, `${T} (RG-A): the tribute drawn three times, the save unchanged (rng ${rng0} → ${g.rng})`);
@@ -9462,7 +9269,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
         const fightScenes = Object.values(SCENES).filter((sc) => (sc.choices || []).some((c) => c.combat)).map((sc) => sc.id);
         let drawn = 0; const changed = [], forest = [];
         for (const id of fightScenes) {
-            const g = ensureBars(newGame(93600, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { forest_day: 3, vday: 3, lf_last: 'lf_heartless', lf_active: id.startsWith('lf_') });
+            const g = ensureBars(newGame(93600, { closed: true })); Object.assign(g.flags, { forest_day: 3, vday: 3, lf_last: 'lf_heartless', lf_active: id.startsWith('lf_') });
             g.scene = id; GW.wakeState(g); const s0 = JSON.stringify({ ...g, lines: 0, log: 0 }); // the waking-day record settled first (game.js wakeState: a draw starts it, by design)
             try { sceneView(g, SCENES); sceneView(g, SCENES); } catch { continue; }
             drawn++; if (id.startsWith('lf_')) forest.push(id);
@@ -9472,7 +9279,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     }
     // the review's TG4: the degree the drawn tribute offers (the one-move check) is the degree of the fight the tap builds
     {
-        const g = ensureBars(newGame(93700, { closed: true, cal: C.LONG_CAL })); Object.assign(g.flags, { forest_day: 3, vday: 3 }); goTo(g, SCENES, 'tribute');
+        const g = ensureBars(newGame(93700, { closed: true })); Object.assign(g.flags, { forest_day: 3, vday: 3 }); goTo(g, SCENES, 'tribute');
         const k = SCENES.tribute.choices.findIndex((c) => c.combat), d1 = PW.degreeForChoice(g, SCENES.tribute.choices[k].combat);
         const r = choose(g, SCENES, k), d2 = PW.prepare(g, r.combat(g)).degree;
         assert(d1 === d2, `${T} (RG-A, TG4): the offered degree is the started fight's (${d1}, ${d2})`);
@@ -9481,7 +9288,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     {
         let hit = null;
         for (let h = 12; h <= 23 && !hit; h++) for (const id of ['wild_explore:0', 'wild_explore:1']) {
-            const g = ensureBars(newGame(93800, { closed: true, cal: C.LONG_CAL })); goTo(g, SCENES, 'wilds'); g.minutes = C.calMinutes(g, 1, h); ensureBars(g);
+            const g = ensureBars(newGame(93800, { closed: true })); goTo(g, SCENES, 'wilds'); g.minutes = C.calMinutes(g, 1, h); ensureBars(g);
             if (!TK.taskOpen(g, SCENES, id)) continue;
             const oc = TK.taskOutcome(g, SCENES, id), m0 = g.minutes, r = TK.runTask(g, SCENES, id);
             if (r.skipped && !r.stopped) { hit = { id, h, oc, got: { minutes: g.minutes - m0, end: g.minutes, fed: g.james.satiety, hp: g.james.hp } }; break; }
@@ -9523,37 +9330,36 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const P = await import('../js/story/prologue.js'), Gm = await import('../js/core/game.js'), CM = await import('../js/story/common.js'), C = await import('../js/core/calendar.js');
     const BR = await import('../js/story/act1_blackroot.js');
     assert(P.LU_HP_LONG === -0.5 && P.LU_READ_HP === 0.5 && P.LU_READS === 1.75 && Gm.LONG_SAT_DIV === 4 && Gm.LONG_SAT_FROM === 3 && Gm.LONG_SAT_HIGH === 6, `${T}: the knobs −0.5, +0.5 a read, ÷4 below True Core and ÷6 from it`);
-    const mk = (seed, realm, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, { forest_day: 3, vday: 3 }); g.james.realm = realm; return ensureBars(g); };
+    const mk = (seed, realm, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, { forest_day: 3, vday: 3 }); g.james.realm = realm; return ensureBars(g); };
     const lu = (g) => SCENES.tribute.choices[0].combat(g).enemies[0];
-    // LN + LR: Lu Han's HP at realms 0–5 against the old calendar's (the same seed, the spread drawn as the fight draws it)
+    // LN + LR: Lu Han's HP at realms 0–5 against the old calendar's raw 14 (v0.11.259's code measured, every realm; OC2: it went with its code), the spread drawn as the fight draws it
     { const L = CM.LONG_STEPS.collectors; const rows = [];
-      for (const r of [0, 1, 2, 3, 4, 5]) { const g = mk(99951, r), o = mk(99951, r, 0), sp = P.luSpread(structuredClone(g)), reads = Math.max(0, r - 1);
-          const want = Math.round((lu(o).hp + sp - 0.5 + 0.5 * reads) * (1 + 0.25 * L)), got = lu(g).hp; rows.push(`${r}:${got}${got === want ? '' : `≠${want}`}`); }
+      for (const r of [0, 1, 2, 3, 4, 5]) { const g = mk(99951, r), sp = P.luSpread(structuredClone(g)), reads = Math.max(0, r - 1);
+          const want = Math.round((14 + sp - 0.5 + 0.5 * reads) * (1 + 0.25 * L)), got = lu(g).hp; rows.push(`${r}:${got}${got === want ? '' : `≠${want}`}`); }
       assert(rows.every((x) => !x.includes('≠')), `${T} (LN, LR): Lu Han's HP = (raw + spread − 0.5 + 0.5 × reads) × the long step, realms 0–5 (${rows.join(' ')})`);
       const hp = (r) => lu(mk(99952, r)).hp;
       assert(hp(0) === hp(1) && hp(3) >= hp(2) && hp(5) > hp(1), `${T} (LR): the same at Mortal Vessel and Foundation (no read), more from True Core (${[0, 1, 2, 3, 5].map(hp).join(' / ')})`);
-      const oh = [0, 1, 3, 5].map((r) => lu(mk(99953, r, 0)).hp);
-      assert(oh.every((v) => v === oh[0]), `${T}: the old calendar's Lu Han the same at every realm (${oh.join(' / ')})`); }
-    // RP-1.5: a sit's Saturation, the root's, by realm; the old calendar ×1
-    { const g = mk(99954, 0), o = mk(99954, 0, 0); const at = (x, r) => { x.james.realm = r; return [Gm.satDiv(x), Gm.sitGain(x), BR.rootGain(x)].join(':'); };
-      const got = [0, 2, 3, 4, 13].map((r) => at(g, r)).join(' '), old = [2, 3].map((r) => at(o, r)).join(' ');
-      assert(got === '4:2.5:3 4:1.1:3 6:0.5:2 6:0.3:2 6:0.1:2' && old === '1:4.4:12 1:3:12', `${T} (RP-1.5): ÷4 to Core Formation, ÷6 from True Core (a sit 0.5%, the root +2%), at least 0.1%; the old calendar ×1 (${got} | ${old})`); }
+    }
+    // RP-1.5: a sit's Saturation, the root's, by realm
+    { const g = mk(99954, 0); const at = (x, r) => { x.james.realm = r; return [Gm.satDiv(x), Gm.sitGain(x), BR.rootGain(x)].join(':'); };
+      const got = [0, 2, 3, 4, 13].map((r) => at(g, r)).join(' ');
+      assert(got === '4:2.5:3 4:1.1:3 6:0.5:2 6:0.3:2 6:0.1:2' , `${T} (RP-1.5): ÷4 to Core Formation, ÷6 from True Core (a sit 0.5%, the root +2%), at least 0.1% (${got})`); }
     // condense at True Core: the Saturation it adds is the ÷6 gain
     { const g = mk(99955, 3); g.james.qi = 50; g.james.saturation = 10; const r = Gm.condense(g);
       assert(r.ok && r.gain === 0.5 && g.james.saturation === 10.5, `${T} (RP-1.5): a True Core sit +0.5% (${r.gain}, ${g.james.saturation})`); }
-    // the cold review (Opus), TG1: LN and LR with the militia and the spears (the floor of 6 raw first, then the spread, LN and LR); TG2: realms 0–14
+    // the cold review (Opus), TG1: LN and LR with the militia and the spears (the floor of 6 raw first, then the spread, LN and LR; the raw 14 / 8 as v0.11.259's old calendar measured); TG2: realms 0–14
     { const L = CM.LONG_STEPS.collectors; const rows = [];
       for (const fl of [{}, { militia: 2, spears: true }]) for (let r = 0; r <= 14; r++) {
           const mkf = (cal) => { const g = mk(99961, r, cal); Object.assign(g.flags, fl); return g; };
-          const g = mkf(C.LONG_CAL), o = mkf(0), sp = P.luSpread(structuredClone(g)), reads = Math.max(0, r - 1);
-          const want = Math.round((lu(o).hp + sp - 0.5 + 0.5 * reads) * (1 + 0.25 * L)), got = lu(g).hp; if (got !== want) rows.push(`${fl.militia ? 'm' : ''}${r}:${got}≠${want}`); }
+          const g = mkf(C.LONG_CAL), sp = P.luSpread(structuredClone(g)), reads = Math.max(0, r - 1);
+          const want = Math.round(((fl.militia ? 8 : 14) + sp - 0.5 + 0.5 * reads) * (1 + 0.25 * L)), got = lu(g).hp; if (got !== want) rows.push(`${fl.militia ? 'm' : ''}${r}:${got}≠${want}`); }
       assert(rows.length === 0, `${T} (TG1, TG2): Lu Han's HP with and without the militia and spears, realms 0–14 (${rows.join(' ')})`); }
     // TG4: the root's scene at True Core on the long calendar says +2%
     { const g = mk(99962, 3); g.james.skills['Convergence Use'].tier = 5; goTo(g, SCENES, 'rr_roots'); const i = SCENES.rr_roots.choices.findIndex((x) => /^Cultivate on the root/.test(String(x.text)));
       const l = (choose(g, SCENES, i)?.lines || []).find((x) => /^The root takes your Qi/.test(x)) || '';
       assert(/Saturation \+2% \(/.test(l), `${T} (TG4): the root at True Core, +2% (${l.slice(-40)})`); }
     // TG5: a long-calendar state with no james
-    assert(Gm.satDiv({ cal: C.LONG_CAL }) === 4 && Gm.satDiv({ cal: C.LONG_CAL, james: null }) === 4 && Gm.satDiv({ cal: 0, james: { realm: 5 } }) === 1, `${T} (TG5): satDiv with no james: ÷4; the old calendar 1`);
+    assert(Gm.satDiv({}) === 4 && Gm.satDiv({ cal: C.LONG_CAL, james: null }) === 4 && Gm.satDiv({ james: { realm: 5 } }) === 6, `${T} (TG5): satDiv with no james: ÷4; any state at True Core and up ÷6 (OC2: no old-calendar ×1)`);
     // TG6: the boundary walked: a breakthrough Core Formation → True Core, and a Coil that starts at a kept True Core
     { const g = mk(99963, 2); g.james.primaries = 12; g.james.saturation = 100; const b = Gm.breakthrough(g); g.james.qi = 50; const r = Gm.condense(g);
       assert(b.ok && g.james.realm === 3 && r.gain === 0.5, `${T} (TG6): the first sit after breaking through to True Core +0.5% (${b.ok} ${g.james.realm} ${r.gain})`); }

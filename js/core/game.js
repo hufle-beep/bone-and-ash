@@ -12,7 +12,7 @@ import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
     realmBonus, realmStepLabel, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
 } from './formulas.js';
-import { calMinutes, calStart, calEnd, LONG_CAL, BL_SPAN, storyDay, longCal, storyDayOf, pinnedStoryDay } from './calendar.js'; // v0.11.222 (J2, SV): BL_SPAN, storyDay (blFill) // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
+import { calMinutes, calStart, calEnd, LONG_CAL, BL_SPAN, storyDay, storyDayOf, pinnedStoryDay } from './calendar.js'; // v0.11.222 (J2, SV): BL_SPAN, storyDay (blFill) // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
 
 export const K = 0.5;
 export const CONVERGENCE_MULTIPLIER = 1.25;
@@ -29,10 +29,9 @@ const node = (tier = 1, level = 1) => ({ tier, level, xp: 0 });
  * A fresh game: James (40, fresh doctorate), Yuki, an empty hammerspace.
  * closed (v0.9.6, task mode): every primary and collateral starts closed (0/12, 0/66); classic games start open.
  */
-/** v0.11.203 (owner pick T1, TS1): `cal: LONG_CAL` starts the long calendar (calendar.js). v0.11.259 (owner pick OC-A, OC4): the long
- *  calendar is the default (main.js always passed it since the flip; the tests and tools now get it too); `cal: 0` still builds an
- *  old-calendar state, for the load flip's tests only. */
-export function newGame(seed = Date.now(), { closed = false, cal = LONG_CAL } = {}) {
+/** v0.11.203 (owner pick T1, TS1): the long calendar (calendar.js). v0.11.260 (owner pick P28-A, OC2): every game on it, the `cal`
+ *  option gone with the old calendar's code (the load flip's tests build an old save by hand: no `cal`, old minutes). */
+export function newGame(seed = Date.now(), { closed = false } = {}) {
     const g = {
         v: SAVE_VERSION,
         seed: seed >>> 0,
@@ -78,7 +77,7 @@ export function newGame(seed = Date.now(), { closed = false, cal = LONG_CAL } = 
         combat: null,
         tasks: { queue: [], fam: {}, adapt: {}, yuki: { on: false, progress: 0 } },
     };
-    if (cal === LONG_CAL) { g.cal = LONG_CAL; g.calBl = BL_SPAN; } // v0.11.222 (owner pick J2, TS9: SV): the Blackroot's camps, BL_SPAN days a story day
+    g.cal = LONG_CAL; g.calBl = BL_SPAN; // v0.11.222 (owner pick J2, TS9: SV): the Blackroot's camps, BL_SPAN days a story day
     g.coil = makeCoil(g);
     g.seen = { [g.scene]: 1 }; // v0.11.35 (P1-a): the start scene, first read on Coil 1
     g.read = {}; // v0.11.133 (FP2): the paragraphs read (again.js noteRead); the screen records what it shows
@@ -252,10 +251,9 @@ export const coilMultNext = (g, chosen) => 1 + COIL_GROWTH * Math.max(0, (g?.coi
  */
 export const XP_RATE = 0.6;
 /**
- * v0.11.207 (owner pick SC2, roadmap-time.md S6): the long calendar's pace until the retune (TS7). On a long-calendar game only
- * (`g.cal === LONG_CAL`): a sit's Saturation ÷LONG_SAT_DIV (`sitGain`; ÷LONG_SAT_HIGH from True Core since v0.11.256, P26-A), a meridian channel's hours ×LONG_MER_MULT (story/meridians.js
- * `need`), every XP award ×LONG_XP after the Coil bonus and XP_RATE (`awardXp`, Yuki's fights). The old calendar and every old save:
- * ×1, unchanged. Measured (the models, 100 games each, Careful / Sociable / Completionist / Cultivator): the prologue on mean Coil
+ * v0.11.207 (owner pick SC2, roadmap-time.md S6): the long calendar's pace until the retune (TS7) (v0.11.260, P28-A OC2: every game;
+ * the old calendar's ×1 went with its code): a sit's Saturation ÷LONG_SAT_DIV (`sitGain`; ÷LONG_SAT_HIGH from True Core since v0.11.256, P26-A), a meridian channel's hours ×LONG_MER_MULT (story/meridians.js
+ * `need`), every XP award ×LONG_XP after the Coil bonus and XP_RATE (`awardXp`, Yuki's fights). Measured (the models, 100 games each, Careful / Sociable / Completionist / Cultivator): the prologue on mean Coil
  * 3.04 / 3.04 / 1.03 / 1.00 (the old calendar 3.10 / 3.10 / 3.33 / 3.08), Act 1 3.29 / 3.34 / 1.03 / 1.00 (old 3.27 / 3.77 / 3.48 / 3.17),
  * the realm at Act 1's end 1 / 1 / 2 / 4 (old 1 / 1 / 1 / 4.45; before SC2 3 / 3 / 4 / 7.95).
  */
@@ -267,16 +265,14 @@ export const LONG_XP = 0.7;
  *  Cultivator's realm at Act 1's end Origin Core (5) → Golden Core (4.08); the others (1 / 1 / 2) and every win rate unchanged. */
 export const LONG_SAT_FROM = 3;
 export const LONG_SAT_HIGH = 6;
-const longPace = (g) => g?.cal === LONG_CAL;
-/** SC2: the Saturation a sit gives is divided by this (1 on the old calendar); P26-A: LONG_SAT_HIGH from LONG_SAT_FROM on. */
-export const satDiv = (g) => (longPace(g) ? ((g.james?.realm || 0) >= LONG_SAT_FROM ? LONG_SAT_HIGH : LONG_SAT_DIV) : 1);
-/** SC2: a meridian channel's hours are multiplied by this (1 on the old calendar). */
-export const merMult = (g) => (longPace(g) ? LONG_MER_MULT : 1);
-/** SC2: every XP award is multiplied by this (1 on the old calendar). */
-export const xpPace = (g) => (longPace(g) ? LONG_XP : 1);
-/** v0.11.207 (owner pick RV1, L1): an award's pool, rounded down; on the long calendar with a hair added first, so 150 × 0.6 × 0.7
- *  (62.999…) pays 63, not 62. The old calendar's product is rounded down as before, bit for bit. */
-export const xpFloor = (g, x) => Math.floor(longPace(g) ? x + 1e-9 : x);
+/** SC2: the Saturation a sit gives is divided by this; P26-A: LONG_SAT_HIGH from LONG_SAT_FROM on. */
+export const satDiv = (g) => ((g.james?.realm || 0) >= LONG_SAT_FROM ? LONG_SAT_HIGH : LONG_SAT_DIV);
+/** SC2: a meridian channel's hours are multiplied by this. */
+export const merMult = () => LONG_MER_MULT;
+/** SC2: every XP award is multiplied by this. */
+export const xpPace = () => LONG_XP;
+/** v0.11.207 (owner pick RV1, L1): an award's pool, rounded down with a hair added first, so 150 × 0.6 × 0.7 (62.999…) pays 63, not 62. */
+export const xpFloor = (g, x) => Math.floor(x + 1e-9);
 /**
  * Speed by use (v0.11.15, B1-b, owner 19:12, Selene's familiarity): each activity speeds up with its own use, kept across
  * Coils: speed = 1 + 9 × (uses ÷ N), up to ×10. Cards N 18 (tasks.js, the familiarity count), the sit N 30, meridian
@@ -869,15 +865,15 @@ export function addItem(g, id, n = 1) {
     }
     g.inventory[id] = have + n;
     if (g.inventory[id] <= 0) delete g.inventory[id];
-    if (FRESH_DAYS[id] && longPace(g)) freshSync(g, id); // TF1 (S): a new piece dated today; a piece gone leaves oldest first
+    if (FRESH_DAYS[id]) freshSync(g, id); // TF1 (S): a new piece dated today; a piece gone leaves oldest first
 }
 export const hasItem = (g, id, n = 1) => (g.inventory[id] || 0) >= n;
 /**
- * v0.11.209 (owner pick TF1, roadmap-time.md TS4): raw food spoils, on the long calendar only. `g.fresh` (a long-calendar save only):
+ * v0.11.209 (owner pick TF1, roadmap-time.md TS4): raw food spoils. `g.fresh`:
  * item id → [[calendar day gained (from 0), pieces], …], oldest first; a piece spoils at the midnight FRESH_DAYS[id] days after the
  * day it was gained (`spoilFresh`, from `advance`). Pieces the record doesn't hold (a save from before, a direct write) count as
  * gained on the day they are first seen; pieces gone (eaten, smoked, stolen, a new Coil's empty hammerspace) leave oldest first.
- * Honeycomb, the village's venison and the kept foods never spoil. The old calendar keeps no record and nothing spoils.
+ * Honeycomb, the village's venison and the kept foods never spoil.
  */
 export const FRESH_DAYS = { hare_raw: 3, fowl_raw: 3, crimson_berry: 3, crab_meat: 2, river_cress: 2, jade_bracket: 4, lizard_egg: 8 };
 /** story/common.js sets `spoilLine(gone)` (gone: [[id, pieces], …]) → the spoil line (Fable's, D1). */
@@ -894,7 +890,7 @@ function freshSync(g, id) {
 }
 /** TF1 (S): pieces of `id` held whose day has come but that haven't left yet (pure; `spoilFresh` takes them at the next step). */
 export function freshDue(g, id) {
-    if (!longPace(g) || !FRESH_DAYS[id]) return 0;
+    if (!FRESH_DAYS[id]) return 0;
     const L = Array.isArray(g.fresh?.[id]) ? g.fresh[id] : [], day = calDay0(g);
     let held = 0, due = 0;
     for (const b of L) { if (!Array.isArray(b) || !(b[1] > 0)) continue; held += b[1]; if (Math.min(b[0], day) + FRESH_DAYS[id] <= day) due += b[1]; }
@@ -909,7 +905,7 @@ export function takeSpoilNotes(g) { const q = (g && spoilQ.get(g)) || []; if (g)
  *  RV1 (M2): every due piece goes wherever it sits in the record, and a piece dated after today (the clock moved back: the Long
  *  Forest's Go back, `lf_exit`) is dated today. Long calendar only. */
 export function spoilFresh(g) {
-    if (!longPace(g) || !g.inventory) return [];
+    if (!g.inventory) return [];
     const day = calDay0(g), gone = [];
     for (const id of Object.keys(FRESH_DAYS)) {
         if (!((g.inventory[id] || 0) > 0) && !g.fresh?.[id]) continue;
@@ -956,7 +952,7 @@ function catchUp(cur, d, top) {
  * not seven times. RV-A (the owner 20:37; the code review's M3): keyed by the choice (`scene:index`, set by story.js `choose` through
  * `gainAt`), a scene's `enter` by the scene, so one-off gains that share a scene with a nightly one still count; L2: the day runs
  * from 05:00 (a choice that ends after midnight is still that evening's); L3: a carried result pinned to an earlier story day never
- * overwrites a later week's record. The old calendar (one day a story day) is untouched. The save's `wg` record: { c: "act:n",
+ * overwrites a later week's record. The save's `wg` record: { c: "act:n",
  * k: { "key|who": [story day, day] } }, reset with the Coil (a stale or broken record is replaced; older code ignores it).
  */
 export const GAIN_ONCE = ['Mei Lin', 'Ya'];
@@ -964,7 +960,7 @@ let GAIN_AT = null;
 /** Run `fn` with the gains keyed by `key` (story.js: the choice being taken). */
 export function gainAt(key, fn) { const o = GAIN_AT; GAIN_AT = key; try { return fn(); } finally { GAIN_AT = o; } }
 export function gainCounts(g, who) {
-    if (!longCal(g) || !GAIN_ONCE.includes(who) || typeof g.scene !== 'string') return true;
+    if (!GAIN_ONCE.includes(who) || typeof g.scene !== 'string') return true;
     const c = `${g.coil?.act || 0}:${g.coil?.n || 1}`;
     let W = g.wg;
     if (!W || typeof W !== 'object' || W.c !== c || !W.k || typeof W.k !== 'object' || Array.isArray(W.k)) W = g.wg = { c, k: {} };
@@ -1191,7 +1187,7 @@ export function startCombat(g, enc0) {
         ...(enc.net ? { netted: true } : {}), // v0.11.251 (owner pick P21-E, NT): Lu Han's net holds Yuki for the whole fight
     };
     const mem = meetFoe(g, enc.id); // v0.11.115 (MA3, FX)
-    const def = longCal(g) && FOE_DEFENCE_OF[enc.id] ? Math.min(FOE_DEFENCE_OF[enc.id].max, (g.stats.foes[enc.id] - 1) * FOE_DEFENCE_OF[enc.id].step) : 0; // v0.11.252 (P22-A, FD)
+    const def = FOE_DEFENCE_OF[enc.id] ? Math.min(FOE_DEFENCE_OF[enc.id].max, (g.stats.foes[enc.id] - 1) * FOE_DEFENCE_OF[enc.id].step) : 0; // v0.11.252 (P22-A, FD)
     if (def > 0) g.combat.memDef = def;
     if (mem > 0) { g.combat.mem = mem; g.combat.log.push(memoryLine(g.stats.foes[enc.id] - 1, mem, def)); }
     g.combat.log.push(...traitLines(g, g.combat.enemies, enc.id)); // v0.11.113 (DA1, TD)
@@ -1595,12 +1591,15 @@ export class SaveError extends Error {
     constructor(kind, message) { super(message); this.kind = kind; }
 }
 
+/** v0.11.260 (owner pick P28-A, OC2): a save this old has no `cal` and runs `migrate` before main.js moves it (`flipFill`), so its act is
+ *  read on its own days (Act 1 from the old Day 8, 06:00), not through the long calendar's helpers. */
+const oldAct1 = (g) => !!g.flags?.ending && g.scene !== 'epilogue' && g.minutes >= 7 * 1440 + 360;
 /** State migrations, oldest first: MIGRATIONS[v] turns a version-v state into version v + 1. */
 const MIGRATIONS = {
     1: (g) => { g.tasks = { queue: [] }; }, // v0.9.0: the task queue (empty)
     2: (g) => { Object.assign(g.tasks, { fam: {}, adapt: {}, yuki: { on: false, progress: 0 } }); }, // v0.9.2: familiarity 0 everywhere
     3: (g) => { g.coil = makeCoil(g); }, // v0.9.4: Coil 1; the rewind point is the save as loaded
-    4: (g) => { if (inAct1(g)) startActCoil(g, 1); else if (g.coil) g.coil.act = 0; }, // v0.9.6: the Coil's act; mid-Act 1 = rewinds to the save as loaded
+    4: (g) => { if (g.cal === LONG_CAL ? inAct1(g) : oldAct1(g)) startActCoil(g, 1); else if (g.coil) g.coil.act = 0; }, // v0.9.6: the Coil's act; mid-Act 1 = rewinds to the save as loaded
 };
 
 export function migrate(g) {

@@ -11,7 +11,6 @@
  *   (`oneOffLeft`): the clock to the evening hour at once, as rest; the evening exit then shows as usual.
  */
 import { advance, clockParts } from '../core/game.js';
-import { longCal } from '../core/calendar.js'; // v0.11.247 (P17-A, HW)
 import { daily } from './common.js';
 import { TASK_HUBS } from './task_hubs.js';
 import { setOnChoose } from '../core/story.js';
@@ -37,7 +36,7 @@ export const onceOpen = (g, scene, i) => !ONCE_MENUS.has(scene) || !g.flags[once
 /** Visits left this Coil to a staged door scene. */
 /** v0.11.247 (owner pick P17-A, HW): the herb slopes a third visit on the long calendar, in the village's week 3 only (a game that spent
  *  both in week 2 now reads week 3's text; a balance change of the pick: +1 visit a Coil, its choice's spirit grass and Mei Lin's gains). */
-export const stageMax = (g, to) => (ONCE_STAGES[to] || 0) + (to === 'herb_slopes' && longCal(g) && (g.flags.vday || 1) >= 3 ? 1 : 0);
+export const stageMax = (g, to) => (ONCE_STAGES[to] || 0) + (to === 'herb_slopes' && (g.flags.vday || 1) >= 3 ? 1 : 0);
 export const stageOpen = (g, to) => !ONCE_STAGES[to] || (g.flags[`oo:${to}`] || 0) < stageMax(g, to);
 
 /** Record a choice taken (story.js choose, tasks.js resolveWork): a once-menu's work choice, a visit to a staged scene. */

@@ -17,7 +17,7 @@
  */
 import { sceneView, choose, seenBefore, isMenuScene, isTimeless } from '../core/story.js';
 import { fnv1a } from '../core/game.js';
-import { longCal, NUM_WORDS } from '../core/calendar.js'; // v0.11.214 (RD1, RV1 L3): the read stop's record on the long calendar only
+import { NUM_WORDS } from '../core/calendar.js'; // v0.11.214 (RD1, RV1 L3): the read stop's record with its numbers aside
 import { TASK_HUBS } from './task_hubs.js';
 import { sceneMemory } from './remember.js'; // v0.11.184 (S1): a scene's own memory line
 import { noteVisit, visitLine, linesOf, textDay } from '../core/lines.js'; // v0.11.134 (LP2: PK, ML); v0.11.152 (RP1, SD): linesOf, textDay
@@ -101,7 +101,7 @@ export function noteRead(g, text, n = g?.coil?.n || 1) {
     if (!isRecord(g.read)) g.read = {};
     for (const p of storyParas(text)) {
         const k = paraKey(p); if (g.read[k] == null || g.read[k] > n) g.read[k] = n;
-        if (/\d/.test(p) && longCal(g)) { const k2 = lineKey(p); if (g.read[k2] == null || g.read[k2] > n) g.read[k2] = n; } // RD1 (RU): with its numbers aside too; RV1 (L3): the long calendar only (the old calendar's record as before)
+        if (/\d/.test(p)) { const k2 = lineKey(p); if (g.read[k2] == null || g.read[k2] > n) g.read[k2] = n; } // RD1 (RU): with its numbers aside too; RV1 (L3)
     }
 }
 /* ---------- v0.11.214 (owner pick RD1: RU, 2026-11-17 16:54) ----------
@@ -115,9 +115,9 @@ const NUM = /\d+(?:[.,]\d+)?\s*(?:h|min|m)\b(?:\s+\d+\s*(?:min|m)\b)?|\d+(?:[.,]
 export const lineKey = (p) => paraKey(String(p).replace(NUM, '#'));
 /** RD1 (RU): the story paragraphs of result lines (strings only; each line may hold paragraphs of its own). */
 const lineParas = (lines) => (Array.isArray(lines) ? lines : [lines]).filter((l) => typeof l === 'string').flatMap(storyParas);
-/** RD1 (RU): note result lines as shown on Coil `n` (numbers aside); RV1 (L3): the long calendar only (the old calendar has no plan). */
+/** RD1 (RU): note result lines as shown on Coil `n` (numbers aside); RV1 (L3). */
 export function noteLines(g, lines, n = g?.coil?.n || 1) {
-    if (!g || !lines || !longCal(g)) return;
+    if (!g || !lines) return;
     if (!isRecord(g.read)) g.read = {};
     for (const p of lineParas(lines)) { const k = lineKey(p); if (g.read[k] == null || g.read[k] > n) g.read[k] = n; }
 }
