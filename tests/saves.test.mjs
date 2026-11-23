@@ -3,7 +3,7 @@ import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { gunzipSync, gzipSync } from 'node:zlib';
 import { SCENES } from '../js/story/prologue.js';
-import { newGame, ensureBars, startCombat, combatStep, serialize, deserialize, peekSave, SaveError, SAVE_VERSION, fnv1a } from '../js/core/game.js';
+import { newGame, ensureBars, startCombat, combatStep, serialize, deserialize, peekSave, flipFill, SaveError, SAVE_VERSION, fnv1a } from '../js/core/game.js';
 import { sceneView, choose, goTo } from '../js/core/story.js';
 
 let pass = 0, fail = 0;
@@ -16,7 +16,7 @@ const files = readdirSync(dir).filter((f) => /\.(json|txt)$/.test(f));
 // v0.11.9: a save shared to GitHub is packed: 'BAZ1:' + base64(gzip(save)), as main.js packText writes it
 const unpack = (t) => (t.trim().startsWith('BAZ1:') ? gunzipSync(Buffer.from(t.trim().slice(5), 'base64')).toString('utf8') : t);
 assert(files.length > 0, 'saves/ has files');
-let rs = 4242;
+let rs = 4242, peekN = 0; // peekN: v0.11.261 (SL) the saves the TG4 check read
 const rnd = (n) => { rs = (rs * 1103515245 + 12345) >>> 0; return (rs >>> 8) % n; };
 for (const f of files) {
     const raw = unpack(readFileSync(new URL(f, dir), 'utf8'));
@@ -27,6 +27,11 @@ for (const f of files) {
     const again = deserialize(serialize(g));
     assert(JSON.stringify(again) === JSON.stringify(g), `${f}: save → load round trip is exact`);
     assert(peekSave(raw)?.scene === g.scene, `${f}: peek works`);
+    { // v0.11.261 (owner pick P29-A, SL; the v0.11.260 review's L1 / TG4): the Saves screen's line is the save as it opens: day, Coil, act and scene as deserialize + flipFill (main.js checkScene) land
+        const p = peekSave(raw), o = deserialize(raw, { force: true }); flipFill(o);
+        assert(!!p && p.minutes === o.minutes && p.coil === (o.coil?.n || 0) && p.act === (o.coil?.act || 0) && p.scene === o.scene && p.cal === o.cal, `SL (TG4): ${f}: peekSave gives the day, Coil, act and scene it loads on (peek ${p && [p.minutes, p.coil, p.act, p.scene]} / load ${[o.minutes, o.coil?.n || 0, o.coil?.act || 0, o.scene]})`);
+        peekN++;
+    }
     for (let s = 0; s < 200; s++) {
         if (g.combat) { const o = combatStep(g, g.james.qi >= 3 ? 'blade' : 'dart'); if (o?.done) goTo(g, SCENES, o.next); continue; }
         const v = sceneView(g, SCENES);
@@ -37,6 +42,13 @@ for (const f of files) {
         if (r.combat) startCombat(g, r.combat(g));
     }
     assert(kindOf(() => deserialize(serialize(g))) === 'ok', `${f}: still saves and loads after 200 steps`);
+}
+{ // v0.11.261 (owner pick P29-A, SL): every save read by TG4; the two the review found: v0.8.5-act1-end shown on Day 94 (was 104), Act 1, Coil 1; the six v0.8.5 saves listed with Coil 1 (was none)
+    assert(peekN === files.length && files.length >= 39, `SL (TG4): every save in saves/ checked (${peekN} of ${files.length})`);
+    const pk = (f) => peekSave(unpack(readFileSync(new URL(f, dir), 'utf8')));
+    const e = pk('v0.8.5-act1-end.json'), v085 = files.filter((f) => /^v0\.8\.5-/.test(f)).map(pk);
+    assert(e && Math.floor(e.minutes / 1440) + 1 === 94 && e.act === 1 && e.coil === 1, `SL (L1): v0.8.5-act1-end shows Day 94, Act 1, Coil 1 (${e && [Math.floor(e.minutes / 1440) + 1, e.act, e.coil]})`);
+    assert(v085.length === 6 && v085.every((p) => p?.coil === 1), `SL: the six v0.8.5 saves listed with Coil 1, as they load (${v085.map((p) => p?.coil)})`);
 }
 
 // 2. the format's safety checks
@@ -69,7 +81,7 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
 //    with it; the rewind point too; then it plays on, saves and loads. A long-calendar save and a moved one are left alone. RV1 (H1, M1):
 //    a save at 00:00–03:59 starts on the week's seventh night and that waking day's marks go to the week's last day.
 {
-    const { flipFill, flipMinutes, inAct1, advance, combatStep: cs, wakeDay } = await import('../js/core/game.js');
+    const { inAct1, advance, combatStep: cs, wakeDay } = await import('../js/core/game.js');
     const { calStart, calEnd, storyDay, weekNights, LONG_CAL: LC, BL_SPAN } = await import('../js/core/calendar.js');
     const { rewind } = await import('../js/core/coil.js');
     const { spacedFree, dayKey, day, markDaily } = await import('../js/story/common.js');
@@ -87,7 +99,7 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
         if (g.cal === LC) { const b = JSON.stringify(g); assert(flipFill(g) === false && JSON.stringify(g) === b, `FP1 ${f}: a long-calendar save is left alone`); kept++; continue; }
         const d = Math.floor(g.minutes / 1440) + 1, tod = g.minutes % 1440, act = g.coil?.act || 0, night = tod < 240 && d > 1;
         const sd = g.coil?.snap ? Math.floor(g.coil.snap.minutes / 1440) + 1 : null, stod = g.coil?.snap ? g.coil.snap.minutes % 1440 : 0;
-        const peekMin = flipMinutes(g.minutes, act);
+        const peekMin = peekSave(unpack(rawF)).minutes; // v0.11.261 (P29-A, SL): the Saves screen's minutes as peekSave reads them (was flipMinutes with the raw save's act, the review's L1)
         const dk = Object.keys(g.flags).filter((k) => /@-?\d+$/.test(k));
         const names = [...new Set(dk.map((k) => k.replace(/@-?\d+$/, '')))];
         // RV1 (TG2): done today by the waking day (dayKey, the daily cards) and by the calendar day (day(g), the Heart's talks), before and after
@@ -180,10 +192,11 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
     const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
     // RV1 (TG3): every deserialize in main.js is a load through checkScene (Import and Restore all too), and checkScene moves an old save
     assert(/function checkScene\(s\) \{ flipFill\(s\);/.test(M) && !/oldCalTest|OLD_CAL_KEY|'boneash\.oldcal'/.test(M) && (M.match(/deserialize\(/g) || []).length === (M.match(/checkScene\(deserialize\(/g) || []).length && (M.match(/checkScene\(deserialize\(/g) || []).length >= 9, 'FP1 (main.js, RV1 TG3; v0.11.259 OC-A, OC3): every load goes through checkScene, which moves an old save (no old-calendar key read any more)');
-    assert(/clockLabel\(p\.cal === LONG_CAL \? p\.minutes : flipMinutes\(p\.minutes, p\.act\)\)/.test(M), 'FP1 (main.js, RV1 L2): the Saves screen\'s lines show the moved day');
+    assert(/clockLabel\(p\.minutes\)/.test(M) && !/flipMinutes/.test(M), 'FP1 (main.js, RV1 L2; v0.11.261 P29-A, SL): the Saves screen\'s lines show the day peekSave reads as it loads (no second flip in main.js)');
     // RV1 (TG5): What's new's numbers from the calendar
     const N = readFileSync(new URL('../js/core/news.js', import.meta.url), 'utf8'), line = (/\['0\.11\.226', '([^\n]*)'\],/.exec(N) || [])[1] || '';
     const lg = newGame(1, {});
+    const flipMinutes = (minutes, act) => { const t = { minutes, flags: {}, coil: { act } }; flipFill(t); return t.minutes; }; // v0.11.261 (P29-A, SL): game.js's flipMinutes gone (only this test used it); the same move through flipFill
     const want = [['the tribute on Day', calStart(lg, 7)], ['the Elder on Day', calStart(lg, 21)], ['Day 6 becomes Day', flipMinutes(5 * 1440 + 600, 0) / 1440 + 1 - 600 / 1440], ['Day 12 Day', flipMinutes(11 * 1440 + 600, 1) / 1440 + 1 - 600 / 1440]];
     for (const [w, v] of want) assert(new RegExp(`${w} ${v}\\b`).test(line), `FP1 (RV1, TG5): What's new says "${w} ${v}"`);
 }

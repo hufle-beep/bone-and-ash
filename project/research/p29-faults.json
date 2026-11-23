@@ -1,0 +1,44 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/game.js",
+  "find": "const g = deserialize(text, { force: true }); flipFill(g); return { scene",
+  "replace": "const g = deserialize(text, { force: true }); return { scene",
+  "note": "SL: the Saves screen lists an old save's unmoved minutes (no flip)"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/game.js",
+  "find": "coil: g.coil?.n || 0, act: g.coil?.act || 0, cal: g.cal || 0 };",
+  "replace": "coil: g.coil?.n || 0, act: 0, cal: g.cal || 0 };",
+  "note": "SL: peekSave forgets the act (Act 1 saves listed without 'Act 1')"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/replies.js",
+  "find": "    /^(?:Breakfast|Midday|Supper): [^\".]+\\. \\+\\d+ satiety\\.$/, //",
+  "replace": "    /^(?:Breakfast|Midday|Supper): NEVER/, //",
+  "note": "M4: the hammerspace routine meal split again (name in the reply)"
+ },
+ {
+  "id": "F5",
+  "file": "js/core/replies.js",
+  "find": "    /^(?:Breakfast|Midday|Supper): the communal pot\\.$/, //",
+  "replace": "    /^NEVER the communal pot\\.$/, //",
+  "note": "M4: the bare pot line back in the reply"
+ },
+ {
+  "id": "F6",
+  "file": "js/core/replies.js",
+  "find": "    /^(?:Breakfast|Midday|Supper): [^\".]+\\. \\+\\d+ satiety\\.$/, //",
+  "replace": "    /^(?:Breakfast|Midday|Supper): .+ satiety\\.$/, //",
+  "note": "M4: the pattern unanchored: a prefixed line with speech becomes a whole gain"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/tasks.js",
+  "find": "    return e.length ? [`${MEAL[slot]}: ${String(e[0]).replace(/^You eat: /, '')}`] : [];",
+  "replace": "    return e.length ? [`${MEAL[slot]} - ${String(e[0]).replace(/^You eat: /, '')}`] : [];",
+  "note": "M4: the routine line's shape drifts from the pattern (split again)"
+ }
+]

@@ -5591,6 +5591,18 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       const m = Tk.dayMeal(g, 'wilds');
       assert(m.length === 1 && /^Breakfast: smoked meat\. \+30 satiety\.$/.test(m[0]) && g.inventory.smoked_meat === 1 && !g.inventory.hare_raw && Gm.takeSpoilNotes(g)[0] === line('1 glassback hare'), `${T} (H1, TG1): the day's meal keeps its line, the spoil line waits (${m.join(' | ')})`);
       const e = Cm.eatBest(g); assert(e.length === 1 && /^You eat: smoked meat/.test(e[0]), `${T} (H1): eatBest returns the meal only`); }
+    // v0.11.261 (owner pick P29-A, M4; the v0.11.259 review's TG-A7): the routine's meals sit whole in the Results, wording unchanged: every food from the
+    // hammerspace at each part of the day, raw and cooked (the wilds by its fire), and dayMeal's bare pot line; nothing of them in the reply
+    { const { FOOD_NAMES } = await import('../js/story/common.js'), { MEAL } = await import('../js/core/tasks.js'); let n = 0; const bad = [];
+      for (const id of Object.keys(FOOD_NAMES)) for (const [slot, h] of [['b', 8], ['l', 12], ['s', 18]]) for (const fire of [false, true]) {
+          const g = mk(C.LONG_CAL); g.inventory = {}; g.fresh = {}; g.minutes = 4 * D + h * 60; Gm.addItem(g, id, 1); g.james.satiety = 50; /* the clock first: a piece added before it would have turned */ g.flags.fire = fire; delete g.tasks.routine;
+          const ls = Tk.dayMeal(g, 'wilds', null, false, '', slot), r = splitReply(ls); n++;
+          if (!(ls.length === 1 && ls[0].startsWith(`${MEAL[slot]}: ${FOOD_NAMES[id]}`) && /\+\d+ satiety\.$/.test(ls[0]) && r.reply.length === 0 && r.gains.length === 1 && r.gains[0] === ls[0])) bad.push(`${id}/${slot}/${fire}: ${ls.join(' | ')} → ${JSON.stringify(r)}`);
+      }
+      const pot = Object.values(MEAL).map((m) => splitReply([`${m}: the communal pot.`]));
+      assert(n === Object.keys(FOOD_NAMES).length * 6 && !bad.length, `${T} (M4, TG-A7): ${n} routine meals from the hammerspace, each one whole line in the Results (${bad.slice(0, 2).join(' || ')})`);
+      assert(pot.every((r) => r.reply.length === 0 && r.gains.length === 1), `${T} (M4, TG-A7): dayMeal's bare pot line in the Results, each part of the day`);
+      assert(splitReply(['She said: smoked meat. +3 satiety.']).reply.length === 1 && splitReply(['Breakfast: a line "with speech": +25 satiety.']).gains.length === 0, `${T} (M4): the patterns anchored on the routine's own shape`); }
     { const g = mk(C.LONG_CAL, 99406, 'rt_camp'); g.inventory = {}; g.fresh = {}; due(g, 'hare_raw', 1); g.minutes = 4 * D + 17 * 60; g.james.satiety = 50; delete g.flags[Object.keys(g.flags).find((k) => /rt_supper/.test(k)) || 'none'];
       const r = goTo(g, SCENES, 'rt_camp') || []; const q = Gm.takeSpoilNotes(g);
       assert(Math.round(g.james.satiety) >= 69 && !g.inventory.hare_raw && (q[0] === line('1 glassback hare')), `${T} (H1, TG1): the last camp's supper with only a turned hare: Ya's +20 (Fed ${Math.round(g.james.satiety)}; ${JSON.stringify(r).slice(0, 80)})`); }

@@ -1649,8 +1649,6 @@ function flipOne(s, act) {
     for (const [, k, v] of moved) f[k] = v;
     for (const k of FLIP_DAY_FLAGS) if (Number.isInteger(f[k])) f[k] = to(f[k]);
 }
-/** RV1 (L2): the minute an old-calendar save's `minutes` moves to (the Saves screen's lines, from `peekSave`; `act` the Coil's act). */
-export function flipMinutes(minutes, act = 0) { const t = { minutes, flags: {} }; flipOne(t, act); return t.minutes; }
 export function flipFill(g) {
     if (!g || g.cal === LONG_CAL) return false;
     const act = g.coil?.act || 0;
@@ -1728,7 +1726,7 @@ export function unwrapSave(text, { force = false } = {}) {
 
 /** A short description of a save without loading it ("<scene id>|<minutes>"), or null. */
 export function peekSave(text) {
-    try { const s = JSON.parse(unwrapSave(text, { force: true })); return s && s.scene ? { scene: s.scene, minutes: s.minutes, coil: (s.coil ? oneCount(JSON.parse(JSON.stringify(s))).coil.n : 0), act: s.coil?.act || 0, cal: s.cal || 0 } : null; /* v0.11.26 … v0.11.226 (RV1, L2): cal, for the moved day; v0.11.26: the one count, as it loads */ } catch { return null; } // v0.11.13: with the Coil, for the save lists
+    try { const g = deserialize(text, { force: true }); flipFill(g); return { scene: g.scene, minutes: g.minutes, coil: g.coil?.n || 0, act: g.coil?.act || 0, cal: g.cal || 0 }; /* v0.11.261 (owner pick P29-A, SL; the v0.11.260 review's L1): read as it loads (deserialize + flipFill, main.js checkScene), so the day, the Coil and the act are the ones it opens on; v0.11.26: the one count (now migrate's); v0.11.226 (RV1, L2): cal */ } catch { return null; } // v0.11.13: with the Coil, for the save lists
 }
 
 export function deserialize(text, { force = false } = {}) {

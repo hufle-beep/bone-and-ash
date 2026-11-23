@@ -2,7 +2,7 @@
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
 import { runWeek, planCards, planHere, planEnsure, planSet, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, planView, doorCards, planRanks, planPrio, doorNote, cardNote, noteCardTap, noteCardDone, noteReadTap, planEmptyShown, planDoorsShown, spacedClosed, withSpaced } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
-import { flipFill, flipMinutes, coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
+import { flipFill, coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, checkValue, xpToNext, clockLabel, clockLabelG, realmName, yukiForm, yukiHeldNote,
     startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
@@ -498,7 +498,7 @@ function backupList() {
     const names = { '5m': 'Last 5 minutes', '30m': 'Last 30 minutes', '2h': 'Last 2 hours', before: `Before ${m.label || 'a risky move'}` };
     return Object.keys(names).map((k) => ({ k, name: names[k], raw: store.get(BAK_KEY(k)), when: m.when?.[k] })).filter((b) => b.raw);
 }
-const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.cal === LONG_CAL ? p.minutes : flipMinutes(p.minutes, p.act)) /* v0.11.226 (RV1, L2): the day it opens on */}${p.coil ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}` : 'Unreadable'; }; // v0.11.13: the Coil too (Incremental Mode, as on Continue)
+const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.minutes) /* v0.11.226 (RV1, L2): the day it opens on; v0.11.261 (P29-A, SL): peekSave reads the save as it loads, so its minutes are already the long calendar's */}${p.coil ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}` : 'Unreadable'; }; // v0.11.13: the Coil too (Incremental Mode, as on Continue)
 
 /* ---------------- saves push (v0.11.9): share, export all, reminder, status ---------------- */
 
