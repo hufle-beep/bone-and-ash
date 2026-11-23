@@ -1,0 +1,10 @@
+[
+ { "id": "F1", "file": "js/core/game.js", "find": "export function newGame(seed = Date.now(), { closed = false, cal = LONG_CAL } = {}) {", "replace": "export function newGame(seed = Date.now(), { closed = false, cal = 0 } = {}) {", "note": "OC4 reverted: the tests' default back on the old calendar" },
+ { "id": "F2", "file": "js/main.js", "find": "function checkScene(s) { flipFill(s);", "replace": "function checkScene(s) { void flipFill;", "note": "OC3: a loaded old save no longer moves to the long calendar" },
+ { "id": "F3", "file": "js/main.js", "find": "const freshGame = (cal = LONG_CAL) =>", "replace": "const freshGame = (cal = 0) =>", "note": "OC3: a new game on the old calendar" },
+ { "id": "F4", "file": "js/core/replies.js", "find": "/^(?:(?:Breakfast|Midday|Supper): )?Stew, and a second ladle you did not ask for\\. \"You work,\"/", "replace": "/^Stew, and a second ladle you did not ask for\\. \"You work,\"/", "note": "K-A reverted for the Fallout's pot line" },
+ { "id": "F5", "file": "js/core/replies.js", "find": "/^(?:(?:Breakfast|Midday|Supper): )?Barley and bean stew\\. The woman with the ladle", "replace": "/^(?:(?:Breakfast|Supper): )?Barley and bean stew\\. The woman with the ladle", "note": "K-A: the midday prefix left out" },
+ { "id": "F6", "file": "js/core/replies.js", "find": "/^(?:(?:Breakfast|Midday|Supper): )?Barley and bean stew, ladled by a woman", "replace": "/(?:(?:Breakfast|Midday|Supper): )?Barley and bean stew, ladled by a woman", "note": "K-A: the pattern unanchored" },
+ { "id": "F7", "file": "js/core/calendar.js", "find": "export const calMinutes = (g, d, h = 0, m = 0) => (calStart(g, d) - 1) * 1440 + h * 60 + m;", "replace": "export const calMinutes = (g, d, h = 0, m = 0) => (d - 1) * 1440 + h * 60 + m;", "note": "the tests' story days read as calendar days" },
+ { "id": "F8", "file": "js/core/game.js", "find": "export const LONG_SAT_DIV = 4;", "replace": "export const LONG_SAT_DIV = 3;", "note": "a re-pinned long-calendar number (the sit ÷4) changes" }
+]

@@ -97,6 +97,7 @@ export const NOTES = [
     ['0.11.255', 'Act 1 is harder for a James who reaches the last pass still at Foundation or below: the rot-ape there is much stronger for him (about twice the HP, and it hits and dodges far better), so a careful first run usually needs a few more Coils to get through. From Core Formation on, the ape is as before.'],
     ['0.11.256', 'At the tribute Lu Han has a little less HP against a James at Foundation or below, the same against one a realm past it, and more for each realm past that, from True Core up. From True Core on, a sit gives less Saturation than it did (about two thirds up to Origin Core, half at Soul Embryo, and still at least 0.1% after that); the Blackroot\'s root and a Long Forest seclusion give two thirds. A James who sits a lot ends Act 1 a realm lower than before.'],
     ['0.11.257', 'The FAQ\'s answer on meditation said every realm needs more sits than the last; from Soul Embryo on each realm takes the same number, so it now says each needs at least as many. Nothing in play changed.'],
+    ['0.11.259', 'The village\'s and the Fallout\'s communal pot: when a day\'s meal comes from the pot, its line ("Breakfast: ", "Midday: " or "Supper: " and the stew) shows among the results again with its +25 satiety, not in the story text above them.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

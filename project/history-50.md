@@ -2,6 +2,29 @@
 
 Started 2026-11-23 (v0.11.258), when `history-49.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-49.md` … `history.md`.
 
+## Moved from the handover in v0.11.259 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-23 (Europe/Budapest). **Version:** 0.11.258 (`sw.js` VERSION `bone-ash-0.11.258`): **the dangling roadmap items placed (PL-A; the owner 2026-11-23 09:52 "place all the dangling/not ordered items into the open roadmap items ... give the updated open roadmap items with time estimates"; in the question dialog after it: "PL-A 🟢 (Recommended)"; docs only):** the Order line's steps 1–4 (t, KA, e, f) marked done, with fresh estimates (about 57–100 pushes, 12–33 working days at 3–5 a day); OC (the old calendar's code) and MF (the mother's friendship under WE against CMN) placed in section 2; a new step 5b, the polish pass (`roadmap.md` section 2b: YM-3, FC-w, NF-g, PK, LT, the polish notes); the lore line and f's CH, LE, FR in `roadmap-act2.md`; e's bundles and its done, closed or superseded lines, f's seven lines and the old order line moved word for word to `roadmap-done-5.md` (new); `roadmap-time.md`'s TS labels say done. No game change. **Next push:** open, options later (below).
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** PL-A done (v0.11.258, docs only). The open roadmap, in order (`roadmap.md`'s Order line): section 2, the retune (left: the RA1 line's items, group d's fights, `roadmap-retune.md`'s knobs and tools, OC, MF; 4–8 pushes), 5b the polish pass (1–2), Act 2 (30–50), the art pass (5–10), systems (12–20), later (5–10). *(The entry as it stood, word for word, in `history-50.md`.)*
+
+*(the decision as it stood)*
+
+- **v0.11.256: P26-A (the owner 2026-11-23, in the question dialog after 00:55: "P26-A 🟢 (Recommended)").** The options as laid out in chat (`project/research/p26-measure.md`): **P26-A 🟢 LN + LR + RP-1.5 (picked, recommended)**; P26-B 🟡 LN + LR + RP-4 (the Cultivator True Core all Act 1, about 540 sits a realm); P26-C 🟠 LN + LR (the Cultivator still Origin Core); P26-D 🔴 RP-1.5 alone (the rates unchanged). Measured and dropped: the whole pace ÷6 (the Completionist 0%, the Cultivator 98%), ÷8 (Careful never Foundation, 6.72 Coils), ÷6 from Core Formation (the Cultivator 42.5%). The cold review (Opus): no high; M1 (the What's new line's "two thirds" held only at realms 3–5), L3, TG1–TG6 done in the reviewer's wording (PG).
+
+*(the version notes as they stood)*
+
+## v0.11.256 — The retune's last Act 1 numbers (P26-A)
+
+- **Files:** `js/core/game.js` (`LONG_SAT_FROM`, `LONG_SAT_HIGH`, `satDiv` by James's realm; the SC2 header's comment), `js/story/prologue.js` (`LU_HP_LONG`, `LU_READ_HP`, `collectorsFight`), `js/story/act1_blackroot.js` (the root's comment, L3), `js/core/news.js` (What's new), `sw.js`; tests: `tests/story.test.mjs` (the P26-A block: the knobs, Lu Han's HP at realms 0–14 with and without the militia and spears, the old calendar unchanged, a sit and the root by realm, a True Core sit, the root's scene at True Core, `satDiv` with no james, a breakthrough to True Core and a kept True Core walked, the What's new line's words and its ratios against `sitGain`; the SC2 block's pace pins, the long-step HP pin and the seclusion pin updated); docs: `project/research/p26-*`, the four docs, `history-49.md`.
+- **What:** see the version line. **Balance (picked with its numbers):** a sit from True Core 0.74 → 0.49% (about 200 sits a realm; half at Soul Embryo, the 0.1% floor from realm 7 as before), the root +3 → +2% from True Core; Lu Han's HP −0.5 raw for a James at Foundation or below, unchanged a realm past it, +0.5 a realm from True Core (realm 14 about +9 after the step). **Save:** none (no field, id, flag or key changed; a save at True Core or above sits more slowly from its next sit). `longforest.js`'s ÷4 comment left (its code is hash-pinned, TG10).
+- **Checks:** a game change (rule 2): while building the story test (1,000 games; three runs: the SC2 seclusion pin, then the review's tests, then the hash-pinned Long Forest comment put back) and `bash tools/check.sh quick` (its tools step failed once on a What's new edit made while it ran; the story test passed after); the models on the build (100 / 40 games) identical to the scratch copy; the full `bash tools/check.sh` once after the review's fixes and the docs (two earlier runs stopped on the docs: the restore-points row in the wrong table, then the tools test's move pins (`CL5_SHA`, part 5's 63 rows, the history pins), re-pinned): exit 0, 1,877 s (3 jobs on 2 cores), sanity 119 compared, 0 drifted, 0 moved more than 5, 0 invariants failed; the long log's notes (log only): the Completionist's Coil-1 tribute 17.2 → 23.9%, whole game 15.5 → 21.5%; the Sociable's tribute C2 won 58.5 → 74%.
+- **Opus:** the cold review (`project/research/p26-review.md`): no high; M1 (the What's new line), L3 (the comments), TG1–TG6 done; L1, L2 open, options later. Planted faults through `tools/mutate.mjs`: 18 of 18 caught (Claude's F1–F8, the reviewer's C1–C10; `project/research/p26-mutate.md`; the reviewer expected C2, C5, C9, C10 to pass before TG1–TG3, TG5). **Fable:** none (no story text; the What's new line is Claude's).
+
 ## Moved from the handover in v0.11.258 (word for word)
 
 *(the version line as it stood)*

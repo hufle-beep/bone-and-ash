@@ -29,8 +29,10 @@ const node = (tier = 1, level = 1) => ({ tier, level, xp: 0 });
  * A fresh game: James (40, fresh doctorate), Yuki, an empty hammerspace.
  * closed (v0.9.6, task mode): every primary and collateral starts closed (0/12, 0/66); classic games start open.
  */
-/** v0.11.203 (owner pick T1, TS1): `cal: LONG_CAL` starts the long calendar (calendar.js; the test switch on the main menu). */
-export function newGame(seed = Date.now(), { closed = false, cal = 0 } = {}) {
+/** v0.11.203 (owner pick T1, TS1): `cal: LONG_CAL` starts the long calendar (calendar.js). v0.11.259 (owner pick OC-A, OC4): the long
+ *  calendar is the default (main.js always passed it since the flip; the tests and tools now get it too); `cal: 0` still builds an
+ *  old-calendar state, for the load flip's tests only. */
+export function newGame(seed = Date.now(), { closed = false, cal = LONG_CAL } = {}) {
     const g = {
         v: SAVE_VERSION,
         seed: seed >>> 0,

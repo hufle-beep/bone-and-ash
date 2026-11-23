@@ -1,0 +1,3211 @@
+{
+ "2026-11-06-1749-incremental-arrival.txt": {
+  "sha": "92e3008219d727556b87233606ee02ce9d659f47f11e31d96e3562a3cf101204",
+  "act1": false,
+  "free": {}
+ },
+ "2026-11-06-1806-incremental-arrival.txt": {
+  "sha": "1ba83c4313ed9111530305841b070051beb875facdd6789b59883174135c42cc",
+  "act1": false,
+  "free": {}
+ },
+ "2026-11-06-2029-incremental-ashfall.txt": {
+  "sha": "e92117fff299e61fc369dd46f7405a08cfb62952bead1f61770d50982ed3b27b",
+  "act1": false,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "mer_e8": [
+    false,
+    false
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "workshop": [
+    false,
+    false
+   ],
+   "wen": [
+    false,
+    false
+   ]
+  }
+ },
+ "2026-11-06-2037-incremental-fo_ashfall.txt": {
+  "sha": "a30c6d22ab2fafc6611330cd94e0e5fe33114e5946fae1fe80b0159e7775ab76",
+  "act1": true,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "mer_e8": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    false,
+    false
+   ],
+   "a1_council": [
+    false,
+    false
+   ],
+   "a1_drill": [
+    false,
+    false
+   ]
+  }
+ },
+ "2026-11-07-0307-incremental-bl_camp.txt": {
+  "sha": "a7e13332815379c618f00f711f4798f5d4983e22d17b7f5799f68d8c67176f38",
+  "act1": true,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "mer_e8": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    false,
+    false
+   ],
+   "rr_scout": [
+    false,
+    false
+   ],
+   "tya": [
+    false,
+    false
+   ],
+   "bt_dart": [
+    false,
+    false
+   ],
+   "bt_ya": [
+    false,
+    false
+   ],
+   "bt_needle": [
+    false,
+    false
+   ],
+   "bl_stakes": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ],
+   "tmei": [
+    false,
+    false
+   ],
+   "bt_yuki": [
+    false,
+    false
+   ],
+   "rr_hunt": [
+    false,
+    false
+   ]
+  }
+ },
+ "2026-11-07-1102-incremental-a1_end.txt": {
+  "sha": "658727c1df91df42656f30b60d18d71ff7df9d2750181fc619b177c7a4abd465",
+  "act1": true,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "mer_e8": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    true,
+    true
+   ],
+   "rr_scout": [
+    true,
+    true
+   ],
+   "tya": [
+    true,
+    true
+   ],
+   "bt_dart": [
+    true,
+    true
+   ],
+   "bt_ya": [
+    true,
+    true
+   ],
+   "bt_needle": [
+    true,
+    true
+   ],
+   "bl_stakes": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ],
+   "tmei": [
+    true,
+    true
+   ],
+   "bt_yuki": [
+    true,
+    true
+   ],
+   "rr_hunt": [
+    true,
+    true
+   ],
+   "dw_forage": [
+    true,
+    true
+   ],
+   "dw_hunt": [
+    true,
+    true
+   ],
+   "ah_forage": [
+    true,
+    true
+   ],
+   "ah_hunt": [
+    true,
+    true
+   ],
+   "spring": [
+    true,
+    true
+   ],
+   "hc_ya": [
+    true,
+    true
+   ],
+   "rt_ya_walk": [
+    true,
+    true
+   ],
+   "rt_mei_walk": [
+    true,
+    true
+   ],
+   "rt_supper": [
+    true,
+    true
+   ],
+   "rt_evening": [
+    true,
+    true
+   ]
+  }
+ },
+ "2026-11-07-1258-incremental-dawn.txt": {
+  "sha": "5be2006a60031b36947ca15511e519aae1dca0d1f4f4911d0683968df0168ea3",
+  "act1": false,
+  "free": {
+   "lf_hare": [
+    true,
+    true
+   ],
+   "lf_fowl": [
+    true,
+    true
+   ],
+   "lf_yhunt": [
+    true,
+    true
+   ]
+  }
+ },
+ "2026-11-07-1305-incremental-village.txt": {
+  "sha": "19e525783689060b48f669d9855c7a7ad6b079c803b018f1c543da771efbeec6",
+  "act1": false,
+  "free": {
+   "lf_hare": [
+    true,
+    true
+   ],
+   "lf_fowl": [
+    true,
+    true
+   ],
+   "lf_yhunt": [
+    true,
+    true
+   ]
+  }
+ },
+ "2026-11-07-1855-incremental-wilds.txt": {
+  "sha": "48c4fd48f7b7c789082c097ffd7b526b74fe02353c0271c4208c45b2e27b3c90",
+  "act1": false,
+  "free": {}
+ },
+ "2026-11-07-1901-incremental-camp.txt": {
+  "sha": "206c727d6808eedf0c4f32b44a2d775a00a54ccc4ab6ce703c3fd75c2281d06a",
+  "act1": false,
+  "free": {
+   "ring": [
+    false,
+    false
+   ],
+   "cress": [
+    false,
+    false
+   ],
+   "honey": [
+    false,
+    false
+   ],
+   "berries": [
+    false,
+    false
+   ],
+   "hare": [
+    false,
+    false
+   ],
+   "fowl": [
+    false,
+    false
+   ],
+   "crab": [
+    false,
+    false
+   ],
+   "t_darts": [
+    false,
+    false
+   ],
+   "t_blade": [
+    false,
+    false
+   ],
+   "t_feet": [
+    false,
+    false
+   ],
+   "t_needle": [
+    false,
+    false
+   ],
+   "explore": [
+    false,
+    false
+   ]
+  }
+ },
+ "2026-11-07-1939-incremental-rr_hub.txt": {
+  "sha": "9c6f162ef01b89700e835949aee8db8cdbd46827b8ea1408da591e9760c25d62",
+  "act1": true,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_supper": [
+    true,
+    true
+   ],
+   "a1_ya": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_clinic": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    false,
+    false
+   ],
+   "rr_scout": [
+    false,
+    false
+   ],
+   "rr_hunt": [
+    false,
+    false
+   ],
+   "tya": [
+    false,
+    false
+   ],
+   "bl_stakes": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ],
+   "bt_ya": [
+    false,
+    false
+   ],
+   "bt_dart": [
+    false,
+    false
+   ],
+   "bt_needle": [
+    false,
+    false
+   ],
+   "bt_yuki": [
+    false,
+    false
+   ],
+   "tmei": [
+    false,
+    false
+   ]
+  }
+ },
+ "2026-11-07-2129-incremental-wilds.txt": {
+  "sha": "ed2b6660d9fd83a1d801a050e4f8dc4691b192796c9c691f1e3b17a075ea91e8",
+  "act1": false,
+  "free": {
+   "ring": [
+    false,
+    false
+   ],
+   "cress": [
+    false,
+    false
+   ],
+   "berries": [
+    false,
+    false
+   ],
+   "honey": [
+    false,
+    false
+   ],
+   "hare": [
+    false,
+    false
+   ],
+   "fowl": [
+    false,
+    false
+   ],
+   "crab": [
+    false,
+    false
+   ],
+   "t_darts": [
+    false,
+    false
+   ],
+   "t_blade": [
+    false,
+    false
+   ],
+   "t_feet": [
+    false,
+    false
+   ],
+   "t_needle": [
+    false,
+    false
+   ],
+   "explore": [
+    false,
+    false
+   ]
+  }
+ },
+ "2026-11-08-0020-incremental-ashfall.txt": {
+  "sha": "63d743b44f168236b68e161cf9ebfac57237b6b7094ff2c3655c88484dd12c0b",
+  "act1": false,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ]
+  }
+ },
+ "2026-11-08-0110-incremental-rr_hub.txt": {
+  "sha": "86237bffc8a6706275e9664269975677828428a9ddff45c9dec6ad7b903c85a7",
+  "act1": true,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "slopes": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_clinic": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "a1_supper": [
+    true,
+    true
+   ],
+   "a1_ya": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    false,
+    false
+   ],
+   "rr_scout": [
+    false,
+    false
+   ],
+   "rr_hunt": [
+    false,
+    false
+   ],
+   "tmei": [
+    false,
+    false
+   ],
+   "tya": [
+    false,
+    false
+   ],
+   "bt_ya": [
+    false,
+    false
+   ],
+   "bt_dart": [
+    false,
+    false
+   ],
+   "bt_needle": [
+    false,
+    false
+   ],
+   "bl_stakes": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ],
+   "bt_yuki": [
+    false,
+    false
+   ]
+  }
+ },
+ "2026-11-08-0220-incremental-heart_hub.txt": {
+  "sha": "a79f1ee7ba06ceb61d3d4b646c795ee2793f23c53f51b7e8a056051fec26f7fe",
+  "act1": true,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "slopes": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_clinic": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "a1_supper": [
+    true,
+    true
+   ],
+   "a1_ya": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    true,
+    true
+   ],
+   "rr_scout": [
+    true,
+    true
+   ],
+   "rr_hunt": [
+    true,
+    true
+   ],
+   "tmei": [
+    true,
+    true
+   ],
+   "tya": [
+    true,
+    true
+   ],
+   "bt_ya": [
+    true,
+    true
+   ],
+   "bt_dart": [
+    true,
+    true
+   ],
+   "bt_needle": [
+    true,
+    true
+   ],
+   "bl_stakes": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ],
+   "bt_yuki": [
+    true,
+    true
+   ],
+   "dw_forage": [
+    true,
+    true
+   ],
+   "dw_hunt": [
+    true,
+    true
+   ],
+   "ah_forage": [
+    true,
+    true
+   ],
+   "ah_hunt": [
+    true,
+    true
+   ],
+   "spring": [
+    false,
+    false
+   ]
+  }
+ },
+ "2026-11-08-0249-incremental-coil_dawn.txt": {
+  "sha": "4b561001d77f751250dfaee91dd6b41fa07dfb8f9a9b46694e22041896a3bbff",
+  "act1": false,
+  "free": {}
+ },
+ "2026-11-08-0446-incremental-rt_camp.txt": {
+  "sha": "1d736542411c435c6e338a54e0a64967cf0e488adc4f168a2db49702ca0e705f",
+  "act1": true,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "slopes": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_clinic": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "a1_supper": [
+    true,
+    true
+   ],
+   "a1_ya": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    true,
+    true
+   ],
+   "rr_scout": [
+    true,
+    true
+   ],
+   "rr_hunt": [
+    true,
+    true
+   ],
+   "tmei": [
+    true,
+    true
+   ],
+   "tya": [
+    true,
+    true
+   ],
+   "bt_ya": [
+    true,
+    true
+   ],
+   "bt_dart": [
+    true,
+    true
+   ],
+   "bt_needle": [
+    true,
+    true
+   ],
+   "bt_yuki": [
+    true,
+    true
+   ],
+   "bl_stakes": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ],
+   "dw_forage": [
+    true,
+    true
+   ],
+   "dw_hunt": [
+    true,
+    true
+   ],
+   "ah_forage": [
+    true,
+    true
+   ],
+   "ah_hunt": [
+    true,
+    true
+   ],
+   "spring": [
+    true,
+    true
+   ],
+   "hc_mei": [
+    true,
+    true
+   ],
+   "rt_mei_walk": [
+    false,
+    false
+   ],
+   "rt_ya_walk": [
+    false,
+    false
+   ],
+   "rt_supper": [
+    false,
+    false
+   ]
+  }
+ },
+ "2026-11-08-0813-incremental-a1_end.txt": {
+  "sha": "1bed2704f671869cacad9e0f5aee8c774c3dad6d8c46d2a48d245fe1a81f517c",
+  "act1": true,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "slopes": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_clinic": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "a1_supper": [
+    true,
+    true
+   ],
+   "a1_ya": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    true,
+    true
+   ],
+   "rr_scout": [
+    true,
+    true
+   ],
+   "rr_hunt": [
+    true,
+    true
+   ],
+   "tmei": [
+    true,
+    true
+   ],
+   "tya": [
+    true,
+    true
+   ],
+   "bt_ya": [
+    true,
+    true
+   ],
+   "bt_dart": [
+    true,
+    true
+   ],
+   "bt_needle": [
+    true,
+    true
+   ],
+   "bt_yuki": [
+    true,
+    true
+   ],
+   "bl_stakes": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ],
+   "dw_forage": [
+    true,
+    true
+   ],
+   "dw_hunt": [
+    true,
+    true
+   ],
+   "ah_forage": [
+    true,
+    true
+   ],
+   "ah_hunt": [
+    true,
+    true
+   ],
+   "spring": [
+    true,
+    true
+   ],
+   "hc_mei": [
+    true,
+    true
+   ],
+   "rt_mei_walk": [
+    true,
+    true
+   ],
+   "rt_ya_walk": [
+    true,
+    true
+   ],
+   "rt_supper": [
+    true,
+    true
+   ],
+   "rt_evening": [
+    true,
+    true
+   ]
+  }
+ },
+ "2026-11-08-0814-incremental-coil_dawn.txt": {
+  "sha": "2b97449c64a7d6f28615114b5a3f5d41aaae74cf8b6276725370a61caa4d5a61",
+  "act1": false,
+  "free": {}
+ },
+ "2026-11-08-2320-incremental-yuki_form.txt": {
+  "sha": "23f756eba95c01820c8c1a46af93cdc41de2ae16fec76e13feae1e21de4cbf9c",
+  "act1": true,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "slopes": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_clinic": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_supper": [
+    true,
+    true
+   ],
+   "a1_ya": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    true,
+    true
+   ],
+   "bt_ya": [
+    true,
+    true
+   ],
+   "rr_scout": [
+    true,
+    true
+   ],
+   "bt_dart": [
+    true,
+    true
+   ],
+   "bt_needle": [
+    true,
+    true
+   ],
+   "bt_yuki": [
+    true,
+    true
+   ],
+   "bl_cook": [
+    true,
+    true
+   ],
+   "yk_sis": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ]
+  }
+ },
+ "2026-11-09-2127-incremental-a1_again.txt": {
+  "sha": "6f9b960f95a209db1f02b0c1b893f279118c02db1f905e51cff4d1938bb94bf9",
+  "act1": true,
+  "free": {
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_supper": [
+    true,
+    true
+   ],
+   "a1_clinic": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_ya": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    true,
+    true
+   ],
+   "rr_scout": [
+    true,
+    true
+   ],
+   "bt_ya": [
+    true,
+    true
+   ],
+   "bl_cook": [
+    true,
+    true
+   ],
+   "bl_stakes": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ],
+   "bt_dart": [
+    true,
+    true
+   ],
+   "bt_needle": [
+    true,
+    true
+   ],
+   "bt_yuki": [
+    true,
+    true
+   ],
+   "rr_hunt": [
+    true,
+    true
+   ],
+   "tmei": [
+    true,
+    true
+   ],
+   "dw_forage": [
+    true,
+    true
+   ],
+   "dw_hunt": [
+    true,
+    true
+   ],
+   "tya": [
+    true,
+    true
+   ],
+   "ah_forage": [
+    true,
+    true
+   ],
+   "spring": [
+    true,
+    true
+   ],
+   "hc_mei": [
+    true,
+    true
+   ],
+   "hc_ya": [
+    true,
+    true
+   ],
+   "rt_ya_walk": [
+    true,
+    true
+   ],
+   "rt_mei_walk": [
+    true,
+    true
+   ],
+   "rt_supper": [
+    true,
+    true
+   ],
+   "rt_evening": [
+    true,
+    true
+   ]
+  }
+ },
+ "2026-11-09-2313-incremental-yuki_check.txt": {
+  "sha": "dbbc811cc123d87689c248ac61a5f1142199aace16b76eb722943f32c51bad83",
+  "act1": false,
+  "free": {}
+ },
+ "2026-11-12-1607-incremental-stream.txt": {
+  "sha": "db0b950d5da5153c9b887047609b47fd2c9944f9843ded496d83b5501d1755ba",
+  "act1": false,
+  "free": {}
+ },
+ "2026-11-12-2046-incremental-bl_night.txt": {
+  "sha": "77721a047cab8ecd42828654e632464ceeffda65477fb9452ffec49229a1b082",
+  "act1": true,
+  "free": {
+   "yk_time": [
+    false,
+    true
+   ],
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "slopes": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "wen_time": [
+    true,
+    true
+   ],
+   "mother_time": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_clinic": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "a1_supper": [
+    true,
+    true
+   ],
+   "a1_ya": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    false,
+    true
+   ],
+   "rr_scout": [
+    false,
+    true
+   ],
+   "yk_camp": [
+    false,
+    true
+   ],
+   "bl_cook": [
+    false,
+    true
+   ],
+   "bl_fire": [
+    false,
+    true
+   ]
+  }
+ },
+ "2026-11-12-2109-incremental-rt_camp.txt": {
+  "sha": "18885f5cf940ff3f589e33a3f2f84387866108807657fc590a7920d3a0fd05a1",
+  "act1": true,
+  "free": {
+   "yk_time": [
+    true,
+    true
+   ],
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "slopes": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "wen_time": [
+    true,
+    true
+   ],
+   "mother_time": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_clinic": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "a1_supper": [
+    true,
+    true
+   ],
+   "a1_ya": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    true,
+    true
+   ],
+   "rr_scout": [
+    true,
+    true
+   ],
+   "yk_camp": [
+    true,
+    true
+   ],
+   "bl_cook": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ],
+   "bt_ya": [
+    true,
+    true
+   ],
+   "bt_dart": [
+    true,
+    true
+   ],
+   "bt_needle": [
+    true,
+    true
+   ],
+   "bt_yuki": [
+    true,
+    true
+   ],
+   "rr_hunt": [
+    true,
+    true
+   ],
+   "tmei": [
+    true,
+    true
+   ],
+   "tya": [
+    true,
+    true
+   ],
+   "bl_stakes": [
+    true,
+    true
+   ],
+   "dw_forage": [
+    true,
+    true
+   ],
+   "dw_hunt": [
+    true,
+    true
+   ],
+   "ah_forage": [
+    true,
+    true
+   ],
+   "ah_hunt": [
+    true,
+    true
+   ],
+   "spring": [
+    true,
+    true
+   ],
+   "hc_mei": [
+    true,
+    true
+   ],
+   "hc_ya": [
+    true,
+    true
+   ],
+   "rt_yk_walk": [
+    false,
+    false
+   ],
+   "rt_ya_walk": [
+    false,
+    false
+   ],
+   "rt_mei_walk": [
+    false,
+    false
+   ],
+   "rt_supper": [
+    false,
+    false
+   ]
+  }
+ },
+ "2026-11-13-1356-incremental-a1_again.json": {
+  "sha": "23fcbc6d025730be49c4930144f8986022af7287954738ab85e4382292982589",
+  "act1": true,
+  "free": {
+   "yk_time": [
+    true,
+    true
+   ],
+   "ring": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "berries": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "slopes": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "wen_time": [
+    true,
+    true
+   ],
+   "mother_time": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_clinic": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "a1_supper": [
+    true,
+    true
+   ],
+   "a1_ya": [
+    true,
+    true
+   ],
+   "rr_bracket": [
+    true,
+    true
+   ],
+   "rr_sorrel": [
+    true,
+    true
+   ],
+   "rel_rr_sorrel": [
+    true,
+    true
+   ],
+   "rr_grub": [
+    true,
+    true
+   ],
+   "rr_scout": [
+    true,
+    true
+   ],
+   "bt_ya": [
+    true,
+    true
+   ],
+   "bt_dart": [
+    true,
+    true
+   ],
+   "bt_needle": [
+    true,
+    true
+   ],
+   "bt_yuki": [
+    true,
+    true
+   ],
+   "rr_elk": [
+    true,
+    true
+   ],
+   "rr_snare": [
+    true,
+    true
+   ],
+   "tmei": [
+    true,
+    true
+   ],
+   "tya": [
+    true,
+    true
+   ],
+   "bl_stakes": [
+    true,
+    true
+   ],
+   "yk_camp": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ],
+   "dw_gill": [
+    true,
+    true
+   ],
+   "dw_chestnut": [
+    true,
+    true
+   ],
+   "rel_dw_chestnut": [
+    true,
+    true
+   ],
+   "dw_frog": [
+    true,
+    true
+   ],
+   "rel_dw_frog": [
+    true,
+    true
+   ],
+   "dw_serpent": [
+    true,
+    true
+   ],
+   "dw_fowl": [
+    true,
+    true
+   ],
+   "ah_truffle": [
+    true,
+    true
+   ],
+   "ah_cinder": [
+    true,
+    true
+   ],
+   "rel_ah_cinder": [
+    true,
+    true
+   ],
+   "ah_beetle": [
+    true,
+    true
+   ],
+   "ah_hawks": [
+    true,
+    true
+   ],
+   "spring": [
+    true,
+    true
+   ],
+   "hc_ya": [
+    true,
+    true
+   ],
+   "hc_mei": [
+    true,
+    true
+   ],
+   "rt_yk_walk": [
+    true,
+    true
+   ],
+   "rt_mei_walk": [
+    true,
+    true
+   ],
+   "rt_ya_walk": [
+    true,
+    true
+   ],
+   "rt_supper": [
+    true,
+    true
+   ],
+   "rt_evening": [
+    true,
+    true
+   ]
+  }
+ },
+ "v0.11.7-act1-coil1.json": {
+  "sha": "1c2e4f08957bbf6acaa646da7931f1948b3a9d2d1c1ea11a62b1f5e4083653ec",
+  "act1": true,
+  "free": {
+   "crab": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "ring": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "slopes": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ]
+  }
+ },
+ "v0.11.7-act1-coil2.json": {
+  "sha": "8576ac753007b1aa486c2081a447b6b331a523aa0342b4734ed1c611c4727c6b",
+  "act1": true,
+  "free": {
+   "crab": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "ring": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "clinic": [
+    true,
+    true
+   ],
+   "slopes": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ]
+  }
+ },
+ "v0.11.7-coil2-day1.json": {
+  "sha": "ab4569446de39737f68ef688a6be4e9d525ed50469bb93ac5662d42d46372f8b",
+  "act1": false,
+  "free": {}
+ },
+ "v0.11.7-long-forest-coil2.json": {
+  "sha": "e790819885112c6789b6c3dcfce4a8804d11e6c642517cd32d14f558de7fc9b2",
+  "act1": false,
+  "free": {}
+ },
+ "v0.8.5-act1-end.json": {
+  "sha": "bca2b8859069d1d35498179e802a386fdc88b5e2700674f587d56312fca7a0de",
+  "act1": true,
+  "free": {
+   "berries": [
+    true,
+    true
+   ],
+   "ring": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "yukihunt": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ],
+   "a1_drill": [
+    true,
+    true
+   ],
+   "a1_clinic": [
+    true,
+    true
+   ],
+   "a1_pot": [
+    true,
+    true
+   ],
+   "a1_mei": [
+    true,
+    true
+   ],
+   "a1_council": [
+    true,
+    true
+   ],
+   "mer_e8": [
+    true,
+    true
+   ],
+   "a1_supper": [
+    true,
+    true
+   ],
+   "a1_palisade": [
+    true,
+    true
+   ],
+   "a1_ya": [
+    true,
+    true
+   ],
+   "tmei": [
+    true,
+    true
+   ],
+   "rr_forage": [
+    true,
+    true
+   ],
+   "rr_hunt": [
+    true,
+    true
+   ],
+   "tya": [
+    true,
+    true
+   ],
+   "rr_scout": [
+    true,
+    true
+   ],
+   "bl_stakes": [
+    true,
+    true
+   ],
+   "bl_cook": [
+    true,
+    true
+   ],
+   "bl_fire": [
+    true,
+    true
+   ],
+   "dw_hunt": [
+    true,
+    true
+   ],
+   "dw_forage": [
+    true,
+    true
+   ],
+   "ah_forage": [
+    true,
+    true
+   ],
+   "ah_hunt": [
+    true,
+    true
+   ],
+   "bt_dart": [
+    true,
+    true
+   ],
+   "bt_ya": [
+    true,
+    true
+   ],
+   "bt_yuki": [
+    true,
+    true
+   ],
+   "bt_needle": [
+    true,
+    true
+   ],
+   "spring": [
+    true,
+    true
+   ],
+   "rt_mei_walk": [
+    true,
+    true
+   ],
+   "rt_ya_walk": [
+    true,
+    true
+   ],
+   "rt_supper": [
+    true,
+    true
+   ],
+   "rt_evening": [
+    true,
+    true
+   ]
+  }
+ },
+ "v0.8.5-act1-start.json": {
+  "sha": "8aa601a18a204a8e5072f8302ccc7365abe2a86c84a989800e41416f89aa0f7a",
+  "act1": true,
+  "free": {
+   "berries": [
+    true,
+    true
+   ],
+   "ring": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "yukihunt": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ]
+  }
+ },
+ "v0.8.5-day1-stream.json": {
+  "sha": "7ca11d3224f346b798a95fa2faba0cba9534e4f4ebbd6431607ac9b5a4cf0580",
+  "act1": false,
+  "free": {}
+ },
+ "v0.8.5-day4-mei-lin.json": {
+  "sha": "0d6fef684bf2b53f31d8435b5752b7178361453522e98d1b9a92905ed4ca34f6",
+  "act1": false,
+  "free": {
+   "berries": [
+    true,
+    true
+   ],
+   "ring": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "yukihunt": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ]
+  }
+ },
+ "v0.8.5-day7-tribute.json": {
+  "sha": "65b99433732e5323017cd3c05b74a0682127e5f321c3be0791e5203f75b8e02b",
+  "act1": false,
+  "free": {
+   "berries": [
+    true,
+    true
+   ],
+   "ring": [
+    true,
+    true
+   ],
+   "honey": [
+    true,
+    true
+   ],
+   "cress": [
+    true,
+    true
+   ],
+   "t_blade": [
+    true,
+    true
+   ],
+   "t_darts": [
+    true,
+    true
+   ],
+   "yukihunt": [
+    true,
+    true
+   ],
+   "hare": [
+    true,
+    true
+   ],
+   "fowl": [
+    true,
+    true
+   ],
+   "crab": [
+    true,
+    true
+   ],
+   "explore": [
+    true,
+    true
+   ],
+   "t_feet": [
+    true,
+    true
+   ],
+   "t_needle": [
+    true,
+    true
+   ],
+   "supper": [
+    true,
+    true
+   ],
+   "pot": [
+    true,
+    true
+   ],
+   "workshop": [
+    true,
+    true
+   ],
+   "wen": [
+    true,
+    true
+   ],
+   "drill": [
+    true,
+    true
+   ],
+   "far": [
+    true,
+    true
+   ],
+   "walk": [
+    true,
+    true
+   ]
+  }
+ },
+ "v0.8.5-long-forest-start.json": {
+  "sha": "8ffc3077484058b8835c2f6ce559723af86ed2b0dee221685212a91bd83c06b8",
+  "act1": false,
+  "free": {}
+ }
+}
