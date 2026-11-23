@@ -8,7 +8,7 @@ import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay,
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
 import { TT } from './tribute_texts.js'; // v0.11.251 (RV-A, HL)
 import { textDay, coilStamp, seqText, dayIndex } from '../core/lines.js'; // v0.11.232 (P5-B, V3b): dayIndex // v0.11.224 (TX2, V3a): seqText
-import { longCal, storyDay, storyDayOf, calStart, calEnd, lastOfWeek, blSpan, elderLeft, departLeft, daysWord, DaysWord, dayWord, countsFill, numWord, dayTitle, titleCase } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar // RV1 (FX); v0.11.188 (N1, L7): coilStamp
+import { storyDay, storyDayOf, calStart, calEnd, lastOfWeek, blSpan, elderLeft, departLeft, daysWord, DaysWord, dayWord, countsFill, numWord, dayTitle, titleCase } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar // RV1 (FX); v0.11.188 (N1, L7): coilStamp
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 import { SONG_AT } from './songs.js'; // v0.11.188 (N1, L7): the song of fo_elder_named, by key (no song named here)
 
@@ -123,8 +123,8 @@ export const SUPPER_POT = {
 };
 const supperPot = (g) => SUPPER_POT[Math.max(1, Math.min(3, Number(g.flags.kitchen_seen) || 0))];
 /** Day 8, 9 or 10. */
-/** v0.11.203 (owner pick T1, TS1): the story's day (8–10); in the long calendar each is a week (Days 44–50, 51–57, 58–64). `ddShow` is the
- *  calendar's day for the titles and the count to the Elder; the farewell waits for the last week's last day. */
+/** v0.11.203 (owner pick T1, TS1): the story's day (8–10); in the long calendar each is a week (Days 44–50, 51–57, 58–64). The titles and
+ *  the count to the Elder read the calendar day (`day`); the farewell waits for the last week's last day. */
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1); // RV1 (MC)
 const dd = (g) => Math.max(8, Math.min(10, storyDay(g)));
 
@@ -193,7 +193,6 @@ const FO_YA_NEW = {
 "I don't like them. They don't like me." She pulls a knee up under her chin. "We go to the tree, and these are what's left to guard the old ones and the goats. Why am I counting them, scholar? I never count anything."`],
 };
 const FO_YA_L0 = { 10: ['"You go in front. We\'ll both be glad you\'re there."', '"Because they\'re yours now. It\'s a nuisance. I\'d know."'] }; // day 9 keeps "Throw her." (the chaff result)
-const ddShow = (g) => (longCal(g) ? day(g) : dd(g));
 export const farewellNow = (g) => dd(g) >= 10 && lastOfWeek(g); // v0.11.204 (RV1, L4): exported for the week planner's stop
 /** The text day as a story day (8–10), for the lists by the story's day. */
 export const textStoryDay = (g) => storyDayOf(g, textDay(g));
@@ -309,7 +308,7 @@ export const BREAK_HUBS = ['fo_ashfall'];
 
 export const FALLOUT = {
     fo_start: {
-        id: 'fo_start', title: (g) => (longCal(g) ? dayTitle(g) : 'Day Eight'), // RV1 (MC)
+        id: 'fo_start', title: (g) => dayTitle(g), // RV1 (MC)
         art: (g) => (ending(g) === 'bluff' ? 'envoy' : 'ashfall_dawn'), place: P,
         enter: (g) => { if (g.james.hp < 1) g.james.hp = 1; return []; },
         text: (g) => `${ending(g) === 'paid' && g.flags.lu_won ? TT.openingPaid /* v0.11.251 (RV-A, HL) */ : OPENING[ending(g)]}
@@ -355,7 +354,7 @@ ${g.flags.romance ? 'Mei Lin, at the back of the room, says nothing. She has no 
         ],
     },
     fo_elder_named: {
-        id: 'fo_elder_named', title: (g) => (longCal(g) ? titleCase(daysWord(elderLeft(g))) : 'Thirteen Days'), // RV1 (MC)
+        id: 'fo_elder_named', title: (g) => titleCase(daysWord(elderLeft(g))), // RV1 (MC)
         art: 'ashfall_dawn', place: P,
         text: (g) => `So that is how it stands. In ${daysWord(elderLeft(g))} Outer Elder Shen Qiu of the Crimson Lotus comes down that road, and everything you have done here goes on the scales.
 
@@ -373,7 +372,7 @@ ${DaysWord(elderLeft(g))}. You can spend them building walls. Or you can go and 
 
     /* ---------------- the day hub ---------------- */
     fo_ashfall: {
-        id: 'fo_ashfall', title: (g) => `Ashfall — Day ${ddShow(g)}`, art: 'village', place: P,
+        id: 'fo_ashfall', title: (g) => `Ashfall — Day ${day(g)}`, art: 'village', place: P,
         text: (g) => {
             const h = hour(g);
             const d2 = Math.max(0, Math.min(2, textStoryDay(g) - 8)); // v0.11.154 (owner pick RV1, Fable's review, L3 FX): by the story's day (from 05:00), Day 8, 9, 10; was byDay(g, [0, 1, 2], 'fo_ashfall')
@@ -384,7 +383,7 @@ ${DaysWord(elderLeft(g))}. You can spend them building walls. Or you can go and 
                 : d2
                 ? (h < 11 ? `Morning. The hammers started before the light did, and nobody has asked them to stop.` : h < 15 ? `Midday. The chalk line across the barley has been walked so often that it is a path.` : h < 19 ? `Late afternoon. The well is busy and silent, which in Ashfall is how you know people are frightened.` : `Dusk. Shutters closed, lamps lit, every door barred out of habit.`)
                 : (h < 11 ? 'Morning. Axes, hammers, and a work-chant kept going so that nobody has to think.' : h < 15 ? 'Midday. A white chalk line runs through the barley where the palisade is to stand.' : h < 19 ? 'Late afternoon. Forty chimneys smoking, and not one laugh at the well all day.' : 'Dusk. Lamps behind every shutter.');
-            const days = calStart(g, 21) - ddShow(g);
+            const days = calStart(g, 21) - day(g);
             return `${when} ${days} days until the Elder.
 
 ${yaHere(g) ? (g.flags.ya_party ? (d2 === 2 ? `Ya is on the shrine roof, honing her spear's bone tip on a ridge tile and looking north. Someone has moved the offering bowl out from under her.` : d2 ? `Ya is on the shrine roof again, awake this time, eating something with its legs still on and watching the street like a play.` : 'Ya is asleep on the shrine roof with one leg dangling, apparently on purpose, to offend the god.') : (d2 === 2 ? `Ya is somewhere in the village. The row of fish drying along the south wall is one fish short, and the gap is being discussed in low, formal voices.` : d2 ? `Ya is somewhere in the village. A dog is barking at one end of it and a grandmother is shouting at the other, so she is moving fast.` : 'Somewhere in the village, Ya is offending someone. You can tell by the silence.')) : ''}
@@ -576,7 +575,7 @@ Mei Lin has one hand for her bowl. The other is tracing the palisade line across
 Mei Lin eats left-handed, because the right has a splinter in it that she will let nobody look at. She has stopped drawing the wall on the table and begun counting it, posts against days, and likes neither number. ${byForm(g, "Yuki, on the stove, has sawdust in her whiskers and is taking no questions about it.", "Yuki, along the wall, smells of pine resin; she dragged four trunks down from the ridge today and let the hunters believe they were helping.", "Yuki, at the head of the table, reaches across and turns the right hand over unasked, has the splinter out before Mei Lin can object, and goes back to her pork.")}`, (g) => `The talk at supper is of post holes: how deep, how many, whose turn to dig. The mother conducts it as she would a burial. When it is settled she puts down her bowl and asks you whether a wall will be enough.
 
 You are still choosing an answer when Mei Lin says, "It'll be enough to make them knock," and laughs, and then looks at the shutters. Her mother does not rebuke her. That is how you learn what the count is doing to this house. ${byForm(g, "Yuki leaves the stove, crosses the table between the bowls and sits down facing the mother, which is as near to an answer as anyone gets tonight.", "Yuki raises her head from the floor, and the lamp flame leans; the mother looks at her for some time, and then goes on eating.", `"It will not be the wall they meet first," says Yuki, from the head of the table, and helps herself to the pickles. The mother considers this, and bows.`)}`, ...FS8.map(fs8), fs8(FS7.d8)]) /* v0.11.243 (P15-B, SN7): the seventh */
-            : longCal(g) && textStoryDay(g) === 10 ? seqText(g, 'fo_supper:10', FS10.map(fs9)) // v0.11.241 (owner pick P13-A, FS10): story day 10 its own six (the long calendar only; the old calendar's day 10 is the farewell); RV1 (C M1): by the text's story day (from 05:00, as the day records), so a supper after midnight on story day 9's last day stays in day 9
+            : textStoryDay(g) === 10 ? seqText(g, 'fo_supper:10', FS10.map(fs9)) // v0.11.241 (owner pick P13-A, FS10): story day 10 its own six; RV1 (C M1): by the text's story day (from 05:00, as the day records), so a supper after midnight on story day 9's last day stays in day 9
             : seqText(g, 'fo_supper:9', [(g) => `${yaHere(g) ? `Ya comes to supper. Nobody invited her. She simply arrives at the door, walks in, sits at the table on the *wrong side* — the host's side — and eats with her fingers, fast, hunched, watching the door the whole time like a wolf at a kill.
 
 Mei Lin's mother serves her anyway, because a guest is a guest even if she is an animal, and sits through the whole meal with the face of a woman enduring a tribulation. Your bowl she fills past the line, ${supperPot(g)}
@@ -650,13 +649,13 @@ Its owner bows to you regardless and thanks you for the attempt. Nothing else th
     },
 
     fo_morning: {
-        id: 'fo_morning', title: (g) => `Day ${ddShow(g)}`, art: 'ashfall_dawn', place: P,
+        id: 'fo_morning', title: (g) => `Day ${day(g)}`, art: 'ashfall_dawn', place: P,
         enter: (g) => {
             const lines = [];
             if (hour(g) < 6 || hour(g) >= 19) lines.push(nightRest(g)); // v0.11.92 (X1): half back after the barley wolves
             // v0.11.225 (owner pick LO2, WM; RV1 WMa): on the long calendar the two mornings right after the loss (as the old calendar's days 9 and 10;
-            // every Fallout morning before, about 20), counted in the world flag `wolf_bit` (0–2); the old calendar as before
-            if (g.flags.wolf === 'lost' && (!longCal(g) || (g.flags.wolf_bit || 0) < 2)) { g.james.hp = Math.ceil(g.james.hp * 0.85); if (longCal(g)) g.flags.wolf_bit = (g.flags.wolf_bit || 0) + 1; }
+            // every Fallout morning before, about 20), counted in the world flag `wolf_bit` (0–2)
+            if (g.flags.wolf === 'lost' && (g.flags.wolf_bit || 0) < 2) { g.james.hp = Math.ceil(g.james.hp * 0.85); g.flags.wolf_bit = (g.flags.wolf_bit || 0) + 1; }
             eat(g, 20);
             lines.push('Breakfast at Mei Lin\'s: gruel and pickles, +20 satiety.');
             return lines;
@@ -667,7 +666,7 @@ Its owner bows to you regardless and thanks you for the attempt. Nothing else th
 You are on the step with a bowl of gruel when Ashfall goes silent at your back. It is not the careful silence you have grown used to. It is sharp and complete, like a plate dropped in a temple.
 
 Someone is walking out of the Blackroot: down the north path, through the barley, hauling something heavy behind her on a rope.`
-            : `${longCal(g) ? `${dayWord(g)}. ${DaysWord(elderLeft(g))}` : `Day ${ddShow(g)}. ${calStart(g, 21) - ddShow(g)} days`} to the Elder. The wind has come round to the north again, and your Convergence hums along under it without having asked your leave.`),
+            : `${dayWord(g)}. ${DaysWord(elderLeft(g))} to the Elder. The wind has come round to the north again, and your Convergence hums along under it without having asked your leave.`),
         choices: [
             { text: 'Look.', show: (g) => dd(g) === 9 && !yaHere(g), to: 'ya_arrives' },
             { text: 'Old Wen has called for you. Today is the day you decide.', show: (g) => dd(g) >= 10 && !g.flags.fo_plan, to: 'fo_plan' },
@@ -696,7 +695,7 @@ Then she sees you. And Yuki. Her nostrils flare, and all the play leaves her fac
         enter: (g) => { g.flags.ya_met = true; bumpRel(g, 'Ya', 2, 2); return []; },
         text: (g) => `She comes straight up to you, far closer than anyone here would stand, and *smells* you: the neck, the hair, the collar of the coat. Yuki, ${byForm(g, 'on your shoulder', 'at your hip', 'at your elbow')}, sets her ears back and lets it happen. She has let nobody do it before.
 
-"*You,*" says the woman. "${longCal(g) ? 'Night after night I sat outside your little fire. All of them.' : 'Three nights I sat outside your little fire. Three.'} You smell like nothing. Nothing smells like nothing. It all stinks of rot here: the grass, the beasts, the Sect, *them*" — her thumb goes at the village — "whatever eats this air. Not you." A grin, every tooth in it. "I wondered what you'd taste of. Then the dogs came at you, and you killed them, and I thought: mine. I'll fetch him when I get hungry."
+"*You,*" says the woman. "${'Night after night I sat outside your little fire. All of them.'} You smell like nothing. Nothing smells like nothing. It all stinks of rot here: the grass, the beasts, the Sect, *them*" — her thumb goes at the village — "whatever eats this air. Not you." A grin, every tooth in it. "I wondered what you'd taste of. Then the dogs came at you, and you killed them, and I thought: mine. I'll fetch him when I get hungry."
 
 "I'd like the 'mine' part explained."
 
@@ -705,7 +704,7 @@ Then she sees you. And Yuki. Her nostrils flare, and all the play leaves her fac
 She means Mei Lin, behind you, who has come out on the step with a knife in one fist and a bunch of herbs in the other, and outrage all over her face. ${meiLovers(g) ? 'Ya\'s nose wrinkles. She looks from Mei Lin to you and back. "Oh. *Oh.* You two." She sounds pleased, the way a fox sounds pleased to find two hens.' : 'Ya\'s grin widens. "Oh, I like her. She looks like she bites."'}`,
         choices: [
             { text: '"James. That\'s Mei Lin. The one behind you is Old Hu, and he\'s about to challenge you."', to: 'ya_challenge' },
-            { text: (g) => (longCal(g) ? '"You followed me for weeks and didn\'t say hello?"' : '"You followed me for three days and didn\'t say hello?"'), // v0.11.224 (TX2, DN1)
+            { text: (g) => '"You followed me for weeks and didn\'t say hello?"', // v0.11.224 (TX2, DN1)
               do: (g) => { bumpRel(g, 'Ya', 3, 2); return ['"Saying hello is how you get speared," she says, patiently, as one explains fire to the very young.']; }, to: 'ya_challenge' },
         ],
     },
@@ -713,7 +712,7 @@ She means Mei Lin, behind you, who has come out on the step with a knife in one 
         id: 'ya_challenge', title: 'A Matter of Face', art: 'ya_fight', place: `${P} — the lane`,
         text: (g) => `Old Hu is, in fact, about to challenge her. The headband is off already, folded, and given into his nephew's keeping, and in Ashfall wars have been declared with less. Formal fury has turned his face grey. She insulted him in the lane before every soul in Ashfall; this world allows a man two answers to that, and his years have put both out of reach.
 
-Ya notices, and *brightens*. "A fight? Good. ${longCal(g) ? 'Days and days I\'ve been walking.' : 'Four days I\'ve been walking.'}"
+Ya notices, and *brightens*. "A fight? Good. ${'Days and days I\'ve been walking.'}"
 
 "Old Hu," you say, "is seventy."
 
@@ -766,7 +765,7 @@ The chewing stops. So does the grin.
 
 "I sleep in its roots in winter," she says. "It's warm. Nothing else in the forest is warm." She is quiet for a breath. "Sometimes it hums. Only while I sleep. I wake up, and it stops." Her eyes go narrow. "The nights I was near *you*, it hummed louder."
 
-Then the grin comes back, wider than before. "Anyway. Salt. Iron. And you. You gave the white one the best of the meat before you ate, ${longCal(g) ? 'every single night' : 'three nights running'}. I watched." The spoon swings round to Mei Lin. "And maybe you."
+Then the grin comes back, wider than before. "Anyway. Salt. Iron. And you. You gave the white one the best of the meat before you ate, ${'every single night'}. I watched." The spoon swings round to Mei Lin. "And maybe you."
 
 Mei Lin answers with the noise of a kettle.`,
         choices: [
@@ -776,7 +775,7 @@ Mei Lin answers with the noise of a kettle.`,
     },
     ya_share: {
         id: 'ya_share', title: 'An Indecent Proposal', art: 'ya_close', place: `${P} — Mei Lin's step`,
-        text: (g) => `Ya has been studying the two of you as a predator studies anything: with patience, and with nothing overlooked. ${meiLovers(g) ? 'She saw Mei Lin\'s hand find your sleeve on the step. ' + (longCal(g) ? 'She saw the hay that keeps turning up in Mei Lin\'s hair.' : 'She saw the hay still in Mei Lin\'s hair from two nights ago.') : 'She saw how the two of you keep not looking at each other.'}
+        text: (g) => `Ya has been studying the two of you as a predator studies anything: with patience, and with nothing overlooked. ${meiLovers(g) ? 'She saw Mei Lin\'s hand find your sleeve on the step. ' + 'She saw the hay that keeps turning up in Mei Lin\'s hair.' : 'She saw how the two of you keep not looking at each other.'}
 
 "So," she says, and licks gruel from her thumb. "You two are a pair. Good. I don't mind. In the forest, when the kill is good, everybody eats." Her eyes go over Mei Lin, frank and friendly and approving. "You're pretty when you're angry. You're angry a lot. Lucky."
 

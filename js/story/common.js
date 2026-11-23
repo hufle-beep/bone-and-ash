@@ -1,6 +1,6 @@
 /** Shared story helpers: flags, days, food, and how enemies grow with the days James spends training. */
 import { clockParts, addItem, eat, wakeDay, dayHour, combatHooks, yukiForm, foodHooks, spoilFresh, freshDue, advance, itemCap } from '../core/game.js';
-import { longCal, storyDay, storyDayOf, STAY_DAYS } from '../core/calendar.js';
+import { storyDay, storyDayOf, STAY_DAYS } from '../core/calendar.js';
 export { byDay, dayIndex, dayReply, seqText } from '../core/lines.js'; // v0.11.224 (TX2, V3a): seqText // v0.11.135 (owner picks NT1, EV1): a scene's text for the day; v0.11.136 (NC1): a reply's
 /** v0.11.125 (owner pick FM1): a story line by Yuki's current form, as the pictures draw her (the cat's line is the old one; texts by Fable). */
 export const byForm = (g, cat, tiger, human) => { const f = yukiForm(g); return f === 'tiger' ? tiger : f === 'human' ? human : cat; };
@@ -17,7 +17,7 @@ export const DAILY_KEYS = new Set();
 /* v0.11.213 (owner pick FQ1, S3, 2026-11-17 15:35: "FQ1 but also apply to the Heart cards of Mei and Ya"): on the long calendar's
  * stays the repeating door cards (and the Heart's two fireside talks) open every SPACE_DAYS-th day, not every day: a card taken
  * today opens again SPACE_DAYS days later (a day missed costs no visit). Past days count only when they were the same stay's (a
- * journey day's visit, or the last stay's, doesn't hold a stay's first days: RV1, L4). The old calendar, and the long calendar's journey days, keep once a day. The base
+ * journey day's visit, or the last stay's, doesn't hold a stay's first days: RV1, L4). The journey days keep once a day. The base
  * game gives 3 visits a stay (one a story day); the long calendar gave 21 (7×), now 7 (2.3×). Keys: the daily keys below, and the
  * calendar-day flags `spring`, `hc_mei`, `hc_ya` (act1_heart.js). */
 export const SPACE_DAYS = 3;
@@ -35,7 +35,7 @@ const FAM_KEY = new Map(), KEY_OF = new Map();
 /** Space the daily key `key` by its card `cardId`'s familiarity (SK). */
 export function spaceByFam(key, cardId) { FAM_KEY.set(key, cardId); KEY_OF.set(cardId, key); SPACED.add(key); }
 const famReady = (g, key) => !FAM_KEY.has(key) || (Number(g.tasks?.fam?.[FAM_KEY.get(key)]) || 0) >= SKILLED_FAM;
-const spacedNow = (g, key) => !spaceOff && SPACED.has(key) && longCal(g) && STAY_DAYS.has(storyDay(g)) && famReady(g, key);
+const spacedNow = (g, key) => !spaceOff && SPACED.has(key) && STAY_DAYS.has(storyDay(g)) && famReady(g, key);
 /** CN: is the work card `cardId` spaced now (its plan row says "every 3rd day")? */
 export const cardSpaced = (g, cardId) => KEY_OF.has(cardId) && spacedNow(g, KEY_OF.get(cardId));
 /** RV2 (NO, NC): the daily key the card `cardId` is spaced by, or null. */
@@ -159,7 +159,7 @@ export const preservable = (g) => preservePlan(g).reduce((a, [, n]) => a + n, 0)
 export function preserveChoice(hubId, { camp = false } = {}) {
     return {
         text: PRESERVE_LABEL, preserve: true,
-        show: (g) => longCal(g) && (!camp || hubId !== 'wilds' || !!g.flags.fire) && preservable(g) > 0,
+        show: (g) => (!camp || hubId !== 'wilds' || !!g.flags.fire) && preservable(g) > 0,
         minutes: (g) => preservable(g) * PRESERVE_MIN,
         do: (g) => {
             spoilFresh(g); const plan = preservePlan(g), got = {}; // what has turned first: the card counted without it

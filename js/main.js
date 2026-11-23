@@ -219,7 +219,7 @@ function doTask(id) {
 /* v0.11.204 (owner pick W1): the long calendar's week. R3: after a story choice, the quiet night's screens seen before are walked at
  * once (one Results entry); P1: a plan stopped by the evening's choice goes on by itself the next morning. */
 function weekAfter() {
-    if (!g || g.cal !== LONG_CAL || g.combat) return;
+    if (!g || g.combat) return; // v0.11.260 (P28-A, OC2): every game on the long calendar (a load moves an old save first)
     const { fold: f, resume } = afterStory(g, SCENES); // v0.11.206 (FC1, RV1 TG1): the steps the forecast's dry run takes
     if (f.steps) addResult('A quiet night', f.lines.length ? f.lines : [`${f.steps} screen${f.steps > 1 ? 's' : ''} seen on an earlier night, walked at once.`], false, { quiet: true });
     if (resume) runPlan(); // RV1 (L1): also a plan whose week just ended, so "The week is over." shows

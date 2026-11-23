@@ -71,7 +71,7 @@ export const ecStep = (c) => Math.max(0, Math.min(2, 28 - c));
 /** "the Governing crown thread and the Governing nape thread" from collateral `c`. */
 export const ecPairName = (c) => (ecStep(c) === 2 ? `${EXTRA_COLL[c]} and ${EXTRA_COLL[c + 1]}` : EXTRA_COLL[c]);
 const ecCount = (c) => (ecStep(c) === 2 ? `${c + 1} and ${c + 2}/28` : `${c + 1}/28`);
-/** A channel's hours (the tables above are ×1); v0.11.207 (owner pick SC2, S6): ×4 on the long calendar (`merMult`; the old calendar ×1). */
+/** A channel's hours (the tables above are ×1); v0.11.207 (owner pick SC2, S6): ×4 on the long calendar (`merMult`). */
 const need = (g, k) => merMult(g) * (k === 'pri' ? priHours(P(g)) : k === 'col' ? colHours(colGroupsOpen(g)) : k === 'e8' ? e8Hours(m(g).e) : k === 'ec' ? ecHours(m(g).c) : jnHours(m(g).j));
 const nameOf = (g, k) => (k === 'pri' ? PRIMARIES[P(g)]?.name : k === 'col' ? COL_GROUPS[colGroupsOpen(g)]?.name : k === 'e8' ? EXTRA8[m(g).e]?.name : k === 'ec' ? ecPairName(m(g).c) : JUNCTIONS[m(g).j]?.name);
 const countOf = (g, k) => (k === 'pri' ? `${P(g) + 1}/12` : k === 'col' ? `group ${colGroupsOpen(g) + 1}/8` : k === 'e8' ? `${m(g).e + 1}/8` : k === 'ec' ? ecCount(m(g).c) : `${m(g).j + 1}/10`);

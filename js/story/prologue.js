@@ -24,7 +24,7 @@ import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4, installSelene } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 import { MERIDIANS, EXTRA_FROM } from './meridians.js';
-import { weekBegins, calStart, longCal, tributeLeft, daysWord, dayTitle } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar
+import { weekBegins, calStart, tributeLeft, daysWord, dayTitle } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar
 import { installYukiTime } from './yuki_time.js'; // v0.11.137 (TR1)
 import { installHouseTime } from './house_time.js'; // v0.11.139 (MW1)
 import { installKitchen } from './kitchen_install.js'; // v0.11.181 (SP1, PS)
@@ -54,7 +54,7 @@ const jackals = (g) => {
         id: 'jackals', night: true, // v0.11.92 (O1): a night fight costs sleep
         intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */,
         band: 'standard',
-        enemies: enemies.map((e) => grow(e, s, JACKAL_GROWTH)).map((e) => (longCal(g) ? longStep(e, LONG_STEPS.jackals) : e)), // v0.11.251 (P21-E, JK)
+        enemies: enemies.map((e) => grow(e, s, JACKAL_GROWTH)).map((e) => longStep(e, LONG_STEPS.jackals)), // v0.11.251 (P21-E, JK)
         win: 'jackals_won', lose: 'jackals_lost', flee: 'jackals_fled',
     };
 };
@@ -110,7 +110,7 @@ export const luSpread = (g) => (d6(g) - 3.5) * LU_SPREAD;
  *  2.40 → 2.10 Coils, Act 1 4.47 → 4.35 / 4.40 → 4.25. */
 export const LU_HP_LONG = -0.5;
 export const LU_READ_HP = 0.5;
-export const luReads = (g) => (longCal(g) ? Math.max(0, (g.james.realm || 0) - 1) : 0);
+export const luReads = (g) => Math.max(0, (g.james.realm || 0) - 1);
 /** v0.11.252 (owner pick P22-A, JD): the jackals' run on the long calendar, DC 4 → 3.5 (no dice: 2 → 1.5): Careful's Convergence Use
  *  at night on Coil 1 is 1.5, so it gets away (its Coil-1 jackal deaths 75 → 0%, its Coil ends at the tribute instead). */
 export const JR_DC_LONG = 3.5;
@@ -125,7 +125,7 @@ const collectorsFight = (g) => {
     // the hunters you drilled hold the others off and wear Lu Han down
     if (militia) enemies[0].hp = Math.max(6, enemies[0].hp - 2 * militia);
     const reads = luReads(g);
-    if (longCal(g)) enemies[0] = longStep({ ...enemies[0], hp: enemies[0].hp + luSpread(g) + LU_HP_LONG + LU_READ_HP * reads }, LONG_STEPS.collectors); // v0.11.252 (P22-A, TC); v0.11.256 (P26-A): LN, LR
+    enemies[0] = longStep({ ...enemies[0], hp: enemies[0].hp + luSpread(g) + LU_HP_LONG + LU_READ_HP * reads }, LONG_STEPS.collectors); // v0.11.252 (P22-A, TC); v0.11.256 (P26-A): LN, LR
     if (reads) enemies[0] = { ...enemies[0], dc: enemies[0].dc + LU_READS * reads, atk: enemies[0].atk + LU_READS * reads };
     return {
         id: 'collectors',
@@ -495,7 +495,7 @@ ${g.flags.stakes ? 'Something yelps on your bone stakes: one of the visitors is 
 Ashfang jackals. You have never seen one, and you would know them anywhere: they look exactly as this world's Qi tastes.`,
         choices: [
             { text: 'Fight.', combat: jackals, to: 'jackals_won' },
-            { text: 'Bone wall between you and them, then run for the water.', qi: 4, check: { skill: 'Convergence Use', dc: (g) => (longCal(g) ? JR_DC_LONG : 4) /* v0.11.252 (P22-A, JD) */ }, to: 'jackals_fled', fail: 'night_attack_forced' },
+            { text: 'Bone wall between you and them, then run for the water.', qi: 4, check: { skill: 'Convergence Use', dc: JR_DC_LONG /* v0.11.252 (P22-A, JD) */ }, to: 'jackals_fled', fail: 'night_attack_forced' },
         ],
     },
     night_attack_forced: {
@@ -534,7 +534,7 @@ Cold, wet, alive, furious: you are all four. Yuki — ${byForm(g, "perched on yo
 
     /* ================= DAY 2 ================= */
     dawn: {
-        id: 'dawn', title: (g) => (longCal(g) ? dayTitle(g) : g.flags.long ? 'Day Four' : 'Day Two'), // RV1 (MC)
+        id: 'dawn', title: (g) => dayTitle(g), // RV1 (MC)
         art: 'forest_dawn', place: 'Blackroot Wilds',
         text: (g) => `${canFly(g) ? (foodCount(g) ? FW.dawnLeft : FW.dawnNothing) /* v0.11.195 (F1, D1: DW-1) */ : `Morning comes up red. You eat ${foodCount(g) ? 'what\'s left' : 'nothing, a meal you are getting very good at'}, and you are working out which direction counts as *away* when the scream comes.`}
 
@@ -785,7 +785,7 @@ You are not a doctor. You are a man who has spent fifteen years on the question 
 
 You are still looking for it when it finds you. It has the dimensions of a small car, and it regards your visit as a *personal* matter.`,
         choices: [
-            { text: 'Darts to the eyes, then the blade.', combat: (g) => ({ id: 'boar', intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, band: 'challenging', enemies: [grow({ name: 'Ironhide boar', hp: 10, dc: 4, atk: 4, dmg: 5, dr: 1 }, forestScale(g), BOAR_GROWTH)].map((e) => (longCal(g) ? longStep(e, LONG_STEPS.boar) : e)) /* v0.11.251 (P21-E, BR) */, win: 'boar_won', lose: 'boar_lost', flee: hubOf(g) }), to: 'boar_won' },
+            { text: 'Darts to the eyes, then the blade.', combat: (g) => ({ id: 'boar', intro: '' /* v0.11.231 (P4-2, FI): never shown, the stomp posture opens it */, band: 'challenging', enemies: [grow({ name: 'Ironhide boar', hp: 10, dc: 4, atk: 4, dmg: 5, dr: 1 }, forestScale(g), BOAR_GROWTH)].map((e) => longStep(e, LONG_STEPS.boar)) /* v0.11.251 (P21-E, BR) */, win: 'boar_won', lose: 'boar_lost', flee: hubOf(g) }), to: 'boar_won' },
             { text: 'A pit and a bed of bone spikes. Make it come to you.', qi: 6, check: { skill: 'Convergence Use', dc: 4, bonus: (g) => -Math.floor(forestScale(g) / 2) }, time: 60, to: 'boar_won', fail: 'boar_lost' },
         ],
     },
@@ -806,7 +806,7 @@ You are still looking for it when it finds you. It has the dimensions of a small
         enter: (g) => { const p = clockParts(g.minutes); if (dayHour(g) < 19) g.minutes = (p.day - 1) * 1440 + 19 * 60; /* v0.11.37: after midnight (24+) it is already evening: no jump back to 19:00 */ if (!g.flags.ate_dinner) { eat(g, 30); g.flags.ate_dinner = true; return ['Millet, greens and a little smoked fish: +30 satiety.']; } return []; },
         text: (g) => `${g.flags.ignored
         ? 'You find her house by asking. On her doorstep you apologise, properly, with the sarcasm left out. She lets you in, which you had not earned, and sets a bowl in front of you, which you had earned even less.'
-        : g.flags.long ? (longCal(g) ? 'Three weeks of suppers at Mei Lin\'s.' : 'Third supper at Mei Lin\'s.') + ' Her mother serves you first now, which in Ashfall carries about the weight of a signed adoption certificate. The low music from your forearm she has ruled on as well: "It keeps time like a loom. A house can bear that."' : 'Mei Lin\'s house is two rooms and a herb loft, and her mother is a small, fierce woman who gives you one look and starts adding millet to the pot.'}
+        : g.flags.long ? 'Three weeks of suppers at Mei Lin\'s.' + ' Her mother serves you first now, which in Ashfall carries about the weight of a signed adoption certificate. The low music from your forearm she has ruled on as well: "It keeps time like a loom. A house can bear that."' : 'Mei Lin\'s house is two rooms and a herb loft, and her mother is a small, fierce woman who gives you one look and starts adding millet to the pot.'}
 
 Afterwards her mother informs Mei Lin, in a low, severe voice pitched for you to overhear, that a respectable daughter does not drink plum wine with strange men under her mother's roof. Then she goes to bed. Mei Lin pours herself a second cup the moment the door shuts, and that leaves Mei Lin, a clay lamp, a jar of what may once have been plum wine, and you. Yuki has claimed the warmest place by the stove and is pretending to be asleep, convincing nobody.
 
@@ -885,13 +885,13 @@ Lu Han does not take it. He looks at it for as long as courtesy requires, the wa
     },
     bluff_win: {
         id: 'bluff_win', title: 'Senior', art: 'collectors', place: 'Ashfall Hamlet — the tribute post',
-        enter: (g) => { g.flags.ending = 'bluff'; const fv = longCal(g) ? 25 : 20; bumpRel(g, 'Village', fv, 0); /* v0.11.252 (P22-A, FV; RV-A: long calendar): was 20, the send's +25 */ return []; },
+        enter: (g) => { g.flags.ending = 'bluff'; bumpRel(g, 'Village', 25, 0); /* v0.11.252 (P22-A, FV; RV-A): was 20, the send's +25 */ return []; },
         text: bluffWinText, // v0.11.251 (MT): after the won fight (Fable's); RV-A (SM): its degree-3 sentences
         choices: [{ text: 'Breathe out.', to: 'epilogue' }],
     },
     tribute_paid: {
         id: 'tribute_paid', title: 'Heavenly Material', art: 'hairpin', place: 'Ashfall Hamlet — the tribute post',
-        enter: (g) => { addItem(g, 'hairpin', -1); g.flags.ending = 'paid'; const fv = longCal(g) ? 25 : 12; bumpRel(g, 'Village', fv, 0); /* v0.11.252 (P22-A, FV; RV-A: long calendar): was 12, the send's +25 */ return []; },
+        enter: (g) => { addItem(g, 'hairpin', -1); g.flags.ending = 'paid'; bumpRel(g, 'Village', 25, 0); /* v0.11.252 (P22-A, FV; RV-A): was 12, the send's +25 */ return []; },
         text: paidText, // v0.11.251 (MT): after the won fight (Fable's); RV-A (SM): its degree-3 sentence
         choices: [{ text: 'Breathe out.', to: 'epilogue' }],
     },
@@ -906,7 +906,7 @@ Your hands are shaking. It isn't fear. It is that the thing worked.`),
         choices: [
             { text: TT.labels.send, to: 'collectors_sent' },
             { text: TT.labels.bluff, show: (g) => g.flags.tribute_fail !== 'bluff' /* RV-A (OS): an old save's called bluff */, qi: 4, check: { skill: 'GU', dc: 7, bonus: bluffBonus }, failDo: (g) => { g.flags.lu_fail = 'bluff'; return []; } /* RV-A (FL): the line opens collectors_sent */, to: 'bluff_win', fail: 'collectors_sent' },
-            { text: TT.labels.pin, qi: 8, whole: (g) => longCal(g) /* v0.11.252 (P22-A, PN; review C L2; RV-A: long calendar): no thin haul, no double */, check: { skill: 'Convergence Use', dc: 5, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, show: (g) => g.flags.tribute_fail !== 'hairpin' /* RV-A (OS) */, do: (g) => { addItem(g, 'hairpin', 1); return []; }, failDo: (g) => { g.flags.lu_fail = 'pin'; return []; } /* RV-A (FL) */, to: 'tribute_paid', fail: 'collectors_sent' },
+            { text: TT.labels.pin, qi: 8, whole: () => true /* v0.11.252 (P22-A, PN; review C L2; RV-A): no thin haul, no double */, check: { skill: 'Convergence Use', dc: 5, bonus: (g) => -Math.floor((forestScale(g) + villageScale(g)) / 2) }, show: (g) => g.flags.tribute_fail !== 'hairpin' /* RV-A (OS) */, do: (g) => { addItem(g, 'hairpin', 1); return []; }, failDo: (g) => { g.flags.lu_fail = 'pin'; return []; } /* RV-A (FL) */, to: 'tribute_paid', fail: 'collectors_sent' },
         ],
     },
     /** v0.11.251 (MT): the victory's own screen, the old win texts' speech word for word by the degree of the won fight. */

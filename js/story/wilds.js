@@ -7,7 +7,7 @@ import { condensationSatGain } from '../core/formulas.js';
 import { sitGain, yukiFightSkill, canFly } from '../core/game.js'; // v0.11.118 (YK1 review, SB); v0.11.131 (XB2, FY): canFly
 import { FW } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
 import { set, day, hour, daily, markDaily, spaceByFam, forestScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
-import { storyNight, weekMorning, longCal } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
+import { storyNight, weekMorning } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
 import { MORNING_AGAIN } from './remember_texts.js'; // v0.11.184 (S1, KP): the Day 2 morning from the second Coil on
 
 /* v0.11.136 (owner pick NC1, NT1's push 2): replies by day (js/core/lines.js dayReply): the first text is the old reply, the rest Fable's, one for each later day of a Coil. */
@@ -200,21 +200,21 @@ Yuki puts herself back in order as if the fight had been someone else's. You sit
         enter: (g) => {
             const lines = [];
             if (hour(g) < 6 || hour(g) >= 20) lines.push(nightRest(g)); // v0.11.92 (O1): half back after a night fight
-            if (longCal(g)) g.flags.long = true; // v0.11.203 (T1, TS1): a night in the forest makes the long road, as the first night's event does in the old calendar
+            g.flags.long = true; // v0.11.203 (T1, TS1): a night in the forest makes the long road
             if (weekMorning(g)) g.flags.forest_day = (g.flags.forest_day || 1) + 1; // v0.11.203 (T1, TS1): once a week in the long calendar
             const out = eatBest(g);
             lines.push(out.length ? 'Breakfast. ' + out[0] : 'No breakfast. Your stomach enters it in the record.');
             return lines;
         },
-        text: (g) => (longCal(g) && (g.flags.forest_day || 1) === 1 ? MORNING_W1 /* v0.11.243 (P15-B, D1; SF: MW): week 1's own (it read week 3's) */ : `${g.flags.forest_day === 2
-            ? `${longCal(g) ? 'Another morning in the forest. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white when it got here, one body that aches in places you could now label on a diagram.' : 'The second morning. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white yesterday, one body that aches in places you could now label on a diagram.'} Alive, on the evidence.
+        text: (g) => ((g.flags.forest_day || 1) === 1 ? MORNING_W1 /* v0.11.243 (P15-B, D1; SF: MW): week 1's own (it read week 3's) */ : `${g.flags.forest_day === 2
+            ? `${'Another morning in the forest. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white when it got here, one body that aches in places you could now label on a diagram.'} Alive, on the evidence.
 
 ${(replayExplore(g) ? MORNING_AGAIN : 'You could go looking for the way out. Or you could face the data: you know nothing about this world, and this forest is the mildest teacher it is likely to offer. So learn it. Eat. Get stronger. *Then* walk out.').replace(/\*Then\* walk out\.$/, canFly(g) ? FW.morningOut : '$&') /* v0.11.195 (F1, D1: MW) */}`
-            : `${longCal(g) ? 'The third week in the forest.' : 'Day three in the forest.'} You wake ahead of the light now. That is either adaptation or damage, and you decline to run the test that would tell you which.
+            : `${'The third week in the forest.'} You wake ahead of the light now. That is either adaptation or damage, and you decline to run the test that would tell you which.
 
-This patch of forest is yours by now: the stream's tempers, the reeds where the hares lie up, the reek of the mire when the wind turns west. It has other tenants. ${longCal(g) ? 'For nights now something has circled the camp at a distance, and it has left tracks.' : 'For two nights something has circled the camp at a distance, and it has left tracks.'} Large. More than one set. In no hurry.
+This patch of forest is yours by now: the stream's tempers, the reeds where the hares lie up, the reek of the mire when the wind turns west. It has other tenants. ${'For nights now something has circled the camp at a distance, and it has left tracks.'} Large. More than one set. In no hurry.
 
-${g.flags.saw_lights ? 'And then the lights. Your mind keeps going back to the lights.' : longCal(g) ? 'One of these nights, you suspect, the hurry arrives.' : 'Tonight, you suspect, the hurry arrives.'}`}`),
+${g.flags.saw_lights ? 'And then the lights. Your mind keeps going back to the lights.' : 'One of these nights, you suspect, the hurry arrives.'}`}`),
         choices: [{ text: 'Get up.', to: 'wilds' }],
     },
 

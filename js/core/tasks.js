@@ -21,7 +21,7 @@ import { TASK_HUBS } from '../story/task_hubs.js';
 import { onceOpen, noteOnce, stageOpen, ONCE_MENUS, EVENING_HOUR } from '../story/oneoff.js';
 import { daily, foodCount, eatBest, FOOD, stayOf, haulMult } from '../story/common.js'; // v0.11.221 (RV2, HF): haulMult
 import { potCookDue } from '../story/kitchen.js'; // v0.11.217 (owner pick PC1, CG)
-import { storyDay, calStart, calEnd, atStoryDay, longCal, LONG_CAL, STAY_DAYS, tributeLeft } from './calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar; v0.11.204 (W1): the week
+import { storyDay, calStart, calEnd, atStoryDay, LONG_CAL, STAY_DAYS, tributeLeft } from './calendar.js'; // v0.11.203 (owner pick T1, TS1): the long calendar; v0.11.204 (W1): the week
 import { endCoil } from './coil.js';
 import { canMeditate } from './meditate.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
@@ -458,7 +458,7 @@ function yukiTick(g, hubId, minutes) {
         // v0.11.209 (owner pick TF1, Y): on the long calendar her food comes home from one haul in YUKI_LONG_KEEP (RV1, L3: the first of
         // each Coil, then the 4th, 7th, …); the others she comes back with nothing (her job's own line for an empty haul), her XP and
         // familiarity as for a haul. The d8 is rolled as before.
-        if (n > 0 && longCal(g)) { y.cnt = (Number(y.cnt) || 0) + 1; if ((y.cnt - 1) % YUKI_LONG_KEEP) { lines.push(yukiSays(g, job.none), ...awardYukiFightXp(g, 'challenging')); takeCapNotes(); st(g).fam[job.id] = r1(f + 1); continue; } }
+        if (n > 0) { y.cnt = (Number(y.cnt) || 0) + 1; if ((y.cnt - 1) % YUKI_LONG_KEEP) { lines.push(yukiSays(g, job.none), ...awardYukiFightXp(g, 'challenging')); takeCapNotes(); st(g).fam[job.id] = r1(f + 1); continue; } }
         const pick = n > 0 ? yukiCatch(g, job, n) : null;
         if (pick) { addItem(g, pick.item, n); lines.push(`${pick.got(n, g)} +${n} ${itemNames[pick.item]?.name || pick.item}.`, ...awardYukiFightXp(g, 'challenging')); }
         else if (n > 0) lines.push(yukiSays(g, job.full || job.none), ...awardYukiFightXp(g, 'challenging')); // v0.11.71 (Y1): everything she brings here is full: she eats it; XP and familiarity as a haul
@@ -721,7 +721,7 @@ export const SIT_STOP_TEXT = { sat: 'the breakthrough point', qi: 'then Qi runs 
  *  - S1: a week's card (a work card of the hub's own menus: Forage, Hunt, Practice, Clinic, Workshop, Militia, Palisade, Council) takes
  *    ×7 its time. Today's share runs up to the hub's evening hour (`EVENING_HOUR`); the rest is carried (`g.tasks.carry`) and goes on
  *    with the "Go on" card the next mornings; while it is open the other week's cards are busy. Its result, XP, loot and familiarity
- *    come once, at the start, as before. Leaving the stay drops what is left. Journeys, the old calendar and every other card: unchanged.
+ *    come once, at the start, as before. Leaving the stay drops what is left. Journeys and every other card: unchanged.
  *  - R1: the meals run themselves: at the first card in each of three parts of the day (before 11:00, 11:00–14:59, from 15:00), the
  *    best food in the hammerspace when Fed is under ROUTINE_FED (the eat cards stay).
  *  - R2: the day's sit runs itself at the first card of the day, when Qi ≥ 10 and a sit is open (the Meditate cards stay).
@@ -737,7 +737,7 @@ export const SKIP_LINE = 'The day\'s meal and sit came first: no time left for t
 const hrs = (m) => { m = Math.round(m); return m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`; };
 const coilKey = (g) => `${g.coil?.n || 1}|${g.coil?.act || 0}`;
 /** Is this hub a stay of the long calendar right now? */
-export const weekHub = (g, hubId = g.scene) => longCal(g) && WEEK_HUBS.has(hubId) && STAY_DAYS.has(storyDay(g));
+export const weekHub = (g, hubId = g.scene) => WEEK_HUBS.has(hubId) && STAY_DAYS.has(storyDay(g));
 /** Is this card a week's card here (S1)? */
 export const weekCard = (g, hubId, card) => !!card && card.kind === 'work' && !!card.menu && !!TASK_HUBS[hubId]?.menus?.[card.menu] && weekHub(g, hubId);
 /** The waking day (the night to 04:00 belongs to the day before). */
@@ -776,7 +776,7 @@ const carryAlive = (g, cy, hubId) => (CF1.on && isObj(cy) && cy.stay != null ? c
 const STAY_LAST = { 1: 3, 2: 6, 3: 10, 4: 18 };
 export function stayRoom(g, hubId = g.scene) {
     const s = stayOf(storyDay(g));
-    if (!s || !longCal(g)) return 0;
+    if (!s) return 0;
     const lastWake = calEnd(g, STAY_LAST[s]) - 1, day = ((EVENING_HOUR[hubId] ?? 16) - 7) * 60;
     return workRoom(g, hubId) + Math.max(0, lastWake - workDay(g)) * day;
 }
@@ -915,7 +915,6 @@ export function nextStep(g, scenes) {
     if (n >= 2 && day === 1) return `A new Coil: the world and the hammerspace started over, but your familiarity and what James knows didn't. Cards you know run faster${coilMult(g) > 1 ? `, and you learn ×${fmtMult(coilMult(g))} as fast` : ''}.`; // v0.11.86: no "×1 as fast"
     if (g.james.qi >= CONDENSE_SIT_COST && g.james.qi >= 0.9 * jamesQiMax(g) && g.james.saturation < breakAt() && !sitUseless(g) && taskOpen(g, scenes, sitTaskId(g, scenes))) return 'Qi is nearly full: Cultivate turns it into Saturation.';
     if (g.flags.long && storyDay(g) >= 2 && storyDay(g) <= 6) { // v0.11.203 (T1, TS1): 43 in the long calendar
-        if (!longCal(g)) return `Day ${day} of ${calStart(g, 7)}: the Sect's tribute comes on Day ${calStart(g, 7)}.`;
         // v0.11.224 (owner pick TX2, TS6: L6): the long calendar's tribute comes three weeks after the village is reached (Day 43 when the forest is
         // stayed out, earlier when it is left early): in the village its day, in the forest the rule
         return g.flags.vday ? `Day ${day}: the Sect's tribute comes on Day ${day + tributeLeft(g)}.` : `Day ${day}: the Sect's tribute comes three weeks after you reach the village (Day ${calStart(g, 7)} at the latest).`;

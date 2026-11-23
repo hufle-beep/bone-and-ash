@@ -1,6 +1,6 @@
 /**
- * v0.11.204 (owner pick W1; roadmap-time.md TS2 + TS3): the week on the long calendar. Pure, no DOM. Long calendar only: on the old
- * calendar nothing here runs (every entry point checks `longCal` / `weekHub` first).
+ * v0.11.204 (owner pick W1; roadmap-time.md TS2 + TS3): the week on the long calendar. Pure, no DOM. (v0.11.260, P28-A OC2: every game
+ * is on it; the entry points' `longCal` checks went with the old calendar's code.)
  *
  *  - R3, the quiet nights (`foldNight`): on a stay, a night or morning screen with one plain choice whose text is the one it showed
  *    on an earlier night of this Coil (its numbers aside) is walked at once (with `choose`, exactly as a tap would take it). A screen with a real choice,
@@ -14,7 +14,7 @@
  *    The plan is `g.tasks.plan`: { hub, coil, lastDay, items: { cardId: count }, med: { sit, mer, qi } a day, done: { d, sit, mer, qi },
  *    running, stop, bt }.
  */
-import { longCal, storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS, NUM_WORDS } from './calendar.js'; // v0.11.224 (RV1, VK): NUM_WORDS
+import { storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS, NUM_WORDS } from './calendar.js'; // v0.11.224 (RV1, VK): NUM_WORDS
 import { sceneView, choose, seenBefore } from './story.js'; // v0.11.248 (P18-A, NS-b): seenBefore
 import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes, wakeDay } from './game.js';
 import { famOf, taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, carryHere, carriesHere, carriesRead, carryTaskId, isCarryTask, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
@@ -159,7 +159,7 @@ export const QUIET_WAY = {
 export const AGAIN_EVE = { fo_supper: /^("Ya\. Manners\."|Laugh\. Out loud\.)/ };
 /** YM-f: the answer to repeat here (the player's on this story-week's first such evening, `g.tasks.evc` / `evd`), or null. */
 export function weekEveAgain(g, scenes, p, ways) {
-    if (!WEEK_EVE.on || !isRec(p) || !longCal(g) || !STAY_DAYS.has(storyDay(g))) return null;
+    if (!WEEK_EVE.on || !isRec(p) || !STAY_DAYS.has(storyDay(g))) return null;
     const re = AGAIN_EVE[g.scene];
     if (!re || !scenes[g.scene] || !ways.length || !ways.every((c) => c.index < 1000 && re.test(String(c.label)))) return null;
     const t = g.tasks || {}, i = t.evc?.[g.scene];
@@ -170,7 +170,7 @@ export const QUIET_LINE = 'The plan takes the quiet way: '; // RV-A (T L): was '
 /** WE: the quiet way's choice index to take on this evening screen, or null (the plan stops: the week's free evening, or not an ordinary one).
  *  Sets `p.we` on the week's free evening. `ways`: the screen's ways on (the hub's stops on a hub). */
 export function weekEveQuiet(g, scenes, p, ways) {
-    if (!WEEK_EVE.on || !isRec(p) || !longCal(g) || !STAY_DAYS.has(storyDay(g))) return null;
+    if (!WEEK_EVE.on || !isRec(p) || !STAY_DAYS.has(storyDay(g))) return null;
     const q = QUIET_WAY[g.scene];
     if (!q || !scenes[g.scene]) return null;
     const lab = (c) => String(c.label);
@@ -258,7 +258,6 @@ const isRec = (o) => !!o && typeof o === 'object' && !Array.isArray(o);
 export function foldNight(g, scenes, max = 12) {
     const lines = [];
     let steps = 0;
-    if (!longCal(g)) return { steps, lines };
     const t = taskState(g);
     if (!isRec(t.nf)) t.nf = {};
     for (; steps < max; steps++) {
@@ -453,7 +452,7 @@ export function planPrio(g, scenes, key, n) {
 /** After a story choice: should the plan go on by itself here? A running plan on its hub, or (RV1, L1) a running plan whose week has
  *  just ended (runWeek then reports the week's end). */
 export function weekResume(g) {
-    if (!longCal(g) || g.combat) return false;
+    if (g.combat) return false;
     const p = g.tasks?.plan;
     return isRec(p) && !!p.running && p.hub === g.scene && p.coil === coilKey(g);
 }
@@ -766,7 +765,7 @@ export const MORNING_HOUR = 7;
 const WEEK_EVENING = new Set(Object.keys(EVENING_HOUR));
 /** E4: note the choice taken on an evening or night screen (long calendar, a stay's days only (RV1, L4); a hub only in its evening). */
 export function noteEvening(g, sceneId, index) {
-    if (!longCal(g) || !STAY_DAYS.has(storyDay(g)) || !(index >= 0) || index >= 1000) return;
+    if (!STAY_DAYS.has(storyDay(g)) || !(index >= 0) || index >= 1000) return;
     if (!NIGHT_SCENES.has(sceneId) && !(WEEK_EVENING.has(sceneId) && sceneId === g.scene && weekHub(g) && workRoom(g, sceneId) <= 0)) return;
     const t = taskState(g);
     if (!isRec(t.evc)) t.evc = {};
@@ -791,7 +790,7 @@ const doorOpen = (g, scenes) => sceneView(g, scenes).choices.filter((c) => !c.di
 const sigOf = (g, scenes, c) => { const f = scenes[g.scene]?.choices?.[c.index]?.sig; return typeof f === 'function' ? `#${String(f(g)).replace(/\d/g, (n) => 'abcdefghij'[n])}` : c.label; }; // digits as letters: `hash` drops numbers
 export const doorSig = (g, scenes) => hash(doorOpen(g, scenes).map((c) => `${c.index}:${sigOf(g, scenes, c)}`).join('|'));
 export function noteDoor(g, scenes, sceneId, index) {
-    if (!longCal(g) || !PLAN_DOORS.includes(sceneId) || sceneId !== g.scene || !(index >= 0) || index >= 1000) return;
+    if (!PLAN_DOORS.includes(sceneId) || sceneId !== g.scene || !(index >= 0) || index >= 1000) return;
     doorMemo(g)[sceneId] = { i: index, sig: doorSig(g, scenes) };
 }
 /** The choice taken last on this door's screen this Coil, when the screen's options are the same as then and it is open; else null. */

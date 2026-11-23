@@ -110,7 +110,7 @@ export function byDay(g, list, key = g?.scene) {
  *  text that shows on many days of one story day (a stay's week on the long calendar) as a sequence: `list[0]` (the old text, the story's
  *  beat) on the first day `key` shows this Coil, then the next, and round again (again.js's VF folds a text already shown on an earlier
  *  day). The days are noted under `s:<key>` in the Coil's day record, so a scene with several story-day texts keeps one sequence each
- *  (`supper:4`, `supper:5`…). The old calendar shows each such text on one day: always `list[0]`. */
+ *  (`supper:4`, `supper:5`…). */
 export function seqText(g, key, list) {
     const k = `s:${key}`;
     noteDay(g, k);

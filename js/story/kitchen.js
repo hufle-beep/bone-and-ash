@@ -17,7 +17,7 @@
 import { bumpRel, eat } from '../core/game.js';
 import { daily, markDaily, hour, spacedFree, dayKey } from './common.js';
 import { pickLine, textDay, linesOf } from '../core/lines.js';
-import { storyDayOf, longCal } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the Fallout's story day in the long calendar
+import { storyDayOf } from '../core/calendar.js'; // v0.11.203 (owner pick T1, TS1): the Fallout's story day in the long calendar
 import { KT_LABEL, KT_UP, KT_DAY, KT_RETURN, POT_LINE, POT_COOK, POT_AGAIN } from './kitchen_texts.js';
 
 export { KT_LABEL, KT_UP, KT_DAY, KT_RETURN, POT_LINE, POT_COOK, POT_AGAIN };
@@ -68,10 +68,10 @@ export function potLine(g, where) {
  * on the first cook a Coil only; every cook gives the meal (+25 satiety, the pot closed for the day). TX3: the first cook a Coil
  * keeps its scene (POT_COOK); each later one shows one of three repeat scenes (POT_AGAIN, texts by Fable, rule 10), drawn by the line
  * picker after each cook (`<flag>_next`, so the card's label and its scene agree; never the same twice running), the one shown kept
- * in `<flag>_v` (-1 the first). World flags: they reset with the Coil. The old calendar unchanged (once a Coil, no new flag). */
+ * in `<flag>_v` (-1 the first). World flags: they reset with the Coil. */
 export const POT_HUBS = { ashfall: { scene: 'pot_cook', flag: 'pot_cook', daily: 'pot', key: 'cook', t: 'ashfall' }, fo_ashfall: { scene: 'fo_pot_cook', flag: 'fo_pot_cook', daily: 'a1_pot', key: 'a1_cook', t: 'fo' } };
-/** CK1 (RF3): the cook not yet taken: once a Coil on the old calendar; on the long calendar its spacing (every 3rd day of a stay). */
-const cookFree = (g, c) => (longCal(g) ? spacedFree(g, c.key, dayKey(g)) : !g.flags[c.flag]);
+/** CK1 (RF3): the cook not yet taken: its spacing (every 3rd day of a stay). */
+const cookFree = (g, c) => spacedFree(g, c.key, dayKey(g));
 /** The cook card shows: not cooked (CK1: cookFree), the village's 90, 09:00–14:59, the pot not yet used today. */
 export const potCookOpen = (g, hub) => {
     const c = POT_HUBS[hub];
@@ -86,13 +86,13 @@ export const COOK_PLAN = { row: (g, scene) => false };
  *  stay, 2 pot meals a week instead of 7): on the long calendar after the Coil's first cook, only while the plan's cook row is 1. */
 export const potCookDue = (g, hub) => {
     const c = POT_HUBS[hub];
-    return !!c && cookFree(g, c) && (!longCal(g) || !g.flags[c.flag] || COOK_PLAN.row(g, c.scene)) && relF(g, 'Village') >= POT_GATE && hour(g) < POT_UNTIL && daily(c.daily)(g);
+    return !!c && cookFree(g, c) && (!g.flags[c.flag] || COOK_PLAN.row(g, c.scene)) && relF(g, 'Village') >= POT_GATE && hour(g) < POT_UNTIL && daily(c.daily)(g);
 };
 
 /** CK1 (TX3): the repeat drawn for the next cook (an old save's, or a hand-edited value: the first). */
 const nextAgain = (g, c) => { const v = g.flags[`${c.flag}_next`]; return Number.isInteger(v) && v >= 0 && v < POT_AGAIN[c.t].length ? v : 0; };
-/** CK1 (TX3): which text the cook card shows now: -1 the first-time scene (the old calendar always, or not cooked this Coil), else a repeat. */
-export const cookVariant = (g, hub) => { const c = POT_HUBS[hub]; return !longCal(g) || !g.flags[c.flag] ? -1 : nextAgain(g, c); };
+/** CK1 (TX3): which text the cook card shows now: -1 the first-time scene (not cooked this Coil), else a repeat. */
+export const cookVariant = (g, hub) => { const c = POT_HUBS[hub]; return !g.flags[c.flag] ? -1 : nextAgain(g, c); };
 /** The cook's texts { label, text, go, result } for variant `v` (-1 the first). */
 export const cookTexts = (hub, v) => { const c = POT_HUBS[hub]; return v >= 0 && v < POT_AGAIN[c.t].length ? POT_AGAIN[c.t][v] : POT_COOK[c.t]; };
 /** The card's label now. */
@@ -113,7 +113,7 @@ function cookScene(hub) {
     return {
         id: c.scene, title: 'The Communal Pot', art: 'village', place: 'Ashfall Hamlet — the communal pot',
         enter: (g) => {
-            if (longCal(g)) { g.flags[`${c.flag}_v`] = cookVariant(g, hub); markDaily(g, c.key); } // CK1: the old calendar sets no new flag
+            g.flags[`${c.flag}_v`] = cookVariant(g, hub); markDaily(g, c.key); // CK1
             g.flags[c.flag] = true;
             return [];
         },
@@ -124,7 +124,7 @@ function cookScene(hub) {
                 const T = cookTexts(hub, shown(g, c));
                 markDaily(g, c.daily); eat(g, POT_SAT);
                 if (shown(g, c) < 0) { if (POT_MOTHER[hub]) bumpRel(g, 'Mother', POT_MOTHER[hub], 0); bumpRel(g, 'Village', POT_VILLAGE, 0); } // G1: the first cook a Coil
-                if (longCal(g)) { countShown(g, c, shown(g, c)); g.flags[`${c.flag}_next`] = pickLine(g, `cook_${c.t}`, POT_AGAIN[c.t]); } // TX3: the next cook's repeat
+                countShown(g, c, shown(g, c)); g.flags[`${c.flag}_next`] = pickLine(g, `cook_${c.t}`, POT_AGAIN[c.t]); // TX3: the next cook's repeat
                 return [`${T.result}: +${POT_SAT} satiety.`];
             },
             to: hub,
