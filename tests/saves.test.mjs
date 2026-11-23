@@ -29,7 +29,7 @@ for (const f of files) {
     assert(peekSave(raw)?.scene === g.scene, `${f}: peek works`);
     { // v0.11.261 (owner pick P29-A, SL; the v0.11.260 review's L1 / TG4): the Saves screen's line is the save as it opens: day, Coil, act and scene as deserialize + flipFill (main.js checkScene) land
         const p = peekSave(raw), o = deserialize(raw, { force: true }); flipFill(o);
-        assert(!!p && p.minutes === o.minutes && p.coil === (o.coil?.n || 0) && p.act === (o.coil?.act || 0) && p.scene === o.scene && p.cal === o.cal, `SL (TG4): ${f}: peekSave gives the day, Coil, act and scene it loads on (peek ${p && [p.minutes, p.coil, p.act, p.scene]} / load ${[o.minutes, o.coil?.n || 0, o.coil?.act || 0, o.scene]})`);
+        assert(!!p && p.minutes === o.minutes && p.coil === (o.coil?.n || 0) && p.act === (o.coil?.act || 0) && p.scene === o.scene && p.cal === o.cal, `SL (TG4): ${f}: peekSave gives the day, Coil, act and scene deserialize + flipFill load (the review's L1: checkScene's hub and scene checks not included) (peek ${p && [p.minutes, p.coil, p.act, p.scene]} / load ${[o.minutes, o.coil?.n || 0, o.coil?.act || 0, o.scene]})`);
         peekN++;
     }
     for (let s = 0; s < 200; s++) {
@@ -49,6 +49,33 @@ for (const f of files) {
     const e = pk('v0.8.5-act1-end.json'), v085 = files.filter((f) => /^v0\.8\.5-/.test(f)).map(pk);
     assert(e && Math.floor(e.minutes / 1440) + 1 === 94 && e.act === 1 && e.coil === 1, `SL (L1): v0.8.5-act1-end shows Day 94, Act 1, Coil 1 (${e && [Math.floor(e.minutes / 1440) + 1, e.act, e.coil]})`);
     assert(v085.length === 6 && v085.every((p) => p?.coil === 1), `SL: the six v0.8.5 saves listed with Coil 1, as they load (${v085.map((p) => p?.coil)})`);
+}
+{ // v0.11.261 (P29-A; the review's TG5): every save's reading pinned to its measured value (day, minute of the day, Coil, act, scene;
+  // tests/saves-peek.json, measured on v0.11.261's code, the v0.8.5 six checked by hand against the review's old-against-new table),
+  // so a change in migrate or flipFill that moves peekSave and the load together is caught, not only peekSave against itself
+    const pin = JSON.parse(readFileSync(new URL('./saves-peek.json', import.meta.url), 'utf8')), bad = [];
+    for (const f of files) { const p = peekSave(unpack(readFileSync(new URL(f, dir), 'utf8'))), got = p && [Math.floor(p.minutes / 1440) + 1, p.minutes % 1440, p.coil, p.act, p.scene]; if (JSON.stringify(got) !== JSON.stringify(pin[f])) bad.push(`${f}: ${JSON.stringify(got)} / ${JSON.stringify(pin[f])}`); }
+    assert(Object.keys(pin).length === files.length && !bad.length, `SL (TG5): every save's Saves-screen reading as measured (${bad.slice(0, 3).join(' || ')})`);
+}
+{ // v0.11.261 (P29-A; the review's TG1): peekSave and force: a save that needs "Load it anyway" (a bad checksum, a newer format, a newer
+  // state) is listed as the forced load reads it; one the game refuses even forced (no James, state 0) is "Unreadable" (null)
+    const base = ensureBars(newGame(2611)), good = serialize(base), outer = JSON.parse(good), st = JSON.parse(outer.data);
+    const wrap = (o, data = JSON.stringify(o)) => JSON.stringify({ fmt: outer.fmt, sum: fnv1a(data), data });
+    const forced = [['checksum', JSON.stringify({ ...outer, sum: outer.sum ^ 1 })], ['newer format', JSON.stringify({ ...outer, fmt: outer.fmt + 1 })], ['newer state', wrap({ ...st, v: SAVE_VERSION + 1 })]];
+    for (const [k, raw] of forced) {
+        const refused = kindOf(() => deserialize(raw)), o = deserialize(raw, { force: true }); flipFill(o); const p = peekSave(raw);
+        assert(refused !== 'ok' && p && p.scene === o.scene && p.minutes === o.minutes && p.coil === (o.coil?.n || 0), `SL (TG1): a save that needs force (${k}: ${refused}) is listed as the forced load reads it (${p && [p.scene, p.minutes]})`);
+    }
+    const noJames = { ...st }; delete noJames.james;
+    for (const [k, raw] of [['no James', wrap(noJames)], ['state 0', wrap({ ...st, v: 0 })], ['not JSON', 'nope{']]) {
+        let loads = true; try { const o = deserialize(raw, { force: true }); flipFill(o); } catch { loads = false; }
+        assert(!loads && peekSave(raw) === null, `SL (TG1): a save the game refuses even forced (${k}) is "Unreadable" (${loads}, ${JSON.stringify(peekSave(raw))})`);
+    }
+}
+{ // v0.11.261 (P29-A; the review's TG2): the Saves screen's line in main.js: the day from peekSave's minutes, then " · Act 1, Coil n" for an
+  // Act 1 save and " · Coil n" from Coil 1 on (the six v0.8.5 saves' "Coil 1"); a source pin, as the line is built in the browser only
+    const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'), line = (/const descOf = \(raw\) => \{[^\n]*/.exec(M) || [''])[0];
+    assert(/clockLabel\(p\.minutes\)/.test(line) && line.includes("${p.coil ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}"), `SL (TG2): descOf shows the day, "Act 1, " and the Coil from Coil 1 on (${line.slice(0, 80)})`);
 }
 
 // 2. the format's safety checks

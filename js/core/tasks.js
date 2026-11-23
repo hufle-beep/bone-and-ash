@@ -810,6 +810,7 @@ function weekCards(g, scenes, hubId, cards) {
     cards.unshift(...here.map((cy) => ({ id: carryTaskId(cy.id), kind: 'carry', card: cy.id, group: 'This week', label: `Go on: ${cy.label}`, tag: `${hrs(cy.left)} still to go${cy.paid ? '' : ', then its result'}`, minutes: Math.min(cy.left, room), status: room > 0 ? 'open' : 'evening', tier: 0, fam: 0, next: null })));
 }
 let routineBusy = false;
+export const POT_BARE = 'the communal pot.'; // v0.11.261 (P29-A, M4; the review's TG4): dayMeal's line when the pot's run gives no satiety line, exported for the test
 export const MEAL = { b: 'Breakfast', l: 'Midday', s: 'Supper' }; // v0.11.259 (OC-A, the review's TG-A2): exported for K-A's test
 /** The part of the day (R1): before 11:00, 11:00–14:59, from 15:00 (the night to 04:00 is the evening's). */
 export const mealSlot = (g) => { const hh = clockParts(g.minutes).hh, h = hh < NIGHT_TO ? hh + 24 : hh; return h < 11 ? 'b' : h < 15 ? 'l' : 's'; };
@@ -871,7 +872,7 @@ export function dayMeal(g, hubId = g.scene, scenes = null, mark = false, id = ''
         let r;
         try { r = runTask(g, scenes, pot); } finally { routineBusy = false; }
         const ls = r.lines.filter((l) => l !== ''), i = ls.findIndex((l) => /: \+\d+ satiety\.$/.test(l));
-        if (i >= 0) ls[i] = `${MEAL[slot]}: ${ls[i]}`; else ls.unshift(`${MEAL[slot]}: the communal pot.`);
+        if (i >= 0) ls[i] = `${MEAL[slot]}: ${ls[i]}`; else ls.unshift(`${MEAL[slot]}: ${POT_BARE}`);
         return ls;
     }
     if (foodCount(g) <= 0) return [];
