@@ -104,6 +104,12 @@ export const LU_READS = 1.75;
  *  (from the seed and the Coil's number instead, as first built: 10.8 / 21.7%). */
 export const LU_SPREAD = 1;
 export const luSpread = (g) => (d6(g) - 3.5) * LU_SPREAD;
+/** v0.11.256 (owner pick P26-A; TS7, the Coil-1 wins): on the long calendar Lu Han's HP, before the long step, LU_HP_LONG (LN) and
+ *  +LU_READ_HP for each realm he reads (LR; the Cultivator meets him at True Core: +1). Measured (the models, long calendar, 100 games;
+ *  the whole game on Coil 1): the Completionist 20 → 22%, the Cultivator 26 → 25% (LN alone 36%); Careful's and the Sociable's prologue
+ *  2.40 → 2.10 Coils, Act 1 4.47 → 4.35 / 4.40 → 4.25. */
+export const LU_HP_LONG = -0.5;
+export const LU_READ_HP = 0.5;
 export const luReads = (g) => (longCal(g) ? Math.max(0, (g.james.realm || 0) - 1) : 0);
 /** v0.11.252 (owner pick P22-A, JD): the jackals' run on the long calendar, DC 4 → 3.5 (no dice: 2 → 1.5): Careful's Convergence Use
  *  at night on Coil 1 is 1.5, so it gets away (its Coil-1 jackal deaths 75 → 0%, its Coil ends at the tribute instead). */
@@ -119,7 +125,7 @@ const collectorsFight = (g) => {
     // the hunters you drilled hold the others off and wear Lu Han down
     if (militia) enemies[0].hp = Math.max(6, enemies[0].hp - 2 * militia);
     const reads = luReads(g);
-    if (longCal(g)) enemies[0] = longStep({ ...enemies[0], hp: enemies[0].hp + luSpread(g) }, LONG_STEPS.collectors); // v0.11.252 (P22-A, TC)
+    if (longCal(g)) enemies[0] = longStep({ ...enemies[0], hp: enemies[0].hp + luSpread(g) + LU_HP_LONG + LU_READ_HP * reads }, LONG_STEPS.collectors); // v0.11.252 (P22-A, TC); v0.11.256 (P26-A): LN, LR
     if (reads) enemies[0] = { ...enemies[0], dc: enemies[0].dc + LU_READS * reads, atk: enemies[0].atk + LU_READS * reads };
     return {
         id: 'collectors',

@@ -251,7 +251,7 @@ export const coilMultNext = (g, chosen) => 1 + COIL_GROWTH * Math.max(0, (g?.coi
 export const XP_RATE = 0.6;
 /**
  * v0.11.207 (owner pick SC2, roadmap-time.md S6): the long calendar's pace until the retune (TS7). On a long-calendar game only
- * (`g.cal === LONG_CAL`): a sit's Saturation ÷LONG_SAT_DIV (`sitGain`), a meridian channel's hours ×LONG_MER_MULT (story/meridians.js
+ * (`g.cal === LONG_CAL`): a sit's Saturation ÷LONG_SAT_DIV (`sitGain`; ÷LONG_SAT_HIGH from True Core since v0.11.256, P26-A), a meridian channel's hours ×LONG_MER_MULT (story/meridians.js
  * `need`), every XP award ×LONG_XP after the Coil bonus and XP_RATE (`awardXp`, Yuki's fights). The old calendar and every old save:
  * ×1, unchanged. Measured (the models, 100 games each, Careful / Sociable / Completionist / Cultivator): the prologue on mean Coil
  * 3.04 / 3.04 / 1.03 / 1.00 (the old calendar 3.10 / 3.10 / 3.33 / 3.08), Act 1 3.29 / 3.34 / 1.03 / 1.00 (old 3.27 / 3.77 / 3.48 / 3.17),
@@ -260,9 +260,14 @@ export const XP_RATE = 0.6;
 export const LONG_SAT_DIV = 4;
 export const LONG_MER_MULT = 4;
 export const LONG_XP = 0.7;
+/** v0.11.256 (owner pick P26-A, RP-1.5; TS7's realm pace): from True Core (realm 3) on, a long-calendar sit's Saturation ÷6 in
+ *  place of ÷4 (×1.5 slower; the root and a Long Forest seclusion with it). Measured (the models, long calendar, 100 games): the
+ *  Cultivator's realm at Act 1's end Origin Core (5) → Golden Core (4.08); the others (1 / 1 / 2) and every win rate unchanged. */
+export const LONG_SAT_FROM = 3;
+export const LONG_SAT_HIGH = 6;
 const longPace = (g) => g?.cal === LONG_CAL;
-/** SC2: the Saturation a sit gives is divided by this (1 on the old calendar). */
-export const satDiv = (g) => (longPace(g) ? LONG_SAT_DIV : 1);
+/** SC2: the Saturation a sit gives is divided by this (1 on the old calendar); P26-A: LONG_SAT_HIGH from LONG_SAT_FROM on. */
+export const satDiv = (g) => (longPace(g) ? ((g.james?.realm || 0) >= LONG_SAT_FROM ? LONG_SAT_HIGH : LONG_SAT_DIV) : 1);
 /** SC2: a meridian channel's hours are multiplied by this (1 on the old calendar). */
 export const merMult = (g) => (longPace(g) ? LONG_MER_MULT : 1);
 /** SC2: every XP award is multiplied by this (1 on the old calendar). */

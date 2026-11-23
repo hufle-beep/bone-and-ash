@@ -1,0 +1,58 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/game.js",
+  "find": "export const LONG_SAT_FROM = 3;",
+  "replace": "export const LONG_SAT_FROM = 4;",
+  "note": "the slower pace from Golden Core, not True Core"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/game.js",
+  "find": "export const satDiv = (g) => (longPace(g) ? ((g.james?.realm || 0) >= LONG_SAT_FROM ? LONG_SAT_HIGH : LONG_SAT_DIV) : 1);",
+  "replace": "export const satDiv = (g) => (longPace(g) ? LONG_SAT_DIV : 1);",
+  "note": "RP-1.5 reverted"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/game.js",
+  "find": "export const satDiv = (g) => (longPace(g) ? ((g.james?.realm || 0) >= LONG_SAT_FROM ? LONG_SAT_HIGH : LONG_SAT_DIV) : 1);",
+  "replace": "export const satDiv = (g) => (longPace(g) ? ((g.yuki?.realm || 0) >= LONG_SAT_FROM ? LONG_SAT_HIGH : LONG_SAT_DIV) : 1);",
+  "note": "the pace reads Yuki's realm"
+ },
+ {
+  "id": "F4",
+  "file": "js/story/prologue.js",
+  "find": "export const LU_HP_LONG = -0.5;",
+  "replace": "export const LU_HP_LONG = 0;",
+  "note": "LN reverted"
+ },
+ {
+  "id": "F5",
+  "file": "js/story/prologue.js",
+  "find": "hp: enemies[0].hp + luSpread(g) + LU_HP_LONG + LU_READ_HP * reads }, LONG_STEPS.collectors);",
+  "replace": "hp: enemies[0].hp + luSpread(g) + LU_HP_LONG }, LONG_STEPS.collectors);",
+  "note": "LR reverted"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/prologue.js",
+  "find": "hp: enemies[0].hp + luSpread(g) + LU_HP_LONG + LU_READ_HP * reads }, LONG_STEPS.collectors);",
+  "replace": "hp: enemies[0].hp + luSpread(g) + LU_HP_LONG + LU_READ_HP * (g.james.realm || 0) }, LONG_STEPS.collectors);",
+  "note": "LR counts every realm, not the reads"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/prologue.js",
+  "find": "    if (militia) enemies[0].hp = Math.max(6, enemies[0].hp - 2 * militia);\n    const reads = luReads(g);\n    if (longCal(g)) enemies[0] = longStep({ ...enemies[0], hp: enemies[0].hp + luSpread(g) + LU_HP_LONG + LU_READ_HP * reads }, LONG_STEPS.collectors);",
+  "replace": "    if (militia) enemies[0].hp = Math.max(6, enemies[0].hp - 2 * militia);\n    const reads = luReads(g);\n    if (longCal(g)) enemies[0] = longStep({ ...enemies[0], hp: enemies[0].hp + luSpread(g) }, LONG_STEPS.collectors);\n    if (longCal(g)) enemies[0].hp += LU_HP_LONG + LU_READ_HP * reads;",
+  "note": "LN and LR after the long step (unrounded, ×1 not ×1.375)"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/news.js",
+  "find": "about two thirds up to Origin Core",
+  "replace": "about half up to Origin Core",
+  "note": "the What's new line's number wrong"
+ }
+]

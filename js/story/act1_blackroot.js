@@ -6,7 +6,7 @@
  * Entry 'bl_start' (Day 11). Exit 'ht_start' (Day 16, 06:00). Region in g.flags.bl_region, expedition day in g.flags.bl_day (1–5).
  */
 import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest, canFly, satDiv } from '../core/game.js'; // v0.11.207 (RV1, M1): satDiv
-/** v0.11.207 (owner pick RV1, M1): the root's Saturation, +12%; ÷4 on the long calendar (+3%), as a sit (game.js satDiv). */
+/** v0.11.207 (owner pick RV1, M1): the root's Saturation, +12%; ÷4 on the long calendar (+3%), ÷6 from True Core (+2%; v0.11.256, P26-A), as a sit (game.js satDiv). */
 export const ROOT_SAT = 12;
 export const rootGain = (g) => Math.round((ROOT_SAT / satDiv(g)) * 10) / 10;
 import { hasForm } from '../core/forms.js';

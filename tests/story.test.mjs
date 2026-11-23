@@ -5513,12 +5513,13 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { let okOld = true, okLong = true;
       for (let r = 0; r <= Gm.MAX_REALM; r++) { old.james.realm = lg.james.realm = r;
         okOld = okOld && Gm.sitGain(old) === Math.round((100 / Gm.SAT_HOURS(r)) * 10) / 10 && Gm.sitGain(old, 2) === Math.round((200 / Gm.SAT_HOURS(r)) * 10) / 10;
-        const q = Math.round((100 / Gm.SAT_HOURS(r) / 4) * 10) / 10, q2 = Math.round((200 / Gm.SAT_HOURS(r) / 4) * 10) / 10;
+        const dv = r >= 3 ? 6 : 4; // v0.11.256 (P26-A, RP-1.5): ÷6 from True Core
+        const q = Math.round((100 / Gm.SAT_HOURS(r) / dv) * 10) / 10, q2 = Math.round((200 / Gm.SAT_HOURS(r) / dv) * 10) / 10;
         okLong = okLong && (r < Gm.MAX_REALM ? Gm.sitGain(lg) === Math.max(0.1, q) && Gm.sitGain(lg, 2) === Math.max(0.2, q2) && !Gm.sitUseless(lg) : Gm.sitGain(lg) === 0 && Gm.sitUseless(lg)); }
       old.james.realm = lg.james.realm = 0;
       { const g = fresh(C.LONG_CAL, 99308); const at = (r) => { g.james.realm = r; return Gm.sitGain(g); };
-        assert(Gm.LONG_SIT_MIN === 0.1 && [9, 10, 11, 12, 13].every((r) => at(r) === 0.1) && at(14) === 0 && at(6) === 0.2 && at(7) === 0.1, `${T} (FL1): realms 10–13 a sit 0.1% on the long calendar (÷4 rounds to 0), 0 at the top (${[6, 7, 9, 10, 13, 14].map((r) => `${r}: ${at(r)}`).join(', ')})`); }
-      assert(okOld && okLong && Gm.sitGain(old) === 10 && Gm.sitGain(lg) === 2.5, `${T}: a sit +10% / +2.5% at Mortal Vessel, the old formula at every realm, a quarter on the long calendar, at least 0.1% a sit below the top (FL1)`); }
+        assert(Gm.LONG_SIT_MIN === 0.1 && [9, 10, 11, 12, 13].every((r) => at(r) === 0.1) && at(14) === 0 && at(6) === 0.1 && at(7) === 0.1 && at(2) === 1.1 && at(3) === 0.5, `${T} (FL1): realms 10–13 a sit 0.1% on the long calendar (÷4 rounds to 0; v0.11.256 P26-A: ÷6 from True Core, realm 6 0.1%), 0 at the top (${[6, 7, 9, 10, 13, 14].map((r) => `${r}: ${at(r)}`).join(', ')})`); }
+      assert(okOld && okLong && Gm.sitGain(old) === 10 && Gm.sitGain(lg) === 2.5, `${T}: a sit +10% / +2.5% at Mortal Vessel, the old formula at every realm, a quarter on the long calendar (a sixth from True Core, P26-A), at least 0.1% a sit below the top (FL1)`); }
     // condense on both: Saturation and the sit's XP (a third of a standard award, then ×0.6, ×0.7 on the long calendar)
     { const a = fresh(0, 99302), b = fresh(C.LONG_CAL, 99302); a.james.qi = b.james.qi = 50;
       const ra = Gm.condense(a), rb = Gm.condense(b);
@@ -5571,7 +5572,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       { const say = [0, C.LONG_CAL].map((c) => { const g = fresh(c, 99315); g.james.skills['Convergence Use'].tier = 5; g.james.realm = 1; goTo(g, SCENES, 'rr_roots'); const i = SCENES.rr_roots.choices.findIndex((x) => /^Cultivate on the root/.test(String(x.text))); return (choose(g, SCENES, i)?.lines || []).find((l) => /^The root takes your Qi/.test(l)) || ''; });
         assert(/Saturation \+12% \(/.test(say[0]) && /Saturation \+3% \(/.test(say[1]), `${T} (M1): the root's line says its own gain (${say.map((l) => l.slice(-35)).join(' / ')})`); }
       const lf = [0, C.LONG_CAL].map((c) => sat(c, 99312, (g) => { g.james.realm = 3; }, 'lf_seclusion', null));
-      assert(lf[0] > 0 && Math.abs(lf[1] - lf[0] / 4) <= 0.1, `${T} (L2, TG2): a Long Forest seclusion's Saturation ÷4 on the long calendar (${lf.join(' / ')})`); }
+      const lf2 = [0, C.LONG_CAL].map((c) => sat(c, 99312, (g) => { g.james.realm = 2; }, 'lf_seclusion', null));
+      assert(lf[0] > 0 && Math.abs(lf[1] - lf[0] / 6) <= 0.1 && lf2[0] > 0 && Math.abs(lf2[1] - lf2[0] / 4) <= 0.1, `${T} (L2, TG2): a Long Forest seclusion's Saturation ÷4 on the long calendar, ÷6 from True Core (v0.11.256, P26-A) (${lf.join(' / ')}; Core Formation ${lf2.join(' / ')})`); }
     // RV1 (L1, TG3): every award against whole-number arithmetic on the long calendar (tiers 1–10, Coils 1–4, every band); the old as before
     { const bad = []; let n = 0;
       for (const band of ['standard', 'challenging', 'major']) for (let tier = 1; tier <= 10; tier++) for (let c = 1; c <= 4; c++) {
@@ -9280,7 +9282,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // GS, LH, RR: the fight's numbers (the long calendar's steps against the old calendar's)
     { const old = lu(mk(99931, {}, 0)), g31 = mk(99931), sp = P.luSpread(structuredClone(g31)), lng = lu(g31); // v0.11.252 (TC): the spread drawn as the fight draws it
       const L = CM.LONG_STEPS.collectors;
-      assert(lng.enemies[0].dc === old.enemies[0].dc + 0.5 * L && lng.enemies[0].atk === old.enemies[0].atk + 0.75 * L && lng.enemies[0].hp === Math.round((old.enemies[0].hp + sp) * (1 + 0.25 * L)) && lng.enemies[1].name === 'Gao Feng' && lng.enemies[1].hp === old.enemies[1].hp, `${T} (LH): Lu Han +${L} steps on the long calendar only`);
+      assert(lng.enemies[0].dc === old.enemies[0].dc + 0.5 * L && lng.enemies[0].atk === old.enemies[0].atk + 0.75 * L && lng.enemies[0].hp === Math.round((old.enemies[0].hp + sp + P.LU_HP_LONG) * (1 + 0.25 * L)) /* v0.11.256 (P26-A, LN): −0.5 before the step; realm 0 reads none */ && lng.enemies[1].name === 'Gao Feng' && lng.enemies[1].hp === old.enemies[1].hp, `${T} (LH): Lu Han +${L} steps on the long calendar only`);
       for (const f of ['gao_broken', 'gao_turned']) { const e = lu(mk(99932, { [f]: true })).enemies[1]; assert(e.name === TT.disciple && e.dmg === 4 && e.dr === 1 && e.hp === Math.round(8 * 1.2) && e.dc === 5.5 && e.atk === 7, `${T} (GS): a disciple in Gao's place (${f}: ${JSON.stringify(e)})`); }
       const r3 = mk(99933); r3.james.realm = 3; const e3 = lu(r3), r1 = mk(99933); r1.james.realm = 1; const e1 = lu(r1), o3 = mk(99933, {}, 0); o3.james.realm = 3; const eo = lu(o3);
       assert(e3.enemies[0].dc === e1.enemies[0].dc + 2 * P.LU_READS && e3.enemies[0].atk === e1.enemies[0].atk + 2 * P.LU_READS && e3.tail.includes(TT.read) && !e1.tail.includes(TT.read) && !eo.tail.includes(TT.read) && eo.enemies[0].dc === old.enemies[0].dc, `${T} (RR): +${P.LU_READS} a realm above Foundation, its line; long calendar only`); }
@@ -9507,6 +9509,58 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     assert(coils === '2:7.5 1:17 1:17', `${T} (TG3): two won clears keep Core Formation and the ape 1.5; one clear keeps Foundation and 11; none, at Foundation, 11 (${coils})`);
     { const g = ensureBars(newGame(95504)); g.james.realm = 0; g.flags.mei_party = true; g.flags.ya_party = true; const e = SCENES.ah_ridge_end.choices.find((c) => c.combat).combat(g).enemies[0];
       assert(e.hp === 51 && e.dc === 17, `${T} (TG5): Mei Lin and Ya in the party take 2 HP each after the tune (55 → 51; ${e.hp})`); }
+}
+// v0.11.256 (owner pick P26-A; TS7): LN, Lu Han −0.5 HP before the long step; LR, +0.5 for each realm he reads; RP-1.5, a long-calendar
+// sit ÷6 from True Core (the root and a Long Forest seclusion with it); the old calendar unchanged
+{
+    const T = 'P26-A';
+    const P = await import('../js/story/prologue.js'), Gm = await import('../js/core/game.js'), CM = await import('../js/story/common.js'), C = await import('../js/core/calendar.js');
+    const BR = await import('../js/story/act1_blackroot.js');
+    assert(P.LU_HP_LONG === -0.5 && P.LU_READ_HP === 0.5 && P.LU_READS === 1.75 && Gm.LONG_SAT_DIV === 4 && Gm.LONG_SAT_FROM === 3 && Gm.LONG_SAT_HIGH === 6, `${T}: the knobs −0.5, +0.5 a read, ÷4 below True Core and ÷6 from it`);
+    const mk = (seed, realm, cal = C.LONG_CAL) => { const g = ensureBars(newGame(seed, { closed: true, cal })); Object.assign(g.flags, { forest_day: 3, vday: 3 }); g.james.realm = realm; return ensureBars(g); };
+    const lu = (g) => SCENES.tribute.choices[0].combat(g).enemies[0];
+    // LN + LR: Lu Han's HP at realms 0–5 against the old calendar's (the same seed, the spread drawn as the fight draws it)
+    { const L = CM.LONG_STEPS.collectors; const rows = [];
+      for (const r of [0, 1, 2, 3, 4, 5]) { const g = mk(99951, r), o = mk(99951, r, 0), sp = P.luSpread(structuredClone(g)), reads = Math.max(0, r - 1);
+          const want = Math.round((lu(o).hp + sp - 0.5 + 0.5 * reads) * (1 + 0.25 * L)), got = lu(g).hp; rows.push(`${r}:${got}${got === want ? '' : `≠${want}`}`); }
+      assert(rows.every((x) => !x.includes('≠')), `${T} (LN, LR): Lu Han's HP = (raw + spread − 0.5 + 0.5 × reads) × the long step, realms 0–5 (${rows.join(' ')})`);
+      const hp = (r) => lu(mk(99952, r)).hp;
+      assert(hp(0) === hp(1) && hp(3) >= hp(2) && hp(5) > hp(1), `${T} (LR): the same at Mortal Vessel and Foundation (no read), more from True Core (${[0, 1, 2, 3, 5].map(hp).join(' / ')})`);
+      const oh = [0, 1, 3, 5].map((r) => lu(mk(99953, r, 0)).hp);
+      assert(oh.every((v) => v === oh[0]), `${T}: the old calendar's Lu Han the same at every realm (${oh.join(' / ')})`); }
+    // RP-1.5: a sit's Saturation, the root's, by realm; the old calendar ×1
+    { const g = mk(99954, 0), o = mk(99954, 0, 0); const at = (x, r) => { x.james.realm = r; return [Gm.satDiv(x), Gm.sitGain(x), BR.rootGain(x)].join(':'); };
+      const got = [0, 2, 3, 4, 13].map((r) => at(g, r)).join(' '), old = [2, 3].map((r) => at(o, r)).join(' ');
+      assert(got === '4:2.5:3 4:1.1:3 6:0.5:2 6:0.3:2 6:0.1:2' && old === '1:4.4:12 1:3:12', `${T} (RP-1.5): ÷4 to Core Formation, ÷6 from True Core (a sit 0.5%, the root +2%), at least 0.1%; the old calendar ×1 (${got} | ${old})`); }
+    // condense at True Core: the Saturation it adds is the ÷6 gain
+    { const g = mk(99955, 3); g.james.qi = 50; g.james.saturation = 10; const r = Gm.condense(g);
+      assert(r.ok && r.gain === 0.5 && g.james.saturation === 10.5, `${T} (RP-1.5): a True Core sit +0.5% (${r.gain}, ${g.james.saturation})`); }
+    // the cold review (Opus), TG1: LN and LR with the militia and the spears (the floor of 6 raw first, then the spread, LN and LR); TG2: realms 0–14
+    { const L = CM.LONG_STEPS.collectors; const rows = [];
+      for (const fl of [{}, { militia: 2, spears: true }]) for (let r = 0; r <= 14; r++) {
+          const mkf = (cal) => { const g = mk(99961, r, cal); Object.assign(g.flags, fl); return g; };
+          const g = mkf(C.LONG_CAL), o = mkf(0), sp = P.luSpread(structuredClone(g)), reads = Math.max(0, r - 1);
+          const want = Math.round((lu(o).hp + sp - 0.5 + 0.5 * reads) * (1 + 0.25 * L)), got = lu(g).hp; if (got !== want) rows.push(`${fl.militia ? 'm' : ''}${r}:${got}≠${want}`); }
+      assert(rows.length === 0, `${T} (TG1, TG2): Lu Han's HP with and without the militia and spears, realms 0–14 (${rows.join(' ')})`); }
+    // TG4: the root's scene at True Core on the long calendar says +2%
+    { const g = mk(99962, 3); g.james.skills['Convergence Use'].tier = 5; goTo(g, SCENES, 'rr_roots'); const i = SCENES.rr_roots.choices.findIndex((x) => /^Cultivate on the root/.test(String(x.text)));
+      const l = (choose(g, SCENES, i)?.lines || []).find((x) => /^The root takes your Qi/.test(x)) || '';
+      assert(/Saturation \+2% \(/.test(l), `${T} (TG4): the root at True Core, +2% (${l.slice(-40)})`); }
+    // TG5: a long-calendar state with no james
+    assert(Gm.satDiv({ cal: C.LONG_CAL }) === 4 && Gm.satDiv({ cal: C.LONG_CAL, james: null }) === 4 && Gm.satDiv({ cal: 0, james: { realm: 5 } }) === 1, `${T} (TG5): satDiv with no james: ÷4; the old calendar 1`);
+    // TG6: the boundary walked: a breakthrough Core Formation → True Core, and a Coil that starts at a kept True Core
+    { const g = mk(99963, 2); g.james.primaries = 12; g.james.saturation = 100; const b = Gm.breakthrough(g); g.james.qi = 50; const r = Gm.condense(g);
+      assert(b.ok && g.james.realm === 3 && r.gain === 0.5, `${T} (TG6): the first sit after breaking through to True Core +0.5% (${b.ok} ${g.james.realm} ${r.gain})`); }
+    { const g = mk(99964, 0); g.stats = { ...(g.stats || {}), clears: 3, keptTop: 3 }; liftKept(g); g.james.qi = 50; const r = Gm.condense(g);
+      assert(g.james.realm === 3 && r.gain === 0.5, `${T} (TG6): a Coil that starts at a kept True Core sits at ÷6 (${g.james.realm} ${r.gain})`); }
+    // What's new names it (Claude's words); the cold review's M1 / TG3: its words pinned, and its sit ratios against sitGain by realm
+    { const { NOTES } = await import('../js/core/news.js'); const nt = (NOTES.find(([v]) => v === '0.11.256') || [])[1] || '';
+      const g = mk(99965, 0); const was = (r) => Math.max(0.1, Math.round((100 / Gm.SAT_HOURS(r) / 4) * 10) / 10), now = (r) => { g.james.realm = r; return Gm.sitGain(g); };
+      const two3 = [3, 4, 5].every((r) => now(r) / was(r) >= 0.55 && now(r) / was(r) <= 0.75), half = now(6) / was(6) === 0.5, floor = [7, 8, 9, 10, 11, 12, 13].every((r) => now(r) === 0.1 && was(r) === 0.1);
+      assert(/a little less HP against a James at Foundation or below/.test(nt) && /the same against one a realm past it/.test(nt) && /more for each realm past that, from True Core up/.test(nt)
+          && /about two thirds up to Origin Core, half at Soul Embryo, and still at least 0\.1% after that/.test(nt) && two3 && half && floor
+          && /root and a Long Forest seclusion give two thirds/.test(nt) && BR.ROOT_SAT / Gm.LONG_SAT_HIGH === (BR.ROOT_SAT / Gm.LONG_SAT_DIV) * (2 / 3) && /a realm lower/.test(nt),
+        `${T} (M1, TG3): the What's new line's words, and its ratios against sitGain (${[3, 4, 5, 6, 7].map((r) => `${r}: ${was(r)}→${now(r)}`).join(', ')})`); }
 }
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);
