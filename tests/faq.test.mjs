@@ -8,6 +8,7 @@ import { FAM, FED_EXTRA_PER_HOUR, YUKI_CAP, YUKI_HOURS } from '../js/core/tasks.
 import { PRIMARIES, COL_GROUPS } from '../js/story/meridians.js';
 import { CONDENSE_SIT_COST, FAIL_XP_FRACTION } from '../js/core/formulas.js';
 import { TARGETS, HEAD_START } from '../js/core/coil.js';
+import { LONG_CAL, BL_SPAN, calMinutes } from '../js/core/calendar.js'; // v0.11.259 (owner pick OC-A, OC4)
 import '../js/story/prologue.js'; // the scenes and the Coil hooks, as in the game
 
 let pass = 0, fail = 0;
@@ -71,7 +72,9 @@ assert(plain(text('Yuki\'s job')).includes(`${String(YUKI_HOURS[0]).padStart(2, 
 assert(plain(text('Meridians')).includes(`${PRIMARIES.length} primaries and their ${COL_GROUPS.reduce((n, c) => n + c.size, 0)} collaterals`) && PRIMARIES.length === 12, 'the meridian counts from meridians.js (12 and 66)');
 { const gr = ensureBars(newGame(7, { closed: true })); bumpRel(gr, 'Mei Lin', 999, -999); assert(gr.rel['Mei Lin'].f === REL_MAX && gr.rel['Mei Lin'].a === -REL_MAX && plain(text('People, friendship and affection')).includes(`−${REL_MAX} to ${REL_MAX}`), 'the relationship range: the game clamps at the number the FAQ names'); }
 assert(plain(text('People, friendship and affection')).includes('the Village, last, has friendship only'), 'v0.11.137 (HV1, VD; Fable L6): the FAQ says the Village shows friendship only');
-assert(inAct1({ flags: { ending: 'won' }, scene: 'fo_start', minutes: 7 * 1440 + 6 * 60 }) && plain(text('Act 1')).includes('Day 8'), 'Act 1 starts on Day 8 (inAct1), as the FAQ says');
+{ // v0.11.259 (owner pick OC-A, OC4): on the long calendar, as every game since the flip: Act 1 from Day 44 (story day 8), its deadline Day 103 (story day 21)
+  const a1 = { cal: LONG_CAL, calBl: BL_SPAN, flags: { ending: 'won' }, scene: 'fo_start', minutes: 0 }; a1.minutes = calMinutes(a1, 8, 6);
+  assert(a1.minutes === 43 * 1440 + 6 * 60 && inAct1(a1) && !inAct1({ ...a1, minutes: a1.minutes - 1 }) && plain(text('Act 1', a1)).includes('runs from Day 44') && plain(text('Act 1', a1)).includes('on Day 103'), 'Act 1 starts on Day 44 (story day 8; inAct1), its deadline Day 103, as the FAQ says'); }
 // v0.11.109 (owner pick FL1): the Flight entry's numbers from game.js, and its gate at Foundation
 { const { FLY_MIN, FLY_FROM_REALM, flightMinutes } = await import('../js/core/game.js');
   const gf = ensureBars(newGame(7, { closed: true })); gf.james.realm = FLY_FROM_REALM;

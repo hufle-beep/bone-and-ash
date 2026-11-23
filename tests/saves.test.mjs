@@ -1,5 +1,6 @@
 // Run: node tests/saves.test.mjs — every file in saves/ must load and play on; the save format's safety checks.
-import { readdirSync, readFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { gunzipSync, gzipSync } from 'node:zlib';
 import { SCENES } from '../js/story/prologue.js';
 import { newGame, ensureBars, startCombat, combatStep, serialize, deserialize, peekSave, SaveError, SAVE_VERSION, fnv1a } from '../js/core/game.js';
@@ -73,8 +74,16 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
     const { rewind } = await import('../js/core/coil.js');
     const { spacedFree, dayKey, day, markDaily } = await import('../js/story/common.js');
     let moved = 0, kept = 0, marks = 0, todays = 0, nights = 0;
+    // v0.11.259 (owner pick OC-A, OC4): each old save's reading before the move (its act, and each card's done-today by the waking day and
+    // by the calendar day), frozen in tests/flip-before.json by this build's old-calendar reader, so the move's checks still have their
+    // "before" once that reader goes (OC2, the next push). `--write-flip-before` writes it again (only while the old reader exists);
+    // each entry carries its save's sha-256, so a changed save shows. While the reader exists, the live reading must equal the frozen one.
+    const FB_PATH = new URL('flip-before.json', import.meta.url), FB_WRITE = process.argv.includes('--write-flip-before');
+    const FB = FB_WRITE || !existsSync(FB_PATH) ? {} : JSON.parse(readFileSync(FB_PATH, 'utf8'));
+    let fbN = 0;
     for (const f of files) {
-        const g = deserialize(unpack(readFileSync(new URL(f, dir), 'utf8')));
+        const rawF = readFileSync(new URL(f, dir), 'utf8'), sha = createHash('sha256').update(rawF).digest('hex');
+        const g = deserialize(unpack(rawF));
         if (g.cal === LC) { const b = JSON.stringify(g); assert(flipFill(g) === false && JSON.stringify(g) === b, `FP1 ${f}: a long-calendar save is left alone`); kept++; continue; }
         const d = Math.floor(g.minutes / 1440) + 1, tod = g.minutes % 1440, act1 = inAct1(g), act = g.coil?.act || 0, night = tod < 240 && d > 1;
         const sd = g.coil?.snap ? Math.floor(g.coil.snap.minutes / 1440) + 1 : null, stod = g.coil?.snap ? g.coil.snap.minutes % 1440 : 0;
@@ -83,14 +92,21 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
         const names = [...new Set(dk.map((k) => k.replace(/@-?\d+$/, '')))];
         // RV1 (TG2): done today by the waking day (dayKey, the daily cards) and by the calendar day (day(g), the Heart's talks), before and after
         const probe = () => Object.fromEntries(names.map((k) => [k, [spacedFree(g, k, dayKey(g)), spacedFree(g, k, day(g))]]));
-        const free = probe();
+        const live = { act1, free: probe() };
+        if (FB_WRITE) FB[f] = { sha, ...live };
+        const fb = FB[f];
+        assert(fb && fb.sha === sha, `FP1 ${f} (OC4): its frozen reading in tests/flip-before.json, for this very save (${fb ? 'sha differs' : 'none'})`);
+        if (!fb) continue;
+        fbN++;
+        assert(JSON.stringify(live) === JSON.stringify({ act1: fb.act1, free: fb.free }), `FP1 ${f} (OC4): the frozen reading equals the old-calendar reader's (until OC2 takes the reader)`);
+        const free = fb.free;
         const gl = g.flags.guardian_lost_day, fd = g.flags.foundation_day;
         assert(flipFill(g) === true && g.cal === LC, `FP1 ${f}: moved to the long calendar`);
         moved++; marks += dk.length; if (night) nights++;
         const nd = Math.floor(g.minutes / 1440) + 1;
         assert(nd === calStart(g, d) && g.minutes % 1440 === tod, `FP1 ${f}: Day ${d} → the first day of its week (Day ${nd}, the hour kept)`);
         assert(peekMin === g.minutes, `FP1 ${f} (RV1, L2): the Saves screen's line shows the day it opens on (${peekMin} / ${g.minutes})`);
-        assert(storyDay(g) === d && inAct1(g) === act1 && weekNights(g) === (night ? 6 : 0), `FP1 ${f}: the same story day (${storyDay(g)}), the same act, ${night ? 'the week\'s seventh night (RV1, H1)' : 'the week\'s first night'}`);
+        assert(storyDay(g) === d && inAct1(g) === fb.act1 && weekNights(g) === (night ? 6 : 0), `FP1 ${f}: the same story day (${storyDay(g)}), the same act, ${night ? 'the week\'s seventh night (RV1, H1)' : 'the week\'s first night'}`);
         assert(g.calBl === (act === 0 || d <= 10 ? BL_SPAN : 1), `FP1 ${f}: the Blackroot's days as blFill gives them (${g.calBl})`);
         const dk2 = Object.keys(g.flags).filter((k) => /@-?\d+$/.test(k));
         assert(dk2.length === dk.length, `FP1 ${f} (DK): every day mark kept (${dk.length} → ${dk2.length})`);
@@ -115,23 +131,25 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
         if (sd) { const h = deserialize(unpack(readFileSync(new URL(f, dir), 'utf8'))); flipFill(h); rewind(h);
             assert(h.cal === LC && Math.floor(h.minutes / 1440) + 1 === calStart(h, sd), `FP1 ${f}: a rewind lands on the moved rewind point (Day ${Math.floor(h.minutes / 1440) + 1}, the long calendar)`); }
     }
+    if (FB_WRITE) writeFileSync(FB_PATH, `${JSON.stringify(FB, null, 1)}\n`);
+    assert(fbN === moved && Object.keys(FB).length === moved, `FP1 (OC4): every moved save read against its frozen reading, none left over (${fbN} / ${moved} / ${Object.keys(FB).length})`);
     assert(moved >= 30 && kept >= 3 && marks > 1000 && todays > 0 && nights >= 1, `FP1: ${moved} old saves moved (${marks} day marks, ${todays} done today kept, ${nights} at night), ${kept} long ones left alone`);
     // a new old-calendar game (the tests' default) on Day 1: nothing but the fields; an Act 1 dawn moves to Day 44
-    const n = ensureBars(newGame(11)); flipFill(n);
+    const n = ensureBars(newGame(11, { cal: 0 })); flipFill(n);
     assert(n.cal === LC && n.minutes === newGame(11, { cal: LC }).minutes && n.calBl === BL_SPAN, 'FP1: a Day 1 game moves to Day 1 of the long calendar');
-    const a1 = ensureBars(newGame(12)); a1.minutes = 7 * 1440 + 360; a1.flags.ending = 'accord'; a1.flags['forage@8'] = true; a1.flags['x@0'] = true; a1.flags.guardian_lost_day = 8; a1.flags.foundation_day = 5; flipFill(a1);
+    const a1 = ensureBars(newGame(12, { cal: 0 })); a1.minutes = 7 * 1440 + 360; a1.flags.ending = 'accord'; a1.flags['forage@8'] = true; a1.flags['x@0'] = true; a1.flags.guardian_lost_day = 8; a1.flags.foundation_day = 5; flipFill(a1);
     assert(a1.minutes === 43 * 1440 + 360 && inAct1(a1) && a1.flags['forage@44'] && !a1.flags['forage@8'] && a1.flags['x@0'] && a1.flags.guardian_lost_day === 44 && a1.flags.foundation_day === 29, 'FP1: Act 1\'s Day 8 dawn → Day 44; its marks, the guardian\'s and Foundation\'s days with it (RV1, TG6); a mark of day 0 stays');
     // RV1 (TG4): the Blackroot's boundary: an Act 1 save on Day 10 (the Fallout's last) gets the camps, one on Day 11 the 5-day road
-    for (const [dd, bl] of [[10, BL_SPAN], [11, 1]]) { const t = ensureBars(newGame(13)); t.coil.act = 1; t.flags.ending = 'accord'; t.minutes = (dd - 1) * 1440 + 600; flipFill(t);
+    for (const [dd, bl] of [[10, BL_SPAN], [11, 1]]) { const t = ensureBars(newGame(13, { cal: 0 })); t.coil.act = 1; t.flags.ending = 'accord'; t.minutes = (dd - 1) * 1440 + 600; flipFill(t);
         assert(t.calBl === bl && storyDay(t) === dd, `FP1 (RV1, TG4): an Act 1 save on Day ${dd} gets calBl ${bl} (${t.calBl})`); }
     // RV1 (M1, TG2): a daily card done in the evening of day d − 1, the save at Day d 00:30: still done after the move (9 of 9 lost it before)
     let lost = 0;
-    for (const dd of [2, 3, 4, 5, 6, 7, 9, 10, 17]) { const t = ensureBars(newGame(5)); t.minutes = (dd - 2) * 1440 + 1200; markDaily(t, 'probe_fp1');
+    for (const dd of [2, 3, 4, 5, 6, 7, 9, 10, 17]) { const t = ensureBars(newGame(5, { cal: 0 })); t.minutes = (dd - 2) * 1440 + 1200; markDaily(t, 'probe_fp1');
         advance(t, (dd - 1) * 1440 + 30 - t.minutes); const b0 = spacedFree(t, 'probe_fp1', dayKey(t)); flipFill(t);
         if (spacedFree(t, 'probe_fp1', dayKey(t)) !== b0 || b0) lost++;
         assert(wakeDay(t) === calEnd(t, dd - 1), `FP1 (RV1, M1): Day ${dd} 00:30 is still the evening's waking day (${wakeDay(t)})`); }
     assert(lost === 0, `FP1 (RV1, M1): a card done the evening before stays done after a night move (${lost} of 9 reopened)`);
-    for (const [m, w] of [[30, 6], [239, 6], [240, 0], [1439, 0]]) { const t = ensureBars(newGame(6)); t.minutes = 4 * 1440 + m; flipFill(t);
+    for (const [m, w] of [[30, 6], [239, 6], [240, 0], [1439, 0]]) { const t = ensureBars(newGame(6, { cal: 0 })); t.minutes = 4 * 1440 + m; flipFill(t);
         assert(weekNights(t) === w, `FP1 (RV1, H1): a save at ${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')} on Day 5 starts on night ${w} of the week (${weekNights(t)})`); }
     // RV1 (H1, TG1): an old game played to the first forest night event (Day 2, 01:xx) or to the fire night (vday 2, after midnight),
     // moved, then played on: the counter turns at the next morning, the tribute on Day 43, Act 1 on Day 44 (its rewind point too), the fire shows
@@ -160,8 +178,8 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
     assert(reached >= 2 && fire === 1, `FP1 (RV1, TG1): ${reached} forest nights moved and played to Act 1, ${fire} fire night moved`);
     const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
     // RV1 (TG3): every deserialize in main.js is a load through checkScene (Import and Restore all too), and checkScene moves an old save
-    assert(/function checkScene\(s\) \{ if \(!oldCalTest\(\)\) flipFill\(s\);/.test(M) && (M.match(/deserialize\(/g) || []).length === (M.match(/checkScene\(deserialize\(/g) || []).length && (M.match(/checkScene\(deserialize\(/g) || []).length >= 9, 'FP1 (main.js, RV1 TG3): every load goes through checkScene, which moves an old save (not under the browser test\'s key)');
-    assert(/clockLabel\(p\.cal === LONG_CAL \|\| oldCalTest\(\) \? p\.minutes : flipMinutes\(p\.minutes, p\.act\)\)/.test(M), 'FP1 (main.js, RV1 L2): the Saves screen\'s lines show the moved day');
+    assert(/function checkScene\(s\) \{ flipFill\(s\);/.test(M) && !/oldCalTest|OLD_CAL_KEY|'boneash\.oldcal'/.test(M) && (M.match(/deserialize\(/g) || []).length === (M.match(/checkScene\(deserialize\(/g) || []).length && (M.match(/checkScene\(deserialize\(/g) || []).length >= 9, 'FP1 (main.js, RV1 TG3; v0.11.259 OC-A, OC3): every load goes through checkScene, which moves an old save (no old-calendar key read any more)');
+    assert(/clockLabel\(p\.cal === LONG_CAL \? p\.minutes : flipMinutes\(p\.minutes, p\.act\)\)/.test(M), 'FP1 (main.js, RV1 L2): the Saves screen\'s lines show the moved day');
     // RV1 (TG5): What's new's numbers from the calendar
     const N = readFileSync(new URL('../js/core/news.js', import.meta.url), 'utf8'), line = (/\['0\.11\.226', '([^\n]*)'\],/.exec(N) || [])[1] || '';
     const lg = newGame(1, { cal: LC });

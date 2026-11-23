@@ -423,16 +423,14 @@ ${statusHtml()}
 }
 
 /** v0.11.226 (owner pick FP1, the flip: NG + OB + BT): every new game is on the long calendar (calendar.js; the test switch of
- *  v0.11.203 is gone). BT: the browser test (tools/browser.py `fresh`) sets the storage key OLD_CAL_KEY, which keeps its games and
- *  saves on the old calendar (no player sets it). */
-const OLD_CAL_KEY = 'boneash.oldcal';
-const oldCalTest = () => store.get(OLD_CAL_KEY) === '1';
-const freshGame = (cal = oldCalTest() ? 0 : LONG_CAL) => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true, cal })); // meridians closed at the start (v0.9.6); v0.11.203 (T1, TS1): cal, the long calendar
+ *  v0.11.203 is gone). v0.11.259 (owner pick OC-A, OC3): the browser test's old-calendar key (`boneash.oldcal`, set by nothing since
+ *  v0.11.253) is no longer read: every game and every loaded save is on the long calendar. */
+const freshGame = (cal = LONG_CAL) => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true, cal })); // meridians closed at the start (v0.9.6); v0.11.203 (T1, TS1): cal, the long calendar
 const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
 function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: ☰ Menu → Saves.'); } }
 
 /** Throws a SaveError if the state points at a scene this version doesn't have. */
-function checkScene(s) { if (!oldCalTest()) flipFill(s); /* v0.11.226 (FP1, MV + DK): an old-calendar save moves to the long calendar */ if (!SCENES[s.scene]) throw new SaveError('notSave', `The save points at a scene this version doesn't have (${s.scene}).`); const hub = deadMenuHub(s, SCENES); if (hub) s.scene = hub; return s; } // v0.11.177 (RV1, C2): a save resting in an emptied menu opens on its hub
+function checkScene(s) { flipFill(s); /* v0.11.226 (FP1, MV + DK): an old-calendar save moves to the long calendar */ if (!SCENES[s.scene]) throw new SaveError('notSave', `The save points at a scene this version doesn't have (${s.scene}).`); const hub = deadMenuHub(s, SCENES); if (hub) s.scene = hub; return s; } // v0.11.177 (RV1, C2): a save resting in an emptied menu opens on its hub
 
 function rolling(s) {
     const m = bakMeta();
@@ -500,7 +498,7 @@ function backupList() {
     const names = { '5m': 'Last 5 minutes', '30m': 'Last 30 minutes', '2h': 'Last 2 hours', before: `Before ${m.label || 'a risky move'}` };
     return Object.keys(names).map((k) => ({ k, name: names[k], raw: store.get(BAK_KEY(k)), when: m.when?.[k] })).filter((b) => b.raw);
 }
-const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.cal === LONG_CAL || oldCalTest() ? p.minutes : flipMinutes(p.minutes, p.act)) /* v0.11.226 (RV1, L2): the day it opens on */}${p.coil ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}` : 'Unreadable'; }; // v0.11.13: the Coil too (Incremental Mode, as on Continue)
+const descOf = (raw) => { const p = peekSave(raw); return p ? `${sceneTitle(p.scene)} — ${clockLabel(p.cal === LONG_CAL ? p.minutes : flipMinutes(p.minutes, p.act)) /* v0.11.226 (RV1, L2): the day it opens on */}${p.coil ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}` : 'Unreadable'; }; // v0.11.13: the Coil too (Incremental Mode, as on Continue)
 
 /* ---------------- saves push (v0.11.9): share, export all, reminder, status ---------------- */
 

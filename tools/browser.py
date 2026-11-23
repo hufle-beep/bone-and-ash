@@ -82,7 +82,7 @@ def tap(pg, el, timeout=3000):
     if guarded: _pressed[id(pg)] = time.monotonic()
 
 # v0.11.253 (owner pick P23-A, BT): every flow plays the long calendar, as a player's new game: the old-calendar key (main.js
-# OLD_CAL_KEY) is set by nothing now; it stays in main.js with the old calendar's code (open, options later)
+# OLD_CAL_KEY) is set by nothing now; since v0.11.259 (owner pick OC-A, OC3) main.js no longer reads it
 def fresh(pg, url, js, arg=None):
     """v0.11.8: set storage from a non-game page on the same site, then open the game: the game's save-on-close can't write over it."""
     pg.goto(url.replace('index.html', 'art/bg/CREDITS.md'))

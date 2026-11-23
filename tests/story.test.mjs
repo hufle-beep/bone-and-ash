@@ -5182,7 +5182,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(ok(starts[0]) && ok(starts[7]), `${T} (RV1, TG2): the Blackroot, the Heart and the road home start on story days 11, 16, 19–20 in both calendars (old: ${keys(starts[0])}; long: ${keys(starts[7])})`); }
     // the FAQ and the menu
     { const goal = FAQ.find(([q]) => q === 'What is the goal?')[1], a1 = FAQ.find(([q]) => q === 'Act 1')[1]; assert(/tribute on Day 7\./.test(goal(old)) && /tribute on Day 43\./.test(goal(lg)) && /Day 8 .*Day 21\./.test(a1(old)) && /Day 44 .*Day 103\./.test(a1(lg)), `${T}: the FAQ's days by the save's calendar`); }
-    { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(!/data-new="long"/.test(M) && /const freshGame = \(cal = oldCalTest\(\) \? 0 : LONG_CAL\) =>/.test(M) && /g = freshGame\(\); \/\/ v0\.11\.226/.test(M), `${T}: every new game on the long calendar (v0.11.226, FP1: the test switch gone)`); }
+    { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(!/data-new="long"/.test(M) && /const freshGame = \(cal = LONG_CAL\) =>/.test(M) && !/oldCalTest/.test(M) && /g = freshGame\(\); \/\/ v0\.11\.226/.test(M), `${T}: every new game on the long calendar (v0.11.226, FP1: the test switch gone)`); }
 }
 
 // v0.11.204 (owner pick W1; roadmap-time.md TS2 + TS3): the week on the long calendar (js/core/tasks.js S1, R1, R2; js/core/week.js R3, P1).
