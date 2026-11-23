@@ -2,6 +2,29 @@
 
 Started 2026-11-23 (v0.11.258), when `history-49.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-49.md` … `history.md`.
 
+## Moved from the handover in v0.11.261 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-23 (Europe/Budapest). **Version:** 0.11.260 (`sw.js` VERSION `bone-ash-0.11.260`): **the old calendar's code gone (OC's push 2 of 2; the owner 2026-11-23, in the question dialog: "P28-A 🟢 (Recommended)"):** T1 first (the music-line walk on the long calendar: 160 games, then 40 Fallout mornings × Act 1 Coils 1–3 × friendship bands, then 30 return suppers, 65 of 65 lines; Fable's failed-try lines at the end of a failed week's carry), then OC2 (the core's branches, `newGame`'s `cal` option, `longPace`; `migrate`'s step 4 reads an unmoved v0.8.5 save's act on its own days, `oldAct1`), OC1 (the 72 story branches, the long side kept), MC (the checks marked old deleted, or re-pinned on the long calendar where the rule is shared, against numbers v0.11.259's code measured), L3 (`--write-flip-before` gone), OC6 (`--kept` closed; p13 §10 not old-only, still open), FB (`fallback/2026-11-23-before-oc2`), and the cold review's fixes (Opus: no high; M1–M3, L2–L5 in the reviewer's wording; L1 open, options later). No balance or save change. **Next push:** open, options later.
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** OC done (v0.11.259–v0.11.260). Open, options later (on the roadmap: `roadmap.md` section 2's v0.11.260 line): **SL** (the review's L1: the Saves screen names Day 104 for `saves/v0.8.5-act1-end.json`, which opens on Day 94; `peekSave` gives act 0 to a state before the Coil; since v0.11.226), **M4** (the routine's hammerspace meals split, "Breakfast: smoked meat." in the reply; since v0.11.204, the owner's call), p13 §10 on the long calendar (`roadmap-retune.md`). Then the rest of section 2 (the RA1 items, MF; most measured on the old calendar, so re-measure first), 5b, Act 2, art, systems, later. *(The entry as it stood, word for word, in `history-50.md`.)*
+
+*(the decision as it stood)*
+
+- **v0.11.258: PL-A (the owner 2026-11-23 09:52, then in the question dialog: "PL-A 🟢 (Recommended)").** The options as laid out in chat: **PL-A 🟢 (picked, recommended)** OC and MF to section 2, a new step 5b (YM-3, FC-w, FN, NF-g, PN, PK, LT), LO, CH, LE, FR to Act 2, the stale lines moved, the Order line with estimates; PL-B 🟡 no new step (the text and tool items as the retune's last push); PL-C 🟠 all 13 to section 5; PL-D 🔴 the stale lines only. **Found while building:** FN (the texts that promise a full night after a night fight) was already read and closed in v0.11.246 (P16-A; the tail on `roadmap-e.md`'s format-pass line, now in `roadmap-done-5.md`), so 5b holds six items, not seven.
+
+*(the version notes as they stood)*
+
+## v0.11.258 — The dangling roadmap items placed (PL-A, docs only)
+
+- **Files:** `project/roadmap.md` (the Order line, section 0's note, group f's pointer, section 2's placed line, section 2b new), `roadmap-e.md` (a note; the bundles and eight lines out), `roadmap-act2.md` (the lore line, f's three), `roadmap-time.md` (the TS labels), `roadmap-done-5.md` (new), `history-50.md` (new), `sw.js`; tests: `tests/tools.test.mjs` (the PL-A block; the moved lines' pins: e's block re-pinned (25 tails, its new hash; the two kept lines checked word for word against v0.11.257's block), OR1, RA1, RO2, the group i candidates read `roadmap-done-5.md` too), `tests/README.md`; the four docs.
+- **What:** see the version line. The open roadmap with its estimates: in the push report and `roadmap.md`'s Order line.
+- **Checks:** a docs push (rule 2): the tools test (582 passed, after re-pinning the moved lines: e's block, OR1, RA1, RO2, the group i check, the changelog's part 5 (0.11.235 moved, the size rule) and the history pins) and `bash tools/check.sh quick` (exit 0, 845 s); how it touches the rest: only the docs and their pins, no game file, so no full check (rule 2).
+- **Opus / Fable:** none (no game logic, balance or story text).
+
 ## Moved from the handover in v0.11.260 (word for word)
 
 *(the version line as it stood)*
