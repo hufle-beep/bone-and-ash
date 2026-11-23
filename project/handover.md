@@ -103,7 +103,7 @@ In `project/reference.md` since v0.11.43 (the files table, how to run every chec
 
 - **Files:** `js/core/game.js` (`peekSave` through `deserialize` + `flipFill`; `flipMinutes` gone; two comments, L2), `js/main.js` (`descOf`, the import), `js/core/replies.js` (two patterns), `js/core/tasks.js` (`POT_BARE`, TG4), `js/core/news.js` (What's new), `sw.js`; tests: `tests/saves.test.mjs` (the SL blocks: TG4, the two named, TG5, TG1, TG2; FP1's Saves-screen day through `peekSave`), `tests/saves-peek.json` (new: the 39 readings), `tests/story.test.mjs` (TF1's M4 checks: TG-A7, TG3, TG4, TG6), `tests/README.md`; docs: `project/research/p29-*` (repo only), the four docs, `history-50.md`, `changelog-5.md`, `restore-points-4.md`.
 - **What:** see the version line. A player sees two things: the Saves screen's day and Coil for a save from before the Coil, and a meal from the hammerspace whole among the results.
-- **Checks:** a game change (rule 2): while building the saves and story tests and `bash tools/check.sh quick` (exit 0, 699 s); the full `bash tools/check.sh` once after the review's fixes and the docs (its result in the push report and `restore-points.md`).
+- **Checks:** a game change (rule 2): while building the saves and story tests and `bash tools/check.sh quick` (exit 0, 699 s); the full `bash tools/check.sh` once after the review's fixes and the docs: exit 0, 1,721.5 s, 0 drifted.
 - **Opus:** the cold review (`project/research/p29-review.md`): no high, no medium; L1, L2, TG1–TG6 done. Planted faults through `tools/mutate.mjs` (`project/research/p29-mutate.md`): Claude's F1, F2, F4–F7 (6 of 6 caught) and the reviewer's C1–C7 (7 of 7 caught). **Fable:** none (no story text).
 
 ## v0.11.260 — The old calendar's code gone (P28-A)
