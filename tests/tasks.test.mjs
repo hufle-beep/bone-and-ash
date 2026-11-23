@@ -2184,6 +2184,13 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     rs = rs0;
     assert(rewinds > 0 && meds > 0 && lf > 0 && (skips > 0 || !FULL), `R1: the walk bites the tail (${rewinds}), meditates (${meds}), skips (${skips}), runs (${flees}) and walks the Long Forest (${lf} steps)`);
     assert(bad.size === 0, `B2: every line of ${walked} choices and cards is placed (${[...bad].slice(0, 4).map(([t, w]) => `${w}: ${t}`).join(' || ')})`);
+    // v0.11.259 (owner picks OC-A, K-A): on the long calendar the day's meals carry a prefix (tasks.js MEAL); the three pot lines with
+    // speech in them stay gains with it (B2's walk on the long calendar found them in the reply: the village pot's 3, the Fallout's "You work,")
+    { const { POT_LINE } = await import('../js/story/kitchen_texts.js');
+      const POTS = ['Barley and bean stew, ladled by a woman who addresses you as "honoured guest" in the tone of someone who has not yet ruled on whether you are one: +25 satiety.', `${POT_LINE.ashfall[0]}: +25 satiety.`, `${POT_LINE.fo[2]}: +25 satiety.`];
+      const placed = POTS.flatMap((t) => ['', 'Breakfast: ', 'Midday: ', 'Supper: '].map((p) => { const r = splitReply([p + t]); return r.gains.length === 1 && r.reply.length === 0; }));
+      assert(placed.length === 12 && placed.every(Boolean) && SCENES.ashfall.choices.some((c) => /honoured guest/.test(String(c.do))), `K-A: the three pot lines with speech are gains, bare and with each meal prefix (${placed.filter(Boolean).length} of 12)`);
+      assert(!splitReply(['Breakfast: a line "with speech": +25 satiety.']).gains.length, 'K-A: the prefix alone makes no gain of another line with speech (the patterns stay anchored)'); }
 }
 // v0.11.69 (owner picks R1 + P1, the texts Fable's, "F All"): the missing replies of the one-off story choices (relationship
 // choices that said nothing, choices that answered with gains only, failed checks without a line), and a partial haul keeps

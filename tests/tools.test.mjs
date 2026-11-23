@@ -1192,7 +1192,7 @@ const CL4_SHA = 'bac3bac02069f5cc5ba315d41219d66a55cf75e0fc1aae93dd85c8de5985d1c
     assert(P.storyLines(['GU 0.5 / DC 2 — failure', 'GU +2 XP', 'Starving: −2 HP', 'You see what went wrong. (Intuitive Aptitude: +0.5 on this next time.)', 'You smell moss.']).join('|') === 'You smell moss.', 'CP (C1): the engine\'s lines left out of a result');
     // C2: the bot run (20 games): days, hours, picks per game; rt_ashfall reached after noon (R3), a drill taken more than once (F1)
     const seen = P.seenAt(20, new Set(['rt_ya_talk']));
-    assert(seen.rt_ashfall && seen.rt_ashfall.hours[1] > 12 && Object.keys(seen).some((k) => /^fo_drill:\d+$/.test(k) && seen[k].maxPicks > 1), `CP (C2): rt_ashfall seen till hour ${seen.rt_ashfall?.hours[1]}; a Fallout drill picked twice in a game`);
+    assert(seen.rt_ashfall && seen.rt_ashfall.hours[1] > 12 && Object.keys(seen).some((k) => /^wild_train:\d+$/.test(k) && seen[k].maxPicks > 1), `CP (C2; OC4: the long calendar's Fallout drill is a week's card, taken once): rt_ashfall seen till hour ${seen.rt_ashfall?.hours[1]}; a Wilds training card picked twice in a game`);
     assert(P.whenCode({ show: Object.assign(() => true, { dailyKey: 'x' }) })[0] === 'once a day (key x)' && /^show: /.test(P.whenCode({ show: (g) => g.flags.a })[0]), 'CP (C2): a daily key in words, other conditions as code');
     // C5 + C6 + the packet: whole texts by paragraph, the labels that lead in, results only for marked lines
     const pk = P.packet(['rt_ya_talk', 'rr_scout'], { marks: new Set([`rt_ya_talk:${kiss}`]), seen });
