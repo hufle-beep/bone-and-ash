@@ -270,7 +270,7 @@ for (let run = 0; run < 6; run++) {
         ['fo_ashfall', 2, {}], ['camp', 2, {}], ['ashfall', 2, {}], ['wilds', 2, {}],
     ];
     // v0.11.154 (RV1, CF + FX): the camp goes by the night in the forest, the Fallout hub by the story's day, not by the day record
-    const SETDAY = { camp: (g, k) => { g.flags.forest_day = k + 1; }, fo_ashfall: (g, k) => { g.minutes = (7 + k) * 1440 + 9 * 60; } };
+    const SETDAY = { camp: (g, k) => { g.flags.forest_day = k + 1; }, fo_ashfall: (g, k) => { g.minutes = calMinutes(g, 8 + k, 9); } }; // v0.11.259 (OC-A, the review's M3): story days 8, 9 on the long calendar
     let n = 0;
     for (const [id, want, flags] of NT) for (const [form, realm] of [['cat', 0], ['tiger', 2], ['human', 7]]) {
         const texts = [];
@@ -475,7 +475,7 @@ for (let run = 0; run < 6; run++) {
         const S = COIL_SETS['talk_ya:0'];
         const g = ensureBars(fresh(5420)); g.coil.n = 3; g.scene = 'bl_start'; g.minutes = calMinutes(g, 11, 6);
         startActCoil(g, 1); g.scene = 'talk_ya';
-        const atDay = (d) => { g.minutes = (10 + d) * 1440 + 9 * 60; g.scene = 'talk_ya'; return ya(g); };
+        const atDay = (d) => { g.minutes = calMinutes(g, 11 + d, 9); /* OC4 (the review's L1): story days */ g.scene = 'talk_ya'; return ya(g); };
         const seq = [];
         seq.push(atDay(0), atDay(0), atDay(1)); for (const d of [2, 3, 4]) atDay(d); seq.push(atDay(5)); // the sixth day it is drawn wraps
         assert(seq[0] === S[0][0] && seq[1] === S[0][0] && seq[2] === S[0][1] && seq[3] === S[0][0] && actCoil(g) === 0, `RW1 (RV1, M2): the crossing Coil: set 1, the same day twice the same, day 2 text 2, day 6 wraps (${seq.map((t) => t.slice(0, 20)).join(' | ')})`);
@@ -849,7 +849,7 @@ for (let run = 0; run < 6; run++) {
     // tracks; LB three labels; YF the cat-only texts; ST the ten fights' stomp texts; every Blackroot scene in every form and region
     {
         const FORMS = [['cat', 0], ['tiger', 2], ['human', 7]];
-        const B = (seed, form, region = 'rr', bday = 1, flags = {}, cal) => { const g = ensureBars(fresh(seed, cal)); const r = { cat: 0, tiger: 2, human: 7 }[form]; g.yuki.realm = r; g.james.realm = r; g.yuki.form = form; g.minutes = (9 + bday) * 1440 + 12 * 60; Object.assign(g.flags, { bl_region: region, bl_day: bday }, flags); return ensureBars(g); };
+        const B = (seed, form, region = 'rr', bday = 1, flags = {}, cal) => { const g = ensureBars(fresh(seed, cal)); const r = { cat: 0, tiger: 2, human: 7 }[form]; g.yuki.realm = r; g.james.realm = r; g.yuki.form = form; g.minutes = calMinutes(g, 10 + bday, 12); /* OC4 (L1) */ Object.assign(g.flags, { bl_region: region, bl_day: bday }, flags); return ensureBars(g); };
         const bad = (t) => typeof t !== 'string' || /TODO|\$\{|undefined|\bNaN\b/.test(t);
         const txt = (id, g) => { const t = SCENES[id].text; return typeof t === 'function' ? t(g) : t; };
         const SRC = readFileSync(new URL('../js/story/act1_blackroot.js', import.meta.url), 'utf8');
@@ -2027,29 +2027,29 @@ for (const form of ['cat', 'human']) {
     }
     // S: Ya's "Stay." and the path kiss from 45
     for (const [a, ok] of [[10, false], [44, false], [45, true], [70, true]]) {
-        const f = LG(52700 + a, {}, [10, a], 0); f.minutes = 10 * 1440 + 1320; goTo(f, SCENES, 'fo_last_night');
+        const f = LG(52700 + a, {}, [10, a], 0); f.minutes = calMinutes(f, 11, 0, 1320); goTo(f, SCENES, 'fo_last_night');
         assert(labels(f).includes('"Stay."') === ok, `LG1 (S): "Stay." ${ok ? 'shows' : 'is hidden'} at Ya ${a}`);
         assert(/Do you want me to stay\?/.test(sceneView(f, SCENES).text) === ok, `LG1 (S): Ya's loft text matches the choice at Ya ${a}`);
-        const p = LG(52800 + a, {}, [10, a], 0); p.minutes = 19 * 1440 + 600; goTo(p, SCENES, 'rt_ya_talk');
+        const p = LG(52800 + a, {}, [10, a], 0); p.minutes = calMinutes(p, 20, 0, 600); goTo(p, SCENES, 'rt_ya_talk');
         assert(labels(p).some((l) => /^Kiss Ya before she gets there/.test(l)) === ok, `LG1 (S): the path kiss ${ok ? 'shows' : 'is hidden'} at Ya ${a}`);
     }
     // BC: the hot spring, both like him: the shared night or Ya alone
     {
-        const g = LG(52900, {}, [80, 95], 0); g.minutes = 13 * 1440 + 1200; goTo(g, SCENES, 'spring_ya');
+        const g = LG(52900, {}, [80, 95], 0); g.minutes = calMinutes(g, 14, 0, 1200); goTo(g, SCENES, 'spring_ya');
         assert(/waiting to see what you do/.test(sceneView(g, SCENES).text), 'LG1 (BC, B0): the spring leaves Mei Lin on the bank when both like him');
         assert(labels(g).some((l) => /^Stay as long as the heat lasts/.test(l)) && labels(g).some((l) => /^Tonight, just Ya/.test(l)), 'LG1 (BC, B1): the spring offers the shared night and Ya alone');
-        const y = LG(52901, {}, [80, 95], 0); y.minutes = 13 * 1440 + 1200; goTo(y, SCENES, 'spring_ya');
+        const y = LG(52901, {}, [80, 95], 0); y.minutes = calMinutes(y, 14, 0, 1200); goTo(y, SCENES, 'spring_ya');
         const c = sceneView(y, SCENES).choices.find((x) => /^Tonight, just Ya/.test(x.label)); const r = choose(y, SCENES, c.index);
         assert(y.scene === 'dw_hub' && y.flags.ya_romance === true && r.lines.some((l) => /loud coming back/.test(l)), `LG1 (BC, B2): just Ya goes back to camp with her romance (${y.scene})`);
-        const s = LG(52902, {}, [80, 95], 0); s.minutes = 13 * 1440 + 1200; goTo(s, SCENES, 'spring_ya');
+        const s = LG(52902, {}, [80, 95], 0); s.minutes = calMinutes(s, 14, 0, 1200); goTo(s, SCENES, 'spring_ya');
         const sc = sceneView(s, SCENES).choices.find((x) => /^Stay as long/.test(x.label)); const sr = choose(s, SCENES, sc.index);
         assert(s.scene === 'mei_curious' && sr.lines.some((l) => /Turn around, both of you/.test(l)), 'LG1 (BC, B0): the shared night keeps the splash');
-        const o = LG(52903, {}, [10, 95], 0); o.minutes = 13 * 1440 + 1200; goTo(o, SCENES, 'spring_ya');
+        const o = LG(52903, {}, [10, 95], 0); o.minutes = calMinutes(o, 14, 0, 1200); goTo(o, SCENES, 'spring_ya');
         assert(!labels(o).some((l) => /^Tonight, just Ya/.test(l)) && labels(o).includes('Let the steam close over everything.'), 'LG1 (BC): with Ya alone the spring is as before');
     }
     // BC: the Ashen Hollow camp, both like him, no Ya romance yet
     {
-        const g = LG(53000, { bl_region: 'ah' }, [80, 95], 0); g.minutes = 14 * 1440 + 1260; goTo(g, SCENES, 'bl_fireside');
+        const g = LG(53000, { bl_region: 'ah' }, [80, 95], 0); g.minutes = calMinutes(g, 15, 0, 1260); goTo(g, SCENES, 'bl_fireside');
         assert(pick(g, /^Ya's hand finds yours/), 'LG1 (BC): the Ashen Hollow camp offers Ya\'s night when both like him');
         assert(g.scene === 'ya_romance' && /so much thread/.test(sceneView(g, SCENES).text), `LG1 (BC, B3; RL1 L3): Mei Lin watching from the fire (${g.scene})`);
         const d = LG(53001, { bl_region: 'ah', yr_day: true }, [80, 95], 0); goTo(d, SCENES, 'ya_romance');
@@ -2059,19 +2059,19 @@ for (const form of ['cat', 'human']) {
     }
     // BC: the Fallout's last night, both like him: the roof, Ya alone, or Mei Lin alone
     {
-        const y = LG(53100, { romance: true, ya_romance: true }, [80, 95], 0); y.minutes = 10 * 1440 + 1320; goTo(y, SCENES, 'fo_last_night');
+        const y = LG(53100, { romance: true, ya_romance: true }, [80, 95], 0); y.minutes = calMinutes(y, 11, 0, 1320); goTo(y, SCENES, 'fo_last_night');
         const l = labels(y);
         assert(l.some((x) => /^Stay there, the three of you/.test(x)) && l.some((x) => /^Tonight, Ya\./.test(x)) && l.some((x) => /^Tonight, Mei Lin\./.test(x)), 'LG1 (BC, B4, B6): the roof offers the shared night, Ya and Mei Lin');
         const ya0 = y.rel.Ya.a;
         pick(y, /^Tonight, Ya\./);
         assert(y.scene === 'fo_ya_night' && /^"Ya," you say\. "Stay\."/.test(sceneView(y, SCENES).text) && y.rel.Ya.a > ya0, `LG1 (BC, B5): Ya alone bridges into her night (${y.scene})`);
         assert(walkFrom(y, y.scene, new Set(['fo_depart']), 20, true) === true, 'LG1 (BC): from Ya\'s night to the north path');
-        const m = LG(53101, { ya_romance: true }, [80, 95], 0); m.minutes = 10 * 1440 + 1320; goTo(m, SCENES, 'fo_last_night');
+        const m = LG(53101, { ya_romance: true }, [80, 95], 0); m.minutes = calMinutes(m, 11, 0, 1320); goTo(m, SCENES, 'fo_last_night');
         const mei0 = m.rel['Mei Lin'].a;
         pick(m, /^Tonight, Mei Lin\./); seen.add('fo_mei_night');
         assert(m.scene === 'fo_mei_night' && m.flags.romance === true && m.rel['Mei Lin'].a > mei0 && /Bite him once for me/.test(sceneView(m, SCENES).text), `LG1 (BC, B7): Mei Lin alone has her night (${m.scene})`);
         assert(walkFrom(m, m.scene, new Set(['fo_depart']), 20, true) === true, 'LG1 (BC): from Mei Lin\'s night to the north path');
-        const old = LG(53102, {}, [10, 50], 0); old.minutes = 10 * 1440 + 1320; goTo(old, SCENES, 'fo_last_night');
+        const old = LG(53102, {}, [10, 50], 0); old.minutes = calMinutes(old, 11, 0, 1320); goTo(old, SCENES, 'fo_last_night');
         pick(old, /^"Stay\."$/);
         assert(old.scene === 'fo_ya_night' && !/^"Ya," you say/.test(sceneView(old, SCENES).text), 'LG1 (BC): the old "Stay." has no bridge');
     }
@@ -2094,7 +2094,7 @@ for (const form of ['cat', 'human']) {
     // T: walks below Nascent Soul over path × entry × hearts (her human scenes hidden, every walk reaches the end)
     let run = 0;
     for (const path of ['sister', 'lover']) for (const entry of ['bl_start', 'rt_start']) for (const mei of [10, 80]) for (const ya of [10, 95]) {
-        const g = LG(53300 + run++, { yk_path: path, trio: 3, yk_mei: 2 }, [mei, ya], 5); g.minutes = (entry === 'bl_start' ? 10 : 18) * 1440 + 360;
+        const g = LG(53300 + run++, { yk_path: path, trio: 3, yk_mei: 2 }, [mei, ya], 5); g.minutes = calMinutes(g, entry === 'bl_start' ? 11 : 19, 6);
         g.james.gu.level = 9; g.james.skills['Convergence Use'].level = 6; ensureBars(g);
         assert(walkFrom(g, entry, new Set(['a1_end']), 2500) === true, `RL1 (T): a ${path} walk from ${entry} with Yuki a cat reaches the end of Act 1 (Mei ${mei}, Ya ${ya})`);
         for (const id of ['yk_camp', 'yk_night_solo', 'yk_night_mei', 'yk_night_ya', 'yk_night_all']) assert(g.seen?.[id] == null, `RL1 (T): ${id} never seen with Yuki below Nascent Soul (${path}, ${entry}, Mei ${mei}, Ya ${ya})`);
@@ -2109,7 +2109,7 @@ for (const form of ['cat', 'human']) {
         }
         const p = LG(53410 + yr, { yk_path: 'lover' }, [10, 10], yr); p.scene = 'epilogue';
         assert(/instead of a paw/.test(sceneView(p, SCENES).text) === human, `RL1 (T): the prologue's lover beat only at Nascent Soul (realm ${yr})`);
-        const s = LG(53420 + yr, { yk_path: 'sister' }, [10, 10], yr); s.minutes = 19 * 1440 + 1200; goTo(s, SCENES, 'rt_evening');
+        const s = LG(53420 + yr, { yk_path: 'sister' }, [10, 10], yr); s.minutes = calMinutes(s, 20, 0, 1200); goTo(s, SCENES, 'rt_evening');
         assert(/I am disowning you/.test(sceneView(s, SCENES).text), `RL1 (T): the sister's last-night line at any form (realm ${yr})`);
     }
     // NT: the first interrogation by her form
@@ -2119,22 +2119,22 @@ for (const form of ['cat', 'human']) {
     }
     // T: exact gains and the −1 at 44 / 45; L2 the trio step; the camp's Ya choice gone after "just Ya"
     {
-        const y = LG(53600, {}, [80, 95], 0); y.minutes = 13 * 1440 + 1200; goTo(y, SCENES, 'spring_ya');
+        const y = LG(53600, {}, [80, 95], 0); y.minutes = calMinutes(y, 14, 0, 1200); goTo(y, SCENES, 'spring_ya');
         const a0 = y.rel.Ya.a, f0 = y.rel.Ya.f;
         pick(y, /^Tonight, just Ya/);
         assert(y.rel.Ya.a === a0 + 8 && y.rel.Ya.f === f0 + 4, `RL1 (T): just Ya at the spring +4 / +8 (${y.rel.Ya.f - f0} / ${y.rel.Ya.a - a0})`);
         assert((y.flags.trio || 0) >= 2, `RL1 (L2): just Ya keeps the trio step (${y.flags.trio})`);
-        y.flags.bl_region = 'ah'; y.minutes = 14 * 1440 + 1260; goTo(y, SCENES, 'bl_fireside');
+        y.flags.bl_region = 'ah'; y.minutes = calMinutes(y, 15, 0, 1260); goTo(y, SCENES, 'bl_fireside');
         assert(!labels(y).some((l) => /^Ya's hand finds yours/.test(l)), 'RL1 (T): the camp\'s Ya night is gone after "just Ya"');
-        const r = LG(53601, { romance: true, ya_romance: true }, [80, 95], 0); r.minutes = 10 * 1440 + 1320; goTo(r, SCENES, 'fo_last_night');
+        const r = LG(53601, { romance: true, ya_romance: true }, [80, 95], 0); r.minutes = calMinutes(r, 11, 0, 1320); goTo(r, SCENES, 'fo_last_night');
         const ra = r.rel.Ya.a, rf = r.rel.Ya.f; pick(r, /^Tonight, Ya\./);
         assert(r.rel.Ya.a === ra + 10 && r.rel.Ya.f === rf + 6, `RL1 (T): Ya on the roof +6 / +10 (${r.rel.Ya.f - rf} / ${r.rel.Ya.a - ra})`);
         assert(walkFrom(r, r.scene, new Set(['fo_depart']), 20, true) === true && r.flags.fo_pick === undefined, 'RL1 (L4): the bridge\'s flag cleared on the north path');
-        const m = LG(53602, { ya_romance: true }, [80, 95], 0); m.minutes = 10 * 1440 + 1320; goTo(m, SCENES, 'fo_last_night');
+        const m = LG(53602, { ya_romance: true }, [80, 95], 0); m.minutes = calMinutes(m, 11, 0, 1320); goTo(m, SCENES, 'fo_last_night');
         const ma = m.rel['Mei Lin'].a, mf = m.rel['Mei Lin'].f; pick(m, /^Tonight, Mei Lin\./);
         assert(m.rel['Mei Lin'].a === ma + 6 && m.rel['Mei Lin'].f === mf + 3, `RL1 (T): Mei Lin on the roof +3 / +6 (${m.rel['Mei Lin'].f - mf} / ${m.rel['Mei Lin'].a - ma})`);
         for (const [a, d] of [[44, 0], [45, -1]]) {
-            const g = LG(53610 + a, {}, [10, a], 0); g.minutes = 10 * 1440 + 1320; goTo(g, SCENES, 'fo_last_night');
+            const g = LG(53610 + a, {}, [10, a], 0); g.minutes = calMinutes(g, 11, 0, 1320); goTo(g, SCENES, 'fo_last_night');
             const f1 = g.rel.Ya.f; pick(g, /^Sleep\.$/);
             assert(g.rel.Ya.f - f1 === d, `RL1 (T): turning Ya down at ${a} costs ${d} friendship (${g.rel.Ya.f - f1})`);
         }
@@ -2160,13 +2160,13 @@ for (const form of ['cat', 'human']) {
     assert(likesMei(LG(54002, { romance: true }, [10, 10], 0)) && likesYa(LG(54003, { ya_romance: true }, [10, 10], 0)), 'EQ1 (AB): a night\'s flag still counts');
     // KN and D2: the road kisses set no flag; Mei Lin's from 30
     {
-        const y = LG(54010, {}, [10, 50], 0); y.minutes = 19 * 1440 + 600; goTo(y, SCENES, 'rt_ya_talk');
+        const y = LG(54010, {}, [10, 50], 0); y.minutes = calMinutes(y, 20, 0, 600); goTo(y, SCENES, 'rt_ya_talk');
         assert(pick(y, /^Kiss Ya before she gets there/) && !y.flags.ya_romance && !likesYa(y), `EB1 (KN): Ya's path kiss leaves her romance flag unset (${y.flags.ya_romance})`);
         for (const [a, ok] of [[29, false], [30, true]]) {
-            const m = LG(54020 + a, {}, [a, 10], 0); m.minutes = 19 * 1440 + 600; goTo(m, SCENES, 'rt_mei_talk');
+            const m = LG(54020 + a, {}, [a, 10], 0); m.minutes = calMinutes(m, 20, 0, 600); goTo(m, SCENES, 'rt_mei_talk');
             assert(labels(m).some((l) => /^Kiss her before she finds something/.test(l)) === ok, `EQ1 (D2): Mei Lin's road kiss ${ok ? 'offered' : 'hidden'} at ${a}`);
         }
-        const m = LG(54040, {}, [50, 10], 0); m.minutes = 19 * 1440 + 600; goTo(m, SCENES, 'rt_mei_talk');
+        const m = LG(54040, {}, [50, 10], 0); m.minutes = calMinutes(m, 20, 0, 600); goTo(m, SCENES, 'rt_mei_talk');
         const a0 = m.rel['Mei Lin'].a, f0 = m.rel['Mei Lin'].f; pick(m, /^Kiss her before she finds something/);
         assert(m.scene === 'rt_road' && !m.flags.romance && !likesMei(m) && m.rel['Mei Lin'].a === a0 + 8 && m.rel['Mei Lin'].f === f0 + 3, `EB1 (KN; D2): Mei Lin's road kiss +3 / +8, no flag (${m.scene}, ${m.flags.romance})`);
     }
@@ -2184,7 +2184,7 @@ for (const form of ['cat', 'human']) {
         const b = LG(54101, { bl_region: 'dw' }, [80, 80], 0); goTo(b, SCENES, 'mei_raft');
         assert(/Tonight I guard/.test(sceneView(b, SCENES).text), 'EQ1 (D1): Ya\'s lead-in when both like him');
         for (const [fl, rel, why] of [[{ bl_region: 'ah' }, [80, 10], 'the Ashen Hills'], [{ bl_region: 'rr' }, [80, 10], 'the Root Road'], [{ bl_region: 'dw' }, [71, 10], 'Mei Lin 71'], [{ bl_region: 'dw', mei_raft: true }, [80, 10], 'a second time']]) {
-            const n = LG(54110, fl, rel, 0); n.minutes = 13 * 1440 + 1260; goTo(n, SCENES, 'bl_fireside');
+            const n = LG(54110, fl, rel, 0); n.minutes = calMinutes(n, 14, 0, 1260); goTo(n, SCENES, 'bl_fireside');
             assert(!labels(n).some((l) => /^When the fire burns low/.test(l)), `EQ1 (D1): no raft night at ${why}`);
         }
     }
@@ -2195,7 +2195,7 @@ for (const form of ['cat', 'human']) {
         [{ romance: true, ya_romance: true }, [80, 95], /sleep on a god/, /^Tonight, Yuki\./, true, 'the three on the roof'],
         [{ romance: true }, [80, 10], null, /^Follow the cat|^Tonight, Yuki/, false, 'Mei Lin in the hay (YH)']]) {
         for (const yr of [5, 7]) for (const path of ['lover', 'sister']) {
-            const g = LG(54200 + yr, { yk_path: path, ...fl }, rel, yr); g.minutes = 10 * 1440 + 1320; goTo(g, SCENES, 'fo_last_night');
+            const g = LG(54200 + yr, { yk_path: path, ...fl }, rel, yr); g.minutes = calMinutes(g, 11, 0, 1320); goTo(g, SCENES, 'fo_last_night');
             const want = ok && yr >= 7 && path === 'lover';
             assert(labels(g).some((l) => label.test(l)) === want, `EQ1 (D3): Yuki's Fallout night ${want ? 'offered' : 'hidden'} (${why}, ${path}, realm ${yr})`);
             if (!want) continue;
@@ -2207,7 +2207,7 @@ for (const form of ['cat', 'human']) {
     }
     // D4: Yuki's road walk, once a day, lover and human
     for (const yr of [5, 7]) for (const path of ['lover', 'sister']) {
-        const g = LG(54300 + yr, { yk_path: path }, [10, 10], yr); g.minutes = 19 * 1440 + 600; goTo(g, SCENES, 'rt_road');
+        const g = LG(54300 + yr, { yk_path: path }, [10, 10], yr); g.minutes = calMinutes(g, 20, 0, 600); goTo(g, SCENES, 'rt_road');
         const want = yr >= 7 && path === 'lover';
         assert(labels(g).some((l) => /^Let the other two get ahead/.test(l)) === want, `EQ1 (D4): the road walk ${want ? 'offered' : 'hidden'} (${path}, realm ${yr})`);
         if (!want) continue;
@@ -2215,7 +2215,7 @@ for (const form of ['cat', 'human']) {
         assert(g.scene === 'rt_yk_talk' && /Forty gardeners/.test(sceneView(g, SCENES).text), `EQ1 (D4): the walk (${g.scene})`);
         const yk0 = g.rel.Yuki.a; pick(g, /^Stop at the bend\. Kiss Yuki/);
         assert(g.scene === 'rt_road' && g.rel.Yuki.a === yk0 + 6 && !labels(g).some((l) => /^Let the other two get ahead/.test(l)), `EQ1 (D4): the kiss +6, back on the road, once a day (${g.scene})`);
-        const n = LG(54310 + yr, { yk_path: path }, [10, 10], yr); n.minutes = 19 * 1440 + 600; goTo(n, SCENES, 'rt_yk_talk');
+        const n = LG(54310 + yr, { yk_path: path }, [10, 10], yr); n.minutes = calMinutes(n, 20, 0, 600); goTo(n, SCENES, 'rt_yk_talk');
         const n0 = n.rel.Yuki.a; pick(n, /^"The best spot/);
         assert(n.scene === 'rt_road' && n.rel.Yuki.a === n0 + 3, 'EQ1 (D4): the other answer +3, back on the road');
     }
@@ -2242,23 +2242,23 @@ for (const form of ['cat', 'human']) {
         assert(likesMei(g) === (t >= 1) && likesYa(g) === (t >= 1), `ER1 (GF): Mei Lin 65 / Ya 65 liked ${t >= 1 ? 'with' : 'without'} the throuple started (trio ${t})`);
     }
     {
-        const g = LG(55010, { trio: 3 }, [65, 65], 0); g.minutes = 19 * 1440 + 600; goTo(g, SCENES, 'rt_mei_talk');
+        const g = LG(55010, { trio: 3 }, [65, 65], 0); g.minutes = calMinutes(g, 20, 0, 600); goTo(g, SCENES, 'rt_mei_talk');
         assert(/I keep looking at Ya/.test(sceneView(g, SCENES).text), 'ER1 (GF): the old save at Mei Lin 65 keeps Mei Lin\'s confession (v0.11.174, C1: "I keep looking at Ya"; "Ya kissed me" before)');
-        const w = LG(55011, { trio: 3 }, [65, 65], 0); w.minutes = 18 * 1440 + 360; w.james.gu.level = 9; w.james.skills['Convergence Use'].level = 6; ensureBars(w);
+        const w = LG(55011, { trio: 3 }, [65, 65], 0); w.minutes = calMinutes(w, 19, 0, 360); w.james.gu.level = 9; w.james.skills['Convergence Use'].level = 6; ensureBars(w);
         assert(walkFrom(w, 'rt_start', new Set(['a1_end']), 2500) === true, 'ER1 (T7): trio 3 at Mei Lin 65 walks to the end of Act 1');
     }
     // gap 6: a romance flag below the bar (an old path kiss, or a night) still offers her night
     {
-        const g = LG(55020, { ya_romance: true }, [10, 50], 0); g.minutes = 19 * 1440 + 1200; goTo(g, SCENES, 'rt_evening');
+        const g = LG(55020, { ya_romance: true }, [10, 50], 0); g.minutes = calMinutes(g, 20, 0, 1200); goTo(g, SCENES, 'rt_evening');
         assert(likesYa(g) && labels(g).includes('Follow Ya out to the grove.'), 'ER1 (T6): Ya\'s flag at Ya 50 still offers her last night');
     }
     // gap 2 and R5: Mei Lin's road kiss through her romance flag below 30, with the lover's line
     {
-        const g = LG(55030, { romance: true }, [10, 10], 0); g.minutes = 19 * 1440 + 600; goTo(g, SCENES, 'rt_mei_talk');
+        const g = LG(55030, { romance: true }, [10, 10], 0); g.minutes = calMinutes(g, 20, 0, 600); goTo(g, SCENES, 'rt_mei_talk');
         const c = sceneView(g, SCENES).choices.find((x) => !x.disabled && /^Kiss her before she finds something/.test(x.label));
         const r = c && choose(g, SCENES, c.index);
         assert(!!c && r.lines.some((l) => /this time she says when/.test(l)), 'ER1 (T2, R5): the road kiss offered through her flag at 10, with the lover\'s line');
-        const n = LG(55031, {}, [50, 10], 0); n.minutes = 19 * 1440 + 600; goTo(n, SCENES, 'rt_mei_talk');
+        const n = LG(55031, {}, [50, 10], 0); n.minutes = calMinutes(n, 20, 0, 600); goTo(n, SCENES, 'rt_mei_talk');
         const nc = sceneView(n, SCENES).choices.find((x) => !x.disabled && /^Kiss her before she finds something/.test(x.label)); const nr = choose(n, SCENES, nc.index);
         assert(nr.lines.some((l) => /does not say when/.test(l)), 'ER1 (R5): the first-kiss line when she is not yet his lover');
     }
@@ -2268,7 +2268,7 @@ for (const form of ['cat', 'human']) {
         assert(raft.flags.mei_first === 'raft', `ER1 (R1): the raft as her first night sets mei_first (${raft.flags.mei_first})`);
         raft.flags.bl_region = 'ah'; goTo(raft, SCENES, 'mei_bond');
         assert(/no swamp to shock/.test(sceneView(raft, SCENES).text) && !/herb loft/.test(sceneView(raft, SCENES).text), 'ER1 (R1b ii): the embers after the raft');
-        raft.minutes = 19 * 1440 + 1300; goTo(raft, SCENES, 'rt_mei_night');
+        raft.minutes = calMinutes(raft, 20, 0, 1300); goTo(raft, SCENES, 'rt_mei_night');
         assert(/Four walls this time/.test(sceneView(raft, SCENES).text) && !/hundred years/.test(sceneView(raft, SCENES).text), 'ER1 (R1a): the last night after a raft-first romance');
         const loft = LG(55041, { romance: true, bl_region: 'dw' }, [80, 10], 0); goTo(loft, SCENES, 'mei_raft');
         assert(loft.flags.mei_first === undefined, 'ER1 (R1): the raft after the loft leaves mei_first unset');
@@ -2281,9 +2281,9 @@ for (const form of ['cat', 'human']) {
     }
     // gap 1: Yuki's Fallout night with Mei Lin liked by the bar alone (the quiet loft), and with her flag and Ya at 72 (the roof)
     {
-        const q = LG(55050, { yk_path: 'lover' }, [80, 10], 7); q.minutes = 10 * 1440 + 1320; goTo(q, SCENES, 'fo_last_night');
+        const q = LG(55050, { yk_path: 'lover' }, [80, 10], 7); q.minutes = calMinutes(q, 11, 0, 1320); goTo(q, SCENES, 'fo_last_night');
         assert(labels(q).includes('Follow the cat out onto the roof.'), 'ER1 (T1): offered with Mei Lin liked by the bar, no flag');
-        const r = LG(55051, { yk_path: 'lover', romance: true }, [80, 72], 7); r.minutes = 10 * 1440 + 1320; goTo(r, SCENES, 'fo_last_night');
+        const r = LG(55051, { yk_path: 'lover', romance: true }, [80, 72], 7); r.minutes = calMinutes(r, 11, 0, 1320); goTo(r, SCENES, 'fo_last_night');
         assert(labels(r).some((l) => /^Tonight, Yuki\./.test(l)), 'ER1 (T1): the roof version with her flag and Ya at 72');
     }
     // gap 4 and R2–R4: the lead-in with fo_pick unset; the any-form lines
@@ -2291,7 +2291,7 @@ for (const form of ['cat', 'human']) {
         const g = LG(55060, { yk_path: 'lover' }, [10, 10], 7); goTo(g, SCENES, 'yk_night_fo');
         const t = sceneView(g, SCENES).text;
         assert(/gets up from beside you/.test(t) && /whatever she went up as/.test(t) && /pulling/.test(t) && !/since the barley|uncurls from your neck/.test(t), 'ER1 (T4, R3, R4): the quiet lead-in when fo_pick is unset; any form; the north');
-        const w = LG(55061, { yk_path: 'lover' }, [10, 10], 7); w.minutes = 19 * 1440 + 600; goTo(w, SCENES, 'rt_yk_talk');
+        const w = LG(55061, { yk_path: 'lover' }, [10, 10], 7); w.minutes = calMinutes(w, 20, 0, 600); goTo(w, SCENES, 'rt_yk_talk');
         const wt = sceneView(w, SCENES).text;
         assert(/I was in your lap for the log/.test(wt) && /feel her decide something/.test(wt) && !/read the log|weight goes off/.test(wt), 'ER1 (R2, R4): the road walk: the log as a memory; any form');
     }
@@ -2410,7 +2410,7 @@ for (const form of ['cat', 'human']) {
 // her current form, as the pictures do (the cat keeps the old line)
 {
     const FM = (seed, form, flags = {}, rel = [40, 40], cal) => {
-        const g = ensureBars(fresh(seed, cal)); g.minutes = 9 * 1440 + 600;
+        const g = ensureBars(fresh(seed, cal)); g.minutes = calMinutes(g, 10, 10); // OC4 (L1): story day 10
         Object.assign(g.flags, { long: true, forest_day: 3, vday: 3, mei_party: true, ya_party: true, ya_met: true, fire: true }, flags);
         g.rel = { ...g.rel, 'Mei Lin': { f: 40, a: rel[0] }, Ya: { f: 40, a: rel[1] }, Yuki: { f: 50, a: 50 }, Village: { f: 30, a: 0 } };
         const realm = form === 'human' ? 7 : form === 'tiger' ? 2 : 0;
@@ -2470,7 +2470,7 @@ for (const form of ['cat', 'human']) {
     ]) {
         const e = FM(57600 + n++, form); goTo(e, SCENES, 'epilogue');
         assert(tail.test(sceneView(e, SCENES).text), `XS1 (XL): the epilogue's tail as ${form}`);
-        const a = FM(57700 + n++, form, { ending: 'bluff' }); a.minutes = 21 * 1440 + 600; goTo(a, SCENES, 'a1_end');
+        const a = FM(57700 + n++, form, { ending: 'bluff' }); a.minutes = calMinutes(a, 22, 10); /* OC4 (L1) */ goTo(a, SCENES, 'a1_end');
         assert(notDead.test(sceneView(a, SCENES).text), `XS1 (XL): Act 1's last "Not dead" as ${form}`);
         const q = FM(57800 + n++, form, { yk_path: 'sister' }); goTo(q, SCENES, 'rt_quiet_night');
         const qt = sceneView(q, SCENES).text;

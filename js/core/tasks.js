@@ -810,7 +810,7 @@ function weekCards(g, scenes, hubId, cards) {
     cards.unshift(...here.map((cy) => ({ id: carryTaskId(cy.id), kind: 'carry', card: cy.id, group: 'This week', label: `Go on: ${cy.label}`, tag: `${hrs(cy.left)} still to go${cy.paid ? '' : ', then its result'}`, minutes: Math.min(cy.left, room), status: room > 0 ? 'open' : 'evening', tier: 0, fam: 0, next: null })));
 }
 let routineBusy = false;
-const MEAL = { b: 'Breakfast', l: 'Midday', s: 'Supper' };
+export const MEAL = { b: 'Breakfast', l: 'Midday', s: 'Supper' }; // v0.11.259 (OC-A, the review's TG-A2): exported for K-A's test
 /** The part of the day (R1): before 11:00, 11:00–14:59, from 15:00 (the night to 04:00 is the evening's). */
 export const mealSlot = (g) => { const hh = clockParts(g.minutes).hh, h = hh < NIGHT_TO ? hh + 24 : hh; return h < 11 ? 'b' : h < 15 ? 'l' : 's'; };
 /* ---------- v0.11.217 (owner picks PT1 = PM, 2026-11-17 19:26, and PC1 = PM + CG, 2026-11-18 01:01; the owner 17:42: "eating at

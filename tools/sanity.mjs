@@ -41,19 +41,19 @@ await import(path.join(root, 'js/story/prologue.js')); // installs every scene a
 const near = (a, b) => Math.abs(a - b) < 0.051;
 for (const coil of [1, 2, 3, 5]) { // v0.11.15 (B1-b): the Coil bonus is XP only; sit, breakthrough and meridian time go by uses
     const mult = 1 + 0.25 * (coil - 1); // v0.11.29 (RB-1): 0.5 → 0.25
-    const g = G.ensureBars(G.newGame(7, { closed: true })); g.coil.n = coil;
+    const g = G.ensureBars(G.newGame(7, { closed: true })); g.coil.n = coil; // v0.11.259 (owner pick OC-A, M1): the long calendar, newGame's default
     ok(G.coilMult(g) === mult, `Coil ${coil}: XP bonus ×${mult} (${G.coilMult(g)})`);
     for (const uses of [0, 3, 6, 30]) {
         g.tasks.use = { 'act:sit': uses * 5, 'act:mer': uses * 5, 'act:bt': uses };
         const spSit = Math.min(10, 1 + (9 * uses * 5) / 30), spBt = Math.min(10, 1 + (9 * uses) / 6);
         for (const realm of [0, 1, 3, 7, 13]) {
             g.james.realm = realm;
-            ok(near(G.sitGain(g), Math.round((100 / (10 * 1.5 ** realm)) * 10) / 10), `sit gain, realm ${realm}, Coil ${coil} (×1.5 a realm since v0.11.66, S1; no Coil bonus)`);
+            ok(near(G.sitGain(g), Math.max(G.LONG_SIT_MIN, Math.round((100 / (10 * 1.5 ** realm) / G.satDiv(g)) * 10) / 10)), `sit gain, realm ${realm}, Coil ${coil} (×1.5 a realm since v0.11.66, S1; no Coil bonus; v0.11.259 OC-A, M1: the long calendar's ÷${G.satDiv(g)}, at least ${G.LONG_SIT_MIN}%)`);
             ok(G.btMinutes(g) === Math.round((120 * (realm + 1)) / spBt), `breakthrough length, realm ${realm}, Coil ${coil}, ${uses} uses`);
         }
         g.james.realm = 0;
         ok(G.sitMinutes(g) === Math.max(1, Math.round(60 / spSit)), `sit length, Coil ${coil}, ${uses * 5} uses`);
-        ok(M.merMinutesOf(g, 'pri') === Math.max(10, Math.min(120, Math.ceil((2 * 60) / spSit / 10) * 10)), `first primary's sitting, Coil ${coil}, ${uses * 5} uses`);
+        ok(M.merMinutesOf(g, 'pri') === Math.max(10, Math.min(120, Math.ceil((2 * 60 * G.merMult(g)) / spSit / 10) * 10)), `first primary's sitting, Coil ${coil}, ${uses * 5} uses (v0.11.259 OC-A, M1: its hours ×${G.merMult(g)} on the long calendar)`);
     }
 }
 const sum = (n, f) => Array.from({ length: n }, (_, k) => f(k)).reduce((a, b) => a + b, 0);

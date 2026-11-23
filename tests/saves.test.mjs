@@ -70,7 +70,7 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
 //    a save at 00:00–03:59 starts on the week's seventh night and that waking day's marks go to the week's last day.
 {
     const { flipFill, flipMinutes, inAct1, advance, combatStep: cs, wakeDay } = await import('../js/core/game.js');
-    const { calStart, calEnd, storyDay, weekNights, LONG_CAL: LC, BL_SPAN } = await import('../js/core/calendar.js');
+    const { calStart, calEnd, storyDay, weekNights, longCal, LONG_CAL: LC, BL_SPAN } = await import('../js/core/calendar.js');
     const { rewind } = await import('../js/core/coil.js');
     const { spacedFree, dayKey, day, markDaily } = await import('../js/story/common.js');
     let moved = 0, kept = 0, marks = 0, todays = 0, nights = 0;
@@ -79,6 +79,8 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
     // "before" once that reader goes (OC2, the next push). `--write-flip-before` writes it again (only while the old reader exists);
     // each entry carries its save's sha-256, so a changed save shows. While the reader exists, the live reading must equal the frozen one.
     const FB_PATH = new URL('flip-before.json', import.meta.url), FB_WRITE = process.argv.includes('--write-flip-before');
+    // the review's L3, TG-A9: the write needs the old reader (a state with no `cal` read as the old calendar); after OC2 it refuses
+    if (FB_WRITE && longCal({ minutes: 0, flags: {} })) { console.error('--write-flip-before: the old-calendar reader is gone (OC2); the frozen readings stay as they are'); process.exit(2); }
     const FB = FB_WRITE || !existsSync(FB_PATH) ? {} : JSON.parse(readFileSync(FB_PATH, 'utf8'));
     let fbN = 0;
     for (const f of files) {

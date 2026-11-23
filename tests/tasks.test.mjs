@@ -194,6 +194,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         const [sc, i] = card.split(':'); const c = SCENES[sc].choices[+i];
         c.do(g); const r1 = JSON.stringify(g.rel[who]); c.do(g); (c.failDo || c.do)(g);
         assert(r1 !== r0 && JSON.stringify(g.rel[who]) === r1, `G1: ${card}'s ${who} gain once a day (${r0} → ${r1} → ${JSON.stringify(g.rel[who])})`);
+        g.minutes += 1440; c.do(g); assert(JSON.stringify(g.rel[who]) === r1, `G1 (the review's TG-A3): ${card}'s ${who} gain once a story day: not again the next calendar day of the same camp day`);
         g.minutes = calMinutes(g, day + 1, 8); c.do(g); assert(JSON.stringify(g.rel[who]) !== r1, `G1: ${card}'s ${who} gain again the next (story) day`); // OC4: the Blackroot's story day is three calendar days
     }
     for (const [hub, day, label] of [['rr_hub', 13, /grub/], ['ah_hub', 17, /beetle/]]) {
@@ -2188,7 +2189,10 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     // speech in them stay gains with it (B2's walk on the long calendar found them in the reply: the village pot's 3, the Fallout's "You work,")
     { const { POT_LINE } = await import('../js/story/kitchen_texts.js');
       const POTS = ['Barley and bean stew, ladled by a woman who addresses you as "honoured guest" in the tone of someone who has not yet ruled on whether you are one: +25 satiety.', `${POT_LINE.ashfall[0]}: +25 satiety.`, `${POT_LINE.fo[2]}: +25 satiety.`];
-      const placed = POTS.flatMap((t) => ['', 'Breakfast: ', 'Midday: ', 'Supper: '].map((p) => { const r = splitReply([p + t]); return r.gains.length === 1 && r.reply.length === 0; }));
+      const { MEAL } = await import('../js/core/tasks.js'); const PRE = ['', ...Object.values(MEAL).map((m) => `${m}: `)]; // the review's TG-A2: the game's own prefixes
+      const placed = POTS.flatMap((t) => PRE.map((p) => { const r = splitReply([p + t]); return r.gains.length === 1 && r.reply.length === 0; }));
+      // TG-A1: each widened pattern stays anchored: its pot words after other words split as before (no whole-line gain)
+      assert(POTS.every((t) => { const r = splitReply([`She says: ${t}`]); return !(r.gains.length === 1 && r.reply.length === 0); }) && PRE.length === 4, 'K-A (TG-A1, TG-A2): the patterns anchored; the prefixes are tasks.js MEAL\'s three');
       assert(placed.length === 12 && placed.every(Boolean) && SCENES.ashfall.choices.some((c) => /honoured guest/.test(String(c.do))), `K-A: the three pot lines with speech are gains, bare and with each meal prefix (${placed.filter(Boolean).length} of 12)`);
       assert(!splitReply(['Breakfast: a line "with speech": +25 satiety.']).gains.length, 'K-A: the prefix alone makes no gain of another line with speech (the patterns stay anchored)'); }
 }
@@ -2464,6 +2468,45 @@ assert(walkEc > 0, `V1: the Golden Core walk plays the vessels' collateral card 
     assert(T[0] === 4 && T[1] === 6, 'T1: the targets 4 / 6');
     { const g = fresh(6); g.coil.n = 4; assert(/in 4 Coils: a new best ★ \(target 4\)\./.test(nc(g, 0)[0]), 'T1: the prologue on Coil 4: a star');
       const h = fresh(7); h.coil.n = 7; assert(/^Act 1 cleared in 7 Coils: a new best \(target 6\)\.$/.test(nc(h, 1)[0]), 'T1: Act 1 on Coil 7: no star'); }
+}
+// v0.11.259 (owner picks OC-A + W1; the cold review's M2, TG-A8): the rules both calendars share, on the long calendar (the old
+// calendar's numbers in the blocks above, `OC2_OLD`, go with its code in OC2's push; these stay)
+{
+    const G = await import('../js/core/game.js'), M = await import('../js/story/meridians.js');
+    const L = (seed, set) => { const g = ensureBars(newGame(seed, { closed: true })); if (set) set(g); return g; };
+    const pool = (x) => Math.floor(x * XP_RATE * LONG_XP + 1e-9);
+    // YK1: level with his GU held, no XP; under him the long calendar's award; an award past his rank stops at it
+    { const g = L(25901, (x) => { x.yuki.fight = { tier: 2, level: 3, xp: 0 }; x.james.gu = { tier: 2, level: 3, xp: 0 }; }); const out = G.awardYukiFightXp(g, 'major');
+      assert(g.cal === LONG_CAL && G.yukiHeld(g) && g.yuki.fight.xp === 0 && out[0] === G.YUKI_HELD_TEXT.held.replace('{t}', 2).replace('{l}', 3), `M2 (YK1): level with him: held, no XP (${out[0]})`); }
+    { const g = L(25902, (x) => { x.yuki.fight = { tier: 1, level: 1, xp: 0 }; x.james.gu = { tier: 3, level: 1, xp: 0 }; }); const out = G.awardYukiFightXp(g, 'standard');
+      assert(!G.yukiHeld(g) && out[0] === `Yuki Fight +${pool(30)}` && g.yuki.fight.xp === 12, `M2 (YK1): under him, 30 × 0.6 × 0.7 = 12 (${out[0]})`); }
+    { const g = L(25903, (x) => { x.yuki.fight = { tier: 1, level: 8, xp: 3 }; x.james.gu = { tier: 1, level: 9, xp: 0 }; x.coil.n = 21; }); const room = G.xpToNext(g.yuki.fight) - 3; const out = G.awardYukiFightXp(g, 'major');
+      assert(pool(120 * coilMult(g)) > room && g.yuki.fight.tier === 1 && g.yuki.fight.level === 9 && g.yuki.fight.xp === 0 && out[0] === `Yuki Fight +${room} → T1 L9, level with James's GU (held)`, `M2 (YK1): an award past his rank stops at it (${out[0]})`); }
+    // D: GU alone takes the whole pool; a fail pays 25% before the rate; routine pays nothing
+    { const g = L(25904); const gu = g.james.gu.xp; awardXp(g, 'GU', 'standard'); assert(g.james.gu.xp - gu === pool(30) && pool(30) === 12, `M2 (D): GU alone: 12 (${g.james.gu.xp - gu})`); }
+    { const g = L(25905); const cu = g.james.skills['Convergence Use'].xp; awardXp(g, 'Convergence Use', 'standard', { fail: true }); assert(g.james.skills['Convergence Use'].xp - cu === Math.floor(pool(7) / 2) && pool(7) === 2, 'M2 (D): a fail: 7 × 0.6 × 0.7 = 2, split 1'); }
+    { const g = L(25906); assert(awardXp(g, 'Convergence Use', 'routine').length === 0, 'M2 (D): routine pays nothing'); }
+    // the meridians (v0.9.6): closed bars; no group before 2 primaries; XP only on the sitting that opens a channel, progress kept between;
+    // Yuki mirrors; the speed by sittings (×10 at 30) shows under the 2 h cap on the long calendar's ×4 hours
+    { const g = L(25907); assert(G.jamesQiMax(g) === 25.5 && G.yukiQiMax(g) === 20.5 && !M.canColGroup(g) && M.canPrimary(g), 'M2 (v0.9.6): closed bars 25.5 / 20.5, no group before 2 primaries');
+      g.scene = 'meridians'; g.flags.mer_return = 'stream'; g.james.satiety = 70;
+      const wp = SCENES.meridians.choices.findIndex((c) => c.work && /primary|Lung/.test(String(c.text(g))) && c.show(g)); const xpOf = () => g.james.skills['Convergence Use'].xp + g.james.skills['Convergence Use'].level * 1000;
+      const rows = []; for (let k = 0; k < 20 && g.james.primaries < 2; k++) { g.james.qi = 20; g.tasks.use = {}; const p0 = g.james.primaries, x0 = xpOf(); choose(g, SCENES, wp); rows.push([g.james.primaries - p0, xpOf() - x0 > 0, g.yuki.primaries === g.james.primaries]); }
+      assert(rows.length === 9 && rows.every(([o, x, y]) => x === (o === 1) && y) && rows[3][0] === 1 && rows[8][0] === 1, `M2 (v0.9.6): primaries 1 and 2 open on sittings 4 and 9 (2 h × ×${G.merMult(g)}), XP only then, Yuki mirrors (${JSON.stringify(rows)})`);
+      assert(M.canColGroup(g), 'M2 (v0.9.6): a group after primaries 1–2');
+      g.tasks.use = { 'act:mer': 30 }; assert(actSpeed(g, 'mer') === 10 && M.merMinutesOf(g, 'pri') < 120, `M2 (v0.11.15): after 30 sittings ×10, under the 2 h cap (${M.merMinutesOf(g, 'pri')} min)`); }
+    // S1: sits to 95% by realm from the long calendar's sit (each realm at least as many as the last); a sit's XP ×1.5 on Coil 3
+    { const sits = [0, 1, 2, 3, 4, 5, 6, 7].map((r) => { const g = L(25908); g.james.realm = r; return Math.ceil(95 / G.sitGain(g) - 1e-9); });
+      assert(sits.join() === '38,56,87,190,317,475,950,950' && sits.every((v, i) => !i || v >= sits[i - 1]), `M2 (S1): sits to 95% by realm, long calendar (${sits.join(', ')})`);
+      const a = L(25909, (x) => { x.coil.n = 3; x.james.qi = 30; }), b = L(25909, (x) => { x.james.qi = 30; }); const ra = G.condense(a), rb = G.condense(b);
+      const n = (r) => Number(/\+(\d+) XP/.exec(r.xp[0])?.[1]); assert(n(rb) === 2 && n(ra) === Math.floor(n(rb) * 1.5), `M2 (X1): a sit's XP ×1.5 on Coil 3 (${n(rb)} → ${n(ra)})`); }
+    // the review's TG-A5: the Fallout's pot line by the story's day (8, 9, 10), with no day record
+    { const { potLine } = await import('../js/story/kitchen.js'); const { POT_LINE } = await import('../js/story/kitchen_texts.js');
+      const got = [8, 9, 10].map((d) => { const g = L(25912 + d); g.coil.act = 1; g.flags.ending = 'paid'; g.rel.Village = { f: 95, a: 0 }; g.minutes = calMinutes(g, d, 12); delete g.lines; return potLine(g, 'fo'); });
+      assert(got.every((t, k) => t === `${POT_LINE.fo[k]}: +25 satiety.`), `TG-A5: the Fallout's pot line by story day 8 / 9 / 10 (${got.map((t) => String(t).slice(0, 20)).join(' | ')})`); }
+    // the review's L2, TG-A4: a whole-game rewind keeps the calendar (the long one with its Blackroot camps; an old state stays old)
+    { const e = L(25910); e.coil.act = 1; endCoil(e, 'choice', 'stream'); rewind(e, { to: 'game' }); const o = ensureBars(newGame(25911, { closed: true, cal: OC2_OLD })); o.coil.act = 1; endCoil(o, 'choice', 'stream'); rewind(o, { to: 'game' });
+      assert(e.cal === LONG_CAL && e.calBl === 3 && e.coil.act === 0 && !('cal' in o) && !('calBl' in o), `L2 (TG-A4): a whole-game rewind keeps the calendar (${e.cal}/${e.calBl}; old ${o.cal}/${o.calBl})`); }
 }
 // v0.11.82 (owner picks B1 + Y1; texts Fable's): Ya's brawl a weapon spar, Bao's an unarmed brawl, Yuki in them only in human form
 {
