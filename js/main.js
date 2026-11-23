@@ -425,7 +425,7 @@ ${statusHtml()}
 /** v0.11.226 (owner pick FP1, the flip: NG + OB + BT): every new game is on the long calendar (calendar.js; the test switch of
  *  v0.11.203 is gone). v0.11.259 (owner pick OC-A, OC3): the browser test's old-calendar key (`boneash.oldcal`, set by nothing since
  *  v0.11.253) is no longer read: every game and every loaded save is on the long calendar. */
-const freshGame = (cal = LONG_CAL) => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true, cal })); // meridians closed at the start (v0.9.6); v0.11.203 (T1, TS1): cal, the long calendar
+const freshGame = () => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true })); // meridians closed at the start (v0.9.6); v0.11.260 (P28-A, OC2): every game on the long calendar (newGame's `cal` option gone)
 const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
 function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: ☰ Menu → Saves.'); } }
 
