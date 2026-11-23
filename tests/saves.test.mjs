@@ -70,37 +70,35 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
 //    a save at 00:00–03:59 starts on the week's seventh night and that waking day's marks go to the week's last day.
 {
     const { flipFill, flipMinutes, inAct1, advance, combatStep: cs, wakeDay } = await import('../js/core/game.js');
-    const { calStart, calEnd, storyDay, weekNights, longCal, LONG_CAL: LC, BL_SPAN } = await import('../js/core/calendar.js');
+    const { calStart, calEnd, storyDay, weekNights, LONG_CAL: LC, BL_SPAN } = await import('../js/core/calendar.js');
     const { rewind } = await import('../js/core/coil.js');
     const { spacedFree, dayKey, day, markDaily } = await import('../js/story/common.js');
     let moved = 0, kept = 0, marks = 0, todays = 0, nights = 0;
     // v0.11.259 (owner pick OC-A, OC4): each old save's reading before the move (its act, and each card's done-today by the waking day and
-    // by the calendar day), frozen in tests/flip-before.json by this build's old-calendar reader, so the move's checks still have their
-    // "before" once that reader goes (OC2, the next push). `--write-flip-before` writes it again (only while the old reader exists);
-    // each entry carries its save's sha-256, so a changed save shows. While the reader exists, the live reading must equal the frozen one.
-    const FB_PATH = new URL('flip-before.json', import.meta.url), FB_WRITE = process.argv.includes('--write-flip-before');
-    // the review's L3, TG-A9: the write needs the old reader (a state with no `cal` read as the old calendar); after OC2 it refuses
-    if (FB_WRITE && longCal({ minutes: 0, flags: {} })) { console.error('--write-flip-before: the old-calendar reader is gone (OC2); the frozen readings stay as they are'); process.exit(2); }
-    const FB = FB_WRITE || !existsSync(FB_PATH) ? {} : JSON.parse(readFileSync(FB_PATH, 'utf8'));
+    // by the calendar day), frozen in tests/flip-before.json by v0.11.259's old-calendar reader; each entry carries its save's sha-256, so a
+    // changed save shows. v0.11.260 (owner pick P28-A, OC2 + L3): the reader went with the old calendar's code, so the frozen readings are
+    // the only "before" and nothing writes them again (the `--write-flip-before` flag gone: the review's L3).
+    const FB_PATH = new URL('flip-before.json', import.meta.url);
+    const FB = existsSync(FB_PATH) ? JSON.parse(readFileSync(FB_PATH, 'utf8')) : {};
     let fbN = 0;
     for (const f of files) {
         const rawF = readFileSync(new URL(f, dir), 'utf8'), sha = createHash('sha256').update(rawF).digest('hex');
         const g = deserialize(unpack(rawF));
         if (g.cal === LC) { const b = JSON.stringify(g); assert(flipFill(g) === false && JSON.stringify(g) === b, `FP1 ${f}: a long-calendar save is left alone`); kept++; continue; }
-        const d = Math.floor(g.minutes / 1440) + 1, tod = g.minutes % 1440, act1 = inAct1(g), act = g.coil?.act || 0, night = tod < 240 && d > 1;
+        const d = Math.floor(g.minutes / 1440) + 1, tod = g.minutes % 1440, act = g.coil?.act || 0, night = tod < 240 && d > 1;
         const sd = g.coil?.snap ? Math.floor(g.coil.snap.minutes / 1440) + 1 : null, stod = g.coil?.snap ? g.coil.snap.minutes % 1440 : 0;
         const peekMin = flipMinutes(g.minutes, act);
         const dk = Object.keys(g.flags).filter((k) => /@-?\d+$/.test(k));
         const names = [...new Set(dk.map((k) => k.replace(/@-?\d+$/, '')))];
         // RV1 (TG2): done today by the waking day (dayKey, the daily cards) and by the calendar day (day(g), the Heart's talks), before and after
         const probe = () => Object.fromEntries(names.map((k) => [k, [spacedFree(g, k, dayKey(g)), spacedFree(g, k, day(g))]]));
-        const live = { act1, free: probe() };
-        if (FB_WRITE) FB[f] = { sha, ...live };
         const fb = FB[f];
+        // v0.11.260 (P28-A, OC2): a save from before the Coil's act (state < 5, v0.8.5) gets it in `migrate` before the move, read on its own
+        // old days (game.js `oldAct1`), so a save in Act 1 rewinds within Act 1
+        if (/^v0\.8\.5-act1-/.test(f)) assert(fb && fb.act1 === true && act === 1, `FP1 ${f} (OC2): migrate reads the old save's Act 1 on its own days (act ${act})`);
         assert(fb && fb.sha === sha, `FP1 ${f} (OC4): its frozen reading in tests/flip-before.json, for this very save (${fb ? 'sha differs' : 'none'})`);
         if (!fb) continue;
         fbN++;
-        assert(JSON.stringify(live) === JSON.stringify({ act1: fb.act1, free: fb.free }), `FP1 ${f} (OC4): the frozen reading equals the old-calendar reader's (until OC2 takes the reader)`);
         const free = fb.free;
         const gl = g.flags.guardian_lost_day, fd = g.flags.foundation_day;
         assert(flipFill(g) === true && g.cal === LC, `FP1 ${f}: moved to the long calendar`);
@@ -133,25 +131,26 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
         if (sd) { const h = deserialize(unpack(readFileSync(new URL(f, dir), 'utf8'))); flipFill(h); rewind(h);
             assert(h.cal === LC && Math.floor(h.minutes / 1440) + 1 === calStart(h, sd), `FP1 ${f}: a rewind lands on the moved rewind point (Day ${Math.floor(h.minutes / 1440) + 1}, the long calendar)`); }
     }
-    if (FB_WRITE) writeFileSync(FB_PATH, `${JSON.stringify(FB, null, 1)}\n`);
     assert(fbN === moved && Object.keys(FB).length === moved, `FP1 (OC4): every moved save read against its frozen reading, none left over (${fbN} / ${moved} / ${Object.keys(FB).length})`);
     assert(moved >= 30 && kept >= 3 && marks > 1000 && todays > 0 && nights >= 1, `FP1: ${moved} old saves moved (${marks} day marks, ${todays} done today kept, ${nights} at night), ${kept} long ones left alone`);
-    // a new old-calendar game (the tests' default) on Day 1: nothing but the fields; an Act 1 dawn moves to Day 44
-    const n = ensureBars(newGame(11, { cal: 0 })); flipFill(n);
-    assert(n.cal === LC && n.minutes === newGame(11, { cal: LC }).minutes && n.calBl === BL_SPAN, 'FP1: a Day 1 game moves to Day 1 of the long calendar');
-    const a1 = ensureBars(newGame(12, { cal: 0 })); a1.minutes = 7 * 1440 + 360; a1.flags.ending = 'accord'; a1.flags['forage@8'] = true; a1.flags['x@0'] = true; a1.flags.guardian_lost_day = 8; a1.flags.foundation_day = 5; flipFill(a1);
+    // v0.11.260 (P28-A, OC2): an old save built by hand (a new game without `cal` and `calBl`, its minutes on the old days), as the
+    // old calendar's code that made them is gone. A Day 1 save: nothing but the fields; an Act 1 dawn moves to Day 44
+    const oldSave = (g) => { delete g.cal; delete g.calBl; return g; };
+    const n = oldSave(ensureBars(newGame(11, {}))); flipFill(n);
+    assert(n.cal === LC && n.minutes === newGame(11, {}).minutes && n.calBl === BL_SPAN, 'FP1: a Day 1 game moves to Day 1 of the long calendar');
+    const a1 = oldSave(ensureBars(newGame(12, {}))); a1.minutes = 7 * 1440 + 360; a1.flags.ending = 'accord'; a1.flags['forage@8'] = true; a1.flags['x@0'] = true; a1.flags.guardian_lost_day = 8; a1.flags.foundation_day = 5; flipFill(a1);
     assert(a1.minutes === 43 * 1440 + 360 && inAct1(a1) && a1.flags['forage@44'] && !a1.flags['forage@8'] && a1.flags['x@0'] && a1.flags.guardian_lost_day === 44 && a1.flags.foundation_day === 29, 'FP1: Act 1\'s Day 8 dawn → Day 44; its marks, the guardian\'s and Foundation\'s days with it (RV1, TG6); a mark of day 0 stays');
     // RV1 (TG4): the Blackroot's boundary: an Act 1 save on Day 10 (the Fallout's last) gets the camps, one on Day 11 the 5-day road
-    for (const [dd, bl] of [[10, BL_SPAN], [11, 1]]) { const t = ensureBars(newGame(13, { cal: 0 })); t.coil.act = 1; t.flags.ending = 'accord'; t.minutes = (dd - 1) * 1440 + 600; flipFill(t);
+    for (const [dd, bl] of [[10, BL_SPAN], [11, 1]]) { const t = oldSave(ensureBars(newGame(13, {}))); t.coil.act = 1; t.flags.ending = 'accord'; t.minutes = (dd - 1) * 1440 + 600; flipFill(t);
         assert(t.calBl === bl && storyDay(t) === dd, `FP1 (RV1, TG4): an Act 1 save on Day ${dd} gets calBl ${bl} (${t.calBl})`); }
     // RV1 (M1, TG2): a daily card done in the evening of day d − 1, the save at Day d 00:30: still done after the move (9 of 9 lost it before)
     let lost = 0;
-    for (const dd of [2, 3, 4, 5, 6, 7, 9, 10, 17]) { const t = ensureBars(newGame(5, { cal: 0 })); t.minutes = (dd - 2) * 1440 + 1200; markDaily(t, 'probe_fp1');
+    for (const dd of [2, 3, 4, 5, 6, 7, 9, 10, 17]) { const t = oldSave(ensureBars(newGame(5, {}))); t.minutes = (dd - 2) * 1440 + 1200; markDaily(t, 'probe_fp1');
         advance(t, (dd - 1) * 1440 + 30 - t.minutes); const b0 = spacedFree(t, 'probe_fp1', dayKey(t)); flipFill(t);
         if (spacedFree(t, 'probe_fp1', dayKey(t)) !== b0 || b0) lost++;
         assert(wakeDay(t) === calEnd(t, dd - 1), `FP1 (RV1, M1): Day ${dd} 00:30 is still the evening's waking day (${wakeDay(t)})`); }
     assert(lost === 0, `FP1 (RV1, M1): a card done the evening before stays done after a night move (${lost} of 9 reopened)`);
-    for (const [m, w] of [[30, 6], [239, 6], [240, 0], [1439, 0]]) { const t = ensureBars(newGame(6, { cal: 0 })); t.minutes = 4 * 1440 + m; flipFill(t);
+    for (const [m, w] of [[30, 6], [239, 6], [240, 0], [1439, 0]]) { const t = oldSave(ensureBars(newGame(6, {}))); t.minutes = 4 * 1440 + m; flipFill(t);
         assert(weekNights(t) === w, `FP1 (RV1, H1): a save at ${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')} on Day 5 starts on night ${w} of the week (${weekNights(t)})`); }
     // RV1 (H1, TG1): an old game played to the first forest night event (Day 2, 01:xx) or to the fire night (vday 2, after midnight),
     // moved, then played on: the counter turns at the next morning, the tribute on Day 43, Act 1 on Day 44 (its rewind point too), the fire shows
@@ -184,7 +183,7 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
     assert(/clockLabel\(p\.cal === LONG_CAL \? p\.minutes : flipMinutes\(p\.minutes, p\.act\)\)/.test(M), 'FP1 (main.js, RV1 L2): the Saves screen\'s lines show the moved day');
     // RV1 (TG5): What's new's numbers from the calendar
     const N = readFileSync(new URL('../js/core/news.js', import.meta.url), 'utf8'), line = (/\['0\.11\.226', '([^\n]*)'\],/.exec(N) || [])[1] || '';
-    const lg = newGame(1, { cal: LC });
+    const lg = newGame(1, {});
     const want = [['the tribute on Day', calStart(lg, 7)], ['the Elder on Day', calStart(lg, 21)], ['Day 6 becomes Day', flipMinutes(5 * 1440 + 600, 0) / 1440 + 1 - 600 / 1440], ['Day 12 Day', flipMinutes(11 * 1440 + 600, 1) / 1440 + 1 - 600 / 1440]];
     for (const [w, v] of want) assert(new RegExp(`${w} ${v}\\b`).test(line), `FP1 (RV1, TG5): What's new says "${w} ${v}"`);
 }
@@ -197,7 +196,7 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
     const { rewind, endCoil, keptRealm, keptAfterClear, liftKept, KEPT_EXTRA_FROM } = await import('../js/core/coil.js');
     const { jamesHpMax, jamesQiMax, yukiHpMax } = await import('../js/core/game.js');
     const rank = (n) => 10 * (n.tier - 1) + n.level;
-    const won = (seed, outcome, realm, cal = 7) => { const g = ensureBars(newGame(seed, { closed: true, cal })); g.coil.act = 1; g.james.realm = realm; g.flags.a1_outcome = outcome; goTo(g, SCENES, 'a1_end'); return g; };
+    const won = (seed, outcome, realm, cal = 7) => { const g = ensureBars(newGame(seed, { closed: true })); g.coil.act = 1; g.james.realm = realm; g.flags.a1_outcome = outcome; goTo(g, SCENES, 'a1_end'); return g; };
     const biteFrom = (g, re) => { goTo(g, SCENES, 'a1_again'); const c = sceneView(g, SCENES).choices.find((x) => re.test(x.label)); return c ? choose(g, SCENES, c.index) : null; };
     // KG-b: every won ending counts, from the act's end (a1_again) and from the James tab's path (endCoil 'clear' + the Coil screen)
     for (const o of ['victory', 'revelation', 'accord']) {
@@ -214,8 +213,8 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
       assert(g.stats.clears === 1 && g.james.realm === 1, 'KA1: the James tab\'s path (endCoil clear, the Coil screen) counts the clear'); }
     // not a clear: 'taken', a bite by choice, a collapse
     { const g = won(33, 'taken', 3); biteFrom(g, /whole game/); assert(!g.stats.clears && g.james.realm === 0 && !g.coil.kept, 'KA1: going round after taken keeps nothing'); }
-    { const g = ensureBars(newGame(34, { closed: true, cal: 7 })); g.james.realm = 2; endCoil(g, 'collapse'); rewind(g); assert(!g.stats.clears && g.james.realm === 0, 'KA1: a collapse keeps nothing'); }
-    { const g = ensureBars(newGame(35, { closed: true, cal: 7 })); g.coil.act = 1; g.james.realm = 2; endCoil(g, 'choice'); rewind(g); assert(!g.stats.clears && g.james.realm === 0, 'KA1: a bite by choice keeps nothing'); }
+    { const g = ensureBars(newGame(34, { closed: true })); g.james.realm = 2; endCoil(g, 'collapse'); rewind(g); assert(!g.stats.clears && g.james.realm === 0, 'KA1: a collapse keeps nothing'); }
+    { const g = ensureBars(newGame(35, { closed: true })); g.coil.act = 1; g.james.realm = 2; endCoil(g, 'choice'); rewind(g); assert(!g.stats.clears && g.james.realm === 0, 'KA1: a bite by choice keeps nothing'); }
     // KC: never above the realm at a won clear; KB-a: a floor, one realm a clear
     { const g = won(36, 'accord', 0); biteFrom(g, /whole game/); assert(g.stats.clears === 1 && keptRealm(g) === 0 && g.james.realm === 0 && !g.coil.kept && /The meridians are ash again/.test(String(sceneView(g, SCENES).text)), 'KA1 (KC): a clear at Mortal Vessel keeps nothing (the old dawn)');
       g.coil.act = 1; g.james.realm = 1; g.flags.a1_outcome = 'victory'; goTo(g, SCENES, 'a1_end'); biteFrom(g, /whole game/);
@@ -230,21 +229,21 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
       g.coil.snap.james.realm = 4; g.flags.a1_outcome = 'taken'; goTo(g, SCENES, 'a1_end'); const r = biteFrom(g, /start of Act 1/);
       assert(g.james.realm === 4 && !g.coil.kept && !r.lines.some((l) => /^Kept from/.test(l)), 'KA1: an Act 1 snapshot above the floor is kept as it is (no lift, no line)'); }
     // KL-x: the lift itself (James and Yuki, the meridians, Saturation, the bars, the XP)
-    { const g = ensureBars(newGame(38, { closed: true, cal: 7 })); g.stats.clears = 3; g.stats.keptTop = 3; g.james.primaries = 5; g.james.saturation = 40;
+    { const g = ensureBars(newGame(38, { closed: true })); g.stats.clears = 3; g.stats.keptTop = 3; g.james.primaries = 5; g.james.saturation = 40;
       const gu0 = rank(g.james.gu); const k = liftKept(g); ensureBars(g);
       assert(k === 3 && g.james.realm === 3 && g.yuki.realm === 3 && g.james.primaries === 12 && g.james.collaterals === 66 && g.yuki.primaries === 12 && g.yuki.collaterals === 66 && !g.james.colSealed && g.james.saturation === 0, 'KA1 (KL-x): realm 3, Yuki 3, every Mortal Vessel meridian open, Saturation 0');
       assert(rank(g.james.gu) > gu0 && g.james.hp === jamesHpMax(g) && g.james.qi === jamesQiMax(g) && g.yuki.hp === yukiHpMax(g), 'KA1 (KL-x): the Convergence XP is given and the bars are full');
       assert(liftKept(g) === 0, 'KA1: a second lift at the same realm changes nothing');
-      const a = ensureBars(newGame(39, { closed: true, cal: 7 })), b = ensureBars(newGame(39, { closed: true, cal: 7 }));
+      const a = ensureBars(newGame(39, { closed: true })), b = ensureBars(newGame(39, { closed: true }));
       a.stats.clears = b.stats.clears = 1; a.stats.keptTop = b.stats.keptTop = 1; b.james.primaries = 12; b.james.collaterals = 66;
       liftKept(a); liftKept(b); assert(rank(a.james.gu) > rank(b.james.gu), 'KA1 (KL-x): the XP is for the channels still shut (none shut, no XP)'); }
     // XW-a: from Nascent Soul the Extraordinary 8 and their collaterals too; below it they stay for the player to open
-    { const g = ensureBars(newGame(40, { closed: true, cal: 7 })); g.stats.clears = 7; g.stats.keptTop = 9; liftKept(g);
-      const o = ensureBars(newGame(40, { closed: true, cal: 7 })); o.stats.clears = 7; o.stats.keptTop = 9; Object.assign(o.james, { extra8: 8, extraCollaterals: 28 }); liftKept(o);
+    { const g = ensureBars(newGame(40, { closed: true })); g.stats.clears = 7; g.stats.keptTop = 9; liftKept(g);
+      const o = ensureBars(newGame(40, { closed: true })); o.stats.clears = 7; o.stats.keptTop = 9; Object.assign(o.james, { extra8: 8, extraCollaterals: 28 }); liftKept(o);
       const tot = (n) => rank(n) * 1e6 + (n.xp || 0);
       assert(tot(g.james.gu) > tot(o.james.gu), `KA1 (XW-a): the Extraordinary lines' XP is given for those still shut (${JSON.stringify(g.james.gu)} vs already open ${JSON.stringify(o.james.gu)})`);
       assert(KEPT_EXTRA_FROM === 7 && g.james.realm === 7 && g.james.extra8 === 8 && g.james.extraCollaterals === 28 && !g.james.junctions, 'KA1 (XW-a): at Nascent Soul the Extraordinary 8 and 28 collaterals open, the junctions not');
-      const h = ensureBars(newGame(41, { closed: true, cal: 7 })); h.stats.clears = 6; h.stats.keptTop = 6; liftKept(h);
+      const h = ensureBars(newGame(41, { closed: true })); h.stats.clears = 6; h.stats.keptTop = 6; liftKept(h);
       assert(h.james.realm === 6 && !h.james.extra8 && !h.james.extraCollaterals, 'KA1 (XW-a): at Soul Embryo they stay shut (their window is open)'); }
     // the old calendar the same
     { const g = won(42, 'victory', 1, 0); biteFrom(g, /whole game/); assert(g.james.realm === 1 && g.stats.clears === 1, 'KA1: the old calendar keeps the realm too'); }
@@ -264,18 +263,18 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
         const { awardXp } = await import('../js/core/game.js');
         const { coilReport, keptTabText, tabWhy } = await import('../js/core/coil.js');
         const { ykHumanAtStart } = await import('../js/story/yuki_path.js');
-        const xpOf = (seed, prep, extra = 0) => { const g = ensureBars(newGame(seed, { closed: true, cal: 7 })); prep(g); const before = JSON.stringify(g.james.gu); liftKept(g); return { g, before }; };
+        const xpOf = (seed, prep, extra = 0) => { const g = ensureBars(newGame(seed, { closed: true })); prep(g); const before = JSON.stringify(g.james.gu); liftKept(g); return { g, before }; };
         // TG1 + TG2: the exact awards: a fresh lift to Foundation is 20 standard (12 primaries, 8 groups); to Nascent Soul 20 standard and 36 challenging
-        const same = (k, n1, n2) => { const a = ensureBars(newGame(50, { closed: true, cal: 7 })), b = ensureBars(newGame(50, { closed: true, cal: 7 }));
+        const same = (k, n1, n2) => { const a = ensureBars(newGame(50, { closed: true })), b = ensureBars(newGame(50, { closed: true }));
             a.stats.clears = b.stats.clears = k; a.stats.keptTop = b.stats.keptTop = k; liftKept(a);
             Object.assign(b.james, { realm: k, saturation: 0, primaries: 12, collaterals: 66 }); Object.assign(b.yuki, { realm: k, primaries: 12, collaterals: 66 }); if (k >= 7) Object.assign(b.james, { extra8: 8, extraCollaterals: 28 });
             for (let i = 0; i < n1; i++) awardXp(b, 'Convergence Use', 'standard'); for (let i = 0; i < n2; i++) awardXp(b, 'Convergence Use', 'challenging');
             return JSON.stringify([a.james.gu, a.james.skills['Convergence Use'], a.yuki.fight]) === JSON.stringify([b.james.gu, b.james.skills['Convergence Use'], b.yuki.fight]); };
         assert(same(1, 20, 0) && !same(1, 21, 0) && !same(1, 66, 0), 'KA1 (RV1, TG2): a fresh lift to Foundation gives exactly 20 standard Convergence awards (12 primaries, 8 collateral groups)');
         assert(same(7, 20, 36) && !same(7, 20, 35) && !same(7, 20, 0), 'KA1 (RV1, TG1): a fresh lift to Nascent Soul gives 20 standard and exactly 36 challenging (8 vessels, 28 collaterals)');
-        { const a = ensureBars(newGame(51, { closed: true, cal: 7 })), b = ensureBars(newGame(51, { closed: true, cal: 7 }));
+        { const a = ensureBars(newGame(51, { closed: true })), b = ensureBars(newGame(51, { closed: true }));
           for (const x of [a, b]) { x.stats.clears = 7; x.stats.keptTop = 7; } Object.assign(b.james, { extra8: 8, extraCollaterals: 20 }); liftKept(a); liftKept(b);
-          const c = ensureBars(newGame(51, { closed: true, cal: 7 })); Object.assign(c.james, { realm: 7, saturation: 0, primaries: 12, collaterals: 66, extra8: 8, extraCollaterals: 28 }); Object.assign(c.yuki, { realm: 7, primaries: 12, collaterals: 66 });
+          const c = ensureBars(newGame(51, { closed: true })); Object.assign(c.james, { realm: 7, saturation: 0, primaries: 12, collaterals: 66, extra8: 8, extraCollaterals: 28 }); Object.assign(c.yuki, { realm: 7, primaries: 12, collaterals: 66 });
           for (let i = 0; i < 20; i++) awardXp(c, 'Convergence Use', 'standard'); for (let i = 0; i < 8; i++) awardXp(c, 'Convergence Use', 'challenging');
           assert(JSON.stringify(b.james.gu) === JSON.stringify(c.james.gu), 'KA1 (RV1, TG1): XW-a pays only for the Extraordinary lines still shut (8 vessels open, 20 of 28 collaterals: 8 awards)'); }
         // TG3: the James tab's path as main.js runs it (tabWhy → endCoil → the Coil screen → the bite) and its line
@@ -293,7 +292,7 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
         { const g = won(56, 'victory', 4); biteFrom(g, /whole game/); g.coil.act = 1; g.james.realm = 2; g.flags.a1_outcome = 'accord'; goTo(g, SCENES, 'a1_end'); biteFrom(g, /whole game/);
           assert(g.stats.keptTop === 4 && g.stats.clears === 2 && g.james.realm === 2, 'KA1 (RV1, TG4): a later clear at a lower realm keeps the highest (4)'); }
         // TG5: a sealed Foundation snapshot lifted higher is unsealed with its collaterals open
-        { const g = ensureBars(newGame(57, { closed: true, cal: 7 })); Object.assign(g.james, { realm: 1, primaries: 12, collaterals: 34, colSealed: true }); g.stats.clears = 2; g.stats.keptTop = 2; liftKept(g);
+        { const g = ensureBars(newGame(57, { closed: true })); Object.assign(g.james, { realm: 1, primaries: 12, collaterals: 34, colSealed: true }); g.stats.clears = 2; g.stats.keptTop = 2; liftKept(g);
           assert(g.james.realm === 2 && g.james.collaterals === 66 && g.james.colSealed === false && g.yuki.collaterals === 66, 'KA1 (RV1, TG5): a sealed Foundation lifted to Core Formation opens its collaterals and is not sealed'); }
         // TG6: the Coil screen doesn't count the kept realm as this Coil's gain
         { const g = won(58, 'victory', 2); biteFrom(g, /whole game/); assert(g.coil.start.realm === 1 && !coilReport(g).gained.some((x) => /^realm/.test(x)), 'KA1 (RV1, TG6): the Coil starts at the kept realm (no "realm +1" for it)'); }
@@ -305,7 +304,7 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
           const c = sceneView(g, SCENES).choices.find((x) => /Check Yuki over first/.test(x.label)); choose(g, SCENES, c.index);
           const t = String(sceneView(g, SCENES).text);
           assert(g.scene === 'yuki_check' && /Foundation, the pair of you, and it made the trip intact\. At home that still gets you seated with the children\. Nobody here needs to hear it\./.test(t) && !/Mortal Vessel/.test(t), 'KA1 (RV1, M1a, TG8): the arrival\'s Yuki screen after a kept bite names the kept realm');
-          const h = ensureBars(newGame(61, { closed: true, cal: 7 })); const c2 = sceneView(h, SCENES).choices.find((x) => /Check Yuki over first/.test(x.label)); choose(h, SCENES, c2.index);
+          const h = ensureBars(newGame(61, { closed: true })); const c2 = sceneView(h, SCENES).choices.find((x) => /Check Yuki over first/.test(x.label)); choose(h, SCENES, c2.index);
           assert(/Mortal Vessel, the pair of you\. Young, as your people count it\. Larval, near enough\./.test(String(sceneView(h, SCENES).text)), 'KA1 (RV1, M1a): a new game keeps the old line'); }
         // L2: Yuki's human shape from a realm kept on this Coil's rewind
         { const g = won(62, 'victory', 7); g.stats.clears = 7; g.stats.keptTop = 7; g.coil.snap.james.realm = 3; g.coil.snap.yuki.realm = 3; biteFrom(g, /start of Act 1/);

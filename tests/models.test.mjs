@@ -230,7 +230,7 @@ function play(run, model, st, yuki, kept = false) {
     const real = st; if (kept) st = blank(); // KA1 (KM): the first pass counts apart
     rs = seedOf(run, 7 + MODELS.indexOf(model === 'sociable' ? 'careful' : model) + (yuki === 'off' ? 50 : 0)); // RV1 (PS): the Sociable on Careful's dice, so the two compare game for game
     const smart = model !== 'random' || run % 2 === 0;
-    const g = ensureBars(newGame(run + 1 + 900000, { closed: true, cal: CAL }));
+    const g = ensureBars(newGame(run + 1 + 900000, { closed: true }));
     let off = 0; // v0.11.86: the Farmer's bites by choice, through the scenes the James tab's button leads to
     if (model === 'farmer') {
         for (let k = 0; k < FARM_BITES; k++) {
