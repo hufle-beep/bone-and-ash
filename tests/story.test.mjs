@@ -3828,10 +3828,17 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         let days = 0, withLine = 0, twice = 0, bad = 0; let s = 7; const shownKeys = new Set(); // RV1 (TG1): every line shows in a real game
         const rnd = (n) => { s = (s * 1103515245 + 12345) >>> 0; return (s >>> 8) % n; };
         const songsSeen = {}, beforeSong = {}; let afterSong = 0, dupSong = 0; // v0.11.183 (SG2; RV1 TG1)
-        for (let n = 0; n < 160; n++) {
-            const gameSongs = [];
-            const g = ensureBars(fresh(78000 + n, 0 /* OC2: the old calendar's shorter game reaches every stage's lines in 6,000 steps; the long one's 160 games don't (open: OC2's push) */)); const per = {};
-            for (let st = 0; st < 6000; st++) { // v0.11.251 (P21-E, TK): 3000 → 6000, a lost tribute now ends the Coil (more Coils before the Fallout)
+        // v0.11.260 (owner pick P28-A, T1; the v0.11.259 review's M2): on the long calendar, as every game since the flip. A stay is a
+        // week, so the 160 games from Day 1 reach the Fallout's later lines, the journey's and the return's too seldom (20 of 65 never,
+        // measured); each later stage gets walks from a state the first walks reached: B, from the first Fallout morning of 40 games,
+        // each played on Act 1 Coils 1–3 (the `from` lines) and in three friendship bands (as reached, Mei Lin and her mother low, mid);
+        // C, from the first return supper of 30 games in the low, mid and high bands (Mei Lin, her mother, Ya). Measured: 65 of 65.
+        const snapsB = [], snapsC = [];
+        const play = (g, n, steps, snap) => {
+            const gameSongs = [], per = {};
+            for (let st = 0; st < steps; st++) {
+                if (snap && snapsB.length < 40 && g.scene === 'fo_start' && g.coil?.act === 1 && !snap.b) { snap.b = 1; snapsB.push(JSON.stringify(g)); }
+                if (snapsC.length < 30 && g.scene === 'rt_evening' && !snap?.c && snap !== null) { if (snap) snap.c = 1; snapsC.push(JSON.stringify(g)); }
                 if (g.scene === 'collectors_lost' && n % 4 === 0) { SCENES.collectors_lost.choices[0].do(g); goTo(g, SCENES, 'epilogue'); } // v0.11.251 (P21-E, TK): a quarter of the games go on as an old save's accepted loss did ("Get up.", now hidden), so the low-friendship Fallout lines keep their players
                 const v = sceneView(g, SCENES); if (v.end) break;
                 const av = againView(g, v); // RV1 (TG3): newVisit passed as main.js does
@@ -3851,14 +3858,19 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
             }
             for (const e0 of Object.values(per)) { const e = [...e0].filter((x) => x !== 'song' && !x.startsWith('song.')); days++; if (e.length) withLine++; if (e.length > 1) twice++; }
             if (new Set(gameSongs).size !== gameSongs.length) dupSong++;
-        }
-        assert(dupSong === 0 && afterSong === 0, `CM3 (ON-S, DU): 160 random games: no song twice in a game (${dupSong}), no music line after an evening song the same day (${afterSong})`);
-        assert(Object.keys(songsSeen).length === 13, `CM3 (PL; RV1 TG2): all 13 songs show in 160 random games (${Object.keys(songsSeen).length}: ${Object.keys(songsSeen).map((k) => k.slice(5)).join(', ')})`);
+        };
+        const band = (g, f, who) => { for (const w of who) g.rel[w] = { ...(g.rel[w] || { a: 0 }), f }; return g; };
+        for (let n = 0; n < 160; n++) play(ensureBars(fresh(78000 + n)), n, 6000, {});
+        snapsB.forEach((sj, j) => { for (const k of [0, 1, 2]) { const g = JSON.parse(sj); g.coil.n += k; const f = [null, 10, 50][j % 3]; play(f == null ? g : band(g, f, ['Mei Lin', 'Mother']), 1, 3000, { b: 1 }); } });
+        snapsC.forEach((sj, j) => play(band(JSON.parse(sj), [10, 50, 90][j % 3], ['Mei Lin', 'Mother', 'Ya']), 1, 1500, null));
+        assert(snapsB.length === 40 && snapsC.length === 30, `T1 (P28-A): the later stages' walks start from states the first walks reached (${snapsB.length} Fallout mornings, ${snapsC.length} return suppers)`);
+        assert(dupSong === 0 && afterSong === 0, `CM3 (ON-S, DU): the random walks (160 games, 120 from the Fallout, 30 from the return): no song twice in a game (${dupSong}), no music line after an evening song the same day (${afterSong})`);
+        assert(Object.keys(songsSeen).length === 13, `CM3 (PL; RV1 TG2): all 13 songs show in the random walks (160 games, 120 from the Fallout, 30 from the return) (${Object.keys(songsSeen).length}: ${Object.keys(songsSeen).map((k) => k.slice(5)).join(', ')})`);
         assert(Object.keys(beforeSong).length === 0, `CM3 (RV1 M1, TG1): no music line earlier the same evening as an evening song (${JSON.stringify(beforeSong)})`);
-        assert(twice === 0 && bad === 0 && withLine > days * 0.4, `CM2 (ML): 160 random games, ${days} text days, ${withLine} with a music line, ${twice} with two (the game's own lines counted), ${bad} off the evening screens`);
+        assert(twice === 0 && bad === 0 && withLine > days * 0.4, `CM2 (ML): the random walks (160 games, 120 from the Fallout, 30 from the return), ${days} text days, ${withLine} with a music line, ${twice} with two (the game's own lines counted), ${bad} off the evening screens`);
         { const allKeys = Object.entries(M.MUSIC_LINES).flatMap(([st, p]) => Object.entries(p).flatMap(([k, l]) => l.map((x, i) => [`${st}.${k}.${i}`, x.key])));
           const miss = allKeys.filter(([k]) => !shownKeys.has(k)).map(([, key]) => key);
-          assert(miss.length === 0, `RV1 (TG1): every music and archive line shows in 160 random games (never: ${miss.join(', ') || 'none'})`); }
+          assert(miss.length === 0, `RV1 (TG1): every music and archive line shows in the random walks (160 games, 120 from the Fallout, 30 from the return) (never: ${miss.join(', ') || 'none'})`); }
     }
 
     // CM3 (v0.11.183, owner picks SG2, D1): the songs: PL each once in its scene, ON-S once a save (kept across the Coil), DU the day's music, ED both editions

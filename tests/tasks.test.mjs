@@ -269,26 +269,34 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const e = at(15711); for (const k of ['clinic', 'workshop', 'drill']) mark(e, k);
     for (const m of ['clinic', 'workshop', 'drill']) { const c = SCENES.ashfall.choices.find((x) => x.to === m); assert(c.show(e), `PA: the ${m} entry shows after a card today`); }
     e.minutes = calMinutes(e, 5, 23); assert(['clinic', 'workshop', 'drill'].every((m) => !SCENES.ashfall.choices.find((x) => x.to === m).show(e)), 'PA: the entries still close late in the evening');
-    // RV1 (Fable's review, L1–L3): a failed try stays open the same day (no once-a-Coil mark; the day marked; a bracket spent), says
-    // Fable's lines (FT, no "tonight" / "tomorrow"), and "Call it a day" can show after it while that card is still open
+    // v0.11.260 (owner pick P28-A, T1; the v0.11.259 review's M2): Fable's failed-try lines (FT) on the long calendar, where a card is
+    // a week's work carried day by day and the check falls at its end: the failure says Fable's line with no "tonight" / "tomorrow",
+    // sets no once-a-Coil mark (RV1, L1: it can be tried again) and the card is offered again the next morning. (The old calendar's
+    // failure in one go, the same day, went with its code in OC2's push.)
     const { JADE_FAIL, SPEARS_FAIL } = await import('../js/story/ashfall.js');
-    const weak = (seed) => { const w = at(seed, OC2_OLD); /* OC2: the old calendar's failed try in one go (the long one's carries on) */ w.james.gu = { tier: 1, level: 1, xp: 0 }; w.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; w.james.satiety = 0; w.tasks.fam = {}; ensureBars(w); w.james.qi = 60; return w; };
-    { const w = weak(15712); const ji = SCENES.clinic.choices.findIndex((c) => /jade bracket/.test(c.text)); const b0 = w.inventory.jade_bracket;
-      const r = runTask(w, SCENES, `clinic:${ji}`);
-      if (r.fail) {
-          assert(!w.flags[onceKey('clinic', ji)] && w.flags[`clinic@${wd(w)}`] === true && w.inventory.jade_bracket === b0 - 1, `TG: a failed jade-bracket clinic: no once-a-Coil mark, the day marked, a bracket spent (${b0} → ${w.inventory.jade_bracket})`);
-          assert(grp(w, 'Clinic').find((c) => c.id === `clinic:${ji}`)?.status === 'open', 'TG (L1): the failed card is open again the same day');
-          assert(r.lines.join(' ').includes(JADE_FAIL) && !/tonight/.test(r.lines.join(' ')), `FT: the failed clinic says Fable's line, no "tonight" (${r.lines})`);
-          Object.assign(w.flags, { 'oo:wen_lesson': 2, 'oo:herb_slopes': 2, village_hunt: true }); mark(w, 'workshop'); mark(w, 'drill');
-          assert(oneOffLeft(w, SCENES, 'ashfall') === false && grp(w, 'Clinic').some((c) => c.status === 'open'), 'TG (L4, as Act 1\'s): "Call it a day" shows after a failed try, the card still open');
-      } else assert(false, `TG: the weak-James jade clinic was meant to fail (test setup; ${r.lines})`); }
+    const { carryTaskId, carriesRead } = await import('../js/core/tasks.js');
+    const weak = (seed) => { const w = at(seed); w.james.gu = { tier: 1, level: 1, xp: 0 }; w.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; w.james.satiety = 0; w.tasks.fam = {}; ensureBars(w); w.james.qi = 60; return w; };
+    const nextMorning = (w) => { w.minutes = (Math.floor(w.minutes / 1440) + 1) * 1440 + 7 * 60; w.james.satiety = 95; w.james.qi = 60; };
+    /** Runs a card and its carried days to the end (`each` before every next day); the last run's lines and how many days it took. */
+    const carryOut = (w, id, each = () => {}) => { let r = runTask(w, SCENES, id), days = 1;
+        for (; days < 12 && Object.keys(carriesRead(w)).length; days++) { const cid = carryTaskId(Object.keys(carriesRead(w))[0]); each(w); nextMorning(w); r = runTask(w, SCENES, cid); }
+        return { r, days, t: r.lines.join(' ') }; };
+    { const w = weak(15712); const ji = SCENES.clinic.choices.findIndex((c) => /jade bracket/.test(c.text));
+      const { r, days, t } = carryOut(w, `clinic:${ji}`);
+      assert(days > 1 && !Object.keys(carriesRead(w)).length && /— (partly|failed)/.test(t), `T1 (FT): the weak-James jade clinic is a week's work that fails at its end (${days} days; ${t.slice(-160)})`);
+      assert(t.includes(JADE_FAIL) && !/tonight|[Tt]omorrow/.test(t), `T1 (FT): the failed clinic says Fable's line at the carry's end, no "tonight" / "tomorrow" (${t.slice(-200)})`);
+      assert(!w.flags[onceKey('clinic', ji)], 'T1 (RV1, L1): a failed clinic sets no once-a-Coil mark');
+      w.inventory.jade_bracket = 1; nextMorning(w); assert(grp(w, 'Clinic').find((c) => c.id === `clinic:${ji}`)?.status === 'open', 'T1 (RV1, L1): the failed clinic is offered again the next morning'); }
     { const w = weak(15713); const si = SCENES.workshop.choices.findIndex((c) => /^Spearheads/.test(c.text));
       const { hasForm } = await import('../js/core/forms.js'); const sp = SCENES.workshop.choices[si];
       for (let n = 0; n < 100 && !hasForm(w, sp.form); n++) { const cu = w.james.skills['Convergence Use']; if (cu.level < 10) cu.level++; else { cu.tier++; cu.level = 1; } } // the least Bonesinger that sings the spear
-      assert(hasForm(w, sp.form) && grp(w, 'Workshop').some((c) => c.id === `workshop:${si}`), `TG: the spearheads offered at the least Bonesinger that sings them (${JSON.stringify(w.james.skills['Convergence Use'])})`);
-      const r = runTask(w, SCENES, `workshop:${si}`);
-      if (r.fail || /— partly/.test(r.lines.join(' '))) assert(r.lines.join(' ').includes(SPEARS_FAIL) && !/Tomorrow/.test(r.lines.join(' ')) && !w.flags.spears && grp(w, 'Workshop').find((c) => c.id === `workshop:${si}`)?.status === 'open', `FT: the failed spearheads say Fable's line, no "Tomorrow", and stay open today (${r.lines})`);
-      else assert(false, `TG: the weak-James spearheads were meant to fail (test setup; ${r.lines})`); }
+      const cu0 = { ...w.james.skills['Convergence Use'] };
+      assert(hasForm(w, sp.form) && grp(w, 'Workshop').some((c) => c.id === `workshop:${si}`), `TG: the spearheads offered at the least Bonesinger that sings them (${JSON.stringify(cu0)})`);
+      // the least Bonesinger passes the check at the carry's end (4 / DC 4), so the carried days run at T1 L1 for the failure
+      const { days, t } = carryOut(w, `workshop:${si}`, (x) => { x.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; });
+      assert(days > 1 && /— (partly|failed)/.test(t), `T1 (FT): the weak-James spearheads are a week's work that fails at its end (${days} days; ${t.slice(-160)})`);
+      assert(t.includes(SPEARS_FAIL) && !/tonight|[Tt]omorrow/.test(t) && !w.flags.spears && !w.flags[onceKey('workshop', si)], `T1 (FT): the failed spearheads say Fable's line, no "Tomorrow", no spears, no once-a-Coil mark (${t.slice(-200)})`);
+      w.james.skills['Convergence Use'] = cu0; nextMorning(w); assert(grp(w, 'Workshop').find((c) => c.id === `workshop:${si}`)?.status === 'open', 'T1 (RV1, L1): the failed spearheads are offered again the next morning'); }
     assert(!/tonight|[Tt]omorrow/.test(JADE_FAIL + SPEARS_FAIL) && SCENES.clinic.choices.some((c) => c.failDo && String(c.failDo).includes('JADE_FAIL')) && SCENES.workshop.choices.some((c) => c.failDo && String(c.failDo).includes('SPEARS_FAIL')), 'FT: the two lines are wired to their failures and promise no later time');
 }
 // v0.11.20: the lean dry-run copy gives exactly what the old full copy gave (forecast rows, card minutes)
