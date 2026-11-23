@@ -1,0 +1,51 @@
+[
+ {
+  "id": "C1",
+  "file": "js/core/game.js",
+  "find": "const g = deserialize(text, { force: true }); flipFill(g);",
+  "replace": "const g = deserialize(text); flipFill(g);",
+  "note": "SL: peekSave without force: a save with a checksum mismatch, a newer format or a newer state is listed 'Unreadable' on the Saves and recovery screens, though 'Load it anyway' opens it (the old peekSave listed it). Expected to survive (TG1)."
+ },
+ {
+  "id": "C2",
+  "file": "js/main.js",
+  "find": "${p.coil ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}",
+  "replace": "${p.coil > 1 ? ` · ${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}` : ''}",
+  "note": "SL: descOf drops 'Coil 1' (and with it 'Act 1, Coil 1'): the six v0.8.5 saves are listed with no Coil again, the fix undone on the screen while peekSave stays right. Expected to survive (TG2: only peekSave and a source regex are tested, never descOf's string)."
+ },
+ {
+  "id": "C3",
+  "file": "js/main.js",
+  "find": "${p.act === 1 ? 'Act 1, ' : ''}Coil ${p.coil}",
+  "replace": "${p.act === 1 && p.coil > 1 ? 'Act 1, ' : ''}Coil ${p.coil}",
+  "note": "SL: v0.8.5-act1-end (Act 1, Coil 1) listed as plain 'Coil 1', the act lost on the screen. Expected to survive (TG2)."
+ },
+ {
+  "id": "C4",
+  "file": "js/core/replies.js",
+  "find": "[^\".]+\\. \\+\\d+ satiety\\.$/",
+  "replace": "[^\"]+\\. \\+\\d+ satiety\\.$/",
+  "note": "M4: the dot no longer excluded: 'Supper: Stew. Ya says nothing. +3 satiety.' goes whole into the Results, its reply sentence lost from under the scene text. Expected to survive (TG3)."
+ },
+ {
+  "id": "C5",
+  "file": "js/core/replies.js",
+  "find": "\\. \\+\\d+ satiety\\.$/, // from the hammerspace",
+  "replace": "\\. \\+\\d+ satiety\\./, // from the hammerspace",
+  "note": "M4: the end anchor gone: a routine meal line with a reply sentence after its stat ('… +30 satiety. Yuki takes the rest.') goes whole into the Results. Expected to survive (TG3)."
+ },
+ {
+  "id": "C6",
+  "file": "js/core/replies.js",
+  "find": "/^(?:Breakfast|Midday|Supper): the communal pot\\.$/",
+  "replace": "/the communal pot\\.$/",
+  "note": "M4: the bare pot pattern unanchored: any story or task line ending 'the communal pot.' becomes a whole gain (none in play today). Expected to survive (TG3: no negative case for this pattern)."
+ },
+ {
+  "id": "C7",
+  "file": "js/core/replies.js",
+  "find": "\\. \\+\\d+ satiety\\.$/, // from the hammerspace",
+  "replace": "\\. \\+\\d\\d satiety\\.$/, // from the hammerspace",
+  "note": "M4: one-digit meals (river cress +8, needleberries +3) split again: 'Breakfast: river cress.' in the reply. Expected to be caught by TG-A7 (66 meals, every food)."
+ }
+]

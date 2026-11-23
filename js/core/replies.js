@@ -18,6 +18,9 @@ export const GAIN_LINES = [
     /^ {2}\S/, // a fight's indented damage lines
     /attacks: you defend \(/, // a fight's defence lines
     /^(Breakfast\. |Supper\. )?You eat: /, // eating: what and how much
+    // v0.11.261 (owner pick P29-A, M4; the v0.11.259 review's M4): the long calendar's routine meals (tasks.js dayMeal) whole in the Results, as the old calendar's "Breakfast. You eat: …" was:
+    /^(?:Breakfast|Midday|Supper): [^".]+\. \+\d+ satiety\.$/, // from the hammerspace: the eating line without its lead ("Breakfast: smoked meat. +30 satiety.")
+    /^(?:Breakfast|Midday|Supper): the communal pot\.$/, // the pot's run gave no satiety line (dayMeal's fallback)
     /^HP [\d.]+ → [\d.]+, Convergence /, // the breakthrough's bars ("… Both full.")
     // v0.11.259 (owner picks OC-A, K-A): the three pot lines below also with the long calendar's meal prefix (tasks.js `MEAL`: "Breakfast: ", "Midday: ", "Supper: ")
     /^(?:(?:Breakfast|Midday|Supper): )?Barley and bean stew, ladled by a woman who addresses you as "honoured guest"/, // a meal line with speech in it (ashfall)

@@ -1622,7 +1622,8 @@ export function migrate(g) {
  * RV1 (H1, M1): a save at 00:00–03:59 is on the night after waking day d − 1: `cal_night` 6 (the week's seventh night) and that waking
  * day's marks to calEnd(d − 1).
  * The Coil's rewind point moves the same way (Day 1 stays Day 1, Act 1's Day 8 dawn → Day 44). Called by main.js on every load (the
- * autosave, slots, backups, an import), not by `migrate`: the tests' old-calendar games keep their round trip. Returns true when it moved.
+ * autosave, slots, backups, an import) and by `peekSave` for the Saves screen's line (v0.11.261, P29-A; the review's L2), not by
+ * `migrate`: the tests' old-calendar games keep their round trip. Returns true when it moved.
  */
 const FLIP_DAY_FLAGS = ['guardian_lost_day', 'foundation_day'];
 function flipOne(s, act) {
@@ -1649,8 +1650,6 @@ function flipOne(s, act) {
     for (const [, k, v] of moved) f[k] = v;
     for (const k of FLIP_DAY_FLAGS) if (Number.isInteger(f[k])) f[k] = to(f[k]);
 }
-/** RV1 (L2): the minute an old-calendar save's `minutes` moves to (the Saves screen's lines, from `peekSave`; `act` the Coil's act). */
-export function flipMinutes(minutes, act = 0) { const t = { minutes, flags: {} }; flipOne(t, act); return t.minutes; }
 export function flipFill(g) {
     if (!g || g.cal === LONG_CAL) return false;
     const act = g.coil?.act || 0;
@@ -1726,9 +1725,11 @@ export function unwrapSave(text, { force = false } = {}) {
     return text; // an old plain save
 }
 
-/** A short description of a save without loading it ("<scene id>|<minutes>"), or null. */
+/** The Saves screen's reading of a save, { scene, minutes, coil, act, cal }, or null when it would not load: deserialize (forced, as
+ * "Load it anyway") + flipFill, as main.js `checkScene` begins; not its last two steps (an emptied menu's hub, a scene this version
+ * lacks), as before v0.11.261 (P29-A; the review's L1 and L2). */
 export function peekSave(text) {
-    try { const s = JSON.parse(unwrapSave(text, { force: true })); return s && s.scene ? { scene: s.scene, minutes: s.minutes, coil: (s.coil ? oneCount(JSON.parse(JSON.stringify(s))).coil.n : 0), act: s.coil?.act || 0, cal: s.cal || 0 } : null; /* v0.11.26 … v0.11.226 (RV1, L2): cal, for the moved day; v0.11.26: the one count, as it loads */ } catch { return null; } // v0.11.13: with the Coil, for the save lists
+    try { const g = deserialize(text, { force: true }); flipFill(g); return { scene: g.scene, minutes: g.minutes, coil: g.coil?.n || 0, act: g.coil?.act || 0, cal: g.cal || 0 }; /* v0.11.261 (owner pick P29-A, SL; the v0.11.260 review's L1): read as deserialize + flipFill load it (main.js checkScene's first steps), so the day, the Coil and the act are the ones it opens on; v0.11.26: the one count (now migrate's); v0.11.226 (RV1, L2): cal */ } catch { return null; } // v0.11.13: with the Coil, for the save lists
 }
 
 export function deserialize(text, { force = false } = {}) {
