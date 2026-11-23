@@ -8,7 +8,7 @@ import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay,
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
 import { TT } from './tribute_texts.js'; // v0.11.251 (RV-A, HL)
 import { textDay, coilStamp, seqText, dayIndex } from '../core/lines.js'; // v0.11.232 (P5-B, V3b): dayIndex // v0.11.224 (TX2, V3a): seqText
-import { storyDay, storyDayOf, calStart, calEnd, lastOfWeek, blSpan, elderLeft, departLeft, daysWord, DaysWord, dayWord, countsFill, numWord, dayTitle, titleCase } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar // RV1 (FX); v0.11.188 (N1, L7): coilStamp
+import { pinnedStoryDay, storyDayOf, calStart, calEnd, blSpan, elderLeft, departLeft, daysWord, DaysWord, dayWord, countsFill, numWord, dayTitle, titleCase } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar // RV1 (FX); v0.11.188 (N1, L7): coilStamp
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 import { SONG_AT } from './songs.js'; // v0.11.188 (N1, L7): the song of fo_elder_named, by key (no song named here)
 
@@ -40,7 +40,7 @@ const DR_FO_CLINIC_F = dayReply("fo_clinic:0:f", [
 /** v0.11.170 (owner pick RV1, SD; Fable's review M1): a success closes its card for the rest of the Coil (oneoff.js ONCE_MENUS), so a
  * count of days (dayReply) only ever reached the first text. The eight success lists go by the story's day instead (Day 8, 9, 10 →
  * the first, second, third text); the list is registered as before (the lint and the tests read DAY_REPLIES). No save field. */
-const onStoryDay = (key, list) => { dayReply(key, list); return (g) => { const t = list[Math.max(8, Math.min(10, storyDay(g))) - 8]; return typeof t === 'function' ? t(g) : t; }; };
+const onStoryDay = (key, list) => { dayReply(key, list); return (g) => { const t = list[Math.max(8, Math.min(10, foDay(g))) - 8]; /* v0.11.262 (owner pick P30-A, D1): foDay, was storyDay */ return typeof t === 'function' ? t(g) : t; }; };
 const DR_FO_SING = onStoryDay("fo_palisade:0", ["The stakes come up white and even, humming one note between them. The hunters lay a palm on the nearest, as on a doorpost.", "The old bone lies sorted by length, ready. The stakes come up dead on the chalk; Old Hu sights down the row and finds nothing to straighten.", "The whole stretch comes up on one breath of song, and every stake rings true. A grandmother ties red thread round the last one, and nobody objects."]);
 const DR_FO_PITS = onStoryDay("fo_palisade:1", ["Ugly pits, at the jackals' own angle. They will work, and nobody here asked for handsome.", "You show the angle once. The hunters dig the rest of the stretch to it, and correct one another by bowing at the offending stake.", "The jackals' angle turns out to be teachable. The pits go in faster than you can inspect them; one stake is a finger off true, and three men apologise for it."]);
 const DR_FO_PITS_F = dayReply("fo_palisade:1:f", ["Under a foot of soil the ground is solid stone. You find this out with a mattock, and with both wrists.", "Today's stretch crosses an old field drain. The pits fill with water as fast as they are dug, and the hunters take it as a judgement.", "The angles come out wrong: stakes leaning in, toward the houses. They will have to come up again, and the jackals are not here to ask."]);
@@ -126,7 +126,11 @@ const supperPot = (g) => SUPPER_POT[Math.max(1, Math.min(3, Number(g.flags.kitch
 /** v0.11.203 (owner pick T1, TS1): the story's day (8–10); in the long calendar each is a week (Days 44–50, 51–57, 58–64). The titles and
  *  the count to the Elder read the calendar day (`day`); the farewell waits for the last week's last day. */
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1); // RV1 (MC)
-const dd = (g) => Math.max(8, Math.min(10, storyDay(g)));
+/** v0.11.262 (owner pick P30-A, D1; p13-measure §10 on the long calendar): the Fallout's story day by the text day (from 05:00, as the day
+ *  records and the texts' sequences), so a week's last night 00:00–04:59 reads its own day, not the next one (`storyDay` turns at midnight);
+ *  inside `atStoryDay` (a week's card's result) the day its work started, as before (`pinnedStoryDay`). */
+function foDay(g) { return pinnedStoryDay() ?? textStoryDay(g); }
+const dd = (g) => Math.max(8, Math.min(10, foDay(g))); // v0.11.262 (P30-A, D1): foDay, was storyDay
 
 // v0.11.232 (owner picks P5-B, D1; V3b): the Fallout's two daily scenes a sequence of three a story day on the long calendar (lines.js seqText; the first the old
 // text), with each new text's own labels where the old ones answer only the old text (by the same index: `foSeq`). Texts by Fable (run F), Claude's cuts.
@@ -193,7 +197,7 @@ const FO_YA_NEW = {
 "I don't like them. They don't like me." She pulls a knee up under her chin. "We go to the tree, and these are what's left to guard the old ones and the goats. Why am I counting them, scholar? I never count anything."`],
 };
 const FO_YA_L0 = { 10: ['"You go in front. We\'ll both be glad you\'re there."', '"Because they\'re yours now. It\'s a nuisance. I\'d know."'] }; // day 9 keeps "Throw her." (the chaff result)
-export const farewellNow = (g) => dd(g) >= 10 && lastOfWeek(g); // v0.11.204 (RV1, L4): exported for the week planner's stop
+export const farewellNow = (g) => dd(g) >= 10 && calEnd(g, textStoryDay(g)) === textDay(g); // v0.11.204 (RV1, L4): exported for the week planner's stop; v0.11.262 (P30-A, D2): the week's last day by the text day (was `lastOfWeek`, from midnight: 00:00–04:59 after Day 10's last day gave the supper, not the farewell)
 /** The text day as a story day (8–10), for the lists by the story's day. */
 export const textStoryDay = (g) => storyDayOf(g, textDay(g));
 const toEvening = (g) => (farewellNow(g) ? 'fo_farewell' : 'fo_supper');

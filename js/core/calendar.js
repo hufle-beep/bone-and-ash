@@ -9,7 +9,7 @@
  *
  * Two kinds of stays:
  *  - by the calendar (Ashfall's Fallout, the Heart, the jumps between parts): the story reads `storyDay` (the old day number) in
- *    place of the calendar's day; a beat that ends a story day (the Fallout's farewell) waits for that week's last day (`lastOfWeek`).
+ *    place of the calendar's day; a beat that ends a story day (the Fallout's farewell) waits for that week's last day (act1_fallout.js `farewellNow`, by the text day since v0.11.262, P30-A D2; `lastOfWeek` went then).
  *  - by a counter (the wilds' `forest_day`, the village's `vday`): the counter moves once a week; the nights in between are quiet
  *    and the story's night (the forest's night events and the jackals, the arson) comes on the week's seventh night (`storyNight`).
  *    The nights already slept this story day are kept in the world flag `cal_night` (0–6).
@@ -50,8 +50,6 @@ export const pinnedStoryDay = () => pinnedDay;
 export function atStoryDay(d, fn) { const o = pinnedDay; pinnedDay = d; try { return fn(); } finally { pinnedDay = o; } }
 /** The minute of story day `d`'s first day at `h`:`m`. */
 export const calMinutes = (g, d, h = 0, m = 0) => (calStart(g, d) - 1) * 1440 + h * 60 + m;
-/** Is today the last day of its story day's week? */
-export const lastOfWeek = (g) => { const c = calDayOf(g.minutes); return calEnd(g, storyDayOf(g, c)) === c; };
 
 /* ---------- the counter stays (the wilds, the village) ---------- */
 

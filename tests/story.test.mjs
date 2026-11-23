@@ -9396,6 +9396,65 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
           && /root and a Long Forest seclusion give two thirds/.test(nt) && BR.ROOT_SAT / Gm.LONG_SAT_HIGH === (BR.ROOT_SAT / Gm.LONG_SAT_DIV) * (2 / 3) && /a realm lower/.test(nt),
         `${T} (M1, TG3): the What's new line's words, and its ratios against sitGain (${[3, 4, 5, 6, 7].map((r) => `${r}: ${was(r)}→${now(r)}`).join(', ')})`); }
 }
+{
+    // v0.11.262 (owner pick P30-A: D1, D2, D4; p13-measure §10 on the long calendar; project/research/p30-measure.md): the Fallout reads its
+    // story day by the text day (from 05:00), so a week's last night 00:00–04:59 is still that week's day; inside atStoryDay (a week's
+    // card's result) the day its work started, as before. Calendar days: story day 8 = 44–50, 9 = 51–57, 10 = 58–64, 11 = 65–67.
+    const T = 'P30-A';
+    const C = await import('../js/core/calendar.js'), FO = await import('../js/story/act1_fallout.js'), D = 1440;
+    const mk = (seed, scene, min, fl = {}) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, { ya_met: true, fo_plan: true }, fl); g.yuki.realm = 9; g.scene = scene; g.minutes = min; return g; };
+    const at = (cal, h, m = 0) => (cal - 1) * D + h * 60 + m;
+    const txt = (g) => String(sceneView(g, SCENES).text || '');
+    const labs = (g) => sceneView(g, SCENES).choices.map((c) => c.label).join('|');
+    assert(C.calStart(newGame(1, { closed: true }), 9) === 51 && C.calStart(newGame(1, { closed: true }), 10) === 58 && C.calEnd(newGame(1, { closed: true }), 10) === 64, `${T}: the calendar days as the tests read them`);
+    // D1: day 8's supper after midnight (Day 51 00:11 and 04:30) reads day 8's text, not day 9's
+    { const late = txt(mk(43001, 'fo_supper', at(51, 0, 11))), late2 = txt(mk(43001, 'fo_supper', at(51, 4, 30))), eve = txt(mk(43001, 'fo_supper', at(50, 21))), next = txt(mk(43001, 'fo_supper', at(51, 19)));
+      assert(late === eve && late2 === eve && next !== eve, `${T} (D1): day 8's supper at 00:11 / 04:30 as at 21:00 (${late.slice(0, 24)} | ${late2.slice(0, 24)}), day 9's another (${next.slice(0, 24)})`); }
+    // D1: day 9's supper after midnight (Day 58 00:11) keeps day 9's choices with Ya ("Ya. Manners.")
+    { const late = labs(mk(43002, 'fo_supper', at(58, 0, 11))), eve = labs(mk(43002, 'fo_supper', at(57, 21)));
+      assert(late === eve && /Ya\. Manners\./.test(late), `${T} (D1): day 9's supper choices at 00:11 as at 21:00 (${late.slice(0, 60)})`); }
+    // D1: the loft and Mei Lin's scene on day 9's last night read day 9
+    { const late = txt(mk(43003, 'fo_night', at(58, 0, 11))), eve = txt(mk(43003, 'fo_night', at(57, 22)));
+      assert(late === eve, `${T} (D1): fo_night at 00:11 as at 22:00 (${late.slice(0, 30)} | ${eve.slice(0, 30)})`); }
+    { const g1 = mk(43004, 'fo_mei', at(58, 0, 11)), g2 = mk(43004, 'fo_mei', at(57, 18));
+      assert(txt(g1) === txt(g2) && labs(g1) === labs(g2), `${T} (D1): fo_mei at 00:11 reads day 9 (${txt(g1).slice(0, 30)})`); }
+    // D1: from 05:00 the next story day's texts as before
+    { assert(txt(mk(43001, 'fo_supper', at(51, 5))) === txt(mk(43001, 'fo_supper', at(51, 19))), `${T} (D1): at 05:00 day 9's supper text`); }
+    // D2: the farewell on Day 10's last night: 23:00 and 00:11 yes; 00:11 a day earlier (Day 64, text day 63) no; Day 65 from 05:00 no
+    { const fw = (min) => FO.farewellNow(mk(43005, 'fo_ashfall', min));
+      assert(fw(at(64, 23)) && fw(at(65, 0, 11)) && fw(at(65, 4, 30)) && !fw(at(64, 0, 11)) && !fw(at(65, 5)) && !fw(at(57, 23)), `${T} (D2): farewellNow by the text day (${[at(64, 23), at(65, 0, 11), at(65, 4, 30), at(64, 0, 11), at(65, 5), at(57, 23)].map(fw).join(' ')})`); }
+    // D2: the walk from Ashfall's hub at 00:11 after Day 10's last day: Evening → the farewell → into the Blackroot on its first day
+    { const g = mk(43006, 'fo_ashfall', at(65, 0, 11)); const path = [];
+      for (let i = 0; i < 8 && g.scene !== 'bl_start'; i++) { const v = sceneView(g, SCENES); const c = v.choices.find((x) => /^Evening|^Go up to the loft|^Hold her|^Sleep|^Into the Blackroot/.test(x.label)) || v.choices[0]; path.push(g.scene); if (!c) break; choose(g, SCENES, c.index); }
+      assert(path[1] === 'fo_farewell' && g.scene === 'bl_start' && C.storyDay(g) === 11 && g.minutes < at(66, 0), `${T} (D2): 00:11's evening is the farewell and the Blackroot's first day (${path.join(' > ')} > ${g.scene}, story day ${C.storyDay(g)}, Day ${Math.floor(g.minutes / D) + 1})`); }
+    // D1 (onStoryDay): the palisade's sung reply by the text day: Day 52 noon day 9's; Day 58 00:11 still day 9's; under atStoryDay(8) day 8's
+    { const sing = (g) => String(SCENES.fo_palisade.choices.find((c) => /^Sing a full stretch/.test(String(c.text))).do(g)[0] || '');
+      const a = sing(mk(43008, 'fo_palisade', at(52, 12))), b = sing(mk(43008, 'fo_palisade', at(58, 0, 11))), c = C.atStoryDay(8, () => sing(mk(43008, 'fo_palisade', at(52, 12)))), d = sing(mk(43008, 'fo_palisade', at(58, 12)));
+      assert(/The old bone lies sorted/.test(a) && /The old bone lies sorted/.test(b) && /The stakes come up white and even/.test(c) && !/The old bone lies sorted|white and even/.test(d), `${T} (D1): the sung reply day 9 / day 9 at 00:11 / day 8 pinned / day 10 (${[a, b, c, d].map((x) => x.slice(22, 46)).join(' | ')})`); }
+    // the cold review (Opus): TG1 D2's early edge: Day 64 04:59 no (text day 63), 05:00 yes
+    { const fw = (min) => FO.farewellNow(mk(43009, 'fo_ashfall', min));
+      assert(!fw(at(64, 4, 59)) && fw(at(64, 5)), `${T} (TG1): farewellNow at Day 64 04:59 no, 05:00 yes (${fw(at(64, 4, 59))} ${fw(at(64, 5))})`); }
+    // TG3: fo_night with romance on day 9's last night: the lovers' paragraph day 9's at 00:11 as at 22:00 (the count to the Elder by the calendar day, by design: the review's L2)
+    { const lov = /Mei Lin comes up the ladder earlier tonight/, a = txt(mk(43010, 'fo_night', at(58, 0, 11), { romance: true })), b = txt(mk(43010, 'fo_night', at(57, 22), { romance: true }));
+      assert(lov.test(a) && lov.test(b), `${T} (TG3): fo_night with romance at Day 58 00:11 and Day 57 22:00, day 9's lovers' paragraph (${a.slice(0, 40)} | ${b.slice(0, 40)})`); }
+    // TG4: the farewell stays the way out of Ashfall if the hub is ever held past Day 64 (as before v0.11.262, 5 h later; the review's L3): the
+    // Blackroot's last calendar day of story day 11 (Day 67 with calBl 3), every day with calBl 1; not on Days 65–66 with calBl 3
+    { const fw = (min, bl) => { const g = mk(43011, 'fo_ashfall', min); if (bl != null) g.calBl = bl; return FO.farewellNow(g); };
+      assert(!fw(at(65, 20)) && !fw(at(66, 20)) && fw(at(67, 20)) && fw(at(65, 20), 1) && fw(at(66, 20), 1), `${T} (TG4): farewellNow past Day 64 (${[fw(at(65, 20)), fw(at(66, 20)), fw(at(67, 20)), fw(at(65, 20), 1), fw(at(66, 20), 1)].join(' ')})`); }
+    // TG5: exactly as before at 05:00–23:59 on Days 44–67: the day the Fallout reads (fo_mei's art says 9, fo_ya_time's 10) and farewellNow
+    // against v0.11.261's reads (story day from midnight, the week's last day from midnight), every hour
+    { const rows = [];
+      for (let d = 44; d <= 67; d++) for (let h = 5; h <= 23; h++) {
+          const g = mk(43012, 'fo_ashfall', at(d, h)), sd = C.storyDayOf(g, d), old = Math.max(8, Math.min(10, sd)), oldFw = old >= 10 && C.calEnd(g, sd) === d;
+          const art9 = SCENES.fo_mei.art(g) === 'herb_slope', art10 = SCENES.fo_ya_time.art(g) === 'ya_close';
+          if (art9 !== (old === 9) || art10 !== (old === 10) || FO.farewellNow(g) !== oldFw) rows.push(`${d} ${h}h`); }
+      assert(rows.length === 0, `${T} (TG5): the Fallout's day and the farewell at 05:00–23:59 on Days 44–67 as v0.11.261 read them (${rows.slice(0, 8).join(', ')})`); }
+    // D4: the pin kept: a week's card begun on story day 8 and read on Day 52 (story day 9) reads day 8 (the council's text and its flag)
+    { const g = mk(43007, 'fo_council', at(52, 12)), g8 = mk(43007, 'fo_council', at(50, 12)), g9 = mk(43007, 'fo_council', at(52, 12));
+      const pinned = C.atStoryDay(8, () => txt(g)), i = SCENES.fo_council.choices.findIndex((c) => /^Listen\. Say nothing/.test(String(c.text)));
+      C.atStoryDay(8, () => SCENES.fo_council.choices[i].do(g)); SCENES.fo_council.choices[i].do(g9);
+      assert(i >= 0 && pinned === txt(g8) && pinned !== txt(g9) && g.flags.council8 && !g.flags.council9 && g9.flags.council9, `${T} (D4): under atStoryDay(8) on Day 52 the council reads day 8 (${pinned.slice(0, 24)}) and marks council8 (${!!g.flags.council8} ${!!g.flags.council9} ${!!g9.flags.council9})`); }
+}
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);
