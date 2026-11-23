@@ -154,7 +154,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     }
     { const g = at('rr_hub', 13, 15602); const s0 = grp(g, 'Scout').filter((c) => c.status === 'open'); assert(s0.length === 2, `OS: two scout cards (${s0.map((c) => c.id)})`);
       runTask(g, SCENES, 'rr_scout:1'); const s1 = grp(g, 'Scout');
-      assert(!s1.some((c) => c.id === 'rr_scout:1') && s1.find((c) => c.id === 'rr_scout:0')?.status === 'open', `OS: after "You followed me for three nights?" the other scout card is open the same day, the one taken gone for the Coil (${s1.map((c) => `${c.id} ${c.status}`)})`); }
+      assert(!s1.some((c) => c.id === 'rr_scout:1') && s1.find((c) => c.id === 'rr_scout:0')?.status === 'open', `OS: after "You followed me for weeks?" the other scout card is open the same day, the one taken gone for the Coil (${s1.map((c) => `${c.id} ${c.status}`)})`); }
     { for (const [k, name] of ['Palisade', 'Militia', 'Clinic'].entries()) {
           const g = at('fo_ashfall', 8, 15610 + k); // v0.11.260 (P28-A, OC2): the offer; the old calendar's same-day rest went with its code (the long one's week cards: tests/story.test.mjs)
           const cs = grp(g, name).filter((c) => c.status === 'open'); assert(cs.length >= 2, `OA: ${name} offers two cards (${cs.map((c) => c.id)})`);
@@ -232,14 +232,21 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     const { oneOffLeft, onceKey } = await import('../js/story/oneoff.js');
     const { markDaily: mark } = await import('../js/story/common.js');
     const { wakeDay: wd } = await import('../js/core/game.js');
-    const at = (seed, cal) => { const g = ensureBars(newGame(seed, { closed: true })); g.minutes = calMinutes(g, 5, 7); goTo(g, SCENES, 'ashfall'); Object.assign(g.flags, { healed_try: true, elder: true }); g.james.gu = { tier: 3, level: 10, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 3, level: 10, xp: 0 }; g.james.qi = 60; g.james.satiety = 95; g.inventory.jade_bracket = 2; ensureBars(g); g.james.qi = 60; return g; };
+    const { carriesRead: CR0, carryTaskId: CTI } = await import('../js/core/tasks.js');
+    const at = (seed) => { const g = ensureBars(newGame(seed, { closed: true })); g.minutes = calMinutes(g, 5, 7); goTo(g, SCENES, 'ashfall'); Object.assign(g.flags, { healed_try: true, elder: true }); g.james.gu = { tier: 3, level: 10, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 3, level: 10, xp: 0 }; g.james.qi = 60; g.james.satiety = 95; g.inventory.jade_bracket = 2; ensureBars(g); g.james.qi = 60; return g; };
     const grp = (g, name) => taskCards(g, SCENES).filter((c) => c.group === name);
     for (const [k, [menu, name]] of [['clinic', 'Clinic'], ['workshop', 'Workshop'], ['drill', 'Militia']].entries()) {
         const g = at(15701 + k); // v0.11.260 (P28-A, OC2): the offer and the first card; the old calendar's same-day rest went with its code (the long one's week cards: tests/story.test.mjs)
         const c0 = grp(g, name).filter((c) => c.status === 'open');
         assert(c0.length >= 2 && c0.every((c) => c.id.startsWith(`${menu}:`)), `PA: ${name} offers its cards on the morning of Day 5 (${c0.map((c) => c.id)})`);
-        const first = c0[0].id; const r = runTask(g, SCENES, first);
-        assert(g.scene === 'ashfall' && !r.fail, `PA: ${name}'s first card succeeds for a strong James (${r.lines})`);
+        // v0.11.260 (the cold review's M1, TG1): the card is a week's work: carried to its end, then the band, the once-a-Coil mark, the
+        // menu's day mark from the start tap, the card gone and the rest open the next morning
+        const first = c0[0].id, d0 = wd(g); let r = runTask(g, SCENES, first), days = 1; const mark0 = g.flags[`${menu}@${d0}`] === true;
+        for (; days < 12 && Object.keys(CR0(g)).length; days++) { const cid = CTI(Object.keys(CR0(g))[0]); g.minutes = (Math.floor(g.minutes / 1440) + 1) * 1440 + 7 * 60; g.james.satiety = 95; g.james.qi = 60; r = runTask(g, SCENES, cid); }
+        const t = r.lines.join(' ');
+        assert(days > 1 && !Object.keys(CR0(g)).length && /— (done|a double haul)/.test(t) && !r.fail, `PA: ${name}'s first card, a week's work, succeeds at its end for a strong James (${days} days; ${t.slice(-120)})`);
+        g.minutes = (Math.floor(g.minutes / 1440) + 1) * 1440 + 7 * 60; g.scene = 'ashfall'; const c1 = grp(g, name);
+        assert(mark0 && g.flags[onceKey(menu, +first.split(':')[1])] === true && !c1.some((c) => c.id === first) && c1.length >= 1 && c1.every((c) => c.status === 'open'), `PA: ${name}: the menu's day marked at the start, the card marked once a Coil and gone, the rest open (${c1.map((c) => `${c.id} ${c.status}`)})`);
     }
     // "Call it a day": one card from each menu today counts as that menu done for the button, as before
     const base = () => { const g = at(15710); Object.assign(g.flags, { 'oo:wen_lesson': 2, 'oo:herb_slopes': 2, village_hunt: true }); return g; };
@@ -3364,7 +3371,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
         const real = JSON.parse(JSON.stringify(L)), said = [], got = [];
         for (const id of ['mer:col', 'mer:col', 'mer:pri']) { said.push(taskOutcome(real, SCENES, id).end); runTask(real, SCENES, id); got.push(real.minutes); }
         assert(said.join() === got.join(), `v0.11.13: each card ends where it said (${said.join()} / ${got.join()})`);
-        assert(real.james.collaterals === 0 && real.james.colWork > 0 && real.james.primaries === 3 && real.james.merWork > 0 && real.tasks.use['act:mer'] === 3 && real.scene === 'stream', `v0.11.13: two collateral sittings work on group 1 with 3 primaries, the third on the 4th primary (v0.11.260, OC2: the long calendar's ×4 hours; none opens yet) (${real.james.collaterals}, ${real.james.primaries})`);
+        assert(real.james.collaterals === 0 && Math.abs(real.james.colWork - 4.6) < 1e-9 && real.james.primaries === 3 && Math.abs(real.james.merWork - 3.2) < 1e-9 /* the cold review's L5: the hours, 2 h + 2.6 h (×1.3 by use) on the group, 3.2 h (×1.6) on the primary */ && real.tasks.use['act:mer'] === 3 && real.scene === 'stream', `v0.11.13: two collateral sittings work on group 1 with 3 primaries, the third on the 4th primary (v0.11.260, OC2: the long calendar's ×4 hours; none opens yet) (${real.james.collaterals}, ${real.james.primaries})`);
         L.james.satiety = 19; const lk = medCards(L, SCENES).filter((c) => /^med:mer:/.test(c.id));
         assert(lk.length === 2 && lk.every((c) => !c.open && !c.task && /Too hungry/.test(c.reason)) && !taskOpen(L, SCENES, 'mer:pri'), 'v0.11.13: under Fed 20 both show, locked, with the reason');
         L.james.satiety = 70; L.james.qi = 1; assert(medCards(L, SCENES).filter((c) => /^med:mer:/.test(c.id)).every((c) => !c.open && /2 Qi/.test(c.reason)), 'v0.11.13: under 2 Qi: locked'); L.james.qi = 25;

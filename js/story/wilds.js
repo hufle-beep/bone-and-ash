@@ -207,12 +207,12 @@ Yuki puts herself back in order as if the fight had been someone else's. You sit
             return lines;
         },
         text: (g) => ((g.flags.forest_day || 1) === 1 ? MORNING_W1 /* v0.11.243 (P15-B, D1; SF: MW): week 1's own (it read week 3's) */ : `${g.flags.forest_day === 2
-            ? `${'Another morning in the forest. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white when it got here, one body that aches in places you could now label on a diagram.'} Alive, on the evidence.
+            ? `Another morning in the forest. A red sun hauls itself up over the black trees, and you lie still and take stock: one Yuki, one omnitool, one lab coat that was white when it got here, one body that aches in places you could now label on a diagram. Alive, on the evidence.
 
 ${(replayExplore(g) ? MORNING_AGAIN : 'You could go looking for the way out. Or you could face the data: you know nothing about this world, and this forest is the mildest teacher it is likely to offer. So learn it. Eat. Get stronger. *Then* walk out.').replace(/\*Then\* walk out\.$/, canFly(g) ? FW.morningOut : '$&') /* v0.11.195 (F1, D1: MW) */}`
-            : `${'The third week in the forest.'} You wake ahead of the light now. That is either adaptation or damage, and you decline to run the test that would tell you which.
+            : `The third week in the forest. You wake ahead of the light now. That is either adaptation or damage, and you decline to run the test that would tell you which.
 
-This patch of forest is yours by now: the stream's tempers, the reeds where the hares lie up, the reek of the mire when the wind turns west. It has other tenants. ${'For nights now something has circled the camp at a distance, and it has left tracks.'} Large. More than one set. In no hurry.
+This patch of forest is yours by now: the stream's tempers, the reeds where the hares lie up, the reek of the mire when the wind turns west. It has other tenants. For nights now something has circled the camp at a distance, and it has left tracks. Large. More than one set. In no hurry.
 
 ${g.flags.saw_lights ? 'And then the lights. Your mind keeps going back to the lights.' : 'One of these nights, you suspect, the hurry arrives.'}`}`),
         choices: [{ text: 'Get up.', to: 'wilds' }],

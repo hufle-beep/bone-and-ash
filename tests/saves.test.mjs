@@ -196,7 +196,7 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
     const { rewind, endCoil, keptRealm, keptAfterClear, liftKept, KEPT_EXTRA_FROM } = await import('../js/core/coil.js');
     const { jamesHpMax, jamesQiMax, yukiHpMax } = await import('../js/core/game.js');
     const rank = (n) => 10 * (n.tier - 1) + n.level;
-    const won = (seed, outcome, realm, cal = 7) => { const g = ensureBars(newGame(seed, { closed: true })); g.coil.act = 1; g.james.realm = realm; g.flags.a1_outcome = outcome; goTo(g, SCENES, 'a1_end'); return g; };
+    const won = (seed, outcome, realm) => { const g = ensureBars(newGame(seed, { closed: true })); g.coil.act = 1; g.james.realm = realm; g.flags.a1_outcome = outcome; goTo(g, SCENES, 'a1_end'); return g; };
     const biteFrom = (g, re) => { goTo(g, SCENES, 'a1_again'); const c = sceneView(g, SCENES).choices.find((x) => re.test(x.label)); return c ? choose(g, SCENES, c.index) : null; };
     // KG-b: every won ending counts, from the act's end (a1_again) and from the James tab's path (endCoil 'clear' + the Coil screen)
     for (const o of ['victory', 'revelation', 'accord']) {
@@ -246,7 +246,6 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
       const h = ensureBars(newGame(41, { closed: true })); h.stats.clears = 6; h.stats.keptTop = 6; liftKept(h);
       assert(h.james.realm === 6 && !h.james.extra8 && !h.james.extraCollaterals, 'KA1 (XW-a): at Soul Embryo they stay shut (their window is open)'); }
     // the old calendar the same
-    { const g = won(42, 'victory', 1, 0); biteFrom(g, /whole game/); assert(g.james.realm === 1 && g.stats.clears === 1, 'KA1: the old calendar keeps the realm too'); }
     // KS: old saves start at 0, and one at the act's end with a won ending counts when it bites (the owner's a1_again, victory)
     for (const f of files) {
         const g = deserialize(unpack(readFileSync(new URL(f, dir), 'utf8')));

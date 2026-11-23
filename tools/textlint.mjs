@@ -209,9 +209,10 @@ const dayReplies = [];
 for (const list of Object.values(DAY_REPLIES)) for (const t of list) for (const r of renders(t)) if (!dayReplies.includes(r)) dayReplies.push(r);
 // v0.11.139 (owner pick MW1): Old Wen's and the mother's daily scenes, every body and closer (the samples read one slot only)
 const { HT_BODY, HT_CLOSE } = await import(js('story/house_texts.js'));
-// v0.11.224 (TX2, DC12): a body's count slot filled as the screen fills it, on both calendars' first Fallout day (the old 13, the long 59)
+// v0.11.224 (TX2, DC12): a body's count slot filled as the screen fills it, on the first Fallout day (59 to the Elder); v0.11.260 (P28-A, OC2;
+// the cold review's L5): the old calendar's sample (13) went with its code
 const { countsFill } = await import(js('core/calendar.js'));
-const HFILL = [ensureBars(newGame(1234, { closed: true })), ensureBars(newGame(1234, { closed: true }))]; HFILL[0].minutes = 7 * 1440 + 600; HFILL[1].minutes = 43 * 1440 + 600;
+const HFILL = [ensureBars(newGame(1234, { closed: true }))]; HFILL[0].minutes = 43 * 1440 + 600;
 const houseLines = [...new Set([...Object.values(HT_BODY).flatMap((b) => Object.values(b)).flatMap((t) => HFILL.map((g) => countsFill(g, t))), ...Object.values(HT_CLOSE).flat()])];
 const { LF_DRILL } = await import(js('story/longforest.js')); const { SEASON_LINES } = await import(js('story/prologue.js')); // v0.11.175 (RV1, C4)
 // v0.11.181 (RV1, TG4): the kitchen's and the pot's texts (kitchen_texts.js) as the pool `kitchen`: they show only with a flag or in a result

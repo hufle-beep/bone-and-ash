@@ -695,7 +695,7 @@ Then she sees you. And Yuki. Her nostrils flare, and all the play leaves her fac
         enter: (g) => { g.flags.ya_met = true; bumpRel(g, 'Ya', 2, 2); return []; },
         text: (g) => `She comes straight up to you, far closer than anyone here would stand, and *smells* you: the neck, the hair, the collar of the coat. Yuki, ${byForm(g, 'on your shoulder', 'at your hip', 'at your elbow')}, sets her ears back and lets it happen. She has let nobody do it before.
 
-"*You,*" says the woman. "${'Night after night I sat outside your little fire. All of them.'} You smell like nothing. Nothing smells like nothing. It all stinks of rot here: the grass, the beasts, the Sect, *them*" — her thumb goes at the village — "whatever eats this air. Not you." A grin, every tooth in it. "I wondered what you'd taste of. Then the dogs came at you, and you killed them, and I thought: mine. I'll fetch him when I get hungry."
+"*You,*" says the woman. "Night after night I sat outside your little fire. All of them. You smell like nothing. Nothing smells like nothing. It all stinks of rot here: the grass, the beasts, the Sect, *them*" — her thumb goes at the village — "whatever eats this air. Not you." A grin, every tooth in it. "I wondered what you'd taste of. Then the dogs came at you, and you killed them, and I thought: mine. I'll fetch him when I get hungry."
 
 "I'd like the 'mine' part explained."
 
@@ -712,7 +712,7 @@ She means Mei Lin, behind you, who has come out on the step with a knife in one 
         id: 'ya_challenge', title: 'A Matter of Face', art: 'ya_fight', place: `${P} — the lane`,
         text: (g) => `Old Hu is, in fact, about to challenge her. The headband is off already, folded, and given into his nephew's keeping, and in Ashfall wars have been declared with less. Formal fury has turned his face grey. She insulted him in the lane before every soul in Ashfall; this world allows a man two answers to that, and his years have put both out of reach.
 
-Ya notices, and *brightens*. "A fight? Good. ${'Days and days I\'ve been walking.'}"
+Ya notices, and *brightens*. "A fight? Good. Days and days I\'ve been walking."
 
 "Old Hu," you say, "is seventy."
 
@@ -765,7 +765,7 @@ The chewing stops. So does the grin.
 
 "I sleep in its roots in winter," she says. "It's warm. Nothing else in the forest is warm." She is quiet for a breath. "Sometimes it hums. Only while I sleep. I wake up, and it stops." Her eyes go narrow. "The nights I was near *you*, it hummed louder."
 
-Then the grin comes back, wider than before. "Anyway. Salt. Iron. And you. You gave the white one the best of the meat before you ate, ${'every single night'}. I watched." The spoon swings round to Mei Lin. "And maybe you."
+Then the grin comes back, wider than before. "Anyway. Salt. Iron. And you. You gave the white one the best of the meat before you ate, every single night. I watched." The spoon swings round to Mei Lin. "And maybe you."
 
 Mei Lin answers with the noise of a kettle.`,
         choices: [

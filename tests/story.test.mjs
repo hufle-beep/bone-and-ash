@@ -969,7 +969,7 @@ for (let run = 0; run < 6; run++) {
             if (stop) { if (c === '{') depth++; if (c === '}') { if (depth === 0) { i++; return out; } depth--; } }
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
         const LABELS = Object.values(HEART).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-        const PIN = { 'act1_heart.js': 'fcef2b38c56df6eb', /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (the watch line, the titles) */ /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '84de1b6176aaf735' /* v0.11.260 (P28-A, OC2): re-pinned: Ya's old-calendar posture line gone */ /* v0.11.251 (RV-A, HL): re-pinned: luHere reads lu_won (Lu Han beaten at the tribute stays away) */ /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
+        const PIN = { 'act1_heart.js': 'fcef2b38c56df6eb', /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (the watch line, the titles) */ /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '5486ba3c7c879cb7' /* v0.11.260 (P28-A, OC2): re-pinned: Ya's old-calendar posture line gone, its template wrapper with it (the cold review's L5) */ /* v0.11.251 (RV-A, HL): re-pinned: luHere reads lu_won (Lu Han beaten at the tribute stays away) */ /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
         const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
         const got = { labels: hash(JSON.stringify(LABELS)) };
         for (const f of ['act1_heart.js', 'stomp_act1.js', 'yuki_time.js']) got[f] = hash(skel(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')));
@@ -1050,8 +1050,48 @@ for (let run = 0; run < 6; run++) {
     assert(rendered === Object.keys(HEART).length * FLAGSETS.length * 3 * 3, `P6A (render): every Heart scene rendered (${rendered})`);
 }
 
-// v0.11.172 (owner picks P5A, RV1; Fable's review TG1, TG8): the Blackroot played for real on the old calendar's 5-day road, three Coils:
-// gone with the old calendar's code in v0.11.260 (owner pick P28-A, OC2); the long calendar's camps: TS9's walks and LG below
+// v0.11.172 (owner picks P5A, RV1; Fable's review TG1, TG8): the Blackroot played for real (v0.11.260, P28-A OC2 and the cold review's M3: on the long calendar's
+// 5-day road, calBl 1, as a save moved in or past the Blackroot plays it; the camps' road: TS9's walks and LG below), three Coils with a real rewind, Days 11 to
+// 16 06:00: every day's Practice card through taskCards / runTask, "Knock it off" through choose, cooking at every camp; what each by-day
+// list showed (the darts and the needles five of five, the cooking four of four, "Knock it off" the Coil's set from its first text)
+const CAL16 = await import('../js/core/calendar.js');
+for (const form of ['cat', 'human']) {
+    const g = ensureBars(newGame(77, { closed: true })); g.calBl = 1; /* v0.11.260 (the cold review's M3, TG3): the 5-day road, as a save moved in or past the Blackroot plays it (calBl 1), a line a day */
+    g.minutes = calMinutes(g, 8, 6); Object.assign(g.flags, { ending: 'fought', long: true, ya_met: true });
+    const strong = () => { const r = { cat: 0, tiger: 2, human: 7 }[form]; g.james.realm = r; g.yuki.realm = r; g.yuki.form = form; g.james.gu = { tier: 4, level: 5, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 4, level: 5, xp: 0 }; ensureBars(g); g.james.hp = jamesHpMax(g); g.james.qi = jamesQiMax(g); g.rel['Mei Lin'] = { f: 60, a: 30 }; g.rel.Ya = { f: 60, a: 30 }; g.inventory.venison = 20; g.james.satiety = 50; };
+    strong(); g.scene = 'fo_start'; startActCoil(g, 1);
+    const KEYS = ['bl_camp:0', 'bl_train:1', 'bl_train:2', 'talk_ya:3'];
+    const BRX = await import('../js/story/act1_blackroot.js'); // v0.11.231 (P4-2, AT): the away lines
+    const AWK = { 'bl_train:1': 'dart', 'bl_train:2': 'needle' }; // v0.11.231 (P4-2, AT): Days 14–15 Ya is away in this walk (it never follows her): her days' away lines count as theirs
+    const idxOf = (key, text) => { const i = DAY_REPLIES[key].findIndex((t) => text.includes(typeof t === 'function' ? t(g) : t)); if (i >= 0 || !AWK[key]) return i; return BRX.AW[AWK[key]].findIndex((a) => a && Object.values(a).some((t) => text.includes(typeof t === 'function' ? t(g) : t))); };
+    const pick = (label) => sceneView(g, SCENES).choices.find((c) => !c.disabled && (label instanceof RegExp ? label.test(c.label) : c.label === label)) || null;
+    const fight = (r) => { startCombat(g, r.combat(g)); for (let t = 0; t < 120 && g.combat; t++) { const out = combatStep(g, smartAction(g, t)); if (out?.done) { goTo(g, SCENES, out.next); break; } } };
+    for (let coil = 0; coil < 3; coil++) {
+        const log = {}; const note = (lines) => { const text = (lines || []).join(' | '); for (const k of KEYS) { const i = idxOf(k, text); if (i >= 0) (log[k] ||= []).push(i); } };
+        const take = (c) => { const r = choose(g, SCENES, c.index); note(r.lines); if (r.combat) fight(r); return r; };
+        goTo(g, SCENES, 'bl_start'); let steps = 0;
+        for (; steps < 900 && g.scene !== 'ht_start'; steps++) {
+            const id = g.scene; const v = sceneView(g, SCENES);
+            if (TASK_HUBS[id] && /_hub$/.test(id)) {
+                const card = taskCards(g, SCENES).find((c) => c.group === 'Practice' && c.status === 'open');
+                if (card) { note(runTask(g, SCENES, card.id).lines); continue; }
+                const ty = pick('Talk to Ya.'); if (ty) { take(ty); take(pick('"Ya. Knock it off."')); continue; }
+                const next = pick('Eat with the others.') || pick('Cross the mourning hollow.') || pick(/^Push on to the end/) || pick(/^Climb to the pass/) || pick(/^Make camp/) || pick('Rest an hour.') || pick(/^Cultivate/);
+                if (!next) break; take(next); continue;
+            }
+            if (id === 'bl_camp') { take(pick('Cook and eat.') || pick(/^Sing a ring/) || pick('Sit by the fire with the others.') || pick('Sleep.')); continue; }
+            const open = v.choices.filter((c) => !c.disabled); if (!open.length) break;
+            take(open.find((c) => /^Fight|^Through it|Straight at it|Sleep/.test(c.label)) || open[0]);
+        }
+        const day = clockParts(g.minutes).day;
+        assert(g.scene === 'ht_start' && day === CAL16.calStart(g, 16) && g.calBl === 1, `P5A (RV1, TG1): the Blackroot walked to the Heart on the 5-day road, story day 16 (${form}, Coil ${coil + 1}: ${g.scene}, Day ${day}, ${steps} steps)`);
+        const seq = (k, n, off = 0) => JSON.stringify(log[k] || []) === JSON.stringify([...Array(n).keys()].map((i) => i + off));
+        assert(seq('bl_train:1', DAY_REPLIES['bl_train:1'].length) && seq('bl_train:2', DAY_REPLIES['bl_train:2'].length), `P5A (RV1, TG1): the darts and the needles show all five lines, Days 11–15 (${form}, Coil ${coil + 1}: ${log['bl_train:1']} / ${log['bl_train:2']})`);
+        assert(seq('bl_camp:0', DAY_REPLIES['bl_camp:0'].length), `P5A (RV1, TG1, M1): the cooking shows all four lines at the four camps (${form}, Coil ${coil + 1}: ${log['bl_camp:0']})`);
+        assert(seq('talk_ya:3', COIL_SETS['talk_ya:3'][coil].length - 2, 5 * coil) && actCoil(g) === coil, `P5A (RV1, TG8; v0.11.231 AG: no talk with Ya on Days 14–15, she is away): "Knock it off" shows set ${coil + 1} from its first text after ${coil} real rewind(s) (${form}: ${log['talk_ya:3']})`);
+        if (coil < 2) { rewind(g); strong(); g.flags.long = true; }
+    }
+}
 // v0.11.174 (owner picks P7A, SL1, CN1, CA1; Fable's rewrite of part 7, the Return; Selene): DR the practice drill's four lines a
 // kind (the picker), SD Mei Lin carrying the seed, SZ / TY / FX the seed's size, the years, nine days; YC Ya's childhood her way; YF / FB
 // the woman's lines; ST the four fights' stomp texts; SC the Selene story at the last camp (appended last: no card id moves); NM / GS her
@@ -5069,6 +5109,26 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
     { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8'); assert(!/data-new="long"/.test(M) && /const freshGame = \(\) => ensureBars\(newGame\(Math\.floor\(Math\.random\(\) \* 2 \*\* 31\), \{ closed: true \}\)\)/.test(M) && !/oldCalTest/.test(M) && /g = freshGame\(\); \/\/ v0\.11\.226/.test(M), `${T}: every new game on the long calendar (v0.11.226, FP1: the test switch gone)`); }
 }
 
+// v0.11.260 (owner pick P28-A; the cold review's M2, TG2): the day replies through the real tap path on the long calendar (the old
+// calendar's one-go walks, SW TG1 / TG2 and NX2 TG1, went with its code): a week's card carried to its end with `runTask`, the day
+// record the game's own. A failure shows no success text and notes no success day; a success shows the text of the story day its
+// work started on (`atStoryDay`), also when it ends in the next story day's week.
+{
+    const Tk = await import('../js/core/tasks.js');
+    const T = 'TG2 (OC2, the cold review\'s M2)';
+    const carry = (g, id) => { let r = runTask(g, SCENES, id), days = 1; for (; days < 12 && Object.keys(Tk.carriesRead(g)).length; days++) { const cid = Tk.carryTaskId(Object.keys(Tk.carriesRead(g))[0]); g.minutes = (Math.floor(g.minutes / 1440) + 1) * 1440 + 7 * 60; g.james.satiety = 95; g.james.qi = 60; r = runTask(g, SCENES, cid); } return { r, days }; };
+    const said = (g, r, k) => { const s = splitReply(r.lines); const all = s.reply.concat(s.gains); return DAY_REPLIES[k].findIndex((y) => all.some((x) => x.includes(typeof y === 'function' ? y(g) : y))); };
+    { const g = ensureBars(fresh(5612)); goTo(g, SCENES, 'wilds'); g.minutes = calMinutes(g, 2, 7); Object.assign(g.flags, { forest_day: 2, long: true });
+      g.james.gu = { tier: 1, level: 1, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 1, level: 1, xp: 0 }; g.james.satiety = 95; ensureBars(g); g.james.qi = 60;
+      const k = 'wild_train:1'; const { r, days } = carry(g, k);
+      assert(days > 1 && /— failed/.test(r.lines.join(' ')) && said(g, r, k) < 0 && !(`r:${k}` in (g.lines?.d || {})), `${T}: a carried wild_train failure: no success text, no success day noted (${days} days; ${Object.keys(g.lines?.d || {}).join(',')})`); }
+    for (const [start, want] of [[50, 0], [51, 1], [57, 1], [58, 2]]) {
+        const g = ensureBars(fresh(7908)); g.minutes = (start - 1) * 1440 + 8 * 60; g.flags.ending = 'fought'; goTo(g, SCENES, 'fo_ashfall');
+        g.james.gu = { tier: 4, level: 10, xp: 0 }; g.james.skills['Convergence Use'] = { tier: 4, level: 10, xp: 0 }; g.james.satiety = 95; ensureBars(g); g.james.qi = 60;
+        const k = 'fo_palisade:0'; const { r, days } = carry(g, k); const end = Math.floor(g.minutes / 1440) + 1;
+        assert(days > 1 && !r.fail && said(g, r, k) === want, `${T}: fo_palisade:0 started on Day ${start} (story day ${8 + want}), done on Day ${end}: that story day's text (${said(g, r, k)})`);
+    }
+}
 // v0.11.204 (owner pick W1; roadmap-time.md TS2 + TS3): the week on the long calendar (js/core/tasks.js S1, R1, R2; js/core/week.js R3, P1).
 // (v0.11.260, P28-A OC2: the old calendar's checks, no week's card, no routine, no fold, no plan, went with its code.)
 {
@@ -5086,7 +5146,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(cy && cy.id === 'wild_forage:1' && cy.total === once * Tk.WEEK_MULT && cy.left > 0 && cy.left < cy.total && rl.lines.some((x) => /^A week's work: /.test(x)), `${T}: a week's card is ×7 its time, the rest carried (${once} min → ${cy?.total}, ${cy?.left} left)`);
       assert(clockParts(l.minutes).hh === 15 && clockParts(l.minutes).mm === 0, `${T}: today's share ends at the wilds' evening hour (15:00; ${clockParts(l.minutes).hh}:${clockParts(l.minutes).mm})`);
       // v0.11.215 (FP1, FS): a food card pays at its start, as on the old calendar; its work goes on already paid
-      assert((l.inventory.river_cress || 0) === (o.inventory.river_cress || 0) && l.tasks.fam['wild_forage:1'] === o.tasks.fam['wild_forage:1'] && cy.paid === true && Tk.foodCard(SCENES.wild_forage.choices[1]), `${T} (FP1, FS): a food card's result and familiarity at its start, as on the old calendar (cress ${o.inventory.river_cress}/${l.inventory.river_cress})`);
+      assert((l.inventory.river_cress || 0) > 0 && (l.tasks.fam['wild_forage:1'] || 0) > 0 && cy.left > 0 /* the cold review's L4: paid while its work goes on */ && cy.paid === true && Tk.foodCard(SCENES.wild_forage.choices[1]), `${T} (FP1, FS): a food card's result and familiarity at its start (cress ${l.inventory.river_cress}, fam ${l.tasks.fam['wild_forage:1']})`);
       const gid = Tk.carryTaskId('wild_forage:1');
       { const cards = taskCards(l, SCENES), carry = cards.find((c) => c.id === gid);
         assert(carry && carry.status === 'evening' && !/then its result/.test(carry.tag) && cards.filter((c) => c.week && c.status === 'busy').length === 0, `${T} (CF1, UB): no other card waits behind it; its Go on waits for the morning (${carry?.status}, ${carry?.tag})`); }
@@ -6832,7 +6892,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(t === 'Day Forty-Four|Fifty-Nine Days|Day Twenty-Two|Day One Hundred and Two', `${T} (MC, TG4): the titles (${t})`);
       const SP = await import('../js/story/stomp_act1.js'); const P = await import('../js/story/power.js');
       const fn = (P.STOMPS || P.stomps || {})?.ya_brawl?.posture; const src = readFileSync(new URL('../js/story/stomp_act1.js', import.meta.url), 'utf8');
-      assert(/'"Weeks I watched you/.test(src) && !/Three nights at your fire/.test(src), `${T} (MF1, TG4): Ya's fight opener, the long calendar's (v0.11.260, OC2: the old one's gone)`);
+      assert(/"Weeks I watched you/.test(src) && !/Three nights at your fire/.test(src), `${T} (MF1, TG4): Ya's fight opener, the long calendar's (v0.11.260, OC2: the old one's gone)`);
       const nightSrc = readFileSync(new URL('../js/story/act1_fallout.js', import.meta.url), 'utf8'); assert(/cap\(numWord\(elderLeft\(g\)\)\) \+ '," she says, and that is all the arithmetic/.test(nightSrc), `${T} (MC, TG4): Mei Lin's count from the calendar`); }
     // TG5 (VK, M1): VF on real scenes: a later day whose text changed only in its count or the food stock folds
     { const g = at(true, 22, 19, { long: true, vday: 1, cal_night: 0 }); const seen = [];

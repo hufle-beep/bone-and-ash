@@ -585,7 +585,7 @@ ${byForm(g, `What this house owes the post stands by the door in two sacks, weig
 
 "How much larger," she asks. The mother tells her, to the handful. Yuki nods and says no more, and you, who know that nod, eat your fish and feel briefly sorry for the measure.`)}`, ...SUPPER_NEW[4], SN7.supper4]) /* v0.11.243 (P15-B, SN7): the seventh */
             : vday(g) >= 3 ? seqText(g, 'supper:6', SW3.map(sw3)) // v0.11.241 (owner picks P13-A, WK-d): week 3 its own six (the long calendar only)
-            : seqText(g, 'supper:5', [/* v0.11.248 (P18-A, HM; Fable's run HM): "her mother" twice */ (g) => `${'Another supper at Mei Lin\'s.'} Her mother no longer watches you as she would a fox in the henhouse. She watches you as she would a fox she might find a use for.
+            : seqText(g, 'supper:5', [/* v0.11.248 (P18-A, HM; Fable's run HM): "her mother" twice */ (g) => `Another supper at Mei Lin\'s. Her mother no longer watches you as she would a fox in the henhouse. She watches you as she would a fox she might find a use for.
 
 Tonight she talks. Of Mei Lin's father, who had a spirit root, and who went up the road with the collectors when Mei Lin was six. Of the letter that came down four years later, two words long: *Tribulation. Honoured.* Of the box they buried, which had nothing in it.
 
@@ -628,7 +628,7 @@ She gives the patch of dark her full and serious attention. "It looks cold."
 "It was warm. We grew our houses out of trees. They sang back when you sang to them." You stop. "Sorry. That sounds insane."
 
 "It sounds," she says, "like the only thing anyone has told me in years that I wanted to be true."`
-            : `${'Up on the roof again.'} This time she brings the plum wine, and does not ask whether you want any.
+            : `Up on the roof again. This time she brings the plum wine, and does not ask whether you want any.
 
 She tells you what the tribute costs, in numbers: so many baskets of grass, so many sacks of millet, so many children tested for roots. Which families hid their children last year, and which of those were caught. Her voice is perfectly level through all of it. Her hands are not.
 

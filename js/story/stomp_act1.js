@@ -67,7 +67,7 @@ Old Hu turns the skulls outward again. Later, alone, he turns one of them back.`
         one: () => 'You throw once. The fight is reclassified as a burial detail.',
     },
     ya_brawl: {
-        posture: (g, d) => `Ya rolls her neck until it cracks, spits in the dust, and shows you every tooth she owns. ${'"Weeks I watched you, scholar, upwind and down, and I never smelled a thing on you. No rot. No fear. *Nothing*."'} She beckons with two fingers. "Come on, Nothing. If you win, you buy my salt. If I win, I take the coat. Then whatever's under it."
+        posture: (g, d) => `Ya rolls her neck until it cracks, spits in the dust, and shows you every tooth she owns. "Weeks I watched you, scholar, upwind and down, and I never smelled a thing on you. No rot. No fear. *Nothing*." She beckons with two fingers. "Come on, Nothing. If you win, you buy my salt. If I win, I take the coat. Then whatever's under it."
 
 ${pick(d, 'She is very fast, and she knows it.', 'She is fast, and about to have an educational morning.', 'You find you are sorry in advance, chiefly on behalf of the goats.')}`,
         win: {

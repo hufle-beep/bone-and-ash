@@ -948,7 +948,7 @@ Ya is furious. Not with you; with the elk, which she curses in a language you su
 
 "Me?"
 
-${'"Way back, before the village: your camp, by the stream.'} The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. ${'Weeks it took me, working out what you were.'}"
+"Way back, before the village: your camp, by the stream. The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. Weeks it took me, working out what you were."
 
 ${g.flags.saw_lights ? 'Further on, where the roots braid together, she has one more thing to show you: a trail in the moss, greener than the moss on either side of it, running inward. "The lights walk here," she says. "Every night. Toward the old tree. I followed them once, when I was small. I didn\'t go in."' : 'Further on, where the roots braid together, the moss runs greener along a line that points at the heart of the forest. "Something walks here at night," Ya says. "Not an animal. I don\'t follow it."'}`,
         choices: [

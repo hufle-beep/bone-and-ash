@@ -297,7 +297,8 @@ for (const mode of ['full', 'quick']) {
       const ld = modelDigest(lr, 1);
       assert(/0 failed/.test(lr) && /days: tribute Day [\d.]+ \(n \d+\) · Act 1's end Day 10[34]\.0 \(n 2\) · the long calendar/.test(lr) && /· tribute Day [\d.]+, Act 1 ends Day 10[34]\.0$/.test(ld?.[0] ?? ''), `models --cal 7: two long-calendar games end on Day 103 or 104 (93 or 94 before v0.11.222, TS9), the digest names the days (${ld?.[0] ?? lr.slice(-300)})`);
       let bc = 0; try { execFileSync(process.execPath, ['tests/models.test.mjs', '--games', '1', '--cal', '5'], { cwd: ROOT, stdio: 'ignore' }); } catch (e) { bc = e.status; }
-      assert(bc === 2, `models --cal with another number exits 2 (${bc})`); }
+      let b0 = 0; try { execFileSync(process.execPath, ['tests/models.test.mjs', '--games', '1', '--cal', '0'], { cwd: ROOT, stdio: 'ignore' }); } catch (e) { b0 = e.status; }
+      assert(bc === 2 && b0 === 2, `models --cal with another number exits 2, the old calendar's 0 too (v0.11.260, the cold review's L2, TG5: ${bc} / ${b0})`); }
     { // RV1 (TG6): the long calendar's step plays the long calendar (its arguments read from the source, as the Sitter's below)
       const cs = readFileSync(path.join(ROOT, 'tools/check.mjs'), 'utf8'), line = cs.split('\n').find((l) => l.includes("key: 'models',")) || '';
       const mt = readFileSync(path.join(ROOT, 'tests/models.test.mjs'), 'utf8');

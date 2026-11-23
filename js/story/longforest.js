@@ -245,11 +245,11 @@ export const LONGFOREST = {
         enter: (g) => { g.flags.lf_active = true; g.flags.longforest = true; g.flags.lf_days = g.flags.lf_days || 0; return []; },
         text: (g) => `Past the black trees there are people. When the wind turns you can smell their smoke: wood, cooking fat, and the faint sour edge of lives lived at close quarters.
 
-You could walk out to them. That would be the sensible thing, and this time you know where the sensible thing leads: ${'a scream out of the forest, then a village, a Sect, and a tribute on the day appointed.'}
+You could walk out to them. That would be the sensible thing, and this time you know where the sensible thing leads: a scream out of the forest, then a village, a Sect, and a tribute on the day appointed.
 
 Instead you sit down on a root and look at your hands, and at Yuki, and at a forest that did its best to eat you the last time through, and you think: *I know exactly what is waiting out there. What I don't know is how far I can climb before I walk back into it.*
 
-You have, as far as you can tell, all the time in the world, and lately you mean it literally. ${'Your people live eight or nine hundred years, and the days behind you have already shown that they come round again.'}
+You have, as far as you can tell, all the time in the world, and lately you mean it literally. Your people live eight or nine hundred years, and the days behind you have already shown that they come round again.
 
 "Yuki," you say. "How do you feel about camping?"
 
