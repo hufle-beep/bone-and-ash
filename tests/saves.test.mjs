@@ -145,7 +145,8 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
         const nd = Math.floor(g.minutes / 1440) + 1;
         assert(nd === calStart(g, d) && g.minutes % 1440 === tod, `FP1 ${f}: Day ${d} → the first day of its week (Day ${nd}, the hour kept)`);
         assert(peekMin === g.minutes, `FP1 ${f} (RV1, L2): the Saves screen's line shows the day it opens on (${peekMin} / ${g.minutes})`);
-        assert(storyDay(g) === d && inAct1(g) === fb.act1 && weekNights(g) === (night ? 6 : 0), `FP1 ${f}: the same story day (${storyDay(g)}), the same act, ${night ? 'the week\'s seventh night (RV1, H1)' : 'the week\'s first night'}`);
+        const sdNow = tod < 300 && d > 1 ? d - 1 : d; // v0.11.263 (owner pick P31-A, K1): the story day turns at 05:00, so a save before it is on the night of the day before (the bl_night save at 01:25: 11, the text day; was d, from midnight)
+        assert(storyDay(g) === sdNow && inAct1(g) === fb.act1 && weekNights(g) === (night ? 6 : 0), `FP1 ${f}: the same story day (${storyDay(g)}; by the text day from v0.11.263), the same act, ${night ? 'the week\'s seventh night (RV1, H1)' : 'the week\'s first night'}`);
         assert(g.calBl === (act === 0 || d <= 10 ? BL_SPAN : 1), `FP1 ${f}: the Blackroot's days as blFill gives them (${g.calBl})`);
         const dk2 = Object.keys(g.flags).filter((k) => /@-?\d+$/.test(k));
         assert(dk2.length === dk.length, `FP1 ${f} (DK): every day mark kept (${dk.length} → ${dk2.length})`);

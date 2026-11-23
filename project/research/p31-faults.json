@@ -1,0 +1,9 @@
+[
+ { "id": "F1", "file": "js/core/calendar.js", "find": "storyDayOf(g, calDayOf((g.minutes || 0) - DAY_FROM * 60)));", "replace": "storyDayOf(g, calDayOf(g.minutes)));", "note": "K1: the story day from midnight again" },
+ { "id": "F2", "file": "js/core/calendar.js", "find": "export const storyDay = (g) => (pinnedDay != null ? pinnedDay : storyDayOf(", "replace": "export const storyDay = (g) => (storyDayOf(", "note": "K1/FD: the pin dropped (a week's card's result reads the day it ends)" },
+ { "id": "F3", "file": "js/core/game.js", "find": "export const DAY_END_HOUR = 0, NIGHT_TO = DAY_FROM;", "replace": "export const DAY_END_HOUR = 0, NIGHT_TO = 4;", "note": "K2: the night to 04:00 again (and the text day with it, lines.js)" },
+ { "id": "F4", "file": "js/core/game.js", "find": "const X4 = (m) => Math.floor((m - NIGHT_TO * 60) / 1440) + 1;", "replace": "const X4 = (m) => Math.floor((m - 240) / 1440) + 1;", "note": "K2: the waking day's counter turns at 04:00 (the daily marks a day ahead at 04:00–04:59)" },
+ { "id": "F5", "file": "js/story/act1_fallout.js", "find": "g.minutes = Math.max(g.minutes, (calEnd(g, 10) - 1) * 1440 + 23 * 60);", "replace": "g.minutes = (calEnd(g, 10) - 1) * 1440 + 23 * 60;", "note": "L1g: the depart sets the clock back again" },
+ { "id": "F6", "file": "js/story/oneoff.js", "find": "show: (g) => hourOf(g) >= NIGHT_TO && hourOf(g) < h", "replace": "show: (g) => hourOf(g) >= 4 && hourOf(g) < h", "note": "K2: Call it a day from 04:00 (in the night); expected to survive unless a hub at 04:30 shows it (the M1 assert reads it)" },
+ { "id": "F7", "file": "js/core/week.js", "find": "const wakeCal = (g) => Math.floor(((g.minutes || 0) - NIGHT_TO * 60) / 1440) + 1;", "replace": "const wakeCal = (g) => Math.floor(((g.minutes || 0) - 240) / 1440) + 1;", "note": "K2: a spaced card's 'opens Day N' by 04:00; expected to survive (no test at 04:xx on the planner's door notes)" }
+]

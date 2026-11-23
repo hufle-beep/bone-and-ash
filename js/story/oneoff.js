@@ -7,10 +7,10 @@
  *   counts: a failed (or a partial, empty-handed) try can be made again (owner 14:05).
  * - ONCE_STAGES: progressive door scenes (Wen's lessons, the herb slopes): that many visits per Coil (`oo:<scene>`), daily stays.
  * - Repeatable as before: hunts, self-training, foraging (F1), Cultivate, Meditate, rest, eating; talks one each per day (T1).
- * - S1: "Call it a day" on the hubs with a set evening, from 04:00, once nothing but repeatable work is open there
+ * - S1: "Call it a day" on the hubs with a set evening, from the night's end (`NIGHT_TO`: 05:00 since v0.11.263, 04:00 before), once nothing but repeatable work is open there
  *   (`oneOffLeft`): the clock to the evening hour at once, as rest; the evening exit then shows as usual.
  */
-import { advance, clockParts } from '../core/game.js';
+import { advance, clockParts, NIGHT_TO } from '../core/game.js';
 import { daily } from './common.js';
 import { TASK_HUBS } from './task_hubs.js';
 import { setOnChoose } from '../core/story.js';
@@ -93,7 +93,7 @@ export function installOnce(scenes) {
         const exitAt = (g) => { const at = { ...g, minutes: (clockParts(g.minutes).day - 1) * 1440 + h * 60, wake: g.wake && { ...g.wake } }; /* its own wake: wakeState writes to it */ return evening.some((c) => c.show && !c.show(g) && c.show(at)); };
         s.choices.push({
             text: 'Call it a day. Nothing here needs you before evening.',
-            show: (g) => hourOf(g) >= 4 && hourOf(g) < h && !oneOffLeft(g, scenes, hubId) && exitAt(g),
+            show: (g) => hourOf(g) >= NIGHT_TO && hourOf(g) < h /* v0.11.263 (P31-A, K2): from the night's end, 05:00 (was 4) */ && !oneOffLeft(g, scenes, hubId) && exitAt(g),
             do: (g) => toHour(g, h),
             to: hubId,
         });

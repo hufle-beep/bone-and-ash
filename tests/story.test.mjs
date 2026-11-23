@@ -969,7 +969,7 @@ for (let run = 0; run < 6; run++) {
             if (stop) { if (c === '{') depth++; if (c === '}') { if (depth === 0) { i++; return out; } depth--; } }
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
         const LABELS = Object.values(HEART).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-        const PIN = { 'act1_heart.js': 'fcef2b38c56df6eb', /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (the watch line, the titles) */ /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '5486ba3c7c879cb7' /* v0.11.260 (P28-A, OC2): re-pinned: Ya's old-calendar posture line gone, its template wrapper with it (the cold review's L5) */ /* v0.11.251 (RV-A, HL): re-pinned: luHere reads lu_won (Lu Han beaten at the tribute stays away) */ /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
+        const PIN = { 'act1_heart.js': '311dc23a81239a0e', /* v0.11.263 (P31-A, the cold review's M1): re-pinned: ht_leave's clock never back (Math.max) */ /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (the watch line, the titles) */ /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '5486ba3c7c879cb7' /* v0.11.260 (P28-A, OC2): re-pinned: Ya's old-calendar posture line gone, its template wrapper with it (the cold review's L5) */ /* v0.11.251 (RV-A, HL): re-pinned: luHere reads lu_won (Lu Han beaten at the tribute stays away) */ /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
         const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
         const got = { labels: hash(JSON.stringify(LABELS)) };
         for (const f of ['act1_heart.js', 'stomp_act1.js', 'yuki_time.js']) got[f] = hash(skel(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')));
@@ -9045,7 +9045,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
           assert(mkHub(40) === false && mkHub(10) === true, `${T} RV (F24): a beat on the walk stops it; none, the walk is safe (${mkHub(40)}, ${mkHub(10)})`); }
         // F26 (C L1): an evening screen after midnight belongs to the waking day's story-week
         { const g = vil(99773); g.minutes = C.calEnd(g, 5) * D + 30; g.scene = 'supper'; const pp = {}; const ways = [{ index: 2, label: 'Go up to the loft early. Tomorrow will want everything you have.' }, { index: 0, label: 'Climb out onto the roof with Mei Lin and watch the stars come out.' }];
-          Wk.weekEveQuiet(g, SCENES, pp, ways); assert(C.storyDay(g) === 6 && pp.we?.sd === 5, `${T} RV (F26, C L1): 00:30 after story day 5's last day is still its week (${C.storyDay(g)}, ${JSON.stringify(pp.we)})`); }
+          Wk.weekEveQuiet(g, SCENES, pp, ways); assert(C.storyDay(g) === 5 && pp.we?.sd === 5, /* v0.11.263 (owner pick P31-A, K1): storyDay from 05:00, so 00:30 reads 5 too (was 6, from midnight) */ `${T} RV (F26, C L1): 00:30 after story day 5's last day is still its week (${C.storyDay(g)}, ${JSON.stringify(pp.we)})`); }
         // FC4: the supper's own text said when the plan takes its quiet way
         { const g = vil(99774); Wk.planEnsure(g); g.tasks.plan.we = { c: `${g.coil?.n || 1}|${g.coil?.act || 0}`, sd: 5, d: -5 }; const lines = []; for (let k = 0; k < 6 && lines.filter((l) => String(l).startsWith(Wk.QUIET_LINE)).length < 2; k++) { const r = Wk.runWeek(g, SCENES); for (const d of r.days) lines.push(...d.lines); if (r.stop !== 'read') break; }
           const i1 = lines.findIndex((l) => /^The plan takes the quiet way: Evening\./.test(l)), i2 = lines.findIndex((l) => /^The plan takes the quiet way: Go up to the loft early/.test(l));
@@ -9454,6 +9454,82 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const pinned = C.atStoryDay(8, () => txt(g)), i = SCENES.fo_council.choices.findIndex((c) => /^Listen\. Say nothing/.test(String(c.text)));
       C.atStoryDay(8, () => SCENES.fo_council.choices[i].do(g)); SCENES.fo_council.choices[i].do(g9);
       assert(i >= 0 && pinned === txt(g8) && pinned !== txt(g9) && g.flags.council8 && !g.flags.council9 && g9.flags.council9, `${T} (D4): under atStoryDay(8) on Day 52 the council reads day 8 (${pinned.slice(0, 24)}) and marks council8 (${!!g.flags.council8} ${!!g.flags.council9} ${!!g9.flags.council9})`); }
+}
+{
+    // v0.11.263 (owner pick P31-A: K1, K2, L1g, FD; project/research/p31-measure.md): the one clock. The story day (calendar.js `storyDay`,
+    // unpinned), the text day (lines.js `textDay`) and the waking day (game.js `NIGHT_TO`: `dayHour`, `wakeState`, tasks.js `workDay`, the
+    // daily marks) all turn at 05:00 (`DAY_FROM`); the story day turned at midnight and the waking day at 04:00 before.
+    // Calendar days: story day 9 = 51–57, 10 = 58–64, 11 = 65–67; the Heart's 18 ends on its calEnd, 19 the day after.
+    const T = 'P31-A';
+    const C = await import('../js/core/calendar.js'), G = await import('../js/core/game.js'), TK = await import('../js/core/tasks.js'), L = await import('../js/core/lines.js'), D = 1440;
+    const mk = (seed, scene, min, fl = {}) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, { ya_met: true, fo_plan: true }, fl); g.yuki.realm = 9; g.scene = scene; g.minutes = min; return g; };
+    const at = (cal, h, m = 0) => (cal - 1) * D + h * 60 + m;
+    const labs = (g) => sceneView(g, SCENES).choices.map((c) => c.label).join('|');
+    const open = (g) => taskCards(g, SCENES).filter((c) => c.status === 'open').map((c) => c.label).sort().join('|');
+    assert(C.DAY_FROM === 5 && G.NIGHT_TO === 5 && L.TEXT_DAY_FROM === 300, `${T}: one clock at 05:00 (${C.DAY_FROM}, ${G.NIGHT_TO}, ${L.TEXT_DAY_FROM})`);
+    // K1: the story day from 05:00: Day 65 00:11 and 04:59 story day 10, 05:00 11; the Heart's last night (Day e18 + 1) 18 until 05:00
+    { const g0 = mk(43101, 'fo_ashfall', 0), e18 = C.calEnd(g0, 18), sd = (min) => C.storyDay(mk(43101, 'fo_ashfall', min));
+      const r = [sd(at(65, 0, 11)), sd(at(65, 4, 59)), sd(at(65, 5)), sd(at(e18 + 1, 0, 11)), sd(at(e18 + 1, 4, 30)), sd(at(e18 + 1, 5)), C.atStoryDay(8, () => sd(at(65, 0, 11)))];
+      assert(r.join() === '10,10,11,18,18,19,8', `${T} (K1): storyDay by 05:00, the pin kept (${r.join()})`); }
+    // K1 + K2: the three clocks agree at every hour of Days 1–110 (the story day = the text day's story day; the waking day = the text day)
+    { const g = mk(43102, 'fo_ashfall', 0); const bad = [];
+      for (let d = 1; d <= 110; d++) for (const [h, m] of [[0, 0], [0, 11], [3, 59], [4, 0], [4, 30], [4, 59], [5, 0], [6, 0], [12, 0], [23, 59]]) {
+          g.minutes = at(d, h, m); const td = L.textDay(g);
+          if (C.storyDay(g) !== C.storyDayOf(g, td) || TK.workDay(g) + 1 !== td || (G.dayHour(g) >= 24) !== (h < 5)) bad.push(`${d} ${h}:${m}`); }
+      assert(bad.length === 0, `${T} (K1, K2): story, text and waking day turn together at 05:00 (${bad.slice(0, 6).join(', ')})`); }
+    // TG (as before outside the gap): at 05:00–23:59 the story day reads the calendar day's (v0.11.262's read), dayHour the clock's hour,
+    // workDay v0.11.262's (from 04:00); at 04:00–04:59 only the waking day's hour moved (28)
+    { const g = mk(43103, 'fo_ashfall', 0); const bad = [];
+      for (let d = 1; d <= 110; d++) for (let h = 0; h <= 23; h++) { g.minutes = at(d, h, 30);
+          const oldSd = C.storyDayOf(g, d), oldWd = Math.floor((g.minutes - 240) / D), oldDh = h < 4 ? h + 24 : h;
+          const same = h >= 5 ? C.storyDay(g) === oldSd && TK.workDay(g) === oldWd && G.dayHour(g) === oldDh : h === 4 ? G.dayHour(g) === 28 && TK.workDay(g) === oldWd - 1 : G.dayHour(g) === oldDh && TK.workDay(g) === oldWd;
+          if (!same) bad.push(`${d} ${h}h`); }
+      assert(bad.length === 0, `${T} (TG): 05:00–23:59 as v0.11.262 read them; 04:00–04:59 the night before (${bad.slice(0, 6).join(', ')})`); }
+    // K2: the daily marks turn at 05:00: awake from Day 58 03:00, the waking day is the same at 04:30 and one more at 05:00
+    { const g = mk(43104, 'fo_ashfall', at(58, 3)); const w0 = G.wakeDay(g); g.minutes = at(58, 4, 30); const w1 = G.wakeDay(g); g.minutes = at(58, 5); const w2 = G.wakeDay(g);
+      assert(w1 === w0 && w2 === w0 + 1, `${T} (K2): the waking day turns at 05:00, not 04:00 (${w0}, ${w1}, ${w2})`); }
+    // K2 (the P30-A review's M1): Day 58 04:30 after story day 9's last day is the night: the hub's choices and open cards as at 03:30, no spy card (open on Day 57 06:00),
+    // no "Call it a day", supper's meal slot
+    { const a = mk(43105, 'fo_ashfall', at(58, 4, 30)), b = mk(43105, 'fo_ashfall', at(58, 3, 30)), c = mk(43105, 'fo_ashfall', at(57, 6));
+      const spy = (g) => /watching Ashfall from the ridge/.test(open(g)), cid = (g) => /Call it a day/.test(labs(g) + open(g));
+      assert(labs(a) === labs(b) && open(a) === open(b) && !spy(a) && spy(c) && !cid(a) && TK.mealSlot(a) === 's' && G.dayHour(a) === 28 && C.storyDay(a) === 9,
+          `${T} (K2, M1): Day 58 04:30 is day 9's night (${labs(a).slice(0, 60)} | ${labs(b).slice(0, 60)}; open ${open(a).length} / ${open(b).length}; slot ${TK.mealSlot(a)})`); }
+    // K1 (the P30-A review's L4): the hub stays its week's at Day 65 00:11 and 04:30 (weekHub, a week's card), not from 05:00
+    { const wh = (min) => TK.weekHub(mk(43106, 'fo_ashfall', min), 'fo_ashfall');
+      assert(wh(at(64, 20)) && wh(at(65, 0, 11)) && wh(at(65, 4, 30)) && !wh(at(65, 5)), `${T} (K1, L4): weekHub by the story day from 05:00 (${[wh(at(64, 20)), wh(at(65, 0, 11)), wh(at(65, 4, 30)), wh(at(65, 5))].join(' ')})`); }
+    // K1: the Heart's two reads (late, ht_leave) after day 18's last day: day 18 until 05:00, so leaving at 00:11 or 04:30 sleeps to 06:00
+    { const g0 = mk(43107, 'heart_hub', 0), e18 = C.calEnd(g0, 18);
+      const leave = (min) => { const g = mk(43107, 'ht_leave', min); g.coil.act = 1; SCENES.ht_leave.enter(g); return g.minutes; };
+      const r = [leave(at(e18 + 1, 0, 11)), leave(at(e18 + 1, 4, 30)), leave(at(e18 + 1, 5))];
+      assert(r[0] === at(e18 + 1, 6) && r[1] === at(e18 + 1, 6) && r[2] === at(e18 + 1, 5), `${T} (K1): the Heart's day 18 until 05:00; ht_leave to Day ${e18 + 1} 06:00 (${r.map((m) => `${Math.floor(m / D) + 1} ${Math.floor((m % D) / 60)}:${m % 60}`).join(', ')})`); }
+    // K2 + L1g (the P30-A review's L1): the farewell walks from Ashfall's hub never run the clock back; each the farewell and the Blackroot's first morning (Day 65, as from 23:00)
+    { const walk = (min) => { const g = mk(43108, 'fo_ashfall', min); const path = []; let back = false, last = g.minutes;
+          for (let i = 0; i < 8 && g.scene !== 'bl_start'; i++) { const v = sceneView(g, SCENES); const c = v.choices.find((x) => /^Evening|^Go up to the loft|^Hold her|^Sleep|^Into the Blackroot/.test(x.label)) || v.choices[0]; path.push(g.scene); if (!c) break; choose(g, SCENES, c.index); if (g.minutes < last) back = true; last = g.minutes; }
+          return { path, back, end: g.minutes, scene: g.scene }; };
+      const r = [walk(at(64, 23)), walk(at(65, 0, 11)), walk(at(65, 3, 59)), walk(at(64, 19, 30))];
+      assert(r.every((w) => !w.back && w.path[1] === 'fo_farewell' && w.scene === 'bl_start' && w.end === r[0].end) && r[0].end >= at(65, 6) && r[0].end < at(65, 7), `${T} (K2, L1g): the farewell walks forward (${r.map((w) => `${w.path.join('>')}>${w.scene} back ${w.back} end ${Math.floor(w.end / D) + 1} ${Math.floor((w.end % D) / 60)}:${w.end % 60}`).join(' | ')})`); }
+    // L1g: fo_depart never sets the clock back (from Day 65 19:59 it sleeps on to Day 66 06:00; from Day 64 22:00 to Day 65 06:00 as before)
+    { const dep = (min) => { const g = mk(43109, 'fo_depart', min); SCENES.fo_depart.choices[0].do(g); return g.minutes; };
+      assert(dep(at(65, 19, 59)) === at(66, 6) && dep(at(64, 22)) === at(65, 6) && dep(at(65, 1, 11)) === at(65, 6), `${T} (L1g): fo_depart forward only (${[dep(at(65, 19, 59)), dep(at(64, 22)), dep(at(65, 1, 11))].join(', ')})`); }
+    // the cold review (Opus): M1 / TG1: ht_leave after midnight on the Heart's last day never sets the clock back, and costs only the sleep
+    // from the entry minute; `late` reads day 18 then (guardian_approach's "Back away" as at 22:00, gone from 05:00)
+    { const g0 = mk(43110, 'heart_hub', 0), e18 = C.calEnd(g0, 18);
+      const leave = (min) => { const g = mk(43110, 'ht_leave', min); g.coil.act = 1; const s = structuredClone(g); G.sleepUntil(s, 6); let back = false; const m0 = g.minutes; SCENES.ht_leave.enter(g); if (g.minutes < m0) back = true; return !back && g.minutes === s.minutes && JSON.stringify(g.james) === JSON.stringify(s.james); };
+      const back = (min) => /Back away\. Not yet\./.test(labs(mk(43110, 'guardian_approach', min, { log_heard: true })));
+      assert(leave(at(e18 + 1, 0, 11)) && leave(at(e18 + 1, 4, 30)) && back(at(e18, 22)) && back(at(e18 + 1, 0, 11)) && back(at(e18 + 1, 4, 30)) && !back(at(e18 + 1, 5)),
+          `${T} (TG1, M1): ht_leave at 00:11 / 04:30 only sleeps; late by 05:00 (${[leave(at(e18 + 1, 0, 11)), leave(at(e18 + 1, 4, 30)), back(at(e18, 22)), back(at(e18 + 1, 0, 11)), back(at(e18 + 1, 4, 30)), back(at(e18 + 1, 5))].join(' ')})`); }
+    // TG4: K1's jumps in the gap go forward only: bl_start at Day 65 02:00 (story day 10) to the Blackroot's first 06:00; bl_end the night after
+    // story day 15's last day to the Heart's first 06:00; blFill at Day 65 02:00 still before the Blackroot (span 3), from 05:00 in it (1)
+    { const g0 = mk(43111, 'bl_start', 0), e15 = C.calEnd(g0, 15);
+      const st = mk(43111, 'bl_start', at(65, 2)); SCENES.bl_start.enter(st);
+      const en = mk(43111, 'bl_end', at(e15 + 1, 2)); SCENES.bl_end.enter(en);
+      const bf = (min) => { const g = mk(43111, 'fo_ashfall', min); g.coil.act = 1; delete g.calBl; return G.blFill(g).calBl; };
+      assert(st.minutes === C.calMinutes(st, 11, 6) && en.minutes === C.calMinutes(en, 16, 6) && en.minutes > at(e15 + 1, 2) && bf(at(65, 2)) === 3 && bf(at(65, 5)) === 1,
+          `${T} (TG4): the gap's jumps forward (bl_start ${st.minutes} / ${C.calMinutes(st, 11, 6)}, bl_end ${en.minutes} / ${C.calMinutes(en, 16, 6)}, blFill ${bf(at(65, 2))} ${bf(at(65, 5))})`); }
+    // TG5: gainCounts' waking day turns at 05:00: a gain on Day 52 at noon (story day 9) counts again at Day 53 00:30 (the same waking day),
+    // not at Day 53 06:00 (another day of the same week)
+    { const g = mk(43112, 'fo_mei', at(52, 12)); g.coil.act = 1; const r1 = G.gainCounts(g, 'Mei Lin'); g.minutes = at(53, 0, 30); const r2 = G.gainCounts(g, 'Mei Lin'); g.minutes = at(53, 4, 30); const r3 = G.gainCounts(g, 'Mei Lin'); g.minutes = at(53, 6); const r4 = G.gainCounts(g, 'Mei Lin');
+      assert(r1 && r2 && r3 && !r4, `${T} (TG5): gainCounts by the waking day from 05:00 (${r1} ${r2} ${r3} ${r4})`); }
 }
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);

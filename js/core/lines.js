@@ -12,7 +12,7 @@
  * (story.js go() records them; a day runs from 05:00, RN2 H1); `byDay` gives a scene's text for the day: its first text on the first day, the next one on the next
  * day it shows, and so on (a pool in order; past the last, it starts again).
  */
-import { fnv1a, clockParts } from './game.js';
+import { fnv1a, clockParts, NIGHT_TO } from './game.js';
 
 /** A usable record: a plain object for this Coil. */
 const isRec = (r) => !!r && typeof r === 'object' && !Array.isArray(r);
@@ -83,7 +83,7 @@ export function noteVisit(g, id) {
 
 /** v0.11.135 (RN2, H1; Fable's review): a text's day runs from 05:00 (the earliest wake) to 05:00, not midnight, so a night scene
  *  entered before midnight and shown after it is still that night (the last camp no longer turned into its "next night" text). */
-export const TEXT_DAY_FROM = 5 * 60;
+export const TEXT_DAY_FROM = NIGHT_TO * 60; // v0.11.263 (owner pick P31-A): the one clock (calendar.js `DAY_FROM`, 05:00 as before)
 export const textDay = (g) => clockParts((g.minutes || 0) - TEXT_DAY_FROM).day;
 /** v0.11.135 (NT1, EV1): note that `key` (a scene id, or a scene's event) shows today. */
 export function noteDay(g, key) {

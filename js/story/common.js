@@ -8,7 +8,7 @@ export const byForm = (g, cat, tiger, human) => { const f = yukiForm(g); return 
 export const once = (flag) => (g) => !g.flags[flag];
 export const set = (...flags) => (g) => { for (const f of flags) g.flags[f] = true; return []; };
 export const day = (g) => clockParts(g.minutes).day;
-export const hour = (g) => dayHour(g); // v0.11.37: 00:00–03:59 read 24–27 in Incremental Mode (the evening before), unless pushed through
+export const hour = (g) => dayHour(g); // v0.11.37: 00:00–03:59 read 24–27 in Incremental Mode (00:00–04:59, 24–28, since v0.11.263, P31-A K2) (the evening before), unless pushed through
 /** Available once per in-game day. */
 /** A once-a-day test; `dailyKey` lets the task screen show it as "back tomorrow" (v0.9.0). */
 /** v0.11.18: in Incremental Mode a "day" for these is a waking day (back after sleep or a push), not the calendar. */

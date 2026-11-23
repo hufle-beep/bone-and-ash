@@ -793,7 +793,7 @@ ${g.flags.reaction === 'rage' ? 'And after that, you think, somebody in red is g
         enter: (g) => {
             const out = [];
             if (storyDay(g) < 19) {
-                g.minutes = (calStart(g, 19) - 2) * 1440 + 21 * 60;
+                g.minutes = Math.max(g.minutes, (calStart(g, 19) - 2) * 1440 + 21 * 60); // v0.11.263 (P31-A, the cold review's M1): never back (after midnight on the last day the story day is still 18)
                 sleepUntil(g, 6);
                 out.push(`You stay until dawn on Day ${calStart(g, 19)}: resting, mapping the galleries, saying goodbye. HP and Qi full.`);
             } else if (hour(g) >= 9) {

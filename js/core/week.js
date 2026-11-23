@@ -16,7 +16,7 @@
  */
 import { storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS, NUM_WORDS } from './calendar.js'; // v0.11.224 (RV1, VK): NUM_WORDS
 import { sceneView, choose, seenBefore } from './story.js'; // v0.11.248 (P18-A, NS-b): seenBefore
-import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes, wakeDay } from './game.js';
+import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes, wakeDay, NIGHT_TO } from './game.js';
 import { famOf, taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, carryHere, carriesHere, carriesRead, carryTaskId, isCarryTask, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
 import { farewellNow } from '../story/act1_fallout.js'; // RV1 (L4)
 import { foodCount, preservable, unspaced, spacedNext, SPACE_DAYS, cardSpaced, cardKey } from '../story/common.js'; // v0.11.213 (FQ1, S3): the spacing
@@ -244,9 +244,9 @@ export function quietSafe(g, scenes, hub, qi) {
 const GOES_ON = new Set(['evening', 'door']);
 const hash = (t) => fnv1a(String(t || '').replace(/\d+/g, '#').replace(NUM_WORDS, '#')); // the day's numbers ("Day 45. 48 days to the Elder.") don't make a night new; v0.11.224 (RV1, VK): nor in words ("Day fifty-one. Fifty-two days")
 const calDay = (g) => Math.floor((g.minutes || 0) / 1440) + 1;
-/** v0.11.225 (RV1, L2): the calendar day of the waking day (the day turns at 04:00, as wakeState's): a waking day's day as a calendar day
- *  (00:00–04:00 still the day before: a spaced card's "opens Day N" was a day late there). */
-const wakeCal = (g) => Math.floor(((g.minutes || 0) - 240) / 1440) + 1;
+/** v0.11.225 (RV1, L2): the calendar day of the waking day (the day turns at 05:00 since v0.11.263, P31-A K2; 04:00 before; as wakeState's): a waking day's day as a calendar day
+ *  (00:00–05:00 still the day before: a spaced card's "opens Day N" was a day late there). */
+const wakeCal = (g) => Math.floor(((g.minutes || 0) - NIGHT_TO * 60) / 1440) + 1; // v0.11.263 (owner pick P31-A, K2): NIGHT_TO (05:00, the one clock; was 240)
 const hourNow = (g) => clockParts(g.minutes).hh;
 const coilKey = (g) => `${g.coil?.n || 1}|${g.coil?.act || 0}`;
 const plainChoice = (c) => !!c && !c.check && !c.combat && !c.fail && !c.qi;

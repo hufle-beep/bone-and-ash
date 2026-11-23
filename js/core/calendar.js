@@ -43,7 +43,11 @@ export function storyDayOf(g, cal) {
 }
 /** The story day now. v0.11.215 (RV1, MS): inside `atStoryDay` the story day a carried work started (its result's texts and flags). */
 let pinnedDay = null;
-export const storyDay = (g) => (pinnedDay != null ? pinnedDay : storyDayOf(g, calDayOf(g.minutes)));
+/** v0.11.263 (owner pick P31-A, K1): the one clock: the story day, the text day (lines.js `TEXT_DAY_FROM`) and the waking day (game.js
+ *  `NIGHT_TO`, the daily marks) all turn at DAY_FROM (05:00); the night before it belongs to the day before. The story day turned at
+ *  midnight before (00:00–04:59 after a story day's last calendar day read the next story day; 0 screens in play, project/research/p31-measure.md). */
+export const DAY_FROM = 5;
+export const storyDay = (g) => (pinnedDay != null ? pinnedDay : storyDayOf(g, calDayOf((g.minutes || 0) - DAY_FROM * 60)));
 /** v0.11.215 (owner pick RV1, MS): run `fn` as on story day `d` (a week's card's result, read on the day its work started). */
 /** v0.11.249 (P19-A RV, C L3): the pinned story day, or null (game.js `gainCounts`). */
 export const pinnedStoryDay = () => pinnedDay;

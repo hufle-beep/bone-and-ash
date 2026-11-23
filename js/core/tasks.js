@@ -740,7 +740,7 @@ const coilKey = (g) => `${g.coil?.n || 1}|${g.coil?.act || 0}`;
 export const weekHub = (g, hubId = g.scene) => WEEK_HUBS.has(hubId) && STAY_DAYS.has(storyDay(g));
 /** Is this card a week's card here (S1)? */
 export const weekCard = (g, hubId, card) => !!card && card.kind === 'work' && !!card.menu && !!TASK_HUBS[hubId]?.menus?.[card.menu] && weekHub(g, hubId);
-/** The waking day (the night to 04:00 belongs to the day before). */
+/** The waking day (the night to 05:00 belongs to the day before; 04:00 until v0.11.263, P31-A K2). */
 export const workDay = (g) => Math.floor(((g.minutes || 0) - NIGHT_TO * 60) / 1440);
 /** Minutes left today for a week's work: to the hub's evening hour. */
 export const workRoom = (g, hubId = g.scene) => Math.max(0, workDay(g) * 1440 + (EVENING_HOUR[hubId] ?? 16) * 60 - g.minutes);
@@ -812,7 +812,7 @@ function weekCards(g, scenes, hubId, cards) {
 let routineBusy = false;
 export const POT_BARE = 'the communal pot.'; // v0.11.261 (P29-A, M4; the review's TG4): dayMeal's line when the pot's run gives no satiety line, exported for the test
 export const MEAL = { b: 'Breakfast', l: 'Midday', s: 'Supper' }; // v0.11.259 (OC-A, the review's TG-A2): exported for K-A's test
-/** The part of the day (R1): before 11:00, 11:00–14:59, from 15:00 (the night to 04:00 is the evening's). */
+/** The part of the day (R1): before 11:00, 11:00–14:59, from 15:00 (the night to 05:00 is the evening's; 04:00 until v0.11.263). */
 export const mealSlot = (g) => { const hh = clockParts(g.minutes).hh, h = hh < NIGHT_TO ? hh + 24 : hh; return h < 11 ? 'b' : h < 15 ? 'l' : 's'; };
 /* ---------- v0.11.217 (owner picks PT1 = PM, 2026-11-17 19:26, and PC1 = PM + CG, 2026-11-18 01:01; the owner 17:42: "eating at
  * the pot is not among the schedualble options") ----------

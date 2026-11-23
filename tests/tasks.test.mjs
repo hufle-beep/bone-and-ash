@@ -4107,7 +4107,7 @@ assert(yukiRuns > GAMES / 2, `Yuki's lane brings things home (${yukiRuns})`);
     }
     const morning = Object.values(RETURN).find((x) => String(x.enter || '').includes('toHour(g, 6)'));
     const mg = ensureBars(newGame(4703)); mg.minutes = calMinutes(mg, 20, 4, 30); morning.enter(mg);
-    assert(clockParts(mg.minutes).hh === 6 && clockParts(mg.minutes).mm === 0, 'N1: a morning toHour (6) still moves 04:30 to 06:00');
+    assert(mg.minutes === calMinutes(mg, 20, 4, 30), 'N1: a morning toHour (6) at 04:30 is the night (v0.11.263, P31-A K2: the night to 05:00), so the clock stays, as at 00:00–03:59 (it moved to 06:00 before)');
     // gather Qi at Fed 0, and the late tag on a locked sit
     const q = ensureBars(newGame(4704)); q.scene = 'camp'; q.minutes = 20 * 60; q.james.qi = 1; q.james.satiety = 0;
     const qc = medCards(q, SCENES).find((x) => x.id === 'med:qi');

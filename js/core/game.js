@@ -12,7 +12,7 @@ import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
     realmBonus, realmStepLabel, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
 } from './formulas.js';
-import { calMinutes, calStart, calEnd, LONG_CAL, BL_SPAN, storyDay, storyDayOf, pinnedStoryDay } from './calendar.js'; // v0.11.222 (J2, SV): BL_SPAN, storyDay (blFill) // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
+import { calMinutes, calStart, calEnd, LONG_CAL, BL_SPAN, storyDay, storyDayOf, pinnedStoryDay, DAY_FROM } from './calendar.js'; // v0.11.222 (J2, SV): BL_SPAN, storyDay (blFill) // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
 
 export const K = 0.5;
 export const CONVERGENCE_MULTIPLIER = 1.25;
@@ -453,7 +453,7 @@ export function clockLabel(minutes) {
  * a morning by itself, a span of a day or more). Old saves start at their calendar day.
  * v0.11.91 (owner 2026-11-09 09:05, pick B, push 1): no Push through the night and no Exhaustion any more; an old save's
  * `wake.ex` and `wake.push` are dropped when it is read (nothing reads them). */
-const X4 = (m) => Math.floor((m - 240) / 1440) + 1;
+const X4 = (m) => Math.floor((m - NIGHT_TO * 60) / 1440) + 1; // v0.11.263 (P31-A, K2): the waking day turns at NIGHT_TO (05:00; was 04:00, 240)
 export function wakeState(g) {
     const d = clockParts(g.minutes).day;
     if (!g.wake) g.wake = { n: d, lastX: X4(g.minutes), slept: d };
@@ -561,8 +561,10 @@ function regenFor(g, m, resting) {
  * task screens and resting places offer only the night (tasks.js, meditate.js), and a card that would end past it doesn't
  * start. v0.11.91 (owner 2026-11-09 09:05, pick B, push 1): the day ends at 00:00 (it was 02:00), and Push through the
  * night is gone, so the night is always for sleep; the night encounters come at 01:00 (01:20 the jackals) and end by 02:00.
+ * v0.11.263 (owner pick P31-A, K2): the night runs to 05:00 (calendar.js `DAY_FROM`, the one clock; it was 04:00), so 04:00–04:59 reads 28
+ * (the evening before) and the daily marks turn with the story and text day.
  */
-export const DAY_END_HOUR = 0, NIGHT_TO = 4;
+export const DAY_END_HOUR = 0, NIGHT_TO = DAY_FROM;
 /** The night hours belong to the day before. */
 export const dayHour = (g) => { const hh = clockParts(g.minutes).hh; return hh < NIGHT_TO ? hh + 24 : hh; };
 /** The minute this waking day ends (the next 00:00). */
@@ -964,7 +966,7 @@ export function gainCounts(g, who) {
     const c = `${g.coil?.act || 0}:${g.coil?.n || 1}`;
     let W = g.wg;
     if (!W || typeof W !== 'object' || W.c !== c || !W.k || typeof W.k !== 'object' || Array.isArray(W.k)) W = g.wg = { c, k: {} };
-    const day = Math.floor(((g.minutes || 0) - 300) / 1440) + 1; // the waking day (from 05:00), as lines.js textDay
+    const day = Math.floor(((g.minutes || 0) - NIGHT_TO * 60) / 1440) + 1; // the waking day (from 05:00), as lines.js textDay; v0.11.263 (P31-A): NIGHT_TO, the one clock (was 300)
     const pin = pinnedStoryDay();
     const sd = pin != null ? pin : storyDayOf(g, Math.max(1, day));
     const key = `${GAIN_AT || g.scene}|${who}`;
@@ -1636,7 +1638,7 @@ function flipOne(s, act) {
     // RV1 (H1, M1; the Opus review): a save at 00:00–03:59 rests on the night after waking day d − 1 (the old calendar's every night is a
     // story night): it starts on that week's seventh night (`cal_night` 6, as a new long game has it there, so the next morning turns the
     // wilds' and the village's counter), and that waking day's marks go to its week's last day (`dayKey` is the waking day: calEnd(d − 1))
-    const night = tod < 240 && d > 1;
+    const night = tod < 240 && d > 1; // v0.11.263 (P31-A): 04:00 kept here: an old save was written under the old night (to 04:00)
     f.cal_night = night ? LONG_CAL - 1 : 0;
     const to = (n) => (n < 1 ? n : night && n === d - 1 ? calEnd(s, n) : calStart(s, n));
     const moved = [];
