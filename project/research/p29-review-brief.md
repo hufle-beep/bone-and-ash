@@ -16,8 +16,9 @@ Two display faults, no balance or save change (the owner: "P29-A go"):
   was listed on Day 104 but opens on Day 94; the six v0.8.5 saves were listed with no Coil but open on Coil 1 (two in Act 1).
   **Now** `peekSave` reads the save the way loading does: `deserialize(text, { force: true })` then `flipFill` (what `main.js`
   `checkScene` does on every load; `checkScene` also moves a save resting in an emptied menu to its hub, `deadMenuHub`: left out,
-  0 of the 39 saves move by it). `descOf` shows `clockLabel(p.minutes)`; `main.js` no longer imports `flipMinutes` (the export
-  stays: `tests/saves.test.mjs` uses it). Measured before: 1 of 39 saves on the wrong day, 6 of 39 without their Coil; after: 0 / 0.
+  0 of the 39 saves move by it). `descOf` shows `clockLabel(p.minutes)`; `main.js` no longer imports `flipMinutes`; the export is
+  gone (the leftovers check flagged it test-only; `tests/saves.test.mjs` moves its two uses to `peekSave` and a local helper
+  through `flipFill`). Measured before: 1 of 39 saves on the wrong day, 6 of 39 without their Coil; after: 0 / 0.
   `peekSave` is 0.12 ms a save before, 0.13 ms after (node).
 - **M4 (the v0.11.259 review's M4 and TG-A7):** the long calendar's routine meals (`js/core/tasks.js` `dayMeal`) from the
   hammerspace write `"<Breakfast|Midday|Supper>: <food>[, cooked]. +N satiety."` (the eating line without its `You eat: ` lead);
