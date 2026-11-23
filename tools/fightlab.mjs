@@ -8,7 +8,7 @@
 //
 //   node tools/fightlab.mjs                     300 games, one worker per core
 //   node tools/fightlab.mjs --games 1000        more games (slower, steadier)
-//   node tools/fightlab.mjs --fight rot_ape     one fight only (any fight id)
+//   node tools/fightlab.mjs --fight rot_ape     one fight only (any fight id; v0.11.257: the rot ape below Core Formation is rot_ape@low, its own tune)
 //   node tools/fightlab.mjs --min 10            show fights with at least 10 samples (default 30)
 //   node tools/fightlab.mjs --workers 1         one worker
 //   node tools/fightlab.mjs --json out.json     also write the summary (and the bots' own fight counts) as JSON

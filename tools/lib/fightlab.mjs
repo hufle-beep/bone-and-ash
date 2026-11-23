@@ -4,6 +4,7 @@
 import { combatHooks, startCombat, combatStep, COMBAT_ACTIONS, ensureBars, jamesHpMax } from '../../js/core/game.js';
 import { actionOpen, INC_ONLY_ACTIONS } from '../../js/core/forms.js';
 import { smartAction } from '../../tests/lib/smartfight.mjs'; // v0.11.96 (BT1)
+import { LOW_REALM, TUNE_LOW } from '../../js/story/act1_tune.js'; // v0.11.257 (P27-A, FL)
 
 /** A rank from a tier and level (T1 L1 = 1, T10 L10 = 100), and back. */
 export const rank = (n) => 10 * ((n?.tier || 1) - 1) + (n?.level || 1);
@@ -53,12 +54,15 @@ export function playFight(g0, enc, tid, seed = 1) {
     } finally { combatHooks.before = keep.before; combatHooks.lose = keep.lose; }
 }
 
+/** v0.11.257 (owner pick P27-A, FL; P25-A review L3): a fight with a tune of its own below Core Formation (`act1_tune.js` TUNE_LOW: the
+ *  rot ape) gets a row of its own there, `<id>@low`, so its row no longer mixes the two tunes; every other fight keeps its id. */
+export const labId = (id, realm) => (Object.hasOwn(TUNE_LOW, id) && (realm || 0) < LOW_REALM ? `${id}@low` : id);
 /** One fight state, every tactic: { id, power, gu, cu, realm, res: { tactic: [win 0/1, rounds, hp] | null } }. */
 export function sampleFight(g, enc, power) {
     const seed = ((g.seed >>> 0) ^ Math.imul(g.minutes | 0, 0x9e3779b1)) >>> 0;
     const res = {};
     for (const tid of Object.keys(TACTICS)) { const r = playFight(g, enc, tid, seed); res[tid] = r && [r.win ? 1 : 0, r.rounds, r.hp]; }
-    return { id: enc.id, power: Math.round(power * 10) / 10, gu: rank(g.james.gu), cu: rank(g.james.skills['Convergence Use']), realm: g.james.realm || 0, seed: g.seed >>> 0, at: g.minutes | 0, res };
+    return { id: labId(enc.id, g.james.realm), power: Math.round(power * 10) / 10, gu: rank(g.james.gu), cu: rank(g.james.skills['Convergence Use']), realm: g.james.realm || 0, seed: g.seed >>> 0, at: g.minutes | 0, res };
 }
 /** A fixed order for samples (so the thirds don't depend on how many workers played). */
 export const sampleOrder = (a, b) => a.power - b.power || a.gu - b.gu || a.cu - b.cu || a.seed - b.seed || a.at - b.at || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);

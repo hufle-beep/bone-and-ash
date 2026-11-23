@@ -49,6 +49,7 @@ const WALK = { hammerspace: 4500, coil: 1800, epilogue: 7000, sister: 4000 };
 const WALK_CAPS = new Set(Object.values(WALK));
 let walkLongest = 0; // the longest walk to its goal under a WALK cap, printed
 const STEP_CAP = 10000; // v0.11.255 (P25-A, owner pick SC2): about twice the longest random run (5,096: run 49 meets the ape at 11 twice more; 4,480 before); v0.11.34: Incremental Mode games go round the Coil (one game took 2,512 steps over 19 Act 1 Coils), was 2,500 in Story Mode
+const LONG_RUN_NOTE = 6000; // v0.11.257 (owner pick P27-A, SL; P25-A review L4): a NOTE (log only) when the longest random run passes it (5,096 at v0.11.255), well before the cap
 
 // static: every literal target exists
 const src = SHARD ? [] : Object.values(SCENES);
@@ -7412,6 +7413,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
 const sorted = (o) => Object.fromEntries(Object.entries(o).sort(([a], [b]) => (a < b ? -1 : 1)));
 console.log('fights', sorted(fights));
 console.log('endings', sorted(endings), 'longest run', maxSteps, 'scenes', Object.keys(SCENES).length);
+if (maxSteps > LONG_RUN_NOTE) console.log(`NOTE: the longest random run took ${maxSteps} steps, past ${LONG_RUN_NOTE} (the cap ${STEP_CAP}); log only (P27-A, SL)`);
 if (STATS_OUT) writeFileSync(STATS_OUT, JSON.stringify({ games: GAMES, fights, endings, seen: touchedOut() })); // v0.11.3: for tools/sanity.mjs; v0.11.22: `seen` for tools/leftovers.mjs
 console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FULL ? '' : ' (quick: coverage logged, not checked)'}`);
 // v0.11.230 (owner picks P3-2 = FT + SF, D1, AS1, DB1, RV1; 2026-11-19 17:31–18:48): FT the four one-paragraph scenes' texts in threes (far_hunt a

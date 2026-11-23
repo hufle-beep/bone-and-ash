@@ -2,6 +2,29 @@
 
 Started 2026-11-22 (v0.11.255), when `history-48.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-48.md` … `history.md`.
 
+## Moved from the handover in v0.11.257 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-23 (Europe/Budapest). **Version:** 0.11.256 (`sw.js` VERSION `bone-ash-0.11.256`): **the retune's last Act 1 numbers (P26-A; the owner 2026-11-23, in the question dialog after 00:55: "P26-A 🟢 (Recommended)"):** LN (`js/story/prologue.js` `LU_HP_LONG`: Lu Han −0.5 HP before the long step), LR (`LU_READ_HP`: +0.5 HP for each realm he reads), RP-1.5 (`js/core/game.js` `LONG_SAT_FROM` 3, `LONG_SAT_HIGH` 6: from True Core a long-calendar sit, the root and a Long Forest seclusion ÷6 in place of ÷4). Measured (the models, 100 / 40 games, the same seeds; the build identical to its scratch copy): the Completionist 20 → 22%, the Cultivator 26 → 25% whole game on Coil 1; Careful 2.40 / 4.47 → 2.10 / 4.35 Coils (prologue / Act 1), the Sociable 2.40 / 4.40 → 2.10 / 4.25; realm at Act 1's end 1 / 1 / 2 / 5 → 1 / 1 / 2 / 4.08 (`project/research/p26-measure.md`). Full check exit 0, 1,877 s, sanity 119 compared, **0 drifted** (no baseline update needed); the models (200 games): Careful 2.29 / 4.41, the Sociable 2.29 / 4.36 Coils, the Completionist 21.5%, the Cultivator 22% whole game on Coil 1 (realm 4.09), the Farmer 17.5% (40 games). **Next push:** open, options later (below).
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** P26-A done (v0.11.256). Open, options later (on the roadmap: `roadmap.md` section 2's v0.11.256 line): the old calendar's code; YM-3; P25-A's review L1 (the wall goes at a kept Core Formation), L3 (the fight lab's `rot_ape` row mixes the two tunes), L4 (a log line past about 6,000 steps), L6 (`tools/mutate.mjs`'s default `--quick` is no flag); P26-A's review L1 (Lu Han's lowest HP 5 → 4 under the militia's floor, full militia and spears and a 1), L2 (LR has no cap: about +9 HP at a kept realm 14), `faq.js` "every realm needs more sits than the last" (false from realm 6 at the 0.1% floor; older text). *(The entry as it stood, word for word, in `history-49.md`.)*
+
+*(the decision as it stood)*
+
+- **v0.11.254: P24-A (the owner 2026-11-22 20:46 "Go with your picks"; the measure 20:10 "go ahead").** **The owner's answers (2026-11-22, after 18:58, in the question dialog; the owner at 18:58: "you are presenting them wrongly or deeply buried. You did not pose me your questions at all correctly"):** the 20–30% one-Coil win for the Completionist and the Cultivator covers **the whole game**; Act 1 should cost Careful and the Sociable **about 2 more Coils**; the full check's 40 minutes are **too long**; the glasses: **ten lines are enough** (closed). **The options (in chat, `project/research/p24-measure.md`):** P24 (a shorter check): P24-C 🟢 CM + CK + CO (about 24 min, the Yuki-off numbers lost); **P24-A 🟡 CM + CK (picked, recommended; about 25½ min estimated)**; P24-B 🟠 CM (about 27 min). P25 (Act 1, TS7): **P25-A 🟢 AW (recommended; picked for its own push)**; P25-B 🟡 AW + LN; P25-C 🔴 AU. Order recommended: P24 first (every later push's check shorter).
+
+*(the version notes as they stood)*
+
+## v0.11.254 — A shorter full check (P24-A)
+
+- **Files:** `tools/check.mjs` (CM: the models step 200 games each, the Sitter 60, the Farmer 40, Yuki off 120; CK: the realm-kept models 20 each), `tests/tools.test.mjs` (the pins), `tools/models-baseline.json` and `tools/baseline-long.json` (re-saved at 200, log only), `sw.js`; docs: `project/research/p24-measure.md`, `roadmap-e.md` (the glasses closed), `roadmap-retune.md` (TS7: the owner's answers), the four docs, `history-48.md`, `tests/README.md`.
+- **What:** see the version line. No game, balance or save change; the strict drift guard (`tools/baseline.json`, the task and story games) unchanged; the models' numbers move by noise only (about ±3.5 points at 20% with 200 games, ±2.2 with 500).
+- **Checks:** a tools push (rule 2): the tools test (562 passed) and `bash tools/check.sh quick`; the full `bash tools/check.sh` once to measure its length: Full check exit 0, 1,403.7 s (was 2,374.4 s; the models step 1,355 → 538 s, the realm-kept 286 → 142 s), sanity 119 compared, 0 drifted.
+- **Opus / Fable:** none (no game logic, balance or story text).
+
 ## Moved from the handover in v0.11.256 (word for word)
 
 *(the version line as it stood)*
