@@ -1,0 +1,10 @@
+[
+  { "id": "F1", "file": "js/core/game.js", "find": "    4: (g) => { if (g.cal === LONG_CAL ? inAct1(g) : oldAct1(g)) startActCoil(g, 1);", "replace": "    4: (g) => { if (inAct1(g)) startActCoil(g, 1);", "note": "migrate reads an unmoved v0.8.5 save's act through the long calendar: a save in Act 1 rewinds to the prologue" },
+  { "id": "F2", "file": "js/core/calendar.js", "find": "export const storyNight = (g) => weekNights(g) >= LONG_CAL - 1;", "replace": "export const storyNight = (g) => true;", "note": "the old calendar's every night a story night comes back" },
+  { "id": "F3", "file": "js/core/calendar.js", "find": "export const blSpan = (g) => (Number.isInteger(g?.calBl) && g.calBl > 1 ? g.calBl : 1);", "replace": "export const blSpan = (g) => 1;", "note": "the Blackroot's camps gone: the 5-day road for every game" },
+  { "id": "F4", "file": "js/core/game.js", "find": "    if (!GAIN_ONCE.includes(who) || typeof g.scene !== 'string') return true;", "replace": "    return true;", "note": "GT1 off: a gain to Mei Lin or Ya counts every day of a story-week" },
+  { "id": "F5", "file": "js/story/kitchen.js", "find": "const cookFree = (g, c) => spacedFree(g, c.key, dayKey(g));", "replace": "const cookFree = (g, c) => !g.flags[c.flag];", "note": "the old calendar's once-a-Coil cook comes back" },
+  { "id": "F6", "file": "js/story/wilds.js", "find": "            g.flags.long = true; // v0.11.203 (T1, TS1): a night in the forest makes the long road", "replace": "            // removed", "note": "a forest night no longer makes the long road" },
+  { "id": "F7", "file": "js/story/ashfall.js", "find": "show: (g) => daily('slopes')(g) && hour(g) < 15 && vday(g) >= 2,", "replace": "show: (g) => daily('slopes')(g) && hour(g) < 15,", "note": "the herb slopes open in the first village week (the old calendar's hub)" },
+  { "id": "F8", "file": "js/core/tasks.js", "find": "export const weekHub = (g, hubId = g.scene) => WEEK_HUBS.has(hubId) && STAY_DAYS.has(storyDay(g));", "replace": "export const weekHub = (g, hubId = g.scene) => false;", "note": "no week's card anywhere: the old calendar's one-go cards come back" }
+]
