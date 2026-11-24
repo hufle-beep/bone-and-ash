@@ -2,6 +2,29 @@
 
 Started 2026-11-24 (v0.11.266), when `history-51.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-51.md` … `history.md`.
 
+## Moved from the handover in v0.11.268 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-24 (Europe/Budapest). **Version:** 0.11.267 (`sw.js` VERSION `bone-ash-0.11.267`): **the models' Coil-1 clears back under TP (P35-A, the owner 2026-11-24 15:05: "P35-A go"; RV-A after the cold review's M1, 15:39: "RV-A go"):** measured first (the models 40 games a variant, long calendar; sanity; `project/research/p35-measure.md`): every Coil-1 tribute win had come through Say something on Lu Han's posture, which TP closed (a heavy person doesn't posture). Built: **CT-C** Lu Han's stance reads as a posture once James has 20 rounds of blade practice, kept across Coils (`game.js` `STANCE_READ_OF`, `stanceRead`; the tribute only): then his big-blow round is a speech too and Say something stops it; guard still avoids it. The whole game on Coil 1 (the full check, 200 games): Completionist 0 → 20.5%, Cultivator 0 → 19.5%, Farmer 17.5%; Careful and the Sociable unchanged (3.90 / 4.96 Coils). Fable's lines: three read warnings (`TELL_TEXT.bigRead`), the start line (`FOE_TRAITS.heavy.read`, the review's wording, L2W) and three paired replies (`SAY_TEXT.landedRead`, RV-A Pay-F); the smart bot speaks into a read stance (`smartfight.mjs`). Closed: WP, BB, TE, NG, PS, CT-A, CT-B. **TG** the owner's 2026-11-22 targets are section 2's colour key (`roadmap.md`). `baseline.json` re-saved (the owner's go: 3 drifted, tribute C4 won +21.2, C4 lost −24.4, collectors smart +27.6). **Next push:** open, options later.
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** The models' Coil-1 clears back (v0.11.267). Open, options later (on the roadmap: `roadmap.md` section 2): the rest of section 2 (`roadmap-retune.md`'s knobs and tools: the tuning tools and rules, the drift guard on the long calendar (`baseline-long.json` predates P25-A; the full check's long-calendar notes moved up to 100 points against it), BD, HN, KA's (a), the older notes; the fight texts in textlint's pools (the P35 review's TG6)), then 5b, Act 2, art, systems, later. *(The entry as it stood, word for word, in `history-52.md`.)*
+
+*(from Decided in chat)*
+
+- **v0.11.265: P33-A (the owner 2026-11-24 02:58: "P33-a").** The options as laid out in chat (`claude/p33-options.md`, the project doc): **P33-A 🟢 (picked, recommended)** LR, MQ, FC, BN + RA, CD, MF + CMN, PC closed; GD's numbers; TG-LR, TG-PC (9 items settled, 2 guarded; tests and docs only); P33-B 🟡 the same closures, docs only; P33-C 🟠 P33-A with FC built (−0.5 / −1 / −1.5 DC by earlier picks: 0.48 more passed checks a game; full check and Opus review); P33-D 🔴 hold. Measured before the pick (`project/research/p33-measure.md`): 320 bot games (8 models × 40, long calendar), the fight lab 200 games (3,229 states). Seen, no option: Careful's Act 1 rot ape won 30.8% (130 fights; Coils 2–3 dead 100%, Act 1 on Coil 4.35): P25-A's ape below Core Formation, as intended; `baseline-long.json` (2026-11-22) predates it (log only). **Found while building (in scope, TG-PC):** the palisade scene itself has no cap (a direct `goTo` passes 3); the cap is its two cards, once a Coil on the Fallout's hub, so task mode never reaches 3.
+
+*(the version notes)*
+
+## v0.11.265 — Section 2's RA1 line settled (P33-A)
+
+- **Files:** `sw.js`; tests: `tests/story.test.mjs` (the P33-A block: TG-LR, TG-PC), `tests/tools.test.mjs` (T1: this push's move to part 51 re-pinned), `tests/README.md`; docs: `project/research/p33-measure.md` (repo only), the four docs, `history-51.md`, `roadmap-done-5.md` (two done lines moved, MD), `changelog-6.md` (0.11.242 moved, MD), `restore-points-4.md` (0.11.235 moved, MD).
+- **What:** see the version line. No What's new line: nothing a player sees changed.
+- **Checks:** tests and docs only (rule 2): the story test (`--games 4`: 1,320,142 passed; both new asserts planted wrong once on a copy and failed, then passed as written) and `bash tools/check.sh quick`: exit 0, 667.1 s. Its first run stopped on the tools test's T1 doc pin for this push's move (v0.11.262's notes to part 51; re-pinned, 643.5 s). The script's own line asks for the full check before any push; rule 2 sets quick for a tests and docs push. How it meets the rest: the two blocks only read the game; a later change that makes a lost night fight reach its lost scene in a Coil, or lets the palisade's cards come back, fails them.
+- **Opus:** none (no game logic, balance or story text: rule 9). **Fable:** none.
+
 ## Moved from the handover in v0.11.267 (word for word)
 
 *(the version line as it stood)*

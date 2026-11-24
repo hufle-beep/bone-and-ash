@@ -1,6 +1,6 @@
 {
- "saved": "2026-11-22",
- "note": "log only (v0.11.251, DG)",
+ "saved": "2026-11-24",
+ "note": "a guard as tools/baseline.json: ±20 points, n ≥ 50 (v0.11.268, P36-A LG; log only since v0.11.251)",
  "metrics": {
   "careful prologue C1 dead": {
    "v": 0,
@@ -12,35 +12,27 @@
   },
   "careful prologue C3 dead": {
    "v": 0,
-   "n": 83
+   "n": 200
   },
   "careful prologue C4 dead": {
    "v": 0,
-   "n": 24
-  },
-  "careful Act 1 C2 dead": {
-   "v": 0,
-   "n": 117
-  },
-  "careful Act 1 C2 taken": {
-   "v": 0,
-   "n": 117
+   "n": 179
   },
   "careful Act 1 C3 dead": {
-   "v": 0,
-   "n": 59
+   "v": 100,
+   "n": 21
   },
   "careful Act 1 C3 taken": {
    "v": 0,
-   "n": 59
+   "n": 21
   },
   "careful Act 1 C4 dead": {
-   "v": 0,
-   "n": 24
+   "v": 96,
+   "n": 200
   },
   "careful Act 1 C4 taken": {
    "v": 0,
-   "n": 24
+   "n": 200
   },
   "careful tribute C1 won": {
    "v": 0,
@@ -51,28 +43,28 @@
    "n": 200
   },
   "careful tribute C2 won": {
-   "v": 58.5,
+   "v": 0,
    "n": 200
   },
   "careful tribute C2 lost": {
-   "v": 41.5,
+   "v": 100,
    "n": 200
   },
   "careful tribute C3 won": {
-   "v": 71.1,
-   "n": 83
+   "v": 10.5,
+   "n": 200
   },
   "careful tribute C3 lost": {
-   "v": 28.9,
-   "n": 83
+   "v": 89.5,
+   "n": 200
   },
   "careful tribute C4 won": {
    "v": 100,
-   "n": 24
+   "n": 179
   },
   "careful tribute C4 lost": {
    "v": 0,
-   "n": 24
+   "n": 179
   },
   "careful prologue cleared on Coil 1": {
    "v": 0,
@@ -83,44 +75,48 @@
    "n": 200
   },
   "careful fight collectors": {
-   "v": 39.4,
-   "n": 507
+   "v": 25.7,
+   "n": 779
   },
   "careful fight drowned": {
    "v": 100,
-   "n": 198
+   "n": 393
+  },
+  "careful fight rot_ape": {
+   "v": 48.4,
+   "n": 413
   },
   "careful fight night_drowned": {
    "v": 100,
-   "n": 142
+   "n": 286
   },
-  "careful fight night_hawks": {
+  "careful fight night_serpent": {
    "v": 100,
-   "n": 78
-  },
-  "careful fight rot_ape": {
-   "v": 100,
-   "n": 200
+   "n": 134
   },
   "careful fight rt_wolves": {
    "v": 100,
-   "n": 200
+   "n": 186
   },
   "careful fight lizard": {
    "v": 100,
    "n": 17
   },
-  "careful fight night_wolves": {
-   "v": 100,
-   "n": 66
-  },
-  "careful fight night_serpent": {
-   "v": 100,
-   "n": 65
-  },
   "careful fight gao": {
    "v": 100,
-   "n": 76
+   "n": 115
+  },
+  "careful fight night_hawks": {
+   "v": 100,
+   "n": 132
+  },
+  "careful fight night_wolves": {
+   "v": 100,
+   "n": 127
+  },
+  "careful fight root_wyrm": {
+   "v": 100,
+   "n": 13
   },
   "careful:yukiOff prologue C1 dead": {
    "v": 100,
@@ -139,12 +135,12 @@
    "n": 120
   },
   "careful:yukiOff Act 1 C4 dead": {
-   "v": 0,
-   "n": 63
+   "v": 100,
+   "n": 3
   },
   "careful:yukiOff Act 1 C4 taken": {
    "v": 0,
-   "n": 63
+   "n": 3
   },
   "careful:yukiOff tribute C2 won": {
    "v": 0,
@@ -163,11 +159,11 @@
    "n": 120
   },
   "careful:yukiOff tribute C4 won": {
-   "v": 52.5,
+   "v": 2.5,
    "n": 120
   },
   "careful:yukiOff tribute C4 lost": {
-   "v": 47.5,
+   "v": 97.5,
    "n": 120
   },
   "careful:yukiOff prologue cleared on Coil 1": {
@@ -180,43 +176,43 @@
   },
   "careful:yukiOff fight gao": {
    "v": 100,
-   "n": 54
+   "n": 68
   },
   "careful:yukiOff fight collectors": {
-   "v": 30.5,
-   "n": 393
+   "v": 25.4,
+   "n": 472
   },
   "careful:yukiOff fight drowned": {
    "v": 100,
-   "n": 120
+   "n": 273
   },
   "careful:yukiOff fight night_drowned": {
    "v": 100,
-   "n": 76
+   "n": 176
   },
   "careful:yukiOff fight rot_ape": {
+   "v": 43.8,
+   "n": 274
+  },
+  "careful:yukiOff fight night_hawks": {
    "v": 100,
-   "n": 120
+   "n": 94
+  },
+  "careful:yukiOff fight night_wolves": {
+   "v": 100,
+   "n": 91
+  },
+  "careful:yukiOff fight night_serpent": {
+   "v": 100,
+   "n": 93
   },
   "careful:yukiOff fight rt_wolves": {
    "v": 100,
-   "n": 120
+   "n": 118
   },
   "careful:yukiOff fight lizard": {
    "v": 0,
    "n": 36
-  },
-  "careful:yukiOff fight night_wolves": {
-   "v": 100,
-   "n": 46
-  },
-  "careful:yukiOff fight night_hawks": {
-   "v": 100,
-   "n": 50
-  },
-  "careful:yukiOff fight night_serpent": {
-   "v": 100,
-   "n": 33
   },
   "completionist prologue C1 dead": {
    "v": 10,
@@ -224,7 +220,7 @@
   },
   "completionist prologue C2 dead": {
    "v": 0,
-   "n": 169
+   "n": 159
   },
   "completionist prologue C3 dead": {
    "v": 0,
@@ -232,19 +228,19 @@
   },
   "completionist Act 1 C1 dead": {
    "v": 0,
-   "n": 31
+   "n": 41
   },
   "completionist Act 1 C1 taken": {
    "v": 0,
-   "n": 31
+   "n": 41
   },
   "completionist Act 1 C2 dead": {
    "v": 0,
-   "n": 167
+   "n": 157
   },
   "completionist Act 1 C2 taken": {
    "v": 0,
-   "n": 167
+   "n": 157
   },
   "completionist Act 1 C3 dead": {
    "v": 0,
@@ -255,20 +251,20 @@
    "n": 2
   },
   "completionist tribute C1 won": {
-   "v": 17.2,
+   "v": 22.8,
    "n": 180
   },
   "completionist tribute C1 lost": {
-   "v": 82.8,
+   "v": 77.2,
    "n": 180
   },
   "completionist tribute C2 won": {
-   "v": 98.8,
-   "n": 169
+   "v": 98.7,
+   "n": 159
   },
   "completionist tribute C2 lost": {
-   "v": 1.2,
-   "n": 169
+   "v": 1.3,
+   "n": 159
   },
   "completionist tribute C3 won": {
    "v": 100,
@@ -279,16 +275,16 @@
    "n": 2
   },
   "completionist prologue cleared on Coil 1": {
-   "v": 15.5,
+   "v": 20.5,
    "n": 200
   },
   "completionist Act 1 cleared on Coil 1": {
-   "v": 15.5,
+   "v": 20.5,
    "n": 200
   },
   "completionist fight rats": {
    "v": 100,
-   "n": 96
+   "n": 94
   },
   "completionist fight jackals": {
    "v": 95.5,
@@ -300,27 +296,27 @@
   },
   "completionist fight mire": {
    "v": 98.5,
-   "n": 269
+   "n": 261
   },
   "completionist fight gao": {
    "v": 100,
-   "n": 60
+   "n": 59
   },
   "completionist fight wolves": {
    "v": 100,
-   "n": 462
+   "n": 447
   },
   "completionist fight thornback": {
    "v": 100,
-   "n": 476
+   "n": 458
   },
   "completionist fight collectors": {
-   "v": 57,
-   "n": 351
+   "v": 58.7,
+   "n": 341
   },
   "completionist fight sect_watcher": {
    "v": 100,
-   "n": 69
+   "n": 68
   },
   "completionist fight palisade_wolf": {
    "v": 100,
@@ -332,15 +328,15 @@
   },
   "completionist fight bone_elk": {
    "v": 100,
-   "n": 561
+   "n": 563
   },
   "completionist fight root_wyrm": {
    "v": 100,
-   "n": 190
+   "n": 189
   },
   "completionist fight mire_serpent": {
    "v": 100,
-   "n": 382
+   "n": 381
   },
   "completionist fight drowned": {
    "v": 100,
@@ -348,11 +344,11 @@
   },
   "completionist fight night_drowned": {
    "v": 100,
-   "n": 133
+   "n": 129
   },
   "completionist fight cinder_hawks": {
    "v": 100,
-   "n": 938
+   "n": 942
   },
   "completionist fight rot_ape": {
    "v": 100,
@@ -364,7 +360,7 @@
   },
   "completionist fight root_husks": {
    "v": 100,
-   "n": 80
+   "n": 87
   },
   "completionist fight rt_wolves": {
    "v": 100,
@@ -372,35 +368,35 @@
   },
   "completionist fight arson": {
    "v": 100,
-   "n": 188
+   "n": 186
   },
   "completionist fight lizard": {
    "v": 100,
-   "n": 104
+   "n": 101
   },
   "completionist fight night_wolves": {
    "v": 100,
-   "n": 65
+   "n": 67
   },
   "completionist fight night_serpent": {
    "v": 100,
-   "n": 58
+   "n": 57
   },
   "completionist fight elder": {
    "v": 100,
-   "n": 60
+   "n": 59
   },
   "completionist fight guardian": {
    "v": 100,
-   "n": 88
+   "n": 83
   },
   "completionist fight night_hawks": {
    "v": 100,
-   "n": 76
+   "n": 75
   },
   "completionist fight crows": {
    "v": 100,
-   "n": 93
+   "n": 89
   },
   "completionist:yukiOff prologue C1 dead": {
    "v": 100,
@@ -416,23 +412,23 @@
   },
   "completionist:yukiOff prologue C4 dead": {
    "v": 0,
-   "n": 63
+   "n": 58
   },
   "completionist:yukiOff Act 1 C3 dead": {
    "v": 0,
-   "n": 57
+   "n": 62
   },
   "completionist:yukiOff Act 1 C3 taken": {
    "v": 0,
-   "n": 57
+   "n": 62
   },
   "completionist:yukiOff Act 1 C4 dead": {
    "v": 0,
-   "n": 50
+   "n": 48
   },
   "completionist:yukiOff Act 1 C4 taken": {
    "v": 0,
-   "n": 50
+   "n": 48
   },
   "completionist:yukiOff tribute C2 won": {
    "v": 0,
@@ -443,20 +439,20 @@
    "n": 43
   },
   "completionist:yukiOff tribute C3 won": {
-   "v": 48.3,
+   "v": 52.5,
    "n": 118
   },
   "completionist:yukiOff tribute C3 lost": {
-   "v": 51.7,
+   "v": 47.5,
    "n": 118
   },
   "completionist:yukiOff tribute C4 won": {
-   "v": 79.4,
-   "n": 63
+   "v": 82.8,
+   "n": 58
   },
   "completionist:yukiOff tribute C4 lost": {
-   "v": 20.6,
-   "n": 63
+   "v": 17.2,
+   "n": 58
   },
   "completionist:yukiOff prologue cleared on Coil 1": {
    "v": 0,
@@ -467,44 +463,44 @@
    "n": 120
   },
   "completionist:yukiOff fight jackals": {
-   "v": 57.3,
-   "n": 218
+   "v": 55.3,
+   "n": 208
   },
   "completionist:yukiOff fight mire": {
-   "v": 93.8,
-   "n": 274
+   "v": 93.7,
+   "n": 268
   },
   "completionist:yukiOff fight lizard": {
-   "v": 71.4,
-   "n": 91
+   "v": 71.7,
+   "n": 92
   },
   "completionist:yukiOff fight gao": {
    "v": 100,
-   "n": 32
+   "n": 30
   },
   "completionist:yukiOff fight boar": {
-   "v": 97.1,
-   "n": 136
+   "v": 96.9,
+   "n": 131
   },
   "completionist:yukiOff fight thornback": {
    "v": 100,
-   "n": 321
+   "n": 313
   },
   "completionist:yukiOff fight wolves": {
    "v": 100,
-   "n": 303
+   "n": 295
   },
   "completionist:yukiOff fight collectors": {
-   "v": 50.6,
-   "n": 237
+   "v": 52.4,
+   "n": 229
   },
   "completionist:yukiOff fight arson": {
    "v": 100,
-   "n": 126
+   "n": 123
   },
   "completionist:yukiOff fight palisade_wolf": {
    "v": 100,
-   "n": 104
+   "n": 108
   },
   "completionist:yukiOff fight ya_brawl": {
    "v": 100,
@@ -512,15 +508,15 @@
   },
   "completionist:yukiOff fight bone_elk": {
    "v": 100,
-   "n": 340
+   "n": 341
   },
   "completionist:yukiOff fight night_wolves": {
    "v": 100,
-   "n": 42
+   "n": 43
   },
   "completionist:yukiOff fight root_wyrm": {
    "v": 100,
-   "n": 109
+   "n": 108
   },
   "completionist:yukiOff fight mire_serpent": {
    "v": 100,
@@ -532,11 +528,11 @@
   },
   "completionist:yukiOff fight cinder_hawks": {
    "v": 100,
-   "n": 572
+   "n": 566
   },
   "completionist:yukiOff fight night_hawks": {
    "v": 100,
-   "n": 42
+   "n": 43
   },
   "completionist:yukiOff fight rot_ape": {
    "v": 100,
@@ -548,27 +544,19 @@
   },
   "completionist:yukiOff fight guardian": {
    "v": 100,
-   "n": 46
+   "n": 41
   },
   "completionist:yukiOff fight rt_wolves": {
    "v": 100,
-   "n": 119
+   "n": 118
   },
   "completionist:yukiOff fight crows": {
-   "v": 77.6,
-   "n": 85
+   "v": 77.1,
+   "n": 83
   },
   "completionist:yukiOff fight rats": {
-   "v": 68.6,
-   "n": 86
-  },
-  "completionist:yukiOff fight sect_watcher": {
-   "v": 100,
-   "n": 36
-  },
-  "completionist:yukiOff fight night_serpent": {
-   "v": 100,
-   "n": 48
+   "v": 67.5,
+   "n": 83
   },
   "completionist:yukiOff fight root_husks": {
    "v": 100,
@@ -576,11 +564,19 @@
   },
   "completionist:yukiOff fight elder": {
    "v": 100,
-   "n": 38
+   "n": 34
   },
   "completionist:yukiOff fight night_drowned": {
    "v": 100,
-   "n": 66
+   "n": 69
+  },
+  "completionist:yukiOff fight sect_watcher": {
+   "v": 100,
+   "n": 37
+  },
+  "completionist:yukiOff fight night_serpent": {
+   "v": 100,
+   "n": 44
   },
   "rusher prologue C1 dead": {
    "v": 99,
@@ -599,7 +595,7 @@
    "n": 199
   },
   "rusher Act 1 C3 dead": {
-   "v": 0,
+   "v": 100,
    "n": 1
   },
   "rusher Act 1 C3 taken": {
@@ -607,12 +603,12 @@
    "n": 1
   },
   "rusher Act 1 C4 dead": {
-   "v": 0,
-   "n": 2
+   "v": 100,
+   "n": 3
   },
   "rusher Act 1 C4 taken": {
    "v": 0,
-   "n": 2
+   "n": 3
   },
   "rusher tribute C1 won": {
    "v": 0,
@@ -667,7 +663,7 @@
    "n": 190
   },
   "rusher fight collectors": {
-   "v": 12.4,
+   "v": 13.2,
    "n": 234
   },
   "rusher fight lizard": {
@@ -684,63 +680,55 @@
   },
   "rusher fight palisade_wolf": {
    "v": 100,
-   "n": 27
+   "n": 43
   },
   "rusher fight ya_brawl": {
    "v": 100,
-   "n": 28
+   "n": 46
   },
   "rusher fight bone_elk": {
    "v": 100,
-   "n": 143
+   "n": 224
   },
   "rusher fight night_wolves": {
    "v": 100,
-   "n": 5
+   "n": 10
   },
   "rusher fight root_wyrm": {
    "v": 100,
-   "n": 24
+   "n": 37
   },
   "rusher fight night_drowned": {
    "v": 100,
-   "n": 28
+   "n": 37
   },
   "rusher fight mire_serpent": {
    "v": 100,
-   "n": 87
+   "n": 138
   },
   "rusher fight drowned": {
    "v": 100,
-   "n": 26
+   "n": 42
   },
   "rusher fight night_serpent": {
    "v": 100,
-   "n": 7
+   "n": 10
   },
   "rusher fight cinder_hawks": {
    "v": 100,
-   "n": 145
+   "n": 227
   },
   "rusher fight night_hawks": {
    "v": 100,
-   "n": 8
+   "n": 14
   },
   "rusher fight rot_ape": {
-   "v": 100,
-   "n": 29
-  },
-  "rusher fight guardian": {
-   "v": 100,
-   "n": 8
+   "v": 60.9,
+   "n": 46
   },
   "rusher fight rt_wolves": {
    "v": 100,
    "n": 27
-  },
-  "rusher fight elder": {
-   "v": 100,
-   "n": 18
   },
   "rusher fight mire": {
    "v": 89.4,
@@ -748,75 +736,83 @@
   },
   "rusher fight root_husks": {
    "v": 100,
-   "n": 11
+   "n": 7
+  },
+  "rusher fight elder": {
+   "v": 100,
+   "n": 14
   },
   "rusher fight rt_brawl": {
    "v": 100,
    "n": 5
+  },
+  "rusher fight guardian": {
+   "v": 100,
+   "n": 2
   },
   "sitter prologue C1 dead": {
    "v": 100,
    "n": 60
   },
   "sitter prologue C2 dead": {
-   "v": 73.3,
+   "v": 40,
    "n": 60
   },
   "sitter prologue C3 dead": {
-   "v": 85.5,
-   "n": 55
+   "v": 42.6,
+   "n": 54
   },
   "sitter prologue C4 dead": {
-   "v": 23.1,
-   "n": 52
+   "v": 2.4,
+   "n": 42
   },
   "sitter Act 1 C2 dead": {
    "v": 0,
-   "n": 5
+   "n": 6
   },
   "sitter Act 1 C2 taken": {
    "v": 0,
-   "n": 5
+   "n": 6
   },
   "sitter Act 1 C3 dead": {
    "v": 0,
-   "n": 3
+   "n": 12
   },
   "sitter Act 1 C3 taken": {
    "v": 0,
-   "n": 3
+   "n": 12
   },
   "sitter Act 1 C4 dead": {
    "v": 0,
-   "n": 39
+   "n": 41
   },
   "sitter Act 1 C4 taken": {
    "v": 0,
-   "n": 39
+   "n": 41
   },
   "sitter tribute C2 won": {
-   "v": 31.3,
-   "n": 16
+   "v": 16.7,
+   "n": 36
   },
   "sitter tribute C2 lost": {
-   "v": 68.8,
-   "n": 16
+   "v": 83.3,
+   "n": 36
   },
   "sitter tribute C3 won": {
-   "v": 37.5,
-   "n": 8
+   "v": 38.7,
+   "n": 31
   },
   "sitter tribute C3 lost": {
-   "v": 62.5,
-   "n": 8
+   "v": 61.3,
+   "n": 31
   },
   "sitter tribute C4 won": {
-   "v": 97.5,
-   "n": 40
+   "v": 100,
+   "n": 41
   },
   "sitter tribute C4 lost": {
-   "v": 2.5,
-   "n": 40
+   "v": 0,
+   "n": 41
   },
   "sitter prologue cleared on Coil 1": {
    "v": 0,
@@ -827,120 +823,120 @@
    "n": 60
   },
   "sitter fight mire": {
-   "v": 98.7,
-   "n": 154
+   "v": 98.5,
+   "n": 136
   },
   "sitter fight rats": {
    "v": 100,
-   "n": 75
+   "n": 71
   },
   "sitter fight lizard": {
    "v": 100,
    "n": 78
   },
   "sitter fight jackals": {
-   "v": 62.7,
-   "n": 228
+   "v": 57.5,
+   "n": 207
   },
   "sitter fight boar": {
-   "v": 49.3,
-   "n": 148
+   "v": 86.2,
+   "n": 123
   },
   "sitter fight thornback": {
    "v": 100,
-   "n": 106
+   "n": 151
   },
   "sitter fight wolves": {
    "v": 100,
-   "n": 130
+   "n": 182
   },
   "sitter fight collectors": {
-   "v": 77.9,
-   "n": 77
-  },
-  "sitter fight crows": {
-   "v": 100,
-   "n": 60
-  },
-  "sitter fight gao": {
-   "v": 100,
-   "n": 32
-  },
-  "sitter fight palisade_wolf": {
-   "v": 100,
-   "n": 54
-  },
-  "sitter fight ya_brawl": {
-   "v": 100,
-   "n": 60
-  },
-  "sitter fight bone_elk": {
-   "v": 100,
-   "n": 59
-  },
-  "sitter fight mire_serpent": {
-   "v": 100,
-   "n": 55
-  },
-  "sitter fight drowned": {
-   "v": 100,
-   "n": 60
-  },
-  "sitter fight rot_ape": {
-   "v": 100,
-   "n": 46
-  },
-  "sitter fight husks": {
-   "v": 100,
-   "n": 24
+   "v": 55,
+   "n": 109
   },
   "sitter fight arson": {
    "v": 100,
+   "n": 76
+  },
+  "sitter fight palisade_wolf": {
+   "v": 100,
+   "n": 57
+  },
+  "sitter fight ya_brawl": {
+   "v": 100,
+   "n": 54
+  },
+  "sitter fight night_wolves": {
+   "v": 100,
+   "n": 23
+  },
+  "sitter fight bone_elk": {
+   "v": 100,
    "n": 53
+  },
+  "sitter fight root_wyrm": {
+   "v": 100,
+   "n": 53
+  },
+  "sitter fight night_drowned": {
+   "v": 100,
+   "n": 34
+  },
+  "sitter fight mire_serpent": {
+   "v": 100,
+   "n": 105
+  },
+  "sitter fight drowned": {
+   "v": 100,
+   "n": 56
+  },
+  "sitter fight rot_ape": {
+   "v": 100,
+   "n": 60
+  },
+  "sitter fight root_husks": {
+   "v": 100,
+   "n": 21
+  },
+  "sitter fight rt_wolves": {
+   "v": 100,
+   "n": 30
+  },
+  "sitter fight elder": {
+   "v": 100,
+   "n": 39
+  },
+  "sitter fight crows": {
+   "v": 100,
+   "n": 59
+  },
+  "sitter fight night_serpent": {
+   "v": 100,
+   "n": 25
+  },
+  "sitter fight night_hawks": {
+   "v": 100,
+   "n": 24
+  },
+  "sitter fight husks": {
+   "v": 100,
+   "n": 23
+  },
+  "sitter fight cinder_hawks": {
+   "v": 100,
+   "n": 27
   },
   "sitter fight sect_watcher": {
    "v": 100,
    "n": 14
   },
-  "sitter fight night_wolves": {
-   "v": 100,
-   "n": 21
-  },
-  "sitter fight night_serpent": {
-   "v": 100,
-   "n": 31
-  },
-  "sitter fight night_drowned": {
-   "v": 100,
-   "n": 35
-  },
-  "sitter fight root_husks": {
-   "v": 100,
-   "n": 22
-  },
   "sitter fight guardian": {
    "v": 100,
-   "n": 9
+   "n": 14
   },
-  "sitter fight elder": {
+  "sitter fight gao": {
    "v": 100,
-   "n": 38
-  },
-  "sitter fight root_wyrm": {
-   "v": 100,
-   "n": 40
-  },
-  "sitter fight night_hawks": {
-   "v": 100,
-   "n": 16
-  },
-  "sitter fight rt_wolves": {
-   "v": 100,
-   "n": 18
-  },
-  "sitter fight cinder_hawks": {
-   "v": 100,
-   "n": 7
+   "n": 25
   },
   "farmer prologue C1 dead": {
    "v": 27.5,
@@ -948,46 +944,46 @@
   },
   "farmer prologue C2 dead": {
    "v": 0,
-   "n": 34
+   "n": 33
   },
   "farmer Act 1 C1 dead": {
    "v": 0,
-   "n": 6
+   "n": 7
   },
   "farmer Act 1 C1 taken": {
    "v": 0,
-   "n": 6
+   "n": 7
   },
   "farmer Act 1 C2 dead": {
    "v": 0,
-   "n": 34
+   "n": 33
   },
   "farmer Act 1 C2 taken": {
    "v": 0,
-   "n": 34
+   "n": 33
   },
   "farmer tribute C1 won": {
-   "v": 20.7,
+   "v": 24.1,
    "n": 29
   },
   "farmer tribute C1 lost": {
-   "v": 79.3,
+   "v": 75.9,
    "n": 29
   },
   "farmer tribute C2 won": {
    "v": 100,
-   "n": 34
+   "n": 33
   },
   "farmer tribute C2 lost": {
    "v": 0,
-   "n": 34
+   "n": 33
   },
   "farmer prologue cleared on Coil 1": {
-   "v": 15,
+   "v": 17.5,
    "n": 40
   },
   "farmer Act 1 cleared on Coil 1": {
-   "v": 15,
+   "v": 17.5,
    "n": 40
   },
   "farmer fight mire": {
@@ -1012,23 +1008,23 @@
   },
   "farmer fight wolves": {
    "v": 100,
-   "n": 98
+   "n": 96
   },
   "farmer fight thornback": {
    "v": 100,
-   "n": 85
+   "n": 82
   },
   "farmer fight arson": {
    "v": 100,
    "n": 39
   },
   "farmer fight collectors": {
-   "v": 63.5,
-   "n": 63
+   "v": 64.5,
+   "n": 62
   },
   "farmer fight sect_watcher": {
    "v": 100,
-   "n": 18
+   "n": 19
   },
   "farmer fight palisade_wolf": {
    "v": 100,
@@ -1044,15 +1040,15 @@
   },
   "farmer fight root_wyrm": {
    "v": 100,
-   "n": 34
+   "n": 35
   },
   "farmer fight night_drowned": {
    "v": 100,
-   "n": 36
+   "n": 34
   },
   "farmer fight mire_serpent": {
    "v": 100,
-   "n": 79
+   "n": 78
   },
   "farmer fight drowned": {
    "v": 100,
@@ -1060,7 +1056,7 @@
   },
   "farmer fight cinder_hawks": {
    "v": 100,
-   "n": 187
+   "n": 185
   },
   "farmer fight rot_ape": {
    "v": 100,
@@ -1074,21 +1070,25 @@
    "v": 100,
    "n": 40
   },
+  "farmer fight night_serpent": {
+   "v": 100,
+   "n": 14
+  },
   "farmer fight lizard": {
    "v": 100,
    "n": 23
   },
   "farmer fight night_wolves": {
    "v": 100,
-   "n": 12
+   "n": 13
   },
   "farmer fight night_hawks": {
    "v": 100,
-   "n": 15
+   "n": 14
   },
   "farmer fight elder": {
    "v": 100,
-   "n": 16
+   "n": 13
   },
   "farmer fight gao": {
    "v": 100,
@@ -1098,13 +1098,9 @@
    "v": 100,
    "n": 22
   },
-  "farmer fight night_serpent": {
-   "v": 100,
-   "n": 12
-  },
   "farmer fight guardian": {
    "v": 100,
-   "n": 17
+   "n": 19
   },
   "cultivator prologue C1 dead": {
    "v": 0.5,
@@ -1112,71 +1108,71 @@
   },
   "cultivator prologue C2 dead": {
    "v": 0,
-   "n": 152
+   "n": 161
   },
   "cultivator Act 1 C1 dead": {
    "v": 0,
-   "n": 48
+   "n": 39
   },
   "cultivator Act 1 C1 taken": {
    "v": 0,
-   "n": 48
+   "n": 39
   },
   "cultivator Act 1 C2 dead": {
    "v": 0,
-   "n": 152
+   "n": 161
   },
   "cultivator Act 1 C2 taken": {
    "v": 0,
-   "n": 152
+   "n": 161
   },
   "cultivator tribute C1 won": {
-   "v": 24.1,
+   "v": 19.6,
    "n": 199
   },
   "cultivator tribute C1 lost": {
-   "v": 75.9,
+   "v": 80.4,
    "n": 199
   },
   "cultivator tribute C2 won": {
    "v": 100,
-   "n": 152
+   "n": 161
   },
   "cultivator tribute C2 lost": {
    "v": 0,
-   "n": 152
+   "n": 161
   },
   "cultivator prologue cleared on Coil 1": {
-   "v": 24,
+   "v": 19.5,
    "n": 200
   },
   "cultivator Act 1 cleared on Coil 1": {
-   "v": 24,
+   "v": 19.5,
    "n": 200
   },
   "cultivator fight mire": {
    "v": 99.6,
-   "n": 254
+   "n": 259
   },
   "cultivator fight jackals": {
    "v": 100,
-   "n": 197
+   "n": 200
   },
   "cultivator fight boar": {
    "v": 100,
-   "n": 199
+   "n": 200
   },
   "cultivator fight wolves": {
    "v": 100,
-   "n": 393
+   "n": 419
   },
   "cultivator fight collectors": {
-   "v": 57,
-   "n": 351
+   "v": 55.6,
+   "n": 360
   },
   "cultivator fight crows": {
    "v": 100,
-   "n": 103
+   "n": 104
   },
   "cultivator fight gao": {
    "v": 100,
@@ -1184,31 +1180,31 @@
   },
   "cultivator fight thornback": {
    "v": 100,
-   "n": 430
+   "n": 436
   },
   "cultivator fight ya_brawl": {
    "v": 100,
-   "n": 188
+   "n": 182
   },
   "cultivator fight bone_elk": {
    "v": 100,
-   "n": 306
+   "n": 316
+  },
+  "cultivator fight night_wolves": {
+   "v": 100,
+   "n": 63
   },
   "cultivator fight mire_serpent": {
    "v": 100,
-   "n": 381
+   "n": 377
   },
   "cultivator fight drowned": {
    "v": 100,
-   "n": 183
-  },
-  "cultivator fight night_drowned": {
-   "v": 100,
-   "n": 70
+   "n": 185
   },
   "cultivator fight cinder_hawks": {
    "v": 100,
-   "n": 447
+   "n": 513
   },
   "cultivator fight rot_ape": {
    "v": 100,
@@ -1216,59 +1212,59 @@
   },
   "cultivator fight guardian": {
    "v": 100,
-   "n": 8
+   "n": 16
   },
   "cultivator fight rt_wolves": {
    "v": 100,
-   "n": 89
+   "n": 88
   },
   "cultivator fight arson": {
    "v": 100,
-   "n": 172
+   "n": 176
   },
   "cultivator fight lizard": {
    "v": 100,
-   "n": 96
-  },
-  "cultivator fight palisade_wolf": {
-   "v": 100,
-   "n": 184
-  },
-  "cultivator fight night_hawks": {
-   "v": 100,
-   "n": 75
-  },
-  "cultivator fight root_husks": {
-   "v": 100,
-   "n": 81
-  },
-  "cultivator fight rats": {
-   "v": 100,
-   "n": 86
+   "n": 100
   },
   "cultivator fight sect_watcher": {
    "v": 100,
-   "n": 67
+   "n": 70
   },
-  "cultivator fight night_serpent": {
+  "cultivator fight palisade_wolf": {
    "v": 100,
-   "n": 57
-  },
-  "cultivator fight husks": {
-   "v": 100,
-   "n": 94
+   "n": 183
   },
   "cultivator fight root_wyrm": {
    "v": 100,
-   "n": 59
+   "n": 91
   },
-  "cultivator fight night_wolves": {
+  "cultivator fight root_husks": {
    "v": 100,
-   "n": 66
+   "n": 65
+  },
+  "cultivator fight rats": {
+   "v": 100,
+   "n": 84
+  },
+  "cultivator fight night_drowned": {
+   "v": 100,
+   "n": 86
+  },
+  "cultivator fight night_hawks": {
+   "v": 100,
+   "n": 72
+  },
+  "cultivator fight husks": {
+   "v": 100,
+   "n": 103
   },
   "cultivator fight elder": {
    "v": 100,
-   "n": 67
+   "n": 65
+  },
+  "cultivator fight night_serpent": {
+   "v": 100,
+   "n": 47
   },
   "sociable prologue C1 dead": {
    "v": 0,
@@ -1280,35 +1276,27 @@
   },
   "sociable prologue C3 dead": {
    "v": 0,
-   "n": 83
+   "n": 200
   },
   "sociable prologue C4 dead": {
    "v": 0,
-   "n": 24
-  },
-  "sociable Act 1 C2 dead": {
-   "v": 0,
-   "n": 117
-  },
-  "sociable Act 1 C2 taken": {
-   "v": 0,
-   "n": 117
+   "n": 179
   },
   "sociable Act 1 C3 dead": {
-   "v": 0,
-   "n": 59
+   "v": 100,
+   "n": 21
   },
   "sociable Act 1 C3 taken": {
    "v": 0,
-   "n": 59
+   "n": 21
   },
   "sociable Act 1 C4 dead": {
-   "v": 0,
-   "n": 24
+   "v": 96.5,
+   "n": 200
   },
   "sociable Act 1 C4 taken": {
    "v": 0,
-   "n": 24
+   "n": 200
   },
   "sociable tribute C1 won": {
    "v": 0,
@@ -1319,28 +1307,28 @@
    "n": 200
   },
   "sociable tribute C2 won": {
-   "v": 58.5,
+   "v": 0,
    "n": 200
   },
   "sociable tribute C2 lost": {
-   "v": 41.5,
+   "v": 100,
    "n": 200
   },
   "sociable tribute C3 won": {
-   "v": 71.1,
-   "n": 83
+   "v": 10.5,
+   "n": 200
   },
   "sociable tribute C3 lost": {
-   "v": 28.9,
-   "n": 83
+   "v": 89.5,
+   "n": 200
   },
   "sociable tribute C4 won": {
    "v": 100,
-   "n": 24
+   "n": 179
   },
   "sociable tribute C4 lost": {
    "v": 0,
-   "n": 24
+   "n": 179
   },
   "sociable prologue cleared on Coil 1": {
    "v": 0,
@@ -1351,48 +1339,48 @@
    "n": 200
   },
   "sociable fight collectors": {
-   "v": 39.4,
-   "n": 507
+   "v": 25.7,
+   "n": 779
   },
-  "sociable fight night_wolves": {
+  "sociable fight night_drowned": {
    "v": 100,
-   "n": 75
+   "n": 263
   },
   "sociable fight drowned": {
    "v": 100,
-   "n": 200
+   "n": 404
+  },
+  "sociable fight rot_ape": {
+   "v": 48.3,
+   "n": 414
   },
   "sociable fight night_hawks": {
    "v": 100,
-   "n": 78
-  },
-  "sociable fight rot_ape": {
-   "v": 100,
-   "n": 200
+   "n": 156
   },
   "sociable fight rt_wolves": {
    "v": 100,
-   "n": 200
+   "n": 184
   },
   "sociable fight lizard": {
    "v": 100,
    "n": 17
   },
-  "sociable fight night_drowned": {
+  "sociable fight gao": {
    "v": 100,
-   "n": 128
+   "n": 115
+  },
+  "sociable fight night_wolves": {
+   "v": 100,
+   "n": 143
   },
   "sociable fight night_serpent": {
    "v": 100,
-   "n": 70
+   "n": 140
   },
-  "sociable fight gao": {
+  "sociable fight root_wyrm": {
    "v": 100,
-   "n": 76
-  },
-  "sociable fight guardian": {
-   "v": 100,
-   "n": 1
+   "n": 8
   }
  }
 }

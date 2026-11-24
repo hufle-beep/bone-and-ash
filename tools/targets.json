@@ -1,0 +1,32 @@
+{
+ "note": "The owner's 2026-11-22 targets (roadmap.md section 2's colour key), read by tools/sanity.mjs: one log-only TARGET line per target and model, in / near (outside by no more than 2 × its standard error) / out. v0.11.268, owner pick P36-A (TT). Changing a target is the owner's call.",
+ "targets": [
+  {
+   "id": "T1",
+   "what": "the whole game on Coil 1",
+   "said": "owner 2026-11-22 01:43: One coil should be winnable but only for the completionist and the cultivator; 02:36: 20-30%",
+   "metric": "oneCoil",
+   "models": ["completionist", "cultivator"],
+   "min": 20,
+   "max": 30
+  },
+  {
+   "id": "T2",
+   "what": "the whole game on Coil 1",
+   "said": "owner 2026-11-22 01:43: only for the completionist and the cultivator (so none for Careful and the Sociable)",
+   "metric": "oneCoil",
+   "models": ["careful", "sociable"],
+   "min": 0,
+   "max": 0
+  },
+  {
+   "id": "T3",
+   "what": "Act 1 cleared, mean Coil",
+   "said": "owner 2026-11-22: Act 1 about 2 more Coils for Careful and the Sociable than v0.11.252's 2.38; about = 0.75 (P34-A and P35-A were picked green at 4.95)",
+   "metric": "act1MeanCoil",
+   "models": ["careful", "sociable"],
+   "target": 4.38,
+   "about": 0.75
+  }
+ ]
+}

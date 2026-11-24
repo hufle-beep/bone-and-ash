@@ -117,7 +117,7 @@ The bible and the contract between the four part files are at the top of `js/sto
 | `tests/lib/forced.mjs` | v0.11.163 (owner picks W1, HN1): two bot rules of the models and the hungry line: RS Careful's and the Sociable's pick on a task screen with no story exit (each door once a day, then "Rest an hour."), NN every model but Random takes "Not now." only when nothing else is open, `hungryLine` ("under Fed 30 with food" as a log line: the story screens where it happens have no Eat card). |
 | `tests/lib/spare.mjs` | v0.11.142 (owner pick CV1): the Cultivator bot model's spare time (`sparePlan`: 05:00–17:59, a sit, a meridian session or gather Qi); its own file so the tools test checks the rule without playing the models. |
 | `tests/lib/shard.mjs` | The bot games split across worker processes (v0.11.1): `--games`, `--workers`, `--seed`; a seed per game (`seedOf`), so any number of workers gives the same numbers. |
-| `tools/sanity.mjs`, `tools/baseline.json`, `tools/lib/noise.mjs` | The mechanics sanity check (v0.11.3, hard rule 2): invariants and drift (±20 points since v0.11.37, was ±5; n ≥ 50 since v0.11.42, was 100; past ±5 a log-only note) against the saved baseline, plus a log-only noise-scaled line (v0.11.21); the last step of the full check; `--update` only after the owner's go. |
+| `tools/sanity.mjs`, `tools/baseline.json`, `tools/lib/noise.mjs`, `tools/lib/longguard.mjs`, `tools/baseline-long.json`, `tools/targets.json` | The mechanics sanity check (v0.11.3, hard rule 2): invariants and drift (±20 points since v0.11.37, was ±5; n ≥ 50 since v0.11.42, was 100; past ±5 a log-only note) against the saved baseline, plus a log-only noise-scaled line (v0.11.21); the last step of the full check; `--update` only after the owner's go. v0.11.268 (P36-A): the long calendar's numbers a guard like `baseline.json` (LG), the owner's targets as log-only TARGET lines (TT), `--update --last` from the full check's kept stats in `tools/.last-check/` (KS, LU). |
 | `tests/tools.test.mjs` | v0.11.21: the test tools themselves (shard merge and seeds, 1 worker = 2 workers, the runner's job list, the noise band). |
 | `tools/leftovers.mjs`, `tools/leftovers-keep.json`, `tests/lib/seen.mjs` | v0.11.22: the leftover check, strict since v0.11.23 (choices log only; what nothing reaches or reads; the keep-list with a reason each; the bots' record of the flags, items and choices they touch, from two small watched runs). `tests/README.md` has the details. |
 | `.gitignore` | v0.11.22: `__pycache__/`, `*.pyc`, `node_modules/`. |
@@ -137,7 +137,7 @@ bash tools/check.sh quick    # while building
 node tools/check.mjs --verbose   # the full check with the old long output (v0.11.28)
 node tools/bots.mjs --games 1000 --sensible   # balance numbers only
 node tools/fightlab.mjs --fight rot_ape       # the fight lab (v0.11.80): every tactic on one fight; no --fight: every fight
-node tools/sanity.mjs --update                # new baseline, only after the owner's go on an intended change
+node tools/sanity.mjs --update --last         # new baselines (baseline.json, baseline-long.json, models-baseline.json) from the last full check's kept stats, only after the owner's go on an intended change (v0.11.268, P36-A: --update needs the long numbers; --last refuses if js/ or tests/ changed since)
 ```
 **Browser check:** Playwright is preinstalled in the cloud session; `python3 tools/browser.py` (part of the full check since v0.11.7) taps through both modes at 390×844.
 

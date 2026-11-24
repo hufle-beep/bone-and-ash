@@ -19,6 +19,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { validateJobs, run, runPool, onSignals, retryOnce } from './lib/jobs.mjs'; // v0.11.21; v0.11.163 (F1): retryOnce
 import { LOG, stepLine, flagLines, leftoverFound, modelDigest } from './lib/report.mjs'; // v0.11.28
+import { keepStats, KEPT_DIR } from './lib/longguard.mjs'; // v0.11.268 (P36-A, KS)
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
@@ -143,6 +144,7 @@ const { failed, stuck } = await runPool(jobs, {
     },
 });
 
+if (!QUICK && keepStats(ROOT, ST)) console.log(`kept the stats for sanity --update --last: ${KEPT_DIR}/`); // v0.11.268 (owner pick P36-A, KS)
 rmSync(ST, { recursive: true, force: true });
 writeLog();
 const total = Math.round((Date.now() - t0) / 100) / 10;

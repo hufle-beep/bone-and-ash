@@ -60,6 +60,7 @@ import { SOCIAL, EAT } from './lib/social.mjs'; // v0.11.160 (NX2, CN): the Soci
 import { forcedPick, oldForcedPick, skipNotNow, hungryLine } from './lib/forced.mjs'; // v0.11.163 (owner pick W1): RS and NN
 import { sparePlan } from './lib/spare.mjs'; // v0.11.142 (owner pick CV1): the Cultivator's spare time
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
+import { shareTable } from '../tools/lib/longguard.mjs'; // v0.11.268 (P36-A, MB)
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 && argv[i + 1] != null ? argv[i + 1] : d; };
@@ -482,16 +483,8 @@ for (const [m, st] of Object.entries(all)) {
 }
 if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(all));
 
-// v0.11.132 (owner picks PL1, E1, EB and RP): the Act 1 endings, the last nights and the repeated screens against the saved copy, log only
-function shareTable(all) {
-    const out = {};
-    const shares = (o) => { const n = Object.values(o || {}).reduce((a, b) => a + b, 0); return Object.fromEntries(Object.entries(o || {}).map(([k, v]) => [k, { v: Math.round((1000 * v) / n) / 10, n }])); };
-    for (const [m, st] of Object.entries(all)) {
-        out[m] = { games: st.games, endings: shares(st.endings), nights: shares(st.nights) };
-        if (st.texts?.screens) out[m].repeats = { v: Math.round((1000 * st.texts.repeats) / st.texts.screens) / 10, n: st.texts.screens };
-    }
-    return out;
-}
+// v0.11.132 (owner picks PL1, E1, EB and RP): the Act 1 endings, the last nights and the repeated screens against the saved copy, log only;
+// v0.11.268 (owner pick P36-A, MB): shareTable moved to tools/lib/longguard.mjs (sanity --update saves the saved copy too)
 if (!SHARD && SAVE_BASE && (!CAL || KEPT)) console.log(`\n  models baseline NOT saved: the saved copy is the long calendar's main run (no --cal 0, no --kept; the P23 review's L6)`);
 if (!SHARD && CAL && !KEPT) { // v0.11.203 (TS8): the long calendar was never compared with the saved copy; v0.11.253 (owner pick P23-A, DG): the long calendar is the models' default and the saved copy's (tools/models-baseline.json re-saved from it); the old calendar (--cal 0) and the realm kept (--kept) are not compared
     const now = shareTable(all);
