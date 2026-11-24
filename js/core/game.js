@@ -1051,7 +1051,7 @@ export const combatHooks = { before: null, lose: null, steal: null }; // v0.11.1
 /** Fights against people (v0.9.7): losing them keeps their written branches. Every other fight is a beast. */
 export const PEOPLE_FIGHTS = new Set(['gao', 'collectors', 'arson', 'ya_brawl', 'rt_brawl', 'elder', 'sect_watcher', 'lf_rogue', 'lf_bandits']); // v0.11.81 (T1): the Tan brothers too
 /** v0.11.114 (owner pick PA2, PT + SP; research.md #132): people posture every TELL_EVERY rounds, shown a round early, from the
- *  prologue on; not Ya (she is not one of the overly serious), not a heavy foe (Act 1: its stance is its big blow; in the prologue nobody is heavy).
+ *  prologue on; not Ya (she is not one of the overly serious), not a heavy foe (its stance is its big blow; from the prologue on since v0.11.266, P34-A TP).
  *  "Say something" on a posture costs that foe this round's attack and the next (SAY_ROUNDS). */
 export const NO_POSTURE = new Set(['ya_brawl']);
 export const SAY_ROUNDS = 2;
@@ -1182,7 +1182,7 @@ export function startCombat(g, enc0) {
             const t0 = noDiceTune[enc.id]; // v0.9.3: per-fight tuning for the no-dice rules
             const t = !PEOPLE_FIGHTS.has(enc.id) ? { ...(t0 || {}), up: ((t0 && t0.up) || 0) + BEAST_UP } : t0; // v0.9.7: beasts +0.5
             const x = t ? { ...e, dc: e.dc + (t.up || 0), atk: e.atk + (t.up || 0), hp: Math.max(1, Math.round(e.hp * (t.hp || 1))) } : e;
-            const heavy = isHeavy(g, enc, e);
+            const heavy = isHeavy(enc, e);
             return { ...x, hpMax: x.hp, staggered: false, ...(heavy ? { heavy: true } : {}), ...(!heavy && PEOPLE_FIGHTS.has(enc.id) && !NO_POSTURE.has(enc.id) ? { postures: true } : {}) }; // v0.11.113 (DA1, TL); v0.11.114 (PA2, PT)
         }),
         log: [enc.intro || 'Combat!'],
@@ -1222,12 +1222,18 @@ export const traitLine = (g, k, id) => (k === 'heavy' && PEOPLE_FIGHTS.has(id) ?
     : k === 'flies' && !airFights(g) ? FOE_TRAITS.flies.grounded : FOE_TRAITS[k].line);
 /** The trait lines for a fight's start: each trait once, named for the first foe that has it. */
 export const traitLines = (g, enemies, id) => Object.keys(FOE_TRAITS).map((k) => { const e = enemies.find((x) => foeTraits(x).includes(k)); return e ? foeFill(traitLine(g, k, id), e.name) : null; }).filter(Boolean);
-/** DA1 (TL): from Act 1, an armed fight's foes that hit for HEAVY_DMG or more land a big blow every TELL_EVERY rounds (× BIG_BLOW
+/** DA1 (TL): an armed fight's foes that hit for HEAVY_DMG or more land a big blow every TELL_EVERY rounds (× BIG_BLOW
  *  damage), shown the round before; guard avoids it outright, the needle's stagger and the spear's hold stop it as any attack.
- *  Not the rot ape (NO_TELL; measured: the story test's smart bots 47.4 → 35.0% there, Act 1's wall is the retune's). */
+ *  Not the rot ape (NO_TELL; measured: the story test's smart bots 47.4 → 35.0% there, Act 1's wall is the retune's).
+ *  v0.11.266 (owner pick P34-A, TP): from the prologue on (was Act 1 only); a heavy person doesn't posture. Measured before the
+ *  pick (project/research/p34-measure.md): the fight lab's pooled smart 69.4 → 63.8%, collectors 73.2 → 45.2%; the models'
+ *  whole game on Coil 1: Completionist 25 → 0%, Cultivator 27.5 → 0%, Farmer 15 → 0%; Careful's prologue 2.10 → 3.88 Coils. */
 export const HEAVY_DMG = 5, TELL_EVERY = 3, BIG_BLOW = 2;
 export const NO_TELL = new Set(['rot_ape']);
-const isHeavy = (g, enc, e) => !enc.style && (e.dmg || 0) >= HEAVY_DMG && inAct1(g) && !NO_TELL.has(enc.id);
+/** v0.11.266 (owner pick LF-A, the P34-A review's M1): not in the Long Forest's fights (`lf_` ids; never measured with tells:
+ *  its beasts got easier with them, Fang Wei lost Say something), so they play as in v0.11.265. */
+export const lfFight = (id) => String(id || '').startsWith('lf_');
+const isHeavy = (enc, e) => !enc.style && (e.dmg || 0) >= HEAVY_DMG && !NO_TELL.has(enc.id) && !lfFight(enc.id); // TP: no act gate; LF-A
 /** Is this foe's big blow (or, for a foe that goes for Yuki, its lunge) due this round? */
 export const bigBlowDue = (c, e) => !!(e.heavy && e.hp > 0 && c.round % TELL_EVERY === 0);
 /** DA1 (HD): a foe with moods (the Gardeners' Guardian): hungry rounds (James's hits heal it), proud rounds (his hits do double), plain. */

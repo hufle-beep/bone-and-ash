@@ -638,7 +638,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
 // v0.11.121 (owner pick AS1, EL6 + W): the air stalemate: a round from the air in which nobody takes damage while every foe
 // standing can't fly is a stuck round; the third in a row warns, the sixth ends the fight, lost; any damage starts the count again.
 {
-    const { AIR_STALL_WARN, AIR_STALL_END, AIR_STALL_TEXT, foeFillAll, TELL_TEXT, combatFlee } = await import('../js/core/game.js');
+    const { AIR_STALL_WARN, AIR_STALL_END, AIR_STALL_TEXT, foeFillAll, TELL_TEXT, combatFlee, bigBlowDue } = await import('../js/core/game.js');
     const { FAQ } = await import('../js/core/faq.js');
     const { readFileSync } = await import('node:fs');
     const toAct1 = (g) => { g.flags.ending = g.flags.ending || 'victory'; g.minutes = Math.max(g.minutes, calMinutes(g, 8, 6)); return g; };
@@ -698,9 +698,28 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       assert(fl.includes("While no flying foe is standing, a round from the air in which nobody takes damage (no foe, not James) is a stalemate round: after 3 in a row the log warns you, and after 6 in a row the fight is lost, because James's attacks from the air are doing nothing and he has to come down to a foe that is ready for him; any damage on either side starts the count again.") && !/stay up forever/.test(fl), "AS1, RV1 PT: the FAQ's stalemate sentence (Fable)"); }
     { const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
       assert(!main.includes('06:00–19:00') && /YUKI_HOURS\.map/.test(main), 'AS1, LH: the lane note reads YUKI_HOURS'); }
+    // v0.11.266 (owner pick P34-A, W1): the smart bot reacts to the warning: from it to the fight's end on the ground (no darts),
+    // kept per fight without writing into the game's state; a new fight starts in the air again.
+    { const { onGround } = await import('./lib/smartfight.mjs');
+      const g = mk([wall('Rot-ape')]); const picks = []; let warned = -1, lost = false;
+      for (let i = 0; i < 14 && g.combat; i++) { const keys = JSON.stringify(g.combat); const a = smartAction(g, i);
+        assert(JSON.stringify(g.combat) === keys, 'P34-A, W1: the bot writes nothing into the fight'); picks.push(a);
+        const o = cStep(g, a); if (o.lines.includes(warn('Rot-ape'))) warned = i; if (o.done === 'lose') lost = true; }
+      assert(warned === 2 && picks.slice(0, 3).every((a) => a === 'dart'), `P34-A, W1: darts from the air up to the warning (${picks.slice(0, 4)})`);
+      assert(picks.slice(3).every((a) => a !== 'dart') && picks.length > 6 && !lost, `P34-A, W1: on the ground after it, and no stalemate loss (${picks})`);
+      assert(g.combat && g.combat.stall === 0 && onGround(g), 'P34-A, W1: still on the ground when the count is back at 0 (kept for the fight)');
+      g.james.qi = 2; g.combat.bladeFormed = false; assert(smartAction(g, 20) !== 'dart', 'P34-A, W1: on the ground the last-resort dart is guard');
+      const g2 = mk([wall('Rot-ape')]); assert(!onGround(g2) && smartAction(g2, 0) === 'dart', 'P34-A, W1: a new fight starts in the air');
+      // the review's M2 (R1): the same game's next fight starts in the air too (the latch is the fight's, not the game's)
+      g.combat = null; sCombat(g, { id: 'jackals', intro: '', band: 'standard', enemies: [wall('Rot-ape')], win: 'stream', lose: 'stream' }); g.combat.fieldUsed = true;
+      assert(!onGround(g) && smartAction(g, 0) === 'dart', 'P34-A, W1 (review M2): the same game\'s next fight starts in the air');
+      const g3 = mk([{ ...wall('Brute'), dmg: 8 }]); for (let i = 0; i < 3; i++) cStep(g3, 'dart');
+      assert(g3.combat.stall === 3 && onGround(g3), 'P34-A, W1: grounded at the warning');
+      while (g3.combat.round % 3 !== 0) g3.combat.round++;
+      const ans = smartAction(g3, 9); assert(bigBlowDue(g3.combat, g3.combat.enemies[0]) && ['guard', 'spear', 'needle'].includes(ans), `P34-A, W1: on the ground a due big blow is answered, as on any ground round (${ans})`); }
 }
 // v0.11.113 (owner pick DA1; research.md #43, #45, #133): foes show their hand. TD: traits as tags with a line at the start;
-// TL: from Act 1 a foe hitting for 5+ (not the rot ape, not a spar or a brawl) shows its big blow a round early, ×2, guard
+// TL: from Act 1 (from the prologue since v0.11.266, P34-A TP) a foe hitting for 5+ (not the rot ape, not a spar or a brawl) shows its big blow a round early, ×2, guard
 // avoids it, the needle's stagger stops it; TY: a shown lunge, any guard covers Yuki; HD: the guardian's moods (hungry: hits
 // heal it; proud: hits double); CS: a thief takes one food item on its first landed hit; the smart rule answers.
 {
@@ -720,7 +739,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       const g = mk(two, { act1: false }); assert(g.combat.log[0] === 'In.' && g.combat.log[1] === tl[0] && g.combat.log.length === 2, 'DA1, TD: the line follows the intro'); }
     // TL
     { const g = mk([brute()]); assert(g.combat.enemies[0].heavy === true, 'DA1, TL: Act 1, dmg 5: heavy');
-      assert(!mk([brute()], { act1: false }).combat.enemies[0].heavy, 'DA1, TL: not in the prologue');
+      assert(mk([brute()], { act1: false }).combat.enemies[0].heavy === true, 'DA1, TL + P34-A TP: in the prologue too (v0.11.266; was Act 1 only)');
       assert(NO_TELL.has('rot_ape') && !mk([brute()], { id: 'rot_ape' }).combat.enemies[0].heavy, 'DA1, TL: not the rot ape');
       assert(!mk([brute()], { extra: { style: 'spar' } }).combat.enemies[0].heavy, 'DA1, TL: not in a spar');
       assert(!mk([brute('B', { dmg: HEAVY_DMG - 1 })]).combat.enemies[0].heavy, 'DA1, TL: dmg 4: not heavy');
@@ -808,9 +827,30 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
         sCombat(g, { id, intro: 'In.', band: 'standard', enemies, win: 'stream', lose: 'stream', ...(style ? { style } : {}) }); return g; };
     const man = (n = 'Gao', x = {}) => ({ name: n, hp: 999, dc: 60, atk: 60, dmg: 2, ...x });
     // PT: who postures
-    const p = mk('gao', [man('Gao', { dmg: 6 }), man('Pock')]);
-    assert(p.combat.enemies.every((e) => e.postures) && actionOpen(p, 'remark'), 'PA2, PT + SP: in the prologue every person postures, a hard hitter too (nobody is heavy there); Say something opens');
+    const p = mk('gao', [man('Gao'), man('Pock')]);
+    assert(p.combat.enemies.every((e) => e.postures) && actionOpen(p, 'remark'), 'PA2, PT + SP: in the prologue every person under 5 damage postures; Say something opens');
     assert(p.combat.log.includes(FOE_TRAITS.postures.line.replace('{foe}', 'Gao')) && FOE_TRAITS.postures.tag === 'postures', "PA2, PT: the tag and the start line (Fable's)");
+    // v0.11.266 (owner pick P34-A, TP): a hard hitter in the prologue shows the big blow, not a posture (as in Act 1); the other still postures
+    const ph = mk('gao', [man('Gao', { dmg: 6 }), man('Pock')]);
+    assert(ph.combat.enemies[0].heavy && !ph.combat.enemies[0].postures && ph.combat.enemies[1].postures && actionOpen(ph, 'remark'), 'P34-A, TP: in the prologue a heavy person shows the big blow, not a posture');
+    assert(ph.combat.log.includes(FOE_TRAITS.heavy.person.replace('{foe}', 'Gao')), "P34-A, TP: the person's line for a heavy person in the prologue (Fable's DB1 P1)");
+    const pa = mk('gao', [man('Gao', { dmg: 6 })]);
+    assert(pa.combat.enemies[0].heavy && !actionOpen(pa, 'remark'), 'P34-A, TP: a lone heavy person in the prologue: no Say something');
+    { const { FAQ } = await import('../js/core/faq.js'); const ft = FAQ.find(([t]) => t === 'Fights')[1]();
+      assert(ft.includes('A foe that hits hard (5 or more damage) shows its <b>big blow</b> a round early') && !/From Act 1, a foe that hits hard/.test(ft), 'P34-A, TP: the FAQ says it from the prologue on'); }
+    // the review's L1 (R3): the real prologue fights: Lu Han and the Ironhide boar are heavy, Gao and the jackals are not; L3 (R4): What's new says so
+    { const real = (scene) => { const g = ensureBars(newGame(266, { closed: true })); g.james.qi = 40; g.james.hp = jamesHpMax(g);
+        const ch = SCENES[scene].choices.find((c) => c.combat); sCombat(g, G.combatHooks.before ? (G.combatHooks.before(g, ch.combat(g)) || ch.combat(g)) : ch.combat(g)); return g; };
+      const tr = real('tribute'), bo = real('village_hunt'), ja = real('night_attack');
+      assert(tr.combat.enemies[0].name === 'Lu Han' && tr.combat.enemies[0].heavy && !tr.combat.enemies[1].heavy && tr.combat.enemies[1].postures && actionOpen(tr, 'remark'), 'P34-A, TP (review L1): the tribute: Lu Han heavy, the other postures, Say something opens');
+      assert(bo.combat.enemies.every((e) => e.heavy) && ja.combat.enemies.every((e) => !e.heavy), 'P34-A, TP (review L1): the Ironhide boar heavy, the jackals not');
+      const { NOTES } = await import('../js/core/news.js'); const nt = NOTES.find(([v]) => v === '0.11.266');
+      assert(nt && /from the prologue on/.test(nt[1]) && /Lu Han/.test(nt[1]), "P34-A, TP (review L3): What's new says it");
+      // LF-A (the review's M1, R2): the Long Forest's fights don't tell; Fang Wei keeps his posture and Say something
+      const LF_BOSSES = ['lf_ossuary', 'lf_bog_mother', 'lf_thunder_ram', 'lf_heartless', 'lf_rogue'];
+      for (const id of LF_BOSSES) { const g = mk(id, [man('Boss', { dmg: 7 })]); assert(!g.combat.enemies[0].heavy, `P34-A, LF-A: no big blow in the Long Forest (${id})`); }
+      const fw = mk('lf_rogue', [man('Fang Wei', { dmg: 5 })]); assert(fw.combat.enemies[0].postures && actionOpen(fw, 'remark'), 'P34-A, LF-A: Fang Wei postures; Say something opens');
+      assert(G.lfFight('lf_rogue') && !G.lfFight('collectors') && !G.lfFight(undefined), 'P34-A, LF-A: lfFight by the lf_ id'); }
     const el = mk('elder', [man('Shen', { dmg: 5 }), man('Lu', { dmg: 4 })], { act1: true });
     assert(el.combat.enemies[0].heavy && !el.combat.enemies[0].postures && el.combat.enemies[1].postures, 'PA2, PT: in Act 1 a heavy person shows the big blow, not a posture');
     const beast = mk('jackals', [man('Jackal')]); const ya = mk('ya_brawl', [man('Ya')], { act1: true, style: 'spar' });

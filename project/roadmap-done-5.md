@@ -2,6 +2,13 @@
 
 Started in v0.11.258, when `roadmap-done-4.md` would have passed about 45 KB with this move. Newer than `roadmap-done-4.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.266 (word for word; owner pick P34-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB)
+
+### From `roadmap.md` section 2, two done lines
+
+- *(v0.11.264, owner picks P32-A, RV-A; `project/research/p32-measure.md`, `p32-review.md`; the options: `claude/p32-options.md`)* **Done: the one clock's leftovers** (the P31-A review's L1–L3, TG2–TG4 and its survivors): L2 the old-calendar save's night move to 05:00 (`flipOne` `tod < NIGHT_TO * 60`) with its waking day's count by the one clock (RV-A, the review's H2 + M1: a save moved at night lost its next waking day since v0.11.226; the real `bl_night` save now turns at its first sleep; 1 of 36 old-calendar saves changes); L3b the epilogue's day by `clockDay` and never back (RV-A H1: Act 1 on Day 44 from the tribute's night, not Day 45); L3c the Heart's day keys by `clockDay` (and the plan's spring row); L3a the counts and titles kept on the clock label's day (a guard); L1 + TG2 closed as accepted (v0.11.263 already live). Tests: the story test's P32-A block (TG1, TG4–TG6, F7, R6 as every clock write), the saves test (TG2, TG3). Planted faults 15 of 18 caught by the behaviour tests alone (F6, F10, R3 equivalent). In play nothing changes (80 bot games: 0 screens at those hours). **Open, options later:** the rest of this section (the RA1 line's items, MF; re-measure on the long calendar first).
+- *(v0.11.263, owner pick P31-A; `project/research/p31-measure.md`, `p31-review.md`)* **Done: the one clock** (`calendar.js` `DAY_FROM`: the story day, the text day and the waking day, `NIGHT_TO`, all turn at 05:00; was midnight, 05:00 and 04:00; the pin of a week's card's result kept; `fo_depart` and `ht_leave` never set the clock back; `foDay` folded): in play 0 screens changed (100 bot games the same with K1, 40 with K1 + K2; 0 at 04:xx; 0 of 39 saves at 04:00–04:59), forced 53 of 560 screens changed; the P30-A review's M1, L1, L4 and the Heart's two reads closed, and this section's "text day (05:00) against the daily reset (04:00)". ~~**Open, options later:** the P31-A review's L1–L3, TG2–TG4's rest, F6 / F7 / R6~~ *(done or closed in v0.11.264, P32-A + RV-A: the line above)*.
+
 ## Moved in v0.11.265 (word for word; owner pick P33-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB)
 
 ### From `roadmap.md` section 2, two done lines

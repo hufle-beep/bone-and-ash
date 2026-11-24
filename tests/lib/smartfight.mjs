@@ -3,7 +3,7 @@
 // every third round, else the blade, else darts", which lost to "the blade every round" (the fight lab: 67.0 against
 // 71.2% of 5,553 fight states); this rule won 71.8% (v0.11.96; with v0.11.97's reserve 73.1% of 6,242; with v0.11.98's
 // no shield on the fragile knife 73.2% of 6,259, against 72.9% on the same states). Tool code only: no game file imports it.
-import { COMBAT_ACTIONS, actionCost, jamesHpMax, airStrike, bigBlowDue, moodOf, postureDue, waitLeft, songPays } from '../../js/core/game.js';
+import { COMBAT_ACTIONS, actionCost, jamesHpMax, airStrike, bigBlowDue, moodOf, postureDue, waitLeft, songPays, AIR_STALL_WARN } from '../../js/core/game.js';
 import { actionOpen, fragileKnife, fightStyle } from '../../js/core/forms.js';
 
 /** The share of James's max HP at or under which the bot raises the Qi shield (S). */
@@ -46,15 +46,27 @@ export function smartAction(g, t = 0) {
     if (!actionOpen(g, 'remark') || c.enemies.some((e) => e.hp > 0 && e.heavy) || (a === 'dart' && airStrike(g, 'dart'))) return a;
     return c.enemies.some((e) => postureDue(c, e) && !e.staggered && !e.atBay && !(e.flustered > 0)) ? 'remark' : a;
 }
+/**
+ * v0.11.266 (owner pick P34-A, W1; roadmap-retune.md's air stalemate line: "bots that react to the warning"): from the
+ * stalemate's warning (AIR_STALL_WARN stuck rounds in a row) to the fight's end the bot fights on the ground: no darts (every
+ * dart is thrown from the air from Foundation on). Kept per fight in a WeakSet, so the bot writes nothing into the game's state.
+ * Measured before the pick (the models, 320 games, long calendar): 152 of 160 warned fights were lost by the stall (all the rot
+ * ape at Foundation, Careful and the Sociable) → 0; the ape won 30.8 → 30.3% / 31.7 → 31.5%; Act 1 4.35 → 4.40 / 4.25 → 4.28
+ * Coils; the fight lab and the tasks test's bots 0 fights changed. Landing only while stuck (back up after a hit) was easier
+ * (Act 1 4.03 / 4.05, warnings 160 → 722): not picked.
+ */
+const grounded = new WeakSet();
+export const onGround = (g) => { const c = g.combat; if (c && (c.stall || 0) >= AIR_STALL_WARN) grounded.add(c); return !!c && grounded.has(c); };
 /** The smart move before Say something (v0.11.96–v0.11.113). */
 function baseAction(g, t = 0) { // eslint-disable-line no-unused-vars
     const c = g.combat, qi = g.james.qi;
     if (fightStyle(g) === 'unarmed') return 'strike';
+    const ground = onGround(g); // v0.11.266 (P34-A, W1)
     // v0.11.113 (owner pick DA1, TL): a big blow shown for this round is answered (unless darts from the air already keep it off):
     // the spear when it is formed and on that foe (its hold stops it), else guard (avoids it outright). Lab: smart 81.5 → 81.6%.
     // DB1 (S; Fable's review, mediums 3 and 4): two big blows due, or a heavy flyer (the air doesn't keep it off): guard (0 fights today)
     const bigs = c.enemies.filter((e) => bigBlowDue(c, e) && !e.staggered && !e.atBay);
-    const airDart = airStrike(g, 'dart') && actionOpen(g, 'dart') && qi >= cost(g, 'dart') && !bigs.some((e) => e.flies);
+    const airDart = !ground && airStrike(g, 'dart') && actionOpen(g, 'dart') && qi >= cost(g, 'dart') && !bigs.some((e) => e.flies);
     // v0.11.116 (owner pick WA2): a waiting spear can't answer it; a needle the song pays for can (its stagger stops the blow)
     const ready = (id) => waitLeft(g, id) === 0, first = c.enemies.filter((e) => e.hp > 0)[0];
     if (!airDart && bigs.length) return bigs.length === 1 && first === bigs[0] ? (c.spearFormed && ready('spear') ? 'spear' : songPays(g, 'needle') && ready('needle') ? 'needle' : 'guard') : 'guard';
@@ -63,7 +75,7 @@ function baseAction(g, t = 0) { // eslint-disable-line no-unused-vars
     // v0.11.112 (owner pick FF1, TD): from Foundation, darts from the air while a foe that doesn't fly stands (it can't reach him that round).
     // AF1, R (Fable's review, medium 1; kept as picked): below T3 darts lose to armour, so a raw-stat bench case (two root-lurkers, dr 1, T1 L6)
     // loses; in the bots' own Foundation+ fights 0 of 3,791 wins turn into losses (275 losses into wins).
-    if (airStrike(g, 'dart') && actionOpen(g, 'dart') && qi >= cost(g, 'dart')) return 'dart';
+    if (!ground && airStrike(g, 'dart') && actionOpen(g, 'dart') && qi >= cost(g, 'dart')) return 'dart';
     const living = c.enemies.filter((e) => e.hp > 0);
     // v0.11.116 (owner pick WA2, SG): the needle whenever the song pays for it and the first foe would still strike this round.
     // Lab (300 games, the same 7,552 states; with the rhythm): smart 83.3 → 83.6%, blade only 79.5 → 77.8%.
@@ -85,6 +97,6 @@ function baseAction(g, t = 0) { // eslint-disable-line no-unused-vars
     if (ready('blade') && (c.bladeFormed || qi >= cost(g, 'blade'))) return 'blade';
     if (c.flailFormed && actionOpen(g, 'flail') && ready('flail')) return 'flail'; // v0.11.107: a sung flail is free on the last foe too
     if (c.spearFormed && ready('spear')) return 'spear'; // v0.11.116 (WA2, CDB): a formed spear is free while the blade waits
-    if (actionOpen(g, 'dart') && qi >= cost(g, 'dart')) return 'dart';
+    if (!ground && actionOpen(g, 'dart') && qi >= cost(g, 'dart')) return 'dart'; // W1: on the ground, no darts
     return 'guard';
 }

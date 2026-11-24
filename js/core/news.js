@@ -99,6 +99,7 @@ export const NOTES = [
     ['0.11.257', 'The FAQ\'s answer on meditation said every realm needs more sits than the last; from Soul Embryo on each realm takes the same number, so it now says each needs at least as many. Nothing in play changed.'],
     ['0.11.259', 'The village\'s and the Fallout\'s communal pot: when a day\'s meal comes from the pot, its line ("Breakfast: ", "Midday: " or "Supper: " and the stew) shows among the results again with its +25 satiety, not in the story text above them.'],
     ['0.11.261', 'The Saves screen now lists each save on the day it opens on, with its Coil: an old save from before the Coil (version 0.8.5) at the end of Act 1 showed Day 104 but opened on Day 94, and saves that old were listed without their Coil. And a day\'s meal from the hammerspace ("Breakfast: smoked meat. +30 satiety.") now shows whole among the results, as the pot\'s does, not half in the story text above them.'],
+    ['0.11.266', 'Hard hitters show their big blow a round early from the prologue on, not only from Act 1: Lu Han at the tribute and the Ironhide boar among them. Guard avoids it outright; a person who hits that hard no longer postures, so Say something doesn\'t open on them (FAQ: Fights).'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

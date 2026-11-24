@@ -179,7 +179,8 @@ for (let run = 0; run < 200; run++) {
 // the Coil (v0.9.4): a lost tribute, the Coil screen, the first dawn again, back into Day 1
 for (let run = 0; run < 40; run++) {
     const g = ensureBars(freshBot(run + 22222)); g.scene = 'collectors_lost'; g.flags.ending = 'lost'; g.flags.long = true;
-    if (run % 2) { assert(walkFrom(g, 'collectors_lost', new Set(['stream', 'fo_start']), 400) === true, `v0.11.21: a lost tribute walks back to Day 1 (run ${run})`); continue; }
+    // v0.11.266 (owner pick TB-A): the long calendar's limit, as the other half's (WALK.coil): accepting the loss and playing on to Act 1 takes 500–800 steps (run 33 since P34-A's tells; 400 since v0.11.21)
+    if (run % 2) { assert(walkFrom(g, 'collectors_lost', new Set(['stream', 'fo_start']), WALK.coil) === true, `v0.11.21: a lost tribute walks back to Day 1 or on to Act 1 (run ${run})`); continue; }
     SCENES.collectors_lost.enter(g); seen.add('collectors_lost');
     choose(g, SCENES, SCENES.collectors_lost.choices.findIndex((c) => c.to === 'coil_end')); // half the runs bite the tail
     assert(walkFrom(g, 'coil_end', new Set(['stream', 'fo_start']), WALK.coil) === true, `v0.11.21: the Coil screen walks back to Day 1 (run ${run})`);
