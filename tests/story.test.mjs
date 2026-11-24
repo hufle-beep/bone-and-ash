@@ -9615,6 +9615,38 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const r = [walk(at(65, 0, 11)), walk(at(65, 3, 59)), walk(at(64, 23))];
       assert(r.every((w) => w.backs === 0 && w.scene === 'bl_start' && /fo_depart|fo_farewell/.test(w.path)), `${T} (R6): the farewell walks write the clock forward only (${JSON.stringify(r)})`); }
 }
+{
+    // v0.11.265 (owner pick P33-A; claude/p33-options.md, project/research/p33-measure.md): section 2's RA1 line settled on the long calendar.
+    // TG-LR: the three lost night scenes (`night_lost` 70% HP, `jackals_lost` 60%, `bl_night_lost`) are unreachable in a Coil: a lost beast
+    // fight ends the Coil (coil_scenes.js `combatHooks.lose`), so their recovery numbers were closed as unreachable (0 of 320 bot games).
+    // Every story choice whose fight loses into one of them, in both acts: lost at 1 HP against an unbeatable foe → coil_end (a beast);
+    // off a Coil (the prologue's ending taken, Act 1 won) the fight's own lost scene, as before.
+    const T = 'P33-A', LOST = new Set(['night_lost', 'jackals_lost', 'bl_night_lost']);
+    const FL = { bl_ev: 'wolves' };
+    const build = (sc, i, act, off) => { const g = ensureBars(newGame(43301, { closed: true })); g.coil.act = act; Object.assign(g.flags, FL, act ? { ending: 'paid' } : {}, off || {}); g.minutes = (act ? 60 : 2) * 1440 + 22 * 60; g.scene = sc; return g; };
+    const found = [];
+    for (const [sc, s] of Object.entries(SCENES)) for (const [i, c] of (s.choices || []).entries()) {
+        if (typeof c.combat !== 'function') continue;
+        for (const act of [0, 1]) { let e = null; try { e = c.combat(build(sc, i, act)); } catch { e = null; } if (e && LOST.has(e.lose)) { found.push({ sc, i, act, lose: e.lose }); } }
+    }
+    const lose = (f, off) => { const g = build(f.sc, f.i, f.act, off); const enc = SCENES[f.sc].choices[f.i].combat(g); startCombat(g, enc);
+        for (const e of g.combat.enemies) Object.assign(e, { hp: 999, dc: 99, atk: 99, dmg: 99 });
+        g.james.hp = 1; let out = null; for (let t = 0; t < 60 && g.combat; t++) { out = combatStep(g, 'blade'); if (out?.done) break; }
+        return { done: out?.done, next: out?.next, why: g.coil.why || null }; };
+    const kinds = new Set(found.map((f) => f.lose)), inCoil = found.map((f) => ({ ...f, ...lose(f) }));
+    assert(kinds.size === 3 && found.length >= 7 && inCoil.every((r) => r.done === 'lose' && r.next === 'coil_end' && r.why === 'beast'),
+        `${T} (TG-LR): a lost night beast fight in a Coil ends the Coil, never its lost scene (${JSON.stringify(inCoil)})`);
+    const offCoil = found.map((f) => ({ ...f, ...lose(f, f.act ? { a1_outcome: 'accord' } : { ending: 'paid' }) }));
+    assert(offCoil.every((r) => r.next === r.lose && !r.why), `${T} (TG-LR): off a Coil the fight's own lost scene (${JSON.stringify(offCoil.filter((r) => r.next !== r.lose))})`);
+    // TG-PC: the palisade's count tops at 2: its two choices are once-a-Coil cards on the Fallout's hub (oneoff.js ONCE_MENUS), each gone once
+    // done, so the count (no cap in the scene itself) never reaches 3 in play (0 of 287 Act 1 ends; 257 at 2)
+    { const g = ensureBars(newGame(43302, { closed: true })); g.coil.act = 1; Object.assign(g.flags, { ending: 'paid', ya_met: true, fo_plan: true });
+      for (const k of Object.keys(g.james.skills)) Object.assign(g.james.skills[k], { tier: 5, level: 5 }); g.james.gu = { tier: 5, level: 5 };
+      const hub = (d) => { g.minutes = (50 + d) * 1440 + 8 * 60; goTo(g, SCENES, 'fo_ashfall'); return taskCards(g, SCENES).filter((c) => c.id.startsWith('fo_palisade:')).map((c) => c.id).join(','); };
+      const pick = (d, re) => { g.minutes = (50 + d) * 1440 + 8 * 60; g.james.qi = 99; g.james.satiety = 90; goTo(g, SCENES, 'fo_palisade'); const c = sceneView(g, SCENES).choices.find((x) => re.test(x.label)); choose(g, SCENES, c.index); return g.flags.palisade; };
+      const r = [hub(0), pick(0, /^Sing/), hub(1), pick(1, /^Teach/), hub(2), hub(9), hub(20)];
+      assert(r.join('|') === 'fo_palisade:0,fo_palisade:1|1|fo_palisade:1|2|||', `${T} (TG-PC): the palisade's two cards once a Coil, the count at 2 (${r.join('|')})`); }
+}
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

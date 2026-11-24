@@ -2,6 +2,13 @@
 
 Started in v0.11.258, when `roadmap-done-4.md` would have passed about 45 KB with this move. Newer than `roadmap-done-4.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.265 (word for word; owner pick P33-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB)
+
+### From `roadmap.md` section 2, two done lines
+
+- *(v0.11.262, owner pick P30-A; `project/research/p30-measure.md`, `p30-review.md`)* **Done: p13 §10 on the long calendar, for the Fallout** (`act1_fallout.js` `dd`, `onStoryDay` and `farewellNow` by the text day, from 05:00, the pin of a week's card's result kept; `lastOfWeek` gone): in play 0 screens changed (40 bot games the same; 0 Fallout screens in the gap, 0 of 39 saves), forced 434 → 6. **Open, options later:** the review's M1 (04:00–04:59 after a week's last day: the daily marks turn at 04:00, the Fallout's day at 05:00; unreachable) and L1 (a farewell after midnight sets the clock back to Day 64 23:00), `spacedNow` / `weekHub` / `carryOk` in the gap, the Heart's two reads, the one clock (the story day from 05:00 everywhere; `roadmap-retune.md`); then the rest of this section (the RA1 line's items, MF; re-measure on the long calendar first).
+- *(v0.11.261, owner pick P29-A; `project/research/p29-review.md`)* **Done: SL and M4** (SL: the Saves screen reads a save as deserialize (forced) + `flipFill` load it, so `saves/v0.8.5-act1-end.json` shows Day 94, Act 1, Coil 1 (was Day 104, no Coil) and the six v0.8.5 saves Coil 1; 39 of 39 saves as they load, pinned in `tests/saves-peek.json`; M4: the long calendar's routine meals from the hammerspace and dayMeal's bare pot line whole in the Results, wording unchanged). **Open, options later:** p13 §10 on the long calendar (`roadmap-retune.md`), then the rest of this section (the RA1 line's items, MF; most measured on the old calendar, so re-measure first). The review's L1 rest (the Saves screen leaves out `checkScene`'s hub and scene checks, as before; 0 of 39 saves affected): log only.
+
 ## Moved in v0.11.264 (word for word; owner picks P32-A + RV-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB)
 
 ### From `roadmap.md` section 2, three done lines

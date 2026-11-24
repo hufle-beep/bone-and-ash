@@ -2,6 +2,29 @@
 
 Started 2026-11-23 (v0.11.262), when `history-50.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-50.md` … `history.md`.
 
+## Moved from the handover in v0.11.265 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-24 (Europe/Budapest). **Version:** 0.11.264 (`sw.js` VERSION `bone-ash-0.11.264`): **the one clock's leftovers (P32-A, the owner 2026-11-24 00:15: "P32-a go"; RV-A after the cold review's two highs, 00:53: "RV-a go"):** L2 (`game.js` `flipOne`: an old-calendar save at 00:00–04:59 moves onto the one clock's night, `tod < NIGHT_TO * 60`, and, RV-A H2 + M1, its waking day's count moves by the one clock too, so its first sleep counts: the real `bl_night` save stayed on waking day 65 after sleeping to Day 66 since v0.11.226), L3b (`prologue.js` the epilogue's `enter` and its Act 1 start by `calendar.js` `clockDay`, never back: from the tribute's night Act 1 on Day 44, not 45), L3c (`act1_heart.js` the day keys by `clockDay`; `week.js` the plan's spring row), L3a kept (the counts and titles on the clock label's day; a guard), L1 + TG2 closed as accepted. In play nothing changes (80 bot games: 0 screens at those hours); a save change: old-calendar saves moved at 00:00–04:59 (1 of 36 samples). No balance change. **Next push:** open, options later.
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** The one clock's leftovers done (v0.11.264). Open, options later (on the roadmap: `roadmap.md` section 2): the rest of section 2 (the RA1 line's items, MF; most measured on the old calendar, so re-measure on the long calendar first), 5b, Act 2, art, systems, later. *(The entry as it stood, word for word, in `history-51.md`.)*
+
+*(from Decided in chat)*
+
+- **v0.11.262: P30-A (the owner 2026-11-23 19:23: "P30-a go").** The options as laid out in chat: **P30-A 🟢 (picked, recommended)** D1 + D2 + D4; P30-B 🟡 D1 + D4 (the 00:11 farewell still lost); P30-C 🟠 D5 only (a guard test, the code as it was); P30-D 🔴 closed as accepted. Measured before the pick (`project/research/p30-measure.md`): 40 bot games, 1,193 screens in the gap (night screens of the wilds, village, Blackroot and road), 0 of them another text or choice by the text day; 0 Fallout or Heart screens in the gap; 0 of 15 searched evenings cross midnight; 1 of 39 saves in the gap, the same either way; forced 434 screens (219 at 00:11, 215 at 04:30), 6 after; the first trial without the pin changed the Sociable (6,821 → 6,841 cards), with it 0 lines differ. **Found while building (in scope):** `lastOfWeek` read nowhere after D2 (the leftovers check); gone, with `storyDay` from the Fallout's import. **The cold review (Opus):** no high; M1 (04:00–04:59 after a week's last day the daily marks have turned and `dd` has not; unreachable: open, options later), L1 (a farewell after midnight sets the clock back to Day 64 23:00: open, options later), L2 (`fo_night`'s count by the calendar day, by design: TG3), L3 (the farewell past Day 64: TG4), L4 (the midnight readers in the gap: open, with the one clock), L5 (`roadmap-retune.md`'s v0.11.203 L4 closed); TG1 (its D2 edge; the 04:00 hour stays with M1), TG3, TG4, TG5 done in the reviewer's wording (PG); TG2 with L1.
+
+*(the version notes)*
+
+## v0.11.262 — The Fallout's day by the text day (P30-A)
+
+- **Files:** `js/story/act1_fallout.js` (`foDay`, `dd`, `onStoryDay`, `farewellNow`, the import), `js/core/calendar.js` (`lastOfWeek` gone, the header comment), `sw.js`; tests: `tests/story.test.mjs` (the P30-A block), `tests/README.md`; docs: `project/research/p30-*` (repo only), the four docs, `history-51.md` (new), `roadmap-retune.md` (§10, L4), `roadmap-done-4.md`, `changelog-5.md`, `restore-points-4.md`.
+- **What:** see the version line. No What's new line: no player reaches the gap.
+- **Checks:** a game change (rule 2): while building the story test and `bash tools/check.sh quick` (exit 0, 893.6 s); the full `bash tools/check.sh` after the review's fixes and the docs: exit 0, 2,099 s, 0 drifted (its first two runs stopped on the tools test's doc pins for this push's moves: history part 51, changelog part 5; re-pinned).
+- **Opus:** the cold review (`project/research/p30-review.md`): no high; M1 and L1 open, options later; L2–L5, TG1, TG3–TG5 done. Planted faults through `tools/mutate.mjs` (`project/research/p30-mutate.md`): Claude's F1–F6 (6 of 6 caught) and the reviewer's R1–R6 (5 of 6; R4 an equivalent change, as the reviewer expected). **Fable:** none (no story text).
+
 ## Moved from the handover in v0.11.264 (word for word)
 
 *(the version line as it stood)*
