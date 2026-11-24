@@ -1,0 +1,7 @@
+# Changelog, part 6: Bone and Ash
+
+Versions from 0.11.241, newest first, moved word for word from `changelog.md` (the size rule MD: the docs every push changes stay under 20 KB) in v0.11.264 (0.11.241), when `changelog-5.md` (55.9 KB) neared the project tool's 60 KB. Newer versions: `changelog.md`. Older: `changelog-5.md` … `changelog-2.md`.
+
+| Version | Date | Commit | What changed |
+|---|---|---|---|
+| 0.11.241 | 2026-11-21 | `736cee7` | **Two suppers' weeks their own six (P13-A with WK-d + D1 + X1 + RV1).** Supper at Mei Lin's house no longer repeats in two more weeks of the long calendar. In the week before the Blackroot (story day 10), the six evenings are now all new instead of the second week's again: travel cakes counted for the ancestors, straw sandals made to a number, a basket sorted into two rows, name strips sewn into collars (Ya's says *guest of this house*), the mother's instructions to the guide, a custom before a journey. In the last week before the tribute, the six suppers are new too: a guest's bowl kept in the grain chest, the Sect called the weather, fish for the weaver's girl of seven, a lamp trimmed to a bead, a letter owed to James's mother, a tassel taken off for the week. A supper begun after midnight stays the day's it belongs to. Written by Fable, with Claude's cuts and the reviewers' fixes; both are the social supper, six a story day (no rule change). The old calendar, the balance and saves are unchanged. |

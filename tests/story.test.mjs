@@ -969,7 +969,7 @@ for (let run = 0; run < 6; run++) {
             if (stop) { if (c === '{') depth++; if (c === '}') { if (depth === 0) { i++; return out; } depth--; } }
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
         const LABELS = Object.values(HEART).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-        const PIN = { 'act1_heart.js': '311dc23a81239a0e', /* v0.11.263 (P31-A, the cold review's M1): re-pinned: ht_leave's clock never back (Math.max) */ /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (the watch line, the titles) */ /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '5486ba3c7c879cb7' /* v0.11.260 (P28-A, OC2): re-pinned: Ya's old-calendar posture line gone, its template wrapper with it (the cold review's L5) */ /* v0.11.251 (RV-A, HL): re-pinned: luHere reads lu_won (Lu Han beaten at the tribute stays away) */ /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
+        const PIN = { 'act1_heart.js': '20cc149fabb68e11', /* v0.11.264 (P32-A, L3c): re-pinned: the day keys by the one clock (hday) */ /* v0.11.263 (P31-A, the cold review's M1): re-pinned: ht_leave's clock never back (Math.max) */ /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (the watch line, the titles) */ /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '5486ba3c7c879cb7' /* v0.11.260 (P28-A, OC2): re-pinned: Ya's old-calendar posture line gone, its template wrapper with it (the cold review's L5) */ /* v0.11.251 (RV-A, HL): re-pinned: luHere reads lu_won (Lu Han beaten at the tribute stays away) */ /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'f5407fff487a26e2' }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
         const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
         const got = { labels: hash(JSON.stringify(LABELS)) };
         for (const f of ['act1_heart.js', 'stomp_act1.js', 'yuki_time.js']) got[f] = hash(skel(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')));
@@ -9530,6 +9530,90 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // not at Day 53 06:00 (another day of the same week)
     { const g = mk(43112, 'fo_mei', at(52, 12)); g.coil.act = 1; const r1 = G.gainCounts(g, 'Mei Lin'); g.minutes = at(53, 0, 30); const r2 = G.gainCounts(g, 'Mei Lin'); g.minutes = at(53, 4, 30); const r3 = G.gainCounts(g, 'Mei Lin'); g.minutes = at(53, 6); const r4 = G.gainCounts(g, 'Mei Lin');
       assert(r1 && r2 && r3 && !r4, `${T} (TG5): gainCounts by the waking day from 05:00 (${r1} ${r2} ${r3} ${r4})`); }
+}
+{
+    // v0.11.264 (owner pick P32-A; claude/p32-options.md): the one clock's leftovers. L3b the epilogue's Act 1 start and L3c the Heart's day
+    // keys by the one clock (calendar.js `clockDay`); L3a the counts and titles keep the clock label's day (a guard); the P31-A review's TG4
+    // rest (spacedNow, foldNight after midnight) and the planted faults that survived it (F6 "Call it a day", F7 `wakeCal`, R6 `fo_depart`).
+    // (L2 / TG3, the old-calendar flip at 04:00–04:59: tests/saves.test.mjs.)
+    const T = 'P32-A';
+    const C = await import('../js/core/calendar.js'), G = await import('../js/core/game.js'), Wk = await import('../js/core/week.js'), Cm = await import('../js/story/common.js'), D = 1440;
+    const at = (cal, h, m = 0) => (cal - 1) * D + h * 60 + m, lbl = (m) => G.clockLabel(m);
+    const mk = (seed, scene, min, fl = {}) => { const g = ensureBars(newGame(seed, { closed: true })); Object.assign(g.flags, { ya_met: true, fo_plan: true }, fl); g.yuki.realm = 9; g.scene = scene; g.minutes = min; return g; };
+    const labs = (g) => sceneView(g, SCENES).choices.filter((c) => !c.disabled).map((c) => c.label).join('|');
+    assert([at(43, 23), at(44, 0, 30), at(44, 4, 59), at(44, 5), at(44, 12)].map((m) => C.clockDay({ minutes: m })).join() === '43,43,43,44,44', `${T}: clockDay turns at 05:00`);
+    // L3b + RV-A (the review's H1, TG1): walked: the epilogue opened from Day 43 23:00, Day 44 00:30 and 04:30, then "Act 1: The Hearth
+    // Tree.": its `enter` keeps the clock (19:00 of the one clock's day, never back) and Act 1 begins on Day 44 (it went back to 19:00 from
+    // 23:00 and on to Day 44 19:00 from 00:30, so Act 1 began on Day 45); from the tribute's morning (Day 43 10:00) to 19:00 as before
+    { const r = [at(43, 23), at(44, 0, 30), at(44, 4, 30), at(43, 10)].map((m) => { const g = mk(43201, 'arrival', m, { long: true }); const w = (() => { let v = g.minutes, back = 0; Object.defineProperty(g, 'minutes', { get: () => v, set: (x) => { if (x < v) back++; v = x; }, enumerable: true, configurable: true }); return () => back; })();
+          goTo(g, SCENES, 'epilogue'); const e = g.minutes; const c = sceneView(g, SCENES).choices.find((x) => /^Act 1: The Hearth Tree\./.test(x.label)); choose(g, SCENES, c.index); return { e, end: g.minutes, back: w(), scene: g.scene }; });
+      assert(r.every((x) => x.back === 0 && x.scene === 'fo_start' && Math.floor(x.end / D) + 1 === 44 && Math.floor((x.end % D) / 60) === 6) && r[0].e === at(43, 23) && r[1].e === at(44, 0, 30) && r[3].e === at(43, 19),
+          `${T} (L3b, RV-A TG1): Act 1 on Day 44 from the tribute's night, the clock never back (${r.map((x) => `${lbl(x.e)} → ${lbl(x.end)} ${x.scene} back ${x.back}`).join('; ')})`); }
+    // L3c: the Heart's fireside talks keyed by the one clock: a talk on Day e18 − 1's evening holds the camp at Day e18 + 1 00:30 (the last night,
+    // still story day 18: two days, under the spacing's three); it opened there before (the midnight key read the next story day)
+    { const g0 = mk(43202, 'heart_camp', 0), e18 = C.calEnd(g0, 18), s16 = C.calStart(g0, 16);
+      const talk = (re) => SCENES.heart_camp.choices.find((x) => re.test(String(x.text)));
+      const run = (re, d, m2) => { const g = mk(43202, 'heart_camp', at(d, 20), { ya_party: true }); g.coil.act = 1; g.rel['Mei Lin'] = g.rel['Mei Lin'] || { f: 20, a: 0 }; g.rel.Ya = g.rel.Ya || { f: 20, a: 0 };
+          const c = talk(re); const s0 = c.show(g); c.do(g); const key = Object.keys(g.flags).find((k) => /^hc_(mei|ya)@/.test(k)); g.minutes = m2; return [s0, key, c.show(g)]; };
+      const mei = run(/Talk with Mei Lin/, e18 - 1, at(e18 + 1, 0, 30)), ya = run(/Ya's ledge/, e18 - 1, at(e18 + 1, 4, 30)), late = run(/Talk with Mei Lin/, e18 - 1, at(e18 + 2, 0, 30)), mid = run(/Talk with Mei Lin/, s16 + 3, at(s16 + 5, 0, 30));
+      assert(mei[0] && mei[1] === `hc_mei@${e18 - 1}` && !mei[2] && ya[0] && ya[1] === `hc_ya@${e18 - 1}` && !ya[2] && !mid[2] && late[2], `${T} (L3c, TG4 spacedNow): the last night's camp after midnight holds a talk two days back (${JSON.stringify({ mei, ya, mid, late })})`);
+      // RV-A (the review's TG5): a talk taken at 00:30 (Ya's, its `do` at night) is the night's day's (s16 + 2): closed two evenings on, open three on
+      { const g = mk(43202, 'heart_camp', at(s16 + 3, 0, 30), { ya_party: true }); g.coil.act = 1; g.rel.Ya = g.rel.Ya || { f: 20, a: 0 };
+        const i = sceneView(g, SCENES).choices.find((x) => /Ya's ledge/.test(x.label))?.index; choose(g, SCENES, i);
+        const ev = (d) => { const h = structuredClone(g); h.minutes = at(d, 20); h.scene = 'heart_camp'; return /Ya's ledge/.test(labs(h)); };
+        assert(i != null && g.flags[`hc_ya@${s16 + 2}`] && !ev(s16 + 4) && ev(s16 + 5), `${T} (L3c, RV-A TG5): Ya's talk at 00:30 keyed ${Object.keys(g.flags).filter((k) => k.startsWith('hc_ya@'))}; evenings s16+4 ${ev(s16 + 4)}, s16+5 ${ev(s16 + 5)}`); }
+      // RV-A (TG4, TG6): the guardian through the hub's view. The late phase (from Day e18 + 1 05:00, the door shown at night): lost at 00:30
+      // on Day e18 + 2 (walked: `guardian_lost`'s enter), the door hidden at 00:30 and 04:59 (the same day by the one clock), shown at 05:00;
+      // the crawl round shown throughout (late). Before it: lost at 14:00 on s16 + 2, the crawl shown at Day s16 + 3 04:59, gone at 05:00
+      { const hub = (min, fl) => { const g = mk(43207, 'heart_hub', min, { log_heard: true, ...fl }); g.coil.act = 1; return labs(g); };
+        const L = mk(43207, 'heart_hub', at(e18 + 2, 0, 30), { log_heard: true }); L.coil.act = 1; goTo(L, SCENES, 'guardian_lost'); const ld = L.flags.guardian_lost_day;
+        const fl = { guardian_lost_day: ld, guardian_losses: 1 }, door = (m) => /door of bone/.test(hub(m, fl)), round = (m) => /Go round the guardian/.test(hub(m, fl));
+        const E = mk(43207, 'heart_hub', at(s16 + 2, 14), { log_heard: true }); E.coil.act = 1; goTo(E, SCENES, 'guardian_lost'); const ed = E.flags.guardian_lost_day, crawl = (m) => /Go round the guardian/.test(hub(m, { guardian_lost_day: ed, guardian_losses: 1 }));
+        assert(ld === e18 + 1 && !door(at(e18 + 2, 0, 30)) && !door(at(e18 + 2, 4, 59)) && door(at(e18 + 2, 5)) && round(at(e18 + 2, 0, 30)) && round(at(e18 + 2, 5)) && ed === s16 + 2 && crawl(at(s16 + 3, 4, 59)) && !crawl(at(s16 + 3, 5)),
+            `${T} (L3c, RV-A TG4): the guardian's day by the one clock (late: lost ${ld}, door ${[door(at(e18 + 2, 0, 30)), door(at(e18 + 2, 4, 59)), door(at(e18 + 2, 5))]}, round ${round(at(e18 + 2, 0, 30))}; before: lost ${ed}, crawl ${crawl(at(s16 + 3, 4, 59))} ${crawl(at(s16 + 3, 5))})`); }
+      // RV-A (TG6): the spring walked by its choice at 10:00: keyed that day, closed the next two days, open the third
+      { const g = mk(43208, 'heart_hub', at(s16 + 1, 10), { spring_found: true, log_heard: true }); g.coil.act = 1; const i = sceneView(g, SCENES).choices.find((x) => /Wash at the spring/.test(x.label))?.index; choose(g, SCENES, i);
+        const sp = (d) => { const h = mk(43208, 'heart_hub', at(d, 10), { ...g.flags }); h.coil.act = 1; return /Wash at the spring/.test(labs(h)); };
+        assert(i != null && g.flags[`spring@${s16 + 1}`] && !sp(s16 + 2) && !sp(s16 + 3) && sp(s16 + 4), `${T} (L3c, RV-A TG6): the spring walked: ${Object.keys(g.flags).filter((k) => k.startsWith('spring@'))}; ${[sp(s16 + 2), sp(s16 + 3), sp(s16 + 4)]}`); }
+      const t = mk(43202, 'heart_morning', at(s16 + 2, 6)); assert(SCENES.heart_morning.title(t) === `Day ${s16 + 2}`, `${T} (L3a): the Heart's morning title keeps the label's day`); }
+    // L3c (week.js): the plan's spring row reads the spring's key by the one clock: a wash on the stay's first day (s16) shows "opens Day
+    // s16 + 3" at Day s16 + 3 00:30 (the night before it opens); by the midnight day the row had no day there
+    { const g0 = mk(43206, 'heart_hub', 0), s16 = C.calStart(g0, 16); const g = mk(43206, 'heart_hub', at(s16 + 3, 0, 30), { spring_found: true, [`spring@${s16}`]: true, log_heard: true }); g.coil.act = 1;
+      Wk.planSet(g, 'door:heart_spring', 1); const row = Wk.doorCards(g, SCENES).find((d) => d.scene === 'heart_spring');
+      g.minutes = at(s16 + 3, 6); const row6 = Wk.doorCards(g, SCENES).find((d) => d.scene === 'heart_spring');
+      assert(row && row.next === s16 + 3 && Wk.doorNote(row) === `every 3rd day, opens Day ${s16 + 3}` && row6 && row6.next === null, `${T} (L3c, week.js): the spring's row by the one clock (${JSON.stringify(row)} | ${JSON.stringify(row6)})`); }
+    // L3a: the counts keep the clock label's day; every text with a count slot is the Fallout's (story days 8–10), so the tribute's night
+    // (Day 44 00:30, story day 7) never draws one
+    { const SL = /\{(days|Days|since|Since|OnElder|elderDay|Day)\}/;
+      const files = readdirSync(new URL('../js/story/', import.meta.url)).filter((f) => f.endsWith('.js') && SL.test(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8'))).sort();
+      const { HT_BODY: HB } = await import('../js/story/house_time.js'); const { TT: TT2 } = await import('../js/story/tribute_texts.js');
+      const htKeys = Object.values(HB).flatMap((v) => Object.entries(v).filter(([, x]) => SL.test(String(x))).map(([k]) => k)), ttKeys = Object.entries(TT2).filter(([, v]) => SL.test(String(v))).map(([k]) => k);
+      const g = mk(43203, 'fo_ashfall', at(65, 0, 30)); const d65 = C.countsFill(g, '{Day}');
+      assert(files.join() === 'act1_fallout.js,house_texts.js,tribute_texts.js' && htKeys.every((k) => k.startsWith('fo_')) && ttKeys.join() === 'letterPaid' && d65 === 'Day sixty-five',
+          `${T} (L3a, TG4 countsFill): count slots only in the Fallout's texts (${files.join()}; ${htKeys.join()}; ${ttKeys.join()}); {Day} by the label (${d65})`); }
+    // TG4: foldNight after midnight on a stay's last night walks forward: the Fallout's quiet night after story day 8's last day (Day 51 00:30)
+    // and after day 10's (Day 65 00:30, still day 10, a stay's) fold to the morning, the clock never back
+    { const r = [at(51, 0, 30), at(65, 0, 30)].map((m) => { const g = ensureBars(newGame(43204, { closed: true })); g.coil.act = 1; Object.assign(g.flags, { ending: 'paid', palisade: true, wolf: 'driven' }); g.minutes = at(45, 22);
+          goTo(g, SCENES, 'fo_night'); Wk.foldNight(g, SCENES); choose(g, SCENES, sceneView(g, SCENES).choices.find((c) => !c.disabled).index); Wk.foldNight(g, SCENES);
+          g.minutes = m; goTo(g, SCENES, 'fo_night'); const sd = C.storyDay(g); const f = Wk.foldNight(g, SCENES); return { sd, steps: f.steps, scene: g.scene, end: g.minutes, back: g.minutes < m }; });
+      assert(r.every((x) => !x.back && x.steps >= 1 && x.end >= x.end - (x.end % D) + 6 * 60) && r[1].sd === 10, `${T} (TG4 foldNight): after midnight on a stay's last night the fold walks on to the morning (${JSON.stringify(r)})`); }
+    // F6: "Call it a day" from 05:00 only: the shrine wood's quiet day (carvings seen) offers it at 10:00, not at 04:30 (the night) nor 04:59.
+    // A guard: P31's F6 (from 04:00) is an equivalent change (at 04:xx every evening hub already offers its evening way, so `exitAt` is
+    // false: 0 of 7,040 forced hub screens at 04:30 / 04:59 showed it with the fault planted, 220 at 10:00; project/research/p32-mutate.md)
+    { const lg = (h, m = 0) => { const g = ensureBars(newGame(99901, { closed: true })); g.flags.ending = 'paid'; Object.assign(g.flags, { bl_day: 3, bl_n: 0, mei_party: true, ya_party: true, ya_mocked: true, ya_sparred: true, rr_listened: true, dw_carving: true, bl_region: 'dw' });
+          g.minutes = (C.calStart(g, 13) - 1) * D + h * 60 + m; goTo(g, SCENES, 'dw_hub'); return /Call it a day/.test(labs(g)); };
+      assert(lg(10) && !lg(4, 30) && !lg(4, 59), `${T} (F6): Call it a day on the quiet wood day at 10:00 only (${[lg(10), lg(4, 30), lg(4, 59)].join(' ')})`); }
+    // F7: a spaced card's "opens Day N" is the same at 03:30 and 04:30 of the night after (the waking day's calendar day by the one clock)
+    { const g = ensureBars(newGame(99701, { closed: true })); goTo(g, SCENES, 'wilds'); g.minutes = D + 7 * 60; g.james.satiety = 80; g.tasks.fam['wild_train:1'] = 8;
+      Cm.markDaily(g, 't_blade'); const n0 = Wk.cardNote(g, 'wild_train:1'); g.minutes = at(3, 3, 30); const n1 = Wk.cardNote(g, 'wild_train:1'); g.minutes = at(3, 4, 30); const n2 = Wk.cardNote(g, 'wild_train:1');
+      assert(/opens Day 5$/.test(n0) && n1 === n0 && n2 === n0, `${T} (F7): the note at 03:30 and 04:30 as at the evening (${n0} | ${n1} | ${n2})`); }
+    // R6: fo_depart never moves the clock back, not even inside its step: every write of g.minutes in the farewell walks from 00:11 and 03:59 forward
+    { const watch = (g) => { let v = g.minutes, back = 0; Object.defineProperty(g, 'minutes', { get: () => v, set: (x) => { if (x < v) back++; v = x; }, enumerable: true, configurable: true }); return () => back; };
+      const walk = (min) => { const g = mk(43205, 'fo_ashfall', min); const backs = watch(g); const path = [];
+          for (let i = 0; i < 8 && g.scene !== 'bl_start'; i++) { const v = sceneView(g, SCENES); const c = v.choices.find((x) => /^Evening|^Go up to the loft|^Hold her|^Sleep|^Into the Blackroot/.test(x.label)) || v.choices[0]; path.push(g.scene); if (!c) break; choose(g, SCENES, c.index); }
+          return { path: path.join('>'), scene: g.scene, backs: backs() }; };
+      const r = [walk(at(65, 0, 11)), walk(at(65, 3, 59)), walk(at(64, 23))];
+      assert(r.every((w) => w.backs === 0 && w.scene === 'bl_start' && /fo_depart|fo_farewell/.test(w.path)), `${T} (R6): the farewell walks write the clock forward only (${JSON.stringify(r)})`); }
 }
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);

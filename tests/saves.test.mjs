@@ -108,8 +108,8 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
 //    with it; the rewind point too; then it plays on, saves and loads. A long-calendar save and a moved one are left alone. RV1 (H1, M1):
 //    a save at 00:00–03:59 starts on the week's seventh night and that waking day's marks go to the week's last day.
 {
-    const { inAct1, advance, combatStep: cs, wakeDay } = await import('../js/core/game.js');
-    const { calStart, calEnd, storyDay, weekNights, LONG_CAL: LC, BL_SPAN } = await import('../js/core/calendar.js');
+    const { inAct1, advance, combatStep: cs, wakeDay, sleepUntil } = await import('../js/core/game.js');
+    const { calStart, calEnd, storyDay, weekNights, storyNight, LONG_CAL: LC, BL_SPAN } = await import('../js/core/calendar.js');
     const { rewind } = await import('../js/core/coil.js');
     const { spacedFree, dayKey, day, markDaily } = await import('../js/story/common.js');
     let moved = 0, kept = 0, marks = 0, todays = 0, nights = 0;
@@ -124,7 +124,7 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
         const rawF = readFileSync(new URL(f, dir), 'utf8'), sha = createHash('sha256').update(rawF).digest('hex');
         const g = deserialize(unpack(rawF));
         if (g.cal === LC) { const b = JSON.stringify(g); assert(flipFill(g) === false && JSON.stringify(g) === b, `FP1 ${f}: a long-calendar save is left alone`); kept++; continue; }
-        const d = Math.floor(g.minutes / 1440) + 1, tod = g.minutes % 1440, act = g.coil?.act || 0, night = tod < 240 && d > 1;
+        const d = Math.floor(g.minutes / 1440) + 1, tod = g.minutes % 1440, act = g.coil?.act || 0, night = tod < 300 && d > 1; // v0.11.264 (P32-A, L2): the one clock's night (was 240)
         const sd = g.coil?.snap ? Math.floor(g.coil.snap.minutes / 1440) + 1 : null, stod = g.coil?.snap ? g.coil.snap.minutes % 1440 : 0;
         const peekMin = peekSave(unpack(rawF)).minutes; // v0.11.261 (P29-A, SL): the Saves screen's minutes as peekSave reads them (was flipMinutes with the raw save's act, the review's L1)
         const dk = Object.keys(g.flags).filter((k) => /@-?\d+$/.test(k));
@@ -190,8 +190,34 @@ assert(kindOf(() => deserialize(JSON.stringify(noV))) === 'ok', 'a save without 
         if (spacedFree(t, 'probe_fp1', dayKey(t)) !== b0 || b0) lost++;
         assert(wakeDay(t) === calEnd(t, dd - 1), `FP1 (RV1, M1): Day ${dd} 00:30 is still the evening's waking day (${wakeDay(t)})`); }
     assert(lost === 0, `FP1 (RV1, M1): a card done the evening before stays done after a night move (${lost} of 9 reopened)`);
-    for (const [m, w] of [[30, 6], [239, 6], [240, 0], [1439, 0]]) { const t = oldSave(ensureBars(newGame(6, {}))); t.minutes = 4 * 1440 + m; flipFill(t);
+    for (const [m, w] of [[30, 6], [239, 6], [240, 6], [299, 6], [300, 0], [1439, 0]]) { const t = oldSave(ensureBars(newGame(6, {}))); t.minutes = 4 * 1440 + m; flipFill(t); // v0.11.264 (P32-A, L2): 04:00–04:59 the night too (240: was 0)
         assert(weekNights(t) === w, `FP1 (RV1, H1): a save at ${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')} on Day 5 starts on night ${w} of the week (${weekNights(t)})`); }
+    // v0.11.264 (owner pick P32-A, L2; the P31-A review's L2 / TG3): an old Act 1 save on Day 9 at 04:30 (and 03:30, 04:59) lands on the night the
+    // one clock reads (story day 8's last night, Day 50): its week's seventh night, the story's night, and the waking day's marks on Day 50,
+    // the day `wakeDay` reads, so a card done that day stays done; 05:00 is day 9's first morning (Day 51, its marks there)
+    { const mkOld = (m) => { const t = oldSave(ensureBars(newGame(14, {}))); t.coil.act = 1; t.flags.ending = 'accord'; t.minutes = 7 * 1440 + 20 * 60; wakeDay(t);
+          markDaily(t, 'probe_tg3'); advance(t, 8 * 1440 + m - t.minutes); return t; }; // done on day 8's evening (its mark @8), saved on Day 9 at m
+      const r = [[210, true], [270, true], [299, true], [300, false]].map(([m, nightOn]) => { const t = mkOld(m); flipFill(t); const wd = wakeDay(t);
+          const markDay = Object.keys(t.flags).filter((k) => k.startsWith('probe_tg3@')).map((k) => +k.split('@')[1])[0], done = !spacedFree(t, 'probe_tg3', dayKey(t));
+          const ok = nightOn ? storyDay(t) === 8 && weekNights(t) === 6 && storyNight(t) && wd === calEnd(t, 8) && markDay === wd && done
+              : storyDay(t) === 9 && weekNights(t) === 0 && !storyNight(t) && markDay === calStart(t, 8); // 05:00: day 9's week begins, day 8's mark on its first day as before
+          return ok ? 'ok' : `${m}: sd ${storyDay(t)} nights ${weekNights(t)} wd ${wd} mark ${markDay} done ${done}`; });
+      assert(r.every((x) => x === 'ok'), `FP1 (P32-A, L2, TG3): an old Day 9 save at 03:30 / 04:30 / 04:59 lands on story day 8's night with its evening's mark, 05:00 on day 9 (${r.join('; ')})`); }
+    // RV-A (the P32-A review's TG2, H2): the same save as an old version wrote it (its waking day by the old 04:00 turn: at 04:30 `lastX` 9,
+    // at 03:30 8), moved, then played on: the evening's mark done tonight, open on each of the next three mornings, the waking day one more a sleep
+    { const run = (m, lx) => { const t = oldSave(ensureBars(newGame(14, {}))); t.coil.act = 1; t.flags.ending = 'accord'; t.minutes = 8 * 1440 + m; t.wake = { n: 8, lastX: lx, slept: 8 }; t.flags['probe_tg2@8'] = true;
+          flipFill(t); const seq = [[wakeDay(t), !spacedFree(t, 'probe_tg2', dayKey(t))]];
+          for (let i = 0; i < 3; i++) { sleepUntil(t, 6); seq.push([wakeDay(t), !spacedFree(t, 'probe_tg2', dayKey(t))]); t.minutes += 12 * 60; }
+          return seq.map(([w, d]) => `${w}${d ? '*' : ''}`).join(' '); };
+      const r = [run(270, 9), run(299, 9), run(210, 8)];
+      assert(r.every((x) => x === '50* 51 52 53'), `FP1 (RV-A, TG2, H2): an old build's 04:30 / 04:59 / 03:30 save: done tonight, open the next three mornings (${r.join(' | ')}; * = done)`); }
+    // RV-A (TG3, M1): after every night move the first sleep counts: an old save at 00:30, 03:30 and 04:30 (its wake as it was written) and the
+    // real bl_night save (Day 66 01:25): the waking day one more at the next 06:00; a day save (10:00) one more after its night
+    { const one = (m, lx) => { const t = oldSave(ensureBars(newGame(15, {}))); t.coil.act = 1; t.flags.ending = 'accord'; t.minutes = 8 * 1440 + m; t.wake = { n: 8, lastX: lx, slept: lx === 9 && m >= 300 ? 9 : 8 }; if (m >= 300) t.wake.n = 9;
+          flipFill(t); const w0 = wakeDay(t); sleepUntil(t, 6); return wakeDay(t) - w0; };
+      const bf = files.find((f) => /bl_night/.test(f)); const b = deserialize(unpack(readFileSync(new URL(bf, dir), 'utf8'))); flipFill(b); const b0 = wakeDay(b), bm = b.minutes; sleepUntil(b, 6); const b1 = wakeDay(b);
+      const r = [one(30, 8), one(210, 8), one(270, 9), one(600, 9)];
+      assert(r.every((x) => x === 1) && b1 === b0 + 1 && Math.floor(bm / 1440) + 1 === 66, `FP1 (RV-A, TG3, M1): the first sleep after a move counts (${r.join(' ')}; bl_night ${b0} → ${b1})`); }
     // RV1 (H1, TG1): an old game played to the first forest night event (Day 2, 01:xx) or to the fire night (vday 2, after midnight),
     // moved, then played on: the counter turns at the next morning, the tribute on Day 43, Act 1 on Day 44 (its rewind point too), the fire shows
     const pol = (g) => { const v = sceneView(g, SCENES); const c = v.choices.filter((x) => !x.disabled); if (!c.length) return null;

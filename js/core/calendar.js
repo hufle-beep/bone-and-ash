@@ -48,6 +48,10 @@ let pinnedDay = null;
  *  midnight before (00:00–04:59 after a story day's last calendar day read the next story day; 0 screens in play, project/research/p31-measure.md). */
 export const DAY_FROM = 5;
 export const storyDay = (g) => (pinnedDay != null ? pinnedDay : storyDayOf(g, calDayOf((g.minutes || 0) - DAY_FROM * 60)));
+/** v0.11.264 (owner pick P32-A, L3b + L3c): the calendar day by the one clock (00:00–04:59 is the day before), for what decides what
+ *  happens (the epilogue's Act 1 start, the Heart's day keys). What is shown beside the clock label (`dayWord`, `dayTitle`, the counts,
+ *  the "Day N" titles) keeps the label's day from midnight (L3a, by design). */
+export const clockDay = (g) => calDayOf((g?.minutes || 0) - DAY_FROM * 60);
 /** v0.11.215 (owner pick RV1, MS): run `fn` as on story day `d` (a week's card's result, read on the day its work started). */
 /** v0.11.249 (P19-A RV, C L3): the pinned story day, or null (game.js `gainCounts`). */
 export const pinnedStoryDay = () => pinnedDay;
@@ -93,7 +97,7 @@ const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 /** "one day" / "fifty-nine days". */
 export const daysWord = (n) => `${numWord(n)} ${n === 1 ? 'day' : 'days'}`;
 export const DaysWord = (n) => cap(daysWord(n));
-const today = (g) => calDayOf(g?.minutes);
+const today = (g) => calDayOf(g?.minutes); // v0.11.264 (P32-A, L3a): from midnight on purpose: the counts and titles read the clock label's day ("Day 65, 00:30")
 /** The days left to the tribute (1 = tomorrow). The village is counted by its weeks (`vday`, the nights slept this story day);
  *  the short road (no `long` flag: straight to the village on the tribute's eve) has 1; before the village's first week begins, all of it. */
 export function tributeLeft(g) {

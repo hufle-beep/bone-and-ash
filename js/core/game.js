@@ -1621,8 +1621,8 @@ export function migrate(g) {
  * calendar. Its story day d moves to the first day of d's week (`calStart`), the hour kept; `cal: LONG_CAL`; `calBl` as `blFill` gives it
  * (BL_SPAN before the Blackroot, 1 in or past it); `cal_night` 0 (the week of its story day begins). DK: the day marks move with it (every
  * `key@d` flag, `guardian_lost_day`, `foundation_day`: d → calStart(d); a mark of day 0 or before stays), so a card done today stays done.
- * RV1 (H1, M1): a save at 00:00–03:59 is on the night after waking day d − 1: `cal_night` 6 (the week's seventh night) and that waking
- * day's marks to calEnd(d − 1).
+ * RV1 (H1, M1): a save at 00:00–03:59 (00:00–04:59 since v0.11.264, P32-A L2: the one clock's night) is on the night after waking day
+ * d − 1: `cal_night` 6 (the week's seventh night) and that waking day's marks to calEnd(d − 1).
  * The Coil's rewind point moves the same way (Day 1 stays Day 1, Act 1's Day 8 dawn → Day 44). Called by main.js on every load (the
  * autosave, slots, backups, an import) and by `peekSave` for the Saves screen's line (v0.11.261, P29-A; the review's L2), not by
  * `migrate`: the tests' old-calendar games keep their round trip. Returns true when it moved.
@@ -1634,11 +1634,16 @@ function flipOne(s, act) {
     s.cal = LONG_CAL;
     s.calBl = act === 0 || d <= 10 ? BL_SPAN : 1;
     s.minutes = (calStart(s, d) - 1) * 1440 + tod;
+    // v0.11.264 (owner pick RV-A, the P32-A review's H2 + M1): the waking day's count moves by the one clock too. An old save at 04:00–04:59
+    // counted its day with the old 04:00 turn (`lastX` one ahead), and every night move set `slept` to the moved day, so the first sleep
+    // after it did not count (the bl_night save stayed on waking day 65 after sleeping to Day 66). The count moves by the one clock's days
+    // between the old and the new minute; `slept` is the waking day itself, as a game on the long calendar has it. A day save: as before.
+    if (s.wake && typeof s.wake === 'object') { const x0 = X4(m0), x1 = X4(s.minutes); s.wake.n = (Number(s.wake.n) || 0) + x1 - x0; s.wake.lastX = x1; s.wake.slept = x1; }
     const f = s.flags && typeof s.flags === 'object' ? s.flags : (s.flags = {});
     // RV1 (H1, M1; the Opus review): a save at 00:00–03:59 rests on the night after waking day d − 1 (the old calendar's every night is a
     // story night): it starts on that week's seventh night (`cal_night` 6, as a new long game has it there, so the next morning turns the
     // wilds' and the village's counter), and that waking day's marks go to its week's last day (`dayKey` is the waking day: calEnd(d − 1))
-    const night = tod < 240 && d > 1; // v0.11.263 (P31-A): 04:00 kept here: an old save was written under the old night (to 04:00)
+    const night = tod < NIGHT_TO * 60 && d > 1; // v0.11.264 (owner pick P32-A, L2; the P31-A review's L2): to the one clock's 05:00 (was 240: an old save at 04:00–04:59 landed on a night the new clock reads, with the day's state)
     f.cal_night = night ? LONG_CAL - 1 : 0;
     const to = (n) => (n < 1 ? n : night && n === d - 1 ? calEnd(s, n) : calStart(s, n));
     const moved = [];

@@ -14,7 +14,7 @@
  *    The plan is `g.tasks.plan`: { hub, coil, lastDay, items: { cardId: count }, med: { sit, mer, qi } a day, done: { d, sit, mer, qi },
  *    running, stop, bt }.
  */
-import { storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS, NUM_WORDS } from './calendar.js'; // v0.11.224 (RV1, VK): NUM_WORDS
+import { storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS, NUM_WORDS, clockDay } from './calendar.js'; // v0.11.264 (P32-A, L3c): clockDay // v0.11.224 (RV1, VK): NUM_WORDS
 import { sceneView, choose, seenBefore } from './story.js'; // v0.11.248 (P18-A, NS-b): seenBefore
 import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes, wakeDay, NIGHT_TO } from './game.js';
 import { famOf, taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, carryHere, carriesHere, carriesRead, carryTaskId, isCarryTask, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
@@ -494,9 +494,9 @@ export function doorCards(g, scenes) {
         if (by.has(c.to) && by.get(c.to).rank >= rank) return;
         let label = card?.label;
         if (!label) { try { label = typeof c.text === 'function' ? c.text(g) : c.text; } catch { label = ''; } }
-        const k = DOOR_KEY[c.to], cal = k === 'spring' ? calDay(g) : null;
+        const k = DOOR_KEY[c.to], cal = k === 'spring' ? clockDay(g) : null; // v0.11.264 (P32-A, L3c): the spring's key by the one clock, as act1_heart.js writes it
         const nx = rep && !card ? (cal != null ? spacedNext(g, k, cal) : spacedNext(g, k, wakeDay(g)) - wakeDay(g) + wakeCal(g)) : null;
-        by.set(c.to, { id, scene: c.to, label: String(label || ''), status: card?.status === 'open' ? 'open' : 'closed', repeat: rep, next: nx != null && nx > (cal != null ? calDay(g) : wakeCal(g)) ? nx : null, rank });
+        by.set(c.to, { id, scene: c.to, label: String(label || ''), status: card?.status === 'open' ? 'open' : 'closed', repeat: rep, next: nx != null && nx > (cal != null ? cal : wakeCal(g)) ? nx : null, rank });
     });
     return [...by.values()].map(({ rank, ...d }) => d).sort((a, b) => PLAN_DOORS.indexOf(a.scene) - PLAN_DOORS.indexOf(b.scene)); // RV1 (M2): the talks last
 }

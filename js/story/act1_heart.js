@@ -6,7 +6,7 @@
 import { addItem, hasItem, condense, advance, jamesHpMax, d6 } from '../core/game.js';
 import { eatBest, pantry, foodCount, set, byForm, byDay, dayReply, spacedFree } from './common.js'; // v0.11.213 (FQ1, S3): spacedFree
 import { byDayLast } from '../core/lines.js';
-import { storyDay, calStart, dayWord } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): dayWord // v0.11.203 (owner pick T1, TS1): the long calendar (Day 19 is 91) // v0.11.154 (owner pick RV1, Fable's review, L2 CL)
+import { storyDay, calStart, dayWord, clockDay } from '../core/calendar.js'; // v0.11.264 (P32-A, L3c): clockDay // v0.11.224 (TX2, TS6): dayWord // v0.11.203 (owner pick T1, TS1): the long calendar (Day 19 is 91) // v0.11.154 (owner pick RV1, Fable's review, L2 CL)
 import { day, hour, encounter, rel, likesMei, likesYa, trio, trioStep, bumpRel, sleepUntil, logTrio, ykShape } from './act1_common.js';
 import { ykPath } from './yuki_path.js';
 
@@ -84,6 +84,9 @@ const PIN = 'Inside the Old Tree';
 const active = (g) => hour(g) >= 6 && hour(g) < 18;
 /** From Day 19 the tree is done with them: only the way forward is left (v0.11.87: Cultivate and Rest too). */
 const late = (g) => storyDay(g) >= 19; // v0.11.203 (T1, TS1): the story's day
+/** v0.11.264 (owner pick P32-A, L3c): the day keys (`spring@`, `hc_mei@`, `hc_ya@`, `guardian_lost_day`) by the one clock: the camp after
+ *  midnight on the last night is still that day's (a talk two days after the last no longer opens there). The title keeps the label's day. */
+const hday = (g) => clockDay(g);
 const guardianOpen = (g) => !!g.flags.log_heard && !g.flags.guardian;
 const ya = (g) => !!g.flags.ya_party;
 const both = (g) => likesMei(g) && likesYa(g);
@@ -208,13 +211,13 @@ ${pantry(g)} ${g.james.hp < jamesHpMax(g) * 0.5 ? 'You are hurt.' : ''}${late(g)
             { text: 'Listen to the hall with your Convergence.', show: (g) => active(g) && !late(g) && !g.flags.hall_song, time: 60, to: 'hall_listen' },
             { text: 'Explore the ring-chambers off the galleries.', show: (g) => active(g) && !late(g) && !g.flags.rings_done, time: 30, to: 'ring_chambers' },
             { text: 'Follow the sound of water.', show: (g) => active(g) && !late(g) && !g.flags.spring_found, time: 30, to: 'heart_spring' },
-            { text: 'Wash at the spring.', show: (g) => active(g) && !late(g) && !!g.flags.spring_found && spacedFree(g, 'spring', day(g)), time: 30, to: 'heart_spring' },
+            { text: 'Wash at the spring.', show: (g) => active(g) && !late(g) && !!g.flags.spring_found && spacedFree(g, 'spring', hday(g)), time: 30, to: 'heart_spring' },
             { text: 'Climb to the great wound high in the wall.', show: (g) => active(g) && !late(g) && !!g.flags.sect_marks && !g.flags.cut_read, time: 60, to: 'sect_cut' },
             { text: 'Go down into the root-galleries.', show: (g) => active(g) && !g.flags.roots_done, time: 30, to: 'heart_roots' },
             { text: 'Go down to the ship.', show: (g) => active(g) && !!g.flags.roots_done && !g.flags.ship_found, time: 60, to: 'ship_wreck' },
             { text: 'Go back to the ship\'s bridge. Hear the rest.', show: (g) => active(g) && !!g.flags.ship_found && !g.flags.log_heard, time: 40, to: 'ship_bridge' },
-            { text: 'Go through the door of bone, to whatever is singing.', show: (g) => (active(g) || late(g)) && guardianOpen(g) && g.flags.guardian_lost_day !== day(g), time: 40, to: 'guardian_approach' },
-            { text: 'Go round the guardian. Whatever it costs.', show: (g) => guardianOpen(g) && !!g.flags.guardian_lost_day && (late(g) || g.flags.guardian_lost_day === day(g)), time: 60, to: 'guardian_bypass' },
+            { text: 'Go through the door of bone, to whatever is singing.', show: (g) => (active(g) || late(g)) && guardianOpen(g) && g.flags.guardian_lost_day !== hday(g), time: 40, to: 'guardian_approach' },
+            { text: 'Go round the guardian. Whatever it costs.', show: (g) => guardianOpen(g) && !!g.flags.guardian_lost_day && (late(g) || g.flags.guardian_lost_day === hday(g)), time: 60, to: 'guardian_bypass' },
             { text: 'Into the heart-chamber.', show: (g) => !!g.flags.guardian && !g.flags.seed, time: 20, to: 'heart_core' },
             { text: 'Leave the Old Tree.', show: (g) => !!g.flags.seed, to: 'ht_leave' },
             // v0.11.87 (owner 2026-11-09 01:52, pick O1, the sitting loop): from Day 19 the tree is done with them, so no sit and no rest here (the Sitter sat here to about Day 50)
@@ -281,7 +284,7 @@ You hold it for longer than you would want anybody to see. ${ya(g) ? 'Ya sees. S
 
     heart_spring: {
         id: 'heart_spring', title: 'The Spring', art: 'hot_spring', place: `${PIN} — the spring`,
-        enter: (g) => { g.flags.spring_found = true; g.flags[`spring@${day(g)}`] = true; return []; },
+        enter: (g) => { g.flags.spring_found = true; g.flags[`spring@${hday(g)}`] = true; return []; },
         text: (g) => byDay(g, [(g) => `One gallery dips, and where it dips there is water: a pool in a basin of grown wood, fed from a seep in the wall and warmed by whatever lies far below. Steam rests on it like breath on a mirror.
 
 It is clean. Your omnitool tells you so twice, in the tone of a tool that doesn't believe itself either. The one clean water you have met on this whole world, and it is inside the corpse of a Hearth Tree.
@@ -565,8 +568,8 @@ In the end it is Mei Lin who speaks. "Thank you for bringing us here. I think I 
 ${byDay(g, HC_POOLS[hcPool(g)], `heart_camp:${hcPool(g)}`)}`; // v0.11.152 (owner pick RP1, RM6; Fable's): a new paragraph each night (up to four); RV1 (M2): each version counted on its own
         },
         choices: [
-            { text: 'Talk with Mei Lin by the fire.', show: (g) => spacedFree(g, 'hc_mei', day(g)), do: (g) => { g.flags[`hc_mei@${day(g)}`] = true; bumpRel(g, 'Mei Lin', 3, likesMei(g) ? 3 : 1); return [DR_HC_MEI(g)]; }, to: 'heart_night' },
-            { text: 'Climb up to Ya\'s ledge.', show: (g) => ya(g) && spacedFree(g, 'hc_ya', day(g)), do: (g) => { g.flags[`hc_ya@${day(g)}`] = true; bumpRel(g, 'Ya', 3, likesYa(g) ? 4 : 1); return [DR_HC_YA(g)]; }, to: 'heart_night' },
+            { text: 'Talk with Mei Lin by the fire.', show: (g) => spacedFree(g, 'hc_mei', hday(g)), do: (g) => { g.flags[`hc_mei@${hday(g)}`] = true; bumpRel(g, 'Mei Lin', 3, likesMei(g) ? 3 : 1); return [DR_HC_MEI(g)]; }, to: 'heart_night' },
+            { text: 'Climb up to Ya\'s ledge.', show: (g) => ya(g) && spacedFree(g, 'hc_ya', hday(g)), do: (g) => { g.flags[`hc_ya@${hday(g)}`] = true; bumpRel(g, 'Ya', 3, likesYa(g) ? 4 : 1); return [DR_HC_YA(g)]; }, to: 'heart_night' },
             { text: 'Sit up with Yuki and the hearth-log.', show: (g) => hasItem(g, 'hearth_log'), do: (g) => { bumpRel(g, 'Yuki', 2, 0); return [DR_HC_LOG(g)]; /* v0.11.126 (NQ1): by her form, Fable's; v0.11.136 (NC1): by the day */ }, to: 'heart_night' },
             { text: 'Story Mode only (removed in v0.11.41).', show: () => false, to: 'heart_night' }, // v0.11.41 (D2-a): Story Mode's sit; the place kept (choice indices)
             { text: 'Sleep.', to: 'heart_night' },
@@ -728,7 +731,7 @@ ${ya(g) ? '"It was good," says Ya quietly, standing over it. She has no higher p
     },
     guardian_lost: {
         id: 'guardian_lost', title: 'Thrown Out', art: 'heart_hall', place: PIN,
-        enter: (g) => { g.flags.guardian_lost_day = day(g); g.flags.guardian_losses = (g.flags.guardian_losses || 0) + 1; g.james.hp = Math.max(3, g.james.hp); return []; },
+        enter: (g) => { g.flags.guardian_lost_day = hday(g); g.flags.guardian_losses = (g.flags.guardian_losses || 0) + 1; g.james.hp = Math.max(3, g.james.hp); return []; },
         text: (g) => `The guardian does not kill you. It could have. That part you work out later.
 
 It only picks you up, as you would lift a cat out of a place the cat should not be, carries you back out through the bone door, sets you down in the root-galleries, and goes in again. The door shuts.

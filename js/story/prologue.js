@@ -24,7 +24,7 @@ import { HEART, BREAK_HUBS as B3 } from './act1_heart.js';
 import { RETURN, BREAK_HUBS as B4, installSelene } from './act1_return.js';
 import { LONGFOREST, BREAK_HUBS as B0 } from './longforest.js';
 import { MERIDIANS, EXTRA_FROM } from './meridians.js';
-import { weekBegins, calStart, tributeLeft, daysWord, dayTitle } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar
+import { weekBegins, calStart, tributeLeft, daysWord, dayTitle, clockDay } from '../core/calendar.js'; // v0.11.264 (P32-A, L3b): clockDay // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar
 import { installYukiTime } from './yuki_time.js'; // v0.11.137 (TR1)
 import { installHouseTime } from './house_time.js'; // v0.11.139 (MW1)
 import { installKitchen } from './kitchen_install.js'; // v0.11.181 (SP1, PS)
@@ -925,7 +925,7 @@ Your hands are shaking. It isn't fear. It is that the thing worked.`),
     },
     epilogue: {
         id: 'epilogue', title: 'The Dead Tree', art: 'ridge', place: 'Blackroot Wilds — the ridge',
-        enter: (g) => { const p = clockParts(g.minutes); g.minutes = (p.day - 1) * 1440 + 19 * 60; return []; },
+        enter: (g) => { g.minutes = Math.max(g.minutes, (clockDay(g) - 1) * 1440 + 19 * 60); return []; }, // v0.11.264 (owner pick RV-A, the P32-A review's H1): 19:00 of the one clock's day, never back (from 23:00 it went back to 19:00; from Day 44 00:30 on to Day 44 19:00, so Act 1 began on Day 45)
         text: (g) => `By evening you are up on the ridge, ${byForm(g, 'with Yuki on your shoulder', 'with Yuki pacing at your side', 'with Yuki at your elbow')} ${g.flags.romance ? 'and Mei Lin\'s hand in yours' : g.rel['Mei Lin']?.f > 10 ? 'and Mei Lin a step behind you' : 'and nobody else'}.
 
 Down below, Ashfall lights its lamps, window by window. Beyond them the black forest rolls on to the horizon, and in the middle of it stands the thing you saw from this spot before: a dead tree, its corpse so vast that it scrapes the clouds.
@@ -943,7 +943,7 @@ You are forty. Your assets: a fresh doctorate, ${byForm(g, 'a cat', 'a cat the s
 "Sure," you say. "I don't see how that could go wrong."
 
 — **End of the Prologue.** —`,
-        choices: [{ text: 'Act 1: The Hearth Tree.', do: (g) => { const d = Math.floor(g.minutes / 1440) + 1; g.minutes = Math.max(d, calStart(g, 8) - 1) * 1440 + 6 * 60; /* v0.11.203 (T1, TS1): Day 8, or 44 in the long calendar */ g.james.hp = Math.max(g.james.hp, 1); return []; }, to: 'fo_start' }],
+        choices: [{ text: 'Act 1: The Hearth Tree.', do: (g) => { const d = clockDay(g); g.minutes = Math.max(d, calStart(g, 8) - 1) * 1440 + 6 * 60; /* v0.11.264 (owner pick P32-A, L3b): the day by the one clock (00:00–04:59 is the night before: Day 44 06:00, not 45) */ /* v0.11.203 (T1, TS1): Day 8, or 44 in the long calendar */ g.james.hp = Math.max(g.james.hp, 1); return []; }, to: 'fo_start' }],
     },
 };
 

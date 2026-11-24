@@ -2,6 +2,29 @@
 
 Started 2026-11-23 (v0.11.262), when `history-50.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-50.md` … `history.md`.
 
+## Moved from the handover in v0.11.264 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-23 (Europe/Budapest). **Version:** 0.11.263 (`sw.js` VERSION `bone-ash-0.11.263`): **the one clock (P31-A; the owner 2026-11-23 22:19: "P31-a go"):** K1 (`calendar.js` `storyDay` from 05:00, `DAY_FROM`; was midnight; the pin kept), K2 (`game.js` `NIGHT_TO` = `DAY_FROM`, the waking day, the daily marks and the night to 05:00; was 04:00: `X4`, `wakeCal`, `gainCounts`, `TEXT_DAY_FROM` tied to it, "Call it a day" from it), L1g (`fo_depart` and, from the cold review's M1, `ht_leave` never set the clock back), FD (`foDay` folded into `storyDay`), the tests. In play nothing changes (100 bot games identical with K1, 40 with K1 + K2; 0 bot screens at 04:xx; 0 of 39 saves at 04:00–04:59); forced past midnight 53 of 560 screens change, the P30-A review's M1, L1, L4 and the Heart's two reads closed. No balance or save change. **Next push:** open, options later.
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** The one clock done (v0.11.263). Open, options later (on the roadmap: `roadmap.md` section 2's v0.11.263 line): the P31-A review's L1 (a v0.11.262 save at 04:00–04:59 counts a second waking day; 0 of 39 saves; a save change) with TG2, L2 (`flipFill` keeps the old night `tod < 240`: an old-calendar save at 04:00–04:59 lands on a night that contradicts its marks; very rare; a save change) with TG3, L3 (the calendar's text helpers, `today` / `day(g)`, still turn at midnight: a fourth clock; reach probably 0, unmeasured), TG4's rest (`spacedNow`, `countsFill` at Day 44 00:30, `foldNight` after midnight), the planted faults that survived (F6 "Call it a day" and F7 `wakeCal` at 04:xx, R6 `fo_depart`'s clock inside the step); then the rest of section 2 (the RA1 items, MF; most measured on the old calendar, so re-measure first), 5b, Act 2, art, systems, later. *(The entry as it stood, word for word, in `history-51.md`.)*
+
+*(from Decided in chat)*
+
+- **v0.11.261: P29-A (the owner 2026-11-23 17:19: "P-29A go").** The options as laid out in chat: **P29-A 🟢 (picked, recommended)** SL1 + SL2 the loading way, M4a + M4b by the pattern; P29-B 🟡 SL1 by the reviewer's one-liner (33 of 39 Coils), M4 by the pattern; P29-C 🟠 SL the loading way, M4 closed as accepted; P29-D 🔴 both closed as accepted. Measured before the pick: 39 saves, 1 on the wrong day (`v0.8.5-act1-end`, 104 / 94), 6 without their Coil (the v0.8.5 six), 0 / 0 both ways after; `peekSave` 0.12 → 0.13 ms a save; about 95 hammerspace routine lines a game (100 bot games, dry runs counted: a ceiling), the bare pot line 0, about 69 prefixed pot lines a game already whole. **Found while building (in scope):** `flipMinutes` test-only after the change (the leftovers check); gone, its two test uses moved to `peekSave` and a local helper through `flipFill`. **The cold review (Opus):** no high, no medium; L1 ("as it loads" stops short of `checkScene`'s hub and scene checks: the wording fixed, the behaviour as before, 0 of 39 saves affected), L2 (two comments), TG1–TG6 done in the reviewer's wording (PG); its C1–C6, expected to survive, all caught after them.
+
+*(the version notes)*
+
+## v0.11.261 — The Saves screen's day and Coil; the routine's meals in the Results (P29-A)
+
+- **Files:** `js/core/game.js` (`peekSave` through `deserialize` + `flipFill`; `flipMinutes` gone; two comments, L2), `js/main.js` (`descOf`, the import), `js/core/replies.js` (two patterns), `js/core/tasks.js` (`POT_BARE`, TG4), `js/core/news.js` (What's new), `sw.js`; tests: `tests/saves.test.mjs` (the SL blocks: TG4, the two named, TG5, TG1, TG2; FP1's Saves-screen day through `peekSave`), `tests/saves-peek.json` (new: the 39 readings), `tests/story.test.mjs` (TF1's M4 checks: TG-A7, TG3, TG4, TG6), `tests/README.md`; docs: `project/research/p29-*` (repo only), the four docs, `history-50.md`, `changelog-5.md`, `restore-points-4.md`.
+- **What:** see the version line. A player sees two things: the Saves screen's day and Coil for a save from before the Coil, and a meal from the hammerspace whole among the results.
+- **Checks:** a game change (rule 2): while building the saves and story tests and `bash tools/check.sh quick` (exit 0, 699 s); the full `bash tools/check.sh` once after the review's fixes and the docs: exit 0, 1,721.5 s, 0 drifted.
+- **Opus:** the cold review (`project/research/p29-review.md`): no high, no medium; L1, L2, TG1–TG6 done. Planted faults through `tools/mutate.mjs` (`project/research/p29-mutate.md`): Claude's F1, F2, F4–F7 (6 of 6 caught) and the reviewer's C1–C7 (7 of 7 caught). **Fable:** none (no story text).
+
 ## Moved from the handover in v0.11.263 (word for word)
 
 *(the version line as it stood)*
