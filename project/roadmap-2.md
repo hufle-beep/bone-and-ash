@@ -108,7 +108,7 @@ The hybrid with Selene (design in `design.md`). Safety comes before the rewrite,
 
 ## 6. Waiting on the owner
 
-- *(v0.11.171, owner pick RA1, placed from the handover)* **The owner's calls on the texts:** Gao Feng as Lu Han's "cousin" (not in `lore.md`); "four hundred pounds" for the great root-kin (`yuShort` in `stomp_act1.js`, and other texts; not in `lore.md`); the arson's 01:00 tea, now James polishing his glasses (v0.11.169, L4: the tea back if wanted); the watcher's ledger noting Ya on Day 8, before she walks into Ashfall (kept in v0.11.170); Foundation named early in the prologue (Old Wen's ladder talk in Act 1 loses a little; v0.11.167's Opus review, L9).
+- *(v0.11.269, owner pick P37-A, TC)* **The owner's calls on the texts:** moved word for word to `roadmap.md` section 2b (step 5b, asked at its options).
 - One or two real saves from the phone for `saves/`: ☰ Menu → Saves → **Share to GitHub** (v0.11.9; steps in the handover), or Download save file and attach it.
 
 ## Decided

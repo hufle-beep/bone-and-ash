@@ -2,6 +2,16 @@
 
 Started in v0.11.258, when `roadmap-done-4.md` would have passed about 45 KB with this move. Newer than `roadmap-done-4.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.269 (word for word; owner pick P37-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB; and one review note closed)
+
+### From `roadmap.md` section 2, one done line
+
+- *(v0.11.266, owner picks P34-A, LF-A, TB-A; `project/research/p34-measure.md`, `p34-review.md`; the options: `claude/p34-options.md`)* **Done: group d's fights and the smart bots** (the fight lab 300 games a variant, the models 320 a variant, long calendar): **TP** the big blow's tell from the prologue on (`isHeavy` without the act gate; a heavy person doesn't posture; the Long Forest's fights left out, LF-A): pooled smart 69.4 → 63.8%, collectors 73.2 → 45.2%; the whole game on Coil 1 Completionist 25 → 0%, Cultivator 27.5 → 0%, Farmer 15 → 0%; Careful 2.10 / 4.35 → 3.88 / 4.95 Coils; **W1** the smart bots fight on the ground from the stalemate's warning (152 stall losses → 0; Act 1 +0.03–0.05 Coils); closed: **DO** the dart order (an artefact: darts open in 153 of 1,553 jackal states; on those smart 97.4%, darts 96.7%), **S** the smart blast (69.4 → 69.1%), **RC** the rats' call (14 of 4,819 states), **TA** the ape's tell (no reach: it is fought from the air), **HA** the ape's moods (easier: Careful's Act 1 4.35 → 4.05). This settles two lines of `roadmap-retune.md` (moved blocks, kept word for word): the air stalemate's "bots that react to the warning" (W1) and "the smart bots and the Qi blast" (S). `baseline.json` re-saved (2 drifted: tribute C4 lost +22.4, collectors smart −26). **Open, options later:** the rest of this section (`roadmap-retune.md`'s knobs and tools).
+
+### Closed as accepted (P37-A, L4)
+
+- *(v0.11.269, owner pick P37-A; the P35 review's L4, noted in v0.11.267)* **`traitLines`' fallback for a lone read foe:** if the only posturer were the read heavy foe, the postures line would fall back to him and he would get both the read line and "came with things to say about face". Unreachable: the tribute always has two foes, and `STANCE_READ_OF` has one entry (collectors). Closed as accepted; to look at again if `STANCE_READ_OF` grows.
+
 ## Moved in v0.11.267 (word for word; owner pick P35-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB)
 
 ### From `roadmap.md` section 2, one done line
