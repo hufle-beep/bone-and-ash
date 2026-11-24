@@ -1,0 +1,9 @@
+[
+ { "id": "F1", "file": "js/story/fight_tune.js", "find": "export const HIGH_REALM = 2;", "replace": "export const HIGH_REALM = 3;", "note": "RG from True Core, not Core Formation" },
+ { "id": "F2", "file": "js/story/fight_tune.js", "find": "((realm || 0) >= HIGH_REALM &&", "replace": "((realm || 0) > HIGH_REALM &&", "note": "the boundary: Core Formation itself left out" },
+ { "id": "F3", "file": "js/story/fight_tune.js", "find": "export const HP_TUNE_HIGH = {\"collectors\": 0.7};", "replace": "export const HP_TUNE_HIGH = {\"collectors\": 0.75};", "note": "the factor 0.75" },
+ { "id": "F4", "file": "js/story/power.js", "find": "hpTuneFor(enc.id, g.james?.realm)", "replace": "hpTuneFor(enc.id, g.yuki?.realm)", "note": "Yuki's realm decides" },
+ { "id": "F5", "file": "js/story/fight_tune.js", "find": "Object.hasOwn(HP_TUNE_HIGH, id) ? HP_TUNE_HIGH[id] : HP_TUNE[id] || 1", "replace": "Object.hasOwn(HP_TUNE_HIGH, id) ? HP_TUNE_HIGH[id] : HP_TUNE[id] || 0.8", "note": "untuned fights at 0.8" },
+ { "id": "F6", "file": "js/story/power.js", "find": "hpTuneFor(enc.id, g.james?.realm)", "replace": "hpTuneFor(enc.id, 0)", "note": "the realm never passed: RG dead" },
+ { "id": "F7", "file": "js/story/music.js", "find": "if (f < s[0] || f >= s[1]) return false;", "replace": "if (f < s[0] || f > s[1]) return false;", "note": "a step's top bound let in (journey.02 at Ya 30)" }
+]

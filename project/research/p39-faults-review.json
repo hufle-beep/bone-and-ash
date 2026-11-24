@@ -1,0 +1,9 @@
+[
+  { "id": "C1", "file": "js/story/fight_tune.js", "find": "export const HIGH_REALM = 2;", "replace": "export const HIGH_REALM = 3;", "note": "the gate at True Core: a Core Formation James keeps 0.8 (expect caught: P39-A RG, HIGH_REALM === 2 and the realm-2 tap)" },
+  { "id": "C2", "file": "js/story/fight_tune.js", "find": "(realm || 0) >= HIGH_REALM", "replace": "(realm || 0) > HIGH_REALM", "note": "off by one: realm 2 meets 0.8 (expect caught: P39-A RG, hpTuneFor('collectors', 2) and the tap 14/8>10/6)" },
+  { "id": "C3", "file": "js/story/power.js", "find": "hpTuneFor(enc.id, g.james?.realm)", "replace": "hpTuneFor(enc.id, g.yuki?.realm)", "note": "Yuki's realm decides (expect caught: P39-A RG, tap(1, 3) / tap(2, 0))" },
+  { "id": "C4", "file": "js/story/power.js", "find": "enc.enemies.map((e) => ({ ...e, hp: Math.max(1, Math.round(e.hp * f)) }))", "replace": "enc.enemies.map((e, i) => ({ ...e, hp: Math.max(1, Math.round(e.hp * (i && enc.id === 'collectors' ? 0.8 : f))) }))", "note": "Gao Feng / the disciple left at 0.8, only Lu Han at 0.7 (the news line names both). At the test's fresh state (no growth) Gao 8 is 6 either way; with growth 2 he is 9 > 7 vs 6 (expect MISSED: TG1)" },
+  { "id": "C5", "file": "js/story/fight_tune.js", "find": "(realm || 0) >= HIGH_REALM", "replace": "(realm ?? 2) >= HIGH_REALM", "note": "a missing realm (null) counts as Core Formation (expect caught: P39-A RG, the null case)" },
+  { "id": "C6", "file": "js/story/music.js", "find": "low: [-Infinity, 30]", "replace": "low: [-Infinity, 29]", "note": "friendship 29 falls between low and mid (expect caught: JW-A, at(29) gives 0)" },
+  { "id": "C7", "file": "js/story/music.js", "find": "(who === 'ya' && !!g.flags.ya_party)", "replace": "(who === 'ya')", "note": "Ya present on the journey without the party flag (expect caught: JW-A only, at(26, false); the walks always have her in the party)" }
+]

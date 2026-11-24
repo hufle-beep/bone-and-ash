@@ -1108,51 +1108,51 @@
   },
   "cultivator prologue C2 dead": {
    "v": 0,
-   "n": 161
+   "n": 135
   },
   "cultivator Act 1 C1 dead": {
    "v": 0,
-   "n": 39
+   "n": 65
   },
   "cultivator Act 1 C1 taken": {
    "v": 0,
-   "n": 39
+   "n": 65
   },
   "cultivator Act 1 C2 dead": {
    "v": 0,
-   "n": 161
+   "n": 135
   },
   "cultivator Act 1 C2 taken": {
    "v": 0,
-   "n": 161
+   "n": 135
   },
   "cultivator tribute C1 won": {
-   "v": 19.6,
+   "v": 32.7,
    "n": 199
   },
   "cultivator tribute C1 lost": {
-   "v": 80.4,
+   "v": 67.3,
    "n": 199
   },
   "cultivator tribute C2 won": {
    "v": 100,
-   "n": 161
+   "n": 135
   },
   "cultivator tribute C2 lost": {
    "v": 0,
-   "n": 161
+   "n": 135
   },
   "cultivator prologue cleared on Coil 1": {
-   "v": 19.5,
+   "v": 32.5,
    "n": 200
   },
   "cultivator Act 1 cleared on Coil 1": {
-   "v": 19.5,
+   "v": 32.5,
    "n": 200
   },
   "cultivator fight mire": {
    "v": 99.6,
-   "n": 259
+   "n": 237
   },
   "cultivator fight jackals": {
    "v": 100,
@@ -1164,23 +1164,23 @@
   },
   "cultivator fight wolves": {
    "v": 100,
-   "n": 419
+   "n": 385
   },
   "cultivator fight collectors": {
-   "v": 55.6,
-   "n": 360
+   "v": 59.9,
+   "n": 334
   },
   "cultivator fight crows": {
    "v": 100,
-   "n": 104
+   "n": 93
   },
   "cultivator fight gao": {
    "v": 100,
-   "n": 53
+   "n": 50
   },
   "cultivator fight thornback": {
    "v": 100,
-   "n": 436
+   "n": 401
   },
   "cultivator fight ya_brawl": {
    "v": 100,
@@ -1188,83 +1188,83 @@
   },
   "cultivator fight bone_elk": {
    "v": 100,
-   "n": 316
+   "n": 357
   },
-  "cultivator fight night_wolves": {
+  "cultivator fight root_wyrm": {
    "v": 100,
-   "n": 63
+   "n": 109
   },
   "cultivator fight mire_serpent": {
    "v": 100,
-   "n": 377
+   "n": 379
   },
   "cultivator fight drowned": {
    "v": 100,
-   "n": 185
+   "n": 189
+  },
+  "cultivator fight night_drowned": {
+   "v": 100,
+   "n": 88
   },
   "cultivator fight cinder_hawks": {
    "v": 100,
-   "n": 513
+   "n": 573
   },
   "cultivator fight rot_ape": {
    "v": 100,
    "n": 200
   },
-  "cultivator fight guardian": {
-   "v": 100,
-   "n": 16
-  },
-  "cultivator fight rt_wolves": {
-   "v": 100,
-   "n": 88
-  },
   "cultivator fight arson": {
    "v": 100,
-   "n": 176
+   "n": 174
   },
   "cultivator fight lizard": {
    "v": 100,
-   "n": 100
+   "n": 95
   },
   "cultivator fight sect_watcher": {
    "v": 100,
-   "n": 70
+   "n": 68
   },
   "cultivator fight palisade_wolf": {
    "v": 100,
-   "n": 183
-  },
-  "cultivator fight root_wyrm": {
-   "v": 100,
-   "n": 91
-  },
-  "cultivator fight root_husks": {
-   "v": 100,
-   "n": 65
-  },
-  "cultivator fight rats": {
-   "v": 100,
-   "n": 84
-  },
-  "cultivator fight night_drowned": {
-   "v": 100,
-   "n": 86
+   "n": 186
   },
   "cultivator fight night_hawks": {
    "v": 100,
-   "n": 72
+   "n": 74
   },
   "cultivator fight husks": {
    "v": 100,
-   "n": 103
+   "n": 123
   },
   "cultivator fight elder": {
    "v": 100,
-   "n": 65
+   "n": 62
+  },
+  "cultivator fight rats": {
+   "v": 100,
+   "n": 78
+  },
+  "cultivator fight night_wolves": {
+   "v": 100,
+   "n": 59
   },
   "cultivator fight night_serpent": {
    "v": 100,
-   "n": 47
+   "n": 60
+  },
+  "cultivator fight root_husks": {
+   "v": 100,
+   "n": 68
+  },
+  "cultivator fight rt_wolves": {
+   "v": 100,
+   "n": 98
+  },
+  "cultivator fight guardian": {
+   "v": 100,
+   "n": 24
   },
   "sociable prologue C1 dead": {
    "v": 0,

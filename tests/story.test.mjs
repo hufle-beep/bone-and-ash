@@ -3780,8 +3780,22 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         assert(Object.keys(beforeSong).length === 0, `CM3 (RV1 M1, TG1): no music line earlier the same evening as an evening song (${JSON.stringify(beforeSong)})`);
         assert(twice === 0 && bad === 0 && withLine > days * 0.4, `CM2 (ML): the random walks (160 games, 120 from the Fallout, 30 from the return), ${days} text days, ${withLine} with a music line, ${twice} with two (the game's own lines counted), ${bad} off the evening screens`);
         { const allKeys = Object.entries(M.MUSIC_LINES).flatMap(([st, p]) => Object.entries(p).flatMap(([k, l]) => l.map((x, i) => [`${st}.${k}.${i}`, x.key])));
-          const miss = allKeys.filter(([k]) => !shownKeys.has(k)).map(([, key]) => key);
-          assert(miss.length === 0, `RV1 (TG1): every music and archive line shows in the random walks (160 games, 120 from the Fallout, 30 from the return) (never: ${miss.join(', ') || 'none'})`); }
+          // v0.11.271 (owner pick JW-A, in the P39-A build): journey.02 (Ya at a journey camp, friendship under 30) showed in 2 of the 160
+          // walks (Ya 26, James at Core Formation or up); RG's collectors moved those games and it showed in none (200 walks and Ya held low
+          // tried: 0 each), so it is checked directly below on a built state, not by the walks' luck
+          const DIRECT = new Set(['journey.02']);
+          const miss = allKeys.filter(([k, key]) => !shownKeys.has(k) && !DIRECT.has(key)).map(([, key]) => key);
+          assert(miss.length === 0, `RV1 (TG1): every music and archive line shows in the random walks (160 games, 120 from the Fallout, 30 from the return; journey.02 checked directly) (never: ${miss.join(', ') || 'none'})`);
+          const j02 = M.MUSIC_LINES.journey.music.find((x) => x.key === 'journey.02');
+          const g = ensureBars(newGame(78055)); g.coil.act = 1; g.flags.ya_party = true; g.rel.Ya = { f: 26, a: 35 };
+          const at = (f, party, place) => { g.rel.Ya.f = f; g.flags.ya_party = party; return M.lineOpen(g, j02, 'journey', place); };
+          const got = [at(26, true, 'camp'), at(29, true, 'camp'), at(30, true, 'camp'), at(26, false, 'camp'), at(26, true, 'tree')].map(Number).join('');
+          assert(j02 && j02.place === 'camp' && j02.who === 'ya' && j02.step === 'low' && got === '11000', `JW-A (P39-A): journey.02 opens at a journey camp with Ya in the party under friendship 30 (26, 29), shut at 30, without Ya, at the tree (${got})`);
+          // the cold review's TG2: drawn on a real bl_camp screen through musicLine (40 evenings, Days 60–99), never at 30
+          const drawn = (f) => { const h = ensureBars(newGame(79000)); h.coil.act = 1; h.flags.ya_party = true; h.rel.Ya = { f, a: 35 }; h.scene = 'bl_camp'; let k = 0;
+              for (let d = 60; d < 100; d++) { h.minutes = calMinutes(h, d, 19); if (M.musicLine(h, { id: 'bl_camp', text: '' })?.key === 'journey.music.1') k++; } return k; };
+          const dn = [drawn(26), drawn(30)];
+          assert(dn[0] > 0 && dn[1] === 0, `JW-A (P39-A, TG2): journey.02 drawn on bl_camp's evenings with Ya at 26, never at 30 (${dn.join(' / ')} of 40)`); }
     }
 
     // CM3 (v0.11.183, owner picks SG2, D1): the songs: PL each once in its scene, ON-S once a save (kept across the Coil), DU the day's music, ED both editions
@@ -9345,6 +9359,29 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     assert(coils === '2:7.5 1:17 1:17', `${T} (TG3): two won clears keep Core Formation and the ape 1.5; one clear keeps Foundation and 11; none, at Foundation, 11 (${coils})`);
     { const g = ensureBars(newGame(95504)); g.james.realm = 0; g.flags.mei_party = true; g.flags.ya_party = true; const e = SCENES.ah_ridge_end.choices.find((c) => c.combat).combat(g).enemies[0];
       assert(e.hp === 51 && e.dc === 17, `${T} (TG5): Mei Lin and Ya in the party take 2 HP each after the tune (55 → 51; ${e.hp})`); }
+}
+// v0.11.271 (owner pick P39-A, RG; `claude/p39-options.md`): the collectors' HP by James's realm: 0.8 below Core Formation, 0.7 from it; every other fight as before
+{
+    const T = 'P39-A';
+    const { HP_TUNE, HP_TUNE_HIGH, HIGH_REALM, hpTuneFor } = await import('../js/story/fight_tune.js');
+    const PW = await import('../js/story/power.js'); // the preview's degree
+    assert(HIGH_REALM === 2 && JSON.stringify(HP_TUNE_HIGH) === '{"collectors":0.7}' && HP_TUNE.collectors === 0.8, `${T} (RG): the collectors 0.7 from realm 2 (Core Formation), HP_TUNE's 0.8 below`);
+    assert([0, 1, undefined, null].every((r) => hpTuneFor('collectors', r) === 0.8) && [2, 3, 5, 14].every((r) => hpTuneFor('collectors', r) === 0.7), `${T} (RG): Mortal Vessel and Foundation 0.8, Core Formation and up 0.7`);
+    assert(Object.keys(HP_TUNE).filter((id) => id !== 'collectors').every((id) => [0, 1, 2, 5].every((r) => hpTuneFor(id, r) === HP_TUNE[id])) && [0, 2].every((r) => hpTuneFor('no_such_fight', r) === 1), `${T} (RG): every other fight its old factor at every realm, an untuned one 1`);
+    // the real tap path: the tribute's "Step forward" through choose and startCombat, its preview's degree the same
+    const tap = (realm, yuki = realm, scene = 'tribute', grown = false) => { const g = ensureBars(newGame(95900)); g.james.realm = realm; g.yuki.realm = yuki; if (grown) { g.flags.forest_day = 3; g.flags.vday = 3; } g.scene = scene; const i = SCENES[scene].choices.findIndex((c) => c.combat);
+        const raw = SCENES[scene].choices[i].combat(JSON.parse(JSON.stringify(g))).enemies.map((e) => e.hp).join('/');
+        const deg = PW.degreeForChoice(g, SCENES[scene].choices[i].combat); const c = startCombat(g, choose(g, SCENES, i).combat(g));
+        return `${raw}>${c.enemies.map((e) => e.hp).join('/')}${deg === c.degree ? '' : ` degree ${deg}≠${c.degree}`}`; };
+    const got = [0, 1, 2, 5].map((r) => tap(r)).join(' | ');
+    assert(got === '14/8>11/6 | 14/8>11/6 | 14/8>10/6 | 17/8>12/6', `${T} (RG): Lu Han and Gao Feng at realms 0, 1, 2, 5, before and after the factor (${got})`);
+    const yk = [tap(1, 3), tap(2, 0)].join(' | ');
+    assert(yk === '14/8>11/6 | 14/8>10/6', `${T} (RG): James's realm alone decides (Yuki at True Core beside a James at Foundation: 0.8; Yuki a Mortal beside a James at Core Formation: 0.7) (${yk})`);
+    // the cold review (Opus): TG1 the second foe's factor too (at base HP 0.7 and 0.8 round the same: grown, forest day 3 and village day 3), TG3 the other way in (bluff_fail's "Fight.")
+    const grown = [tap(1, 1, 'tribute', true), tap(2, 2, 'tribute', true)].join(' | ');
+    assert(grown === '17/10>14/8 | 17/10>12/7', `${T} (TG1): grown, Lu Han and Gao Feng both by the factor at Foundation and Core Formation (${grown})`);
+    const bluff = [tap(1, 1, 'bluff_fail'), tap(2, 2, 'bluff_fail')].join(' | ');
+    assert(SCENES.bluff_fail.choices.filter((c) => c.combat).length === 1 && bluff === '14/8>11/6 | 14/8>10/6', `${T} (TG3): bluff_fail's "Fight." meets the same factor (${bluff})`);
 }
 // v0.11.256 (owner pick P26-A; TS7): LN, Lu Han −0.5 HP before the long step; LR, +0.5 for each realm he reads; RP-1.5, a long-calendar
 // sit ÷6 from True Core (the root and a Long Forest seclusion with it); the old calendar unchanged

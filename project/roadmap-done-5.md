@@ -2,6 +2,12 @@
 
 Started in v0.11.258, when `roadmap-done-4.md` would have passed about 45 KB with this move. Newer than `roadmap-done-4.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.271 (word for word; owner pick P39-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB)
+
+### From `roadmap.md` section 2, one done line
+
+- *(v0.11.268, owner pick P36-A; `project/research/p36-measure.md`; the options: `claude/p36-options.md`)* **Done: the long calendar's drift guard and the owner's targets** (the models step 200 games a model, the same on `--seed 1`; Careful on four older versions): **LB** `baseline-long.json` re-saved (29 of 345 numbers past 5 points against the 2026-11-22 file, 23 past 20, 4 gone; all P25-A, TP, CT-C); **MB** `models-baseline.json` re-saved (Careful's Mei Lin last nights 32.5 → 1.5%, from P25-A); **LU** `--update` needs the long numbers and saves all three; **KS** the full check keeps its stats, `sanity.mjs --update --last`; **LG** the long numbers a guard (±20, n ≥ 50; a reshuffle: 0 flags); **TT** `tools/targets.json`, one TARGET line each (Completionist 20.5% in, Cultivator 19.5% near, Careful and the Sociable 0% in, Act 1 4.96 / 4.97 in). Found (open, options later): the Cultivator at or under T1's floor (15.5% on seed 1); the mechanism of Careful's Mei Lin nights after P25-A.
+
 ## Moved in v0.11.270 (word for word; owner pick P38-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB)
 
 ### From `roadmap.md` section 2, one done line

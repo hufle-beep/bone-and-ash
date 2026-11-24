@@ -29,7 +29,7 @@
  * James never kills humans: he knocks them out and very nearly cripples them. Beaten humans grovel or swear revenge.
  */
 import { skillCheck, combatHooks, noDiceUp, NO_DICE_DC_SHIFT } from '../core/game.js';
-import { HP_TUNE } from './fight_tune.js';
+import { hpTuneFor } from './fight_tune.js'; // v0.11.271 (P39-A, RG): by James's realm
 import { TT } from './tribute_texts.js'; // v0.11.251 (RV-A, SM)
 
 /** Cultivators' realms (for the realm-gap rule; everyone else is realm 0). Locals can't sense James; he can sense them. */
@@ -66,7 +66,7 @@ export function lfScale(g, enemies) {
 /** The hook the combat engine calls on every encounter. */
 export function prepare(g, enc) {
     if (enc._prepared) return enc;
-    const f = HP_TUNE[enc.id] || 1;
+    const f = hpTuneFor(enc.id, g.james?.realm); // v0.11.271 (P39-A, RG): the collectors 0.7 from Core Formation
     const tuned = f !== 1 ? enc.enemies.map((e) => ({ ...e, hp: Math.max(1, Math.round(e.hp * f)) })) : enc.enemies;
     const enemies = lfScale(g, tuned)
         .map((e) => (e.realm == null && ENEMY_REALM[e.name] != null ? { ...e, realm: ENEMY_REALM[e.name] } : e))
