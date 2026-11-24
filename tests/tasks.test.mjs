@@ -851,6 +851,53 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       for (const id of LF_BOSSES) { const g = mk(id, [man('Boss', { dmg: 7 })]); assert(!g.combat.enemies[0].heavy, `P34-A, LF-A: no big blow in the Long Forest (${id})`); }
       const fw = mk('lf_rogue', [man('Fang Wei', { dmg: 5 })]); assert(fw.combat.enemies[0].postures && actionOpen(fw, 'remark'), 'P34-A, LF-A: Fang Wei postures; Say something opens');
       assert(G.lfFight('lf_rogue') && !G.lfFight('collectors') && !G.lfFight(undefined), 'P34-A, LF-A: lfFight by the lf_ id'); }
+    // v0.11.267 (owner pick P35-A, CT-C): Lu Han's stance reads as a posture once James has 20 rounds of blade practice
+    { const tri = (blade) => { const g = ensureBars(newGame(267, { closed: true })); g.james.qi = 40; g.james.hp = jamesHpMax(g); g.yuki.hp = 0;
+        g.stats.weapons = { ...(g.stats.weapons || {}), blade }; const ch = SCENES.tribute.choices.find((c) => c.combat);
+        sCombat(g, G.combatHooks.before ? (G.combatHooks.before(g, ch.combat(g)) || ch.combat(g)) : ch.combat(g)); return g; };
+      assert(G.STANCE_READ_OF.collectors === 20 && Object.keys(G.STANCE_READ_OF).join() === 'collectors', 'P35-A, CT-C: the tribute only, at 20 blade rounds');
+      const un = tri(19), rd = tri(20), lu = (g) => g.combat.enemies[0], sec = (g) => g.combat.enemies[1];
+      assert(lu(un).name === 'Lu Han' && lu(un).heavy && !lu(un).postures && sec(un).postures, 'P35-A, CT-C: at 19 rounds Lu Han only shows the big blow (as v0.11.266)');
+      assert(lu(rd).heavy && lu(rd).postures && sec(rd).postures && !sec(rd).heavy && actionOpen(rd, 'remark'), 'P35-A, CT-C: at 20 he is heavy and postures; his second as before');
+      assert(G.stanceRead(rd, 'collectors') && !G.stanceRead(un, 'collectors') && !G.stanceRead(rd, 'gao') && !G.stanceRead({ stats: {} }, 'collectors'), 'P35-A, CT-C: stanceRead by the blade rounds, the tribute only, no stats no read');
+      assert(un.combat.log.includes(FOE_TRAITS.heavy.person.replace('{foe}', 'Lu Han')) && !un.combat.log.includes(FOE_TRAITS.heavy.read.replace('{foe}', 'Lu Han')), "P35-A, CT-C: unread, the person's stance line");
+      assert(rd.combat.log.includes(FOE_TRAITS.heavy.read.replace('{foe}', 'Lu Han')) && !rd.combat.log.includes(FOE_TRAITS.heavy.person.replace('{foe}', 'Lu Han')), "P35-A, CT-C: read, the read line at the start (Fable's)");
+      assert(rd.combat.log.includes(FOE_TRAITS.postures.line.replace('{foe}', sec(rd).name)) && !rd.combat.log.includes(FOE_TRAITS.postures.line.replace('{foe}', 'Lu Han')), 'P35-A, CT-C: the postures line names the second, not Lu Han');
+      const say = (t) => t.replace('{foe}', 'Lu Han');
+      cStep(un, 'guard'); const u2 = cStep(un, 'guard'); cStep(rd, 'guard'); const r2 = cStep(rd, 'guard');
+      assert(u2.lines.includes(say(G.TELL_TEXT.bigPerson[1])) && !u2.lines.some((l) => G.TELL_TEXT.bigRead.map(say).includes(l)), 'P35-A, CT-C: unread, the stance warning');
+      assert(r2.lines.includes(say(G.TELL_TEXT.bigRead[1])) && !r2.lines.includes(say(G.TELL_TEXT.bigPerson[1])) && !r2.lines.some((l) => SAY_TEXT.tells.map(say).includes(l)), 'P35-A, CT-C: read, one line for both (no stance line, no posture line for him)');
+      assert(G.TELL_TEXT.bigRead.length === 3 && G.TELL_TEXT.bigRead.every((t) => t.startsWith('{foe} ') && /Next round/.test(t) && /or guard\.$/.test(t)), "P35-A, CT-C: three read warnings (Fable's)");
+      // RV-A (the review's TG3): the second's own speech warning still shows on the read round
+      assert(r2.lines.includes(G.SAY_TEXT.tells[1].replace('{foe}', sec(rd).name)), "P35-A, CT-C (TG3): the second's speech warning on the read round");
+      assert(smartAction(rd) === 'remark' && smartAction(un) !== 'remark', 'P35-A, CT-C: the smart bot speaks into a read stance, not into an unread one');
+      const hp0 = rd.james.hp, r3 = cStep(rd, 'remark', 0);
+      assert(rd.combat && lu(rd).flustered > 0 && !r3.lines.some((l) => /^Lu Han (attacks|brings the big blow)/.test(l)) && !r3.lines.includes(G.TELL_TEXT.bigLands), 'P35-A, CT-C: Say something on the read stance stops the big blow');
+      // RV-A (Pay-F; the review's M1): Lu Han's own reply, paired with the warning, not the second's ancestors line
+      assert(r3.lines.includes(say(G.SAY_TEXT.landedRead[1])) && !r3.lines.includes(say(G.SAY_TEXT.landed[1])), "P35-A, RV-A Pay-F: the read stance's own reply (Fable's)");
+      assert(G.SAY_TEXT.landedRead.length === G.TELL_TEXT.bigRead.length && G.SAY_TEXT.landedRead.every((t) => t.includes('{foe}')), 'P35-A, RV-A Pay-F: one reply per read warning');
+      // TG5 + TG3: on that round James loses exactly what the second's attack lands, and the second still attacks
+      const hits = r3.lines.map((l) => l.match(/^(.+?) attacks: .* (\d+(?:\.\d+)?) \(DR/)).filter(Boolean);
+      assert(r3.lines.some((l) => l.startsWith(`${sec(rd).name} attacks`)) && hits.every((m) => m[1] === sec(rd).name) && Math.abs(hp0 - rd.james.hp - hits.reduce((a, m) => a + Number(m[2]), 0)) < 1e-9, "P35-A, CT-C (TG3, TG5): only the second's hit lands on the read round");
+      // TG1: guard still avoids the read stance's big blow
+      { const gd = tri(20); cStep(gd, 'guard'); cStep(gd, 'guard'); const g3 = cStep(gd, 'guard');
+        assert(g3.lines.includes(say(G.TELL_TEXT.bigAvoided)) && !g3.lines.includes(G.TELL_TEXT.bigLands), 'P35-A, CT-C (TG1): guard avoids the read big blow'); }
+      // TG2: the three read warnings rotate (rounds 2, 5, 8 show indices 1, 2, 0)
+      { const seen = [[2, 1], [5, 2], [8, 0]].map(([r, k]) => { const gr = tri(20); gr.combat.round = r; const o = cStep(gr, 'guard');
+          return !!gr.combat && o.lines.includes(say(G.TELL_TEXT.bigRead[k])); });
+        assert(seen.every(Boolean), `P35-A, CT-C (TG2): the read warnings rotate (${seen})`); }
+      assert(G.FOE_TRAITS.heavy.read.includes('His sword-form reads like the blade you have practised'), "P35-A, RV-A L2W: the start line in the review's wording");
+      // only the tribute: a heavy Gao with any practice, and Act 1's elder, still show the big blow alone
+      const gh = ensureBars(newGame(268, { closed: true })); gh.stats.weapons = { blade: 999 }; gh.james.qi = 40; gh.james.hp = jamesHpMax(gh);
+      sCombat(gh, { id: 'gao', intro: 'In.', band: 'standard', enemies: [{ name: 'Gao', hp: 99, dc: 60, atk: 60, dmg: 6 }], win: 'stream', lose: 'stream' });
+      assert(gh.combat.enemies[0].heavy && !gh.combat.enemies[0].postures, 'P35-A, CT-C: Gao heavy with 999 blade rounds: no posture (not the tribute)');
+      const eh = toAct1(ensureBars(newGame(269, { closed: true }))); eh.stats.weapons = { blade: 999 }; eh.james.qi = 40; eh.james.hp = jamesHpMax(eh);
+      sCombat(eh, { id: 'elder', intro: 'In.', band: 'standard', enemies: [{ name: 'Shen', hp: 99, dc: 60, atk: 60, dmg: 5 }], win: 'stream', lose: 'stream' });
+      assert(eh.combat.enemies[0].heavy && !eh.combat.enemies[0].postures && !G.stanceRead(eh, 'elder'), "P35-A, CT-C (TG4): Act 1's elder with 999 blade rounds: no posture");
+      const { FAQ } = await import('../js/core/faq.js'); const ft = FAQ.find(([t]) => t === 'Fights')[1]();
+      assert(/he reads Lu Han's stance at the tribute/.test(ft) && /about 20 rounds with the bone blade/.test(ft), 'P35-A, CT-C: the FAQ says it');
+      const { NOTES } = await import('../js/core/news.js'); const nt = NOTES.find(([v]) => v === '0.11.267');
+      assert(nt && /Lu Han/.test(nt[1]) && /Say something/.test(nt[1]) && /20 rounds/.test(nt[1]), "P35-A, CT-C: What's new says it"); }
     const el = mk('elder', [man('Shen', { dmg: 5 }), man('Lu', { dmg: 4 })], { act1: true });
     assert(el.combat.enemies[0].heavy && !el.combat.enemies[0].postures && el.combat.enemies[1].postures, 'PA2, PT: in Act 1 a heavy person shows the big blow, not a posture');
     const beast = mk('jackals', [man('Jackal')]); const ya = mk('ya_brawl', [man('Ya')], { act1: true, style: 'spar' });

@@ -40,10 +40,10 @@ export function attackReserve(g) {
 export function smartAction(g, t = 0) {
     const a = baseAction(g, t), c = g.combat;
     // v0.11.114 (owner pick PA2, SS): Say something when a foe postures this round (not stunned, staggered or held), while no heavy foe
-    // stands (its stance is answered as above) and darts from the air don't already keep the foes off (measured: without that,
+    // stands (its stance is answered as above; v0.11.267, P35-A CT-C: unless its stance is read, and so postures too) and darts from the air don't already keep the foes off (measured: without that,
     // the elder's slow fights from the air ran into the round cap, 100 → 91.5%). Lab (300 games, the same states): collectors
     // 22.9 → 28.7%, Gao 70.5 → 78.2%, the Sect watcher's HP left 88 → 93%, the elder unchanged.
-    if (!actionOpen(g, 'remark') || c.enemies.some((e) => e.hp > 0 && e.heavy) || (a === 'dart' && airStrike(g, 'dart'))) return a;
+    if (!actionOpen(g, 'remark') || c.enemies.some((e) => e.hp > 0 && e.heavy && !e.postures) || (a === 'dart' && airStrike(g, 'dart'))) return a;
     return c.enemies.some((e) => postureDue(c, e) && !e.staggered && !e.atBay && !(e.flustered > 0)) ? 'remark' : a;
 }
 /**

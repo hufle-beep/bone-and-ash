@@ -1051,7 +1051,8 @@ export const combatHooks = { before: null, lose: null, steal: null }; // v0.11.1
 /** Fights against people (v0.9.7): losing them keeps their written branches. Every other fight is a beast. */
 export const PEOPLE_FIGHTS = new Set(['gao', 'collectors', 'arson', 'ya_brawl', 'rt_brawl', 'elder', 'sect_watcher', 'lf_rogue', 'lf_bandits']); // v0.11.81 (T1): the Tan brothers too
 /** v0.11.114 (owner pick PA2, PT + SP; research.md #132): people posture every TELL_EVERY rounds, shown a round early, from the
- *  prologue on; not Ya (she is not one of the overly serious), not a heavy foe (its stance is its big blow; from the prologue on since v0.11.266, P34-A TP).
+ *  prologue on; not Ya (she is not one of the overly serious), not a heavy foe (its stance is its big blow; from the prologue on since v0.11.266, P34-A TP) unless
+ *  James reads its stance (v0.11.267, P35-A CT-C: STANCE_READ_OF).
  *  "Say something" on a posture costs that foe this round's attack and the next (SAY_ROUNDS). */
 export const NO_POSTURE = new Set(['ya_brawl']);
 export const SAY_ROUNDS = 2;
@@ -1182,8 +1183,8 @@ export function startCombat(g, enc0) {
             const t0 = noDiceTune[enc.id]; // v0.9.3: per-fight tuning for the no-dice rules
             const t = !PEOPLE_FIGHTS.has(enc.id) ? { ...(t0 || {}), up: ((t0 && t0.up) || 0) + BEAST_UP } : t0; // v0.9.7: beasts +0.5
             const x = t ? { ...e, dc: e.dc + (t.up || 0), atk: e.atk + (t.up || 0), hp: Math.max(1, Math.round(e.hp * (t.hp || 1))) } : e;
-            const heavy = isHeavy(enc, e);
-            return { ...x, hpMax: x.hp, staggered: false, ...(heavy ? { heavy: true } : {}), ...(!heavy && PEOPLE_FIGHTS.has(enc.id) && !NO_POSTURE.has(enc.id) ? { postures: true } : {}) }; // v0.11.113 (DA1, TL); v0.11.114 (PA2, PT)
+            const heavy = isHeavy(enc, e), read = heavy && stanceRead(g, enc.id); // v0.11.267 (P35-A, CT-C)
+            return { ...x, hpMax: x.hp, staggered: false, ...(heavy ? { heavy: true } : {}), ...((!heavy || read) && PEOPLE_FIGHTS.has(enc.id) && !NO_POSTURE.has(enc.id) ? { postures: true } : {}) }; // v0.11.113 (DA1, TL); v0.11.114 (PA2, PT)
         }),
         log: [enc.intro || 'Combat!'],
         ...(enc.net ? { netted: true } : {}), // v0.11.251 (owner pick P21-E, NT): Lu Han's net holds Yuki for the whole fight
@@ -1207,7 +1208,8 @@ export const FOE_TRAITS = {
     yuki: { tag: 'goes for Yuki', line: '{foe} has looked you both over and settled on the smaller one.' },
     flies: { tag: 'flies', line: '{foe} has wings. The air will not keep you out of its reach.', grounded: '{foe} has wings. You have the ground, for now.' },
     plated: { tag: 'plated', line: '{foe} is armoured. Bone will lose some of itself on that; raw Qi will not.', pierced: '{foe} is armoured. Sung bone no longer minds; raw Qi never did.' },
-    heavy: { tag: 'hits hard', line: '{foe} hits hard, and winds up before its worst. Watch for it.', person: '{foe} hits hard, and settles into a stance before the worst of it. Watch for the stance.' },
+    heavy: { tag: 'hits hard', line: '{foe} hits hard, and winds up before its worst. Watch for it.', person: '{foe} hits hard, and settles into a stance before the worst of it. Watch for the stance.',
+        read: '{foe} hits hard. His sword-form reads like the blade you have practised: the stance ahead of the worst blow is also a speech. Speeches can be interrupted.' }, // v0.11.267 (P35-A, CT-C; Fable's; RV-A L2W, the review's L2)
     postures: { tag: 'postures', line: '{foe} came with things to say about face, and will stop the fight to say them. Listen for the breath before it.' }, // v0.11.114 (PA2, PT; Fable's)
     moods: { tag: 'moods', line: '{foe} has moods, and wears them a round early. The singing inside it changes key.' },
     thief: { tag: 'thief', line: '{foe} is watching your supplies more closely than it is watching you.' },
@@ -1218,10 +1220,11 @@ export const foeTraits = (e) => Object.keys(FOE_TRAITS).filter((k) => ({ yuki: e
 export const foeFill = (t, name) => t.replace('{foe}', t.indexOf('{foe}') > 0 && /^The /.test(name) ? `t${name.slice(1)}` : name);
 /** v0.11.113 (DB1, P, W): the line for a trait in this fight: people's wording for a heavy person (PEOPLE_FIGHTS); plated
  *  once sung bone pierces armour (bone tier 3+); flies while James can't fight from the air. Texts Fable's. */
-export const traitLine = (g, k, id) => (k === 'heavy' && PEOPLE_FIGHTS.has(id) ? FOE_TRAITS.heavy.person : k === 'plated' && boneTier(g) >= 3 ? FOE_TRAITS.plated.pierced
+export const traitLine = (g, k, id, e) => (k === 'heavy' && PEOPLE_FIGHTS.has(id) ? (e?.postures ? FOE_TRAITS.heavy.read : FOE_TRAITS.heavy.person) : k === 'plated' && boneTier(g) >= 3 ? FOE_TRAITS.plated.pierced
     : k === 'flies' && !airFights(g) ? FOE_TRAITS.flies.grounded : FOE_TRAITS[k].line);
 /** The trait lines for a fight's start: each trait once, named for the first foe that has it. */
-export const traitLines = (g, enemies, id) => Object.keys(FOE_TRAITS).map((k) => { const e = enemies.find((x) => foeTraits(x).includes(k)); return e ? foeFill(traitLine(g, k, id), e.name) : null; }).filter(Boolean);
+// v0.11.267 (P35-A, CT-C): a read stance has its own heavy line, so the postures line goes to a foe that only postures, if any
+export const traitLines = (g, enemies, id) => Object.keys(FOE_TRAITS).map((k) => { const has = (x) => foeTraits(x).includes(k); const e = (k === 'postures' && enemies.find((x) => has(x) && !x.heavy)) || enemies.find(has); return e ? foeFill(traitLine(g, k, id, e), e.name) : null; }).filter(Boolean);
 /** DA1 (TL): an armed fight's foes that hit for HEAVY_DMG or more land a big blow every TELL_EVERY rounds (× BIG_BLOW
  *  damage), shown the round before; guard avoids it outright, the needle's stagger and the spear's hold stop it as any attack.
  *  Not the rot ape (NO_TELL; measured: the story test's smart bots 47.4 → 35.0% there, Act 1's wall is the retune's).
@@ -1233,6 +1236,13 @@ export const NO_TELL = new Set(['rot_ape']);
 /** v0.11.266 (owner pick LF-A, the P34-A review's M1): not in the Long Forest's fights (`lf_` ids; never measured with tells:
  *  its beasts got easier with them, Fang Wei lost Say something), so they play as in v0.11.265. */
 export const lfFight = (id) => String(id || '').startsWith('lf_');
+/** v0.11.267 (owner pick P35-A, CT-C): a heavy person's stance reads as a posture once James has practised the blade enough
+ *  (g.stats.weapons.blade, rounds, kept across every Coil): then the big-blow round is a speech too, and Say something stops it.
+ *  The tribute only (Lu Han). Measured (the models, long calendar, 40 games; project/research/p35-measure.md): the whole game on
+ *  Coil 1 Completionist 0 → 20%, Cultivator 0 → 20%; Careful and the Sociable unchanged (3.88 / 4.95 Coils; blade rounds at the
+ *  first tribute 1.4, by the fourth 14.5). */
+export const STANCE_READ_OF = { collectors: 20 };
+export const stanceRead = (g, id) => STANCE_READ_OF[id] != null && (g.stats?.weapons?.blade || 0) >= STANCE_READ_OF[id];
 const isHeavy = (enc, e) => !enc.style && (e.dmg || 0) >= HEAVY_DMG && !NO_TELL.has(enc.id) && !lfFight(enc.id); // TP: no act gate; LF-A
 /** Is this foe's big blow (or, for a foe that goes for Yuki, its lunge) due this round? */
 export const bigBlowDue = (c, e) => !!(e.heavy && e.hp > 0 && c.round % TELL_EVERY === 0);
@@ -1240,6 +1250,9 @@ export const bigBlowDue = (c, e) => !!(e.heavy && e.hp > 0 && c.round % TELL_EVE
 export const moodOf = (c, e) => (e?.moods ? (c.round % 3 === 2 ? 'hungry' : c.round % 3 === 0 ? 'proud' : 'plain') : 'plain');
 export const TELL_TEXT = {
     big: ['{foe} draws back and sets its weight. The next one will be the big one.', '{foe} goes very still, gathering. Something large is coming next round.', '{foe} rears up and takes its time about it. Next round, the big blow.'],
+    bigRead: ['{foe} sets the back foot and lifts the blade to ancestral height. Next round, the heaviest stroke and the address that goes with it. Talk, or guard.',
+        '{foe} draws the red along the steel. Next round, the big one arrives with remarks. Interrupt, or guard.',
+        '{foe} opens the old form, which you now recognise as a preamble. Next round, the double blow and a lecture on standing. Speak up, or guard.'], // v0.11.267 (P35-A, CT-C; Fable's; RV-A CUT, the review's M1): a read stance, one line for both
     bigPerson: ['{foe} draws back a pace and sets both feet. The next one will be the big one.', '{foe} goes very still, gathering Qi. Something decisive is coming next round.', '{foe} lowers one hand and takes a long breath over it. Next round, the big blow.'], // DB1 (P): people's wording (Shen Qiu, Fang Wei)
     bigAvoided: '{foe} brings the big blow down on the place you have just left.',
     bigLands: '  The big blow: double.',
@@ -1262,6 +1275,9 @@ export const SAY_TEXT = {
     landed: ['"Is there much more of this?" you ask. {foe} stops mid-sentence, loses the place, and will spend the next round looking for it.',
         '"Sorry, how many generations was that? I lost count at the third." {foe} goes back to count, and is busy this round and the next.',
         'You wait for the first pause. "Noted," you say. {foe} had a good deal more prepared and cannot now find any of it, this round or the next.'],
+    landedRead: ['"Is the height structural?" you ask. {foe} stays poised at the stroke\'s peak, address unbegun, and needs this round and the next to remember how it opened.',
+        '"Will the remarks be circulated afterwards?" you ask. The red gutters on the steel. {foe} has lost the opening sentence and gives up two rounds to hunting for it.',
+        '"Could we skip to the conclusions?" you say, across the preamble. {foe} halts with the form half open; neither blow comes, now or next round, while he finds his heading.'], // v0.11.267 (P35-A RV-A, Pay-F; Fable's): a read stance's replies, paired with TELL_TEXT.bigRead by index
     unheard: 'You say something dry. Nobody had stopped to make a speech, so it lands as a man talking with his hands down.',
     stunned: '{foe} is still looking for the place in the speech.',
     tag: 'cuts a speech short · no guard', tagNow: 'the speech is now',
@@ -1335,7 +1351,7 @@ function stepNoDice(g, actionId, targetIdx) {
             lines.push('You give ground, watching for the opening.');
         } else if (act.remark) { // v0.11.114 (PA2, SS): the target if it postures, else the first foe that does
             const pe = [target, ...living].find((e) => e && postureDue(c, e) && !e.staggered && !e.atBay && !(e.flustered > 0));
-            if (pe) { pe.flustered = SAY_ROUNDS; lines.push(foeFill(SAY_TEXT.landed[Math.floor(c.round / TELL_EVERY) % SAY_TEXT.landed.length], pe.name)); } else lines.push(SAY_TEXT.unheard);
+            if (pe) { pe.flustered = SAY_ROUNDS; const pool = pe.heavy ? SAY_TEXT.landedRead : SAY_TEXT.landed; lines.push(foeFill(pool[Math.floor(c.round / TELL_EVERY) % pool.length], pe.name)); } else lines.push(SAY_TEXT.unheard); // v0.11.267 (RV-A, Pay-F): a read stance gets its own reply
         } else if (act.qshield) {
             c.qshieldHp = qiShield(g); lines.push(QI_SHIELD_TEXT.raise); // v0.11.95 (Q1): this round only
         } else if (act.field) {
@@ -1448,8 +1464,9 @@ function stepNoDice(g, actionId, targetIdx) {
         const next = c.round + 1, bigT = PEOPLE_FIGHTS.has(c.id) ? TELL_TEXT.bigPerson : TELL_TEXT.big;
         for (const e of c.enemies) {
             if (e.hp <= 0) continue;
-            if (e.heavy && next % TELL_EVERY === 0) lines.push(foeFill(bigT[Math.floor(next / TELL_EVERY) % bigT.length], e.name));
-            if (e.postures && next % TELL_EVERY === 0) lines.push(foeFill(SAY_TEXT.tells[Math.floor(next / TELL_EVERY) % SAY_TEXT.tells.length], e.name)); // v0.11.114 (PA2, PT)
+            if (e.heavy && e.postures && next % TELL_EVERY === 0) lines.push(foeFill(TELL_TEXT.bigRead[Math.floor(next / TELL_EVERY) % TELL_TEXT.bigRead.length], e.name)); // v0.11.267 (P35-A, CT-C)
+            else if (e.heavy && next % TELL_EVERY === 0) lines.push(foeFill(bigT[Math.floor(next / TELL_EVERY) % bigT.length], e.name));
+            else if (e.postures && next % TELL_EVERY === 0) lines.push(foeFill(SAY_TEXT.tells[Math.floor(next / TELL_EVERY) % SAY_TEXT.tells.length], e.name)); // v0.11.114 (PA2, PT)
             if (e.prefersSmall && !c.style && g.yuki.hp > 0 && next % TELL_EVERY === 0) lines.push(foeFill(TELL_TEXT.lunge, e.name));
             const m = moodOf({ round: next }, e);
             if (m !== 'plain') lines.push(foeFill(TELL_TEXT[m], e.name));

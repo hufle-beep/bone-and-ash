@@ -41,31 +41,31 @@
   },
   "prologue C4 dead before Mei Lin": {
    "v": 72.7,
-   "n": 999
+   "n": 988
   },
   "prologue C4 dead after Mei Lin": {
-   "v": 14.7,
-   "n": 999
+   "v": 14.8,
+   "n": 988
   },
   "prologue C4 beast deaths": {
-   "v": 85,
-   "n": 999
+   "v": 85.1,
+   "n": 988
   },
   "Act 1 C3 dead": {
    "v": 0,
-   "n": 1
+   "n": 12
   },
   "Act 1 C3 beast deaths": {
    "v": 0,
-   "n": 1
+   "n": 12
   },
   "Act 1 C4 dead": {
    "v": 0,
-   "n": 17
+   "n": 50
   },
   "Act 1 C4 beast deaths": {
    "v": 0,
-   "n": 17
+   "n": 50
   },
   "tribute C1 won": {
    "v": 0,
@@ -92,7 +92,7 @@
    "n": 10
   },
   "tribute C3 won": {
-   "v": 1.3,
+   "v": 16,
    "n": 75
   },
   "tribute C3 paid": {
@@ -100,164 +100,164 @@
    "n": 75
   },
   "tribute C3 lost": {
-   "v": 98.7,
+   "v": 84,
    "n": 75
   },
   "tribute C4 won": {
-   "v": 11.9,
-   "n": 126
+   "v": 33.1,
+   "n": 124
   },
   "tribute C4 paid": {
-   "v": 1.6,
-   "n": 126
+   "v": 4.8,
+   "n": 124
   },
   "tribute C4 lost": {
-   "v": 86.5,
-   "n": 126
+   "v": 62.1,
+   "n": 124
   },
   "tribute C5 won": {
-   "v": 30.2,
-   "n": 205
+   "v": 43.7,
+   "n": 190
   },
   "tribute C5 paid": {
-   "v": 10.7,
-   "n": 205
+   "v": 14.2,
+   "n": 190
   },
   "tribute C5 lost": {
-   "v": 59,
-   "n": 205
+   "v": 42.1,
+   "n": 190
   },
   "tribute C6 won": {
-   "v": 33.9,
-   "n": 227
+   "v": 41,
+   "n": 210
   },
   "tribute C6 paid": {
-   "v": 21.6,
-   "n": 227
+   "v": 24.8,
+   "n": 210
   },
   "tribute C6 lost": {
-   "v": 44.5,
-   "n": 227
+   "v": 34.3,
+   "n": 210
   },
   "fight inc:mire:smart": {
-   "v": 71.3,
-   "n": 698
+   "v": 70.3,
+   "n": 667
   },
   "fight inc:jackals:smart": {
-   "v": 30.6,
-   "n": 2582
+   "v": 29.4,
+   "n": 2467
   },
   "fight inc:gao:smart": {
-   "v": 77.4,
-   "n": 208
+   "v": 77.8,
+   "n": 189
   },
   "fight inc:boar:smart": {
-   "v": 42.5,
-   "n": 724
+   "v": 41.5,
+   "n": 665
   },
   "fight inc:arson:smart": {
    "v": 100,
-   "n": 281
+   "n": 258
   },
   "fight inc:thornback:smart": {
    "v": 100,
-   "n": 374
+   "n": 329
   },
   "fight inc:collectors:smart": {
-   "v": 44.8,
-   "n": 375
-  },
-  "fight inc:wolves:smart": {
-   "v": 100,
-   "n": 377
+   "v": 72.4,
+   "n": 341
   },
   "fight inc:palisade_wolf:smart": {
    "v": 100,
-   "n": 168
+   "n": 250
   },
   "fight inc:ya_brawl:smart": {
    "v": 100,
-   "n": 170
-  },
-  "fight inc:sect_watcher:smart": {
-   "v": 100,
-   "n": 56
+   "n": 255
   },
   "fight inc:bone_elk:smart": {
    "v": 100,
-   "n": 382
+   "n": 559
   },
   "fight inc:root_wyrm:smart": {
    "v": 100,
-   "n": 157
+   "n": 247
   },
   "fight inc:night_drowned:smart": {
    "v": 100,
-   "n": 116
+   "n": 168
   },
   "fight inc:mire_serpent:smart": {
    "v": 100,
-   "n": 252
+   "n": 386
   },
   "fight inc:drowned:smart": {
    "v": 100,
-   "n": 173
+   "n": 265
   },
   "fight inc:cinder_hawks:smart": {
    "v": 100,
-   "n": 489
+   "n": 703
   },
   "fight inc:rot_ape:smart": {
-   "v": 99.4,
-   "n": 181
+   "v": 99.6,
+   "n": 271
   },
   "fight inc:husks:smart": {
    "v": 100,
-   "n": 163
-  },
-  "fight inc:root_husks:smart": {
-   "v": 100,
-   "n": 59
+   "n": 248
   },
   "fight inc:guardian:smart": {
    "v": 100,
-   "n": 68
+   "n": 121
   },
   "fight inc:rt_wolves:smart": {
    "v": 100,
-   "n": 175
-  },
-  "fight inc:lizard:smart": {
-   "v": 88.2,
-   "n": 34
+   "n": 265
   },
   "fight inc:night_serpent:smart": {
    "v": 100,
-   "n": 62
+   "n": 102
   },
   "fight inc:elder:smart": {
    "v": 100,
-   "n": 52
+   "n": 89
+  },
+  "fight inc:wolves:smart": {
+   "v": 100,
+   "n": 348
   },
   "fight inc:night_wolves:smart": {
    "v": 100,
-   "n": 56
+   "n": 85
   },
   "fight inc:night_hawks:smart": {
    "v": 100,
-   "n": 61
+   "n": 100
+  },
+  "fight inc:root_husks:smart": {
+   "v": 100,
+   "n": 91
+  },
+  "fight inc:rt_brawl:smart": {
+   "v": 100,
+   "n": 11
+  },
+  "fight inc:lizard:smart": {
+   "v": 87.5,
+   "n": 32
+  },
+  "fight inc:sect_watcher:smart": {
+   "v": 100,
+   "n": 74
   },
   "fight inc:rats:smart": {
    "v": 91.3,
    "n": 23
   },
-  "fight inc:rt_brawl:smart": {
-   "v": 100,
-   "n": 9
-  },
   "fight inc:crows:smart": {
-   "v": 87,
-   "n": 23
+   "v": 85.7,
+   "n": 21
   },
   "fight inc:jackals:random": {
    "v": 22.5,

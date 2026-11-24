@@ -2,6 +2,12 @@
 
 Started in v0.11.258, when `roadmap-done-4.md` would have passed about 45 KB with this move. Newer than `roadmap-done-4.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.267 (word for word; owner pick P35-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB)
+
+### From `roadmap.md` section 2, one done line
+
+- *(v0.11.265, owner pick P33-A; `project/research/p33-measure.md`; the options: `claude/p33-options.md`)* **Done: the RA1 line and MF settled on the long calendar** (320 bot games, 8 models × 40; the fight lab 200 games): LR closed as unreachable (a lost beast fight in a Coil ends the Coil; 0 of 320 games reach `night_lost`, `jackals_lost` or `bl_night_lost`; guard TG-LR); MQ closed as by design (the v0.11.141 audit; gather Qi 14.9–71.9 h a game); FC closed (1,544 of 2,103 failed story checks are a first or second pick; −0.5 / −1 / −1.5 by earlier picks passes 0.48 more a game, 104 of 152 at `rr_end`, whose fail leads into a fight won 100%); BN + RA superseded (the baseline re-saved 2026-11-22; the story test's rot ape smart 99.7%); CD superseded (Careful: Wen p50 39, the mother 78 by the plan); MF + CMN closed (the mother p50 76–90, the Rusher 43; 287 of 287 Act 1 ends at the kitchen's 30); PC closed as by design (two once-a-Coil cards: tops at 2, 0 of 287 at 3; guard TG-PC). No game change. **Open, options later:** the rest of this section (`roadmap-retune.md`'s knobs and tools; group d's (b) and the smart rule's dart order).
+
 ## Moved in v0.11.266 (word for word; owner pick P34-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB)
 
 ### From `roadmap.md` section 2, two done lines
