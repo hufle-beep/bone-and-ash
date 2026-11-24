@@ -19,7 +19,9 @@ Split out of `roadmap.md` in v0.11.88 (owner pick A, 2026-11-09 02:37, S1): sect
 - *(was: Later; Sect close-ups and interiors have pictures since v0.11.38; the glasses and tattoos are in group e)*
   **Art:** replaced by the art push (v0.11.24 on): generated pictures in the blended CLAMP / Monogatari style. Still open there: Sect close-ups, interiors (elder, healer, dinner), mentioning James's glasses and tattoos in the story text (a text change, the owner's call).
 
-## 4. Systems still to build (after the retune)
+## 4. Systems still to build (step 6: after the retune and the polish pass, before Act 2; owner pick P38-A, v0.11.270)
+
+*(v0.11.270, owner pick P38-A, BM, the owner 2026-11-24 21:04: "move step 8 before act 2, the game should be mature before we start working on it.")* About half of this section's lines change balance (crafting and the progression layer, the threads, stances / clean or barbed / bone into the blade, the engine systems: Qi bond flow, injuries, quest XP lumps; the Eat button on story screens); the rest is display, Android, tools or text. Each balance push is measured against the targets T1–T3 (`tools/targets.json`) and the long-calendar drift guard (both since v0.11.268), so the tuned prologue and Act 1 are re-checked as each lands. Two need the owner's design answers before their options: the threads (what a thread does since there is no queue) and crafting (the recipe list and numbers).
 
 *(v0.11.199, owner pick P1: bundles F (the Android follow-ups (g), (h), (i)) and G ((b), (c), (d)) below; (a) and (e) single; the plan at the top of `roadmap-e.md`.)*
 

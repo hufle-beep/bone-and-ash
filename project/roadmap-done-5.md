@@ -2,6 +2,12 @@
 
 Started in v0.11.258, when `roadmap-done-4.md` would have passed about 45 KB with this move. Newer than `roadmap-done-4.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.270 (word for word; owner pick P38-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB)
+
+### From `roadmap.md` section 2, one done line
+
+- *(v0.11.267, owner picks P35-A, RV-A; `project/research/p35-measure.md`, `p35-review.md`; the options: `claude/p35-options.md`)* **Done: the models' Coil-1 clears back under TP** (the models 40 games a variant, long calendar; sanity): every Coil-1 tribute win came through Say something on Lu Han's posture, which TP closed; **CT-C** his stance reads as a posture once James has 20 rounds of blade practice (the tribute only; `STANCE_READ_OF`): the whole game on Coil 1 Completionist 0 → 20.5%, Cultivator 0 → 19.5% (the full check, 200 games), Careful and the Sociable unchanged (3.90 / 4.96); Fable's lines (three warnings, the start line, three paired replies, RV-A); closed: **WP** practice against Lu Han faster (0%), **BB** the blow ×1.5 (0%), **TE** the tell every 4th round (0%), **NG** bots take the blow (0%), **PS** heavy and posturing with the old bot (0%), **CT-A** Lu Han as in v0.11.265 (20 / 22.5%, Careful's prologue back to 2.10), **CT-B** every heavy person's stance a posture (CT-A's numbers, more scope). `baseline.json` re-saved (3 drifted: tribute C4 won +21.2, C4 lost −24.4, collectors smart +27.6). **TG, the colour key for the rest of the retune (the owner's 2026-11-22 calls, `history-48.md`):** one Coil winnable only for the Completionist and the Cultivator, 20–30% of their games (the whole game); Act 1 about 2 Coils more for Careful and the Sociable than v0.11.252's 2.38 (P25-A: 4.47 / 4.40); P34's colours had used v0.11.111's key (one-Coil games under 5%). **Open, options later:** the rest of this section (`roadmap-retune.md`'s knobs and tools); the fight texts (`TELL_TEXT`, `SAY_TEXT`, `FOE_TRAITS`) in textlint's pools (the P35 review's TG6).
+
 ## Moved in v0.11.269 (word for word; owner pick P37-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB; and one review note closed)
 
 ### From `roadmap.md` section 2, one done line

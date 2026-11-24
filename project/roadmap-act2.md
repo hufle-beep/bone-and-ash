@@ -1,5 +1,7 @@
 # Roadmap, Act 2: Bone and Ash
 
+*(v0.11.270, owner pick P38-A, the owner 2026-11-24 21:04: "move step 8 before act 2, the game should be mature before we start working on it.": Act 2 is step 7 of `roadmap.md`'s Order line, after the retune, the polish pass and section 4, systems; the older placements in the line below.)*
+
 *(v0.11.200, owner pick F2: Act 2 left for now; after the retune of the prologue and Act 1, if there is time; `roadmap.md`'s order line.)* *New in v0.11.171 (owner pick RA1, 2026-11-14 01:04). Act 2's own part of the open work: **after group f (romance) and before section 2 (the retune)** in `roadmap.md`, which names this file between them; sections 3–6 are in `roadmap-2.md`. The order now: group e (the rewrite, CM), group f (romance), **Act 2**, section 2 (the retune of the prologue, Act 1 and Act 2 together), section 3 (the art pass), the rest of section 4. Every push gets its own options and pick (rule 1); texts by Fable (rule 10); the story facts in `lore.md` ("Act 2").*
 
 ## The owner's words (2026-11-14 01:02, word for word)
