@@ -1,5 +1,6 @@
 {
  "note": "The owner's 2026-11-22 targets (roadmap.md section 2's colour key), read by tools/sanity.mjs: one log-only TARGET line per target and model, in / near (outside by no more than 2 × its standard error) / out. v0.11.268, owner pick P36-A (TT). Changing a target is the owner's call.",
+ "frozen_note": "v0.11.273, owner pick P41-A (FZ + RR): a section is frozen only on the owner's word, with one key number each (the same fields as a target, plus section and the owner's words in said). tools/sanity.mjs prints one FROZEN line per number and model; out (outside its band by more than 2 × its standard error) fails the check. Empty until the owner freezes a section.",
  "targets": [
   {
    "id": "T1",
@@ -28,5 +29,6 @@
    "target": 4.38,
    "about": 0.75
   }
- ]
+ ],
+ "frozen": []
 }

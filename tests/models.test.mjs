@@ -63,6 +63,7 @@ import { forcedPick, oldForcedPick, skipNotNow, hungryLine } from './lib/forced.
 import { sparePlan } from './lib/spare.mjs'; // v0.11.142 (owner pick CV1): the Cultivator's spare time
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 import { shareTable } from '../tools/lib/longguard.mjs'; // v0.11.268 (P36-A, MB)
+import { skillPrint, linesOf, silentSkill, skillWatchLine } from './lib/skillwatch.mjs'; // v0.11.273 (owner pick P41-A, SW)
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 && argv[i + 1] != null ? argv[i + 1] : d; };
@@ -128,15 +129,18 @@ function fight(g, st, smart) {
     for (let t = 0; t < 400 && g.combat; t++) {
         let out;
         if (smart) {
-            out = combatStep(g, smartAction(g, t)); // v0.11.96 (BT1): the shared smart rule
+            out = see(combatStep(g, smartAction(g, t))); // v0.11.96 (BT1): the shared smart rule
         } else {
             const acts = Object.keys(COMBAT_ACTIONS).filter((id) => !INC_ONLY_ACTIONS.has(id) || actionOpen(g, id));
-            out = (t % 7 === 6 && g.combat.flee) ? combatFlee(g) : combatStep(g, pick(acts));
+            out = see((t % 7 === 6 && g.combat.flee) ? combatFlee(g) : combatStep(g, pick(acts)));
         }
-        if (out?.done) { const f = st.fights[id0] || (st.fights[id0] = { win: 0, lose: 0, flee: 0 }); f[out.done] = (f[out.done] || 0) + 1; goTo(g, SCENES, out.next); return; }
+        if (out?.done) { const f = st.fights[id0] || (st.fights[id0] = { win: 0, lose: 0, flee: 0 }); f[out.done] = (f[out.done] || 0) + 1; see(goTo(g, SCENES, out.next)); return; }
     }
 }
-const runCombat = (g, r, st, smart) => { if (r?.combat) { startCombat(g, r.combat(g)); fight(g, st, smart); } };
+// v0.11.273 (owner pick P41-A, SW): what each step shows, for skillWatch (tests/lib/skillwatch.mjs; log only)
+let swSeen = [];
+const see = (x) => { swSeen.push(...linesOf(x)); return x; };
+const runCombat = (g, r, st, smart) => { if (r?.combat) { see(startCombat(g, r.combat(g))); fight(g, st, smart); } };
 
 /** What a model queues on a task screen this visit (card ids), or null to take a story stop. */
 export function hubPlan(model, g, cards, mem, noExit = false) {
@@ -208,7 +212,7 @@ const MED_PLAN = { careful: { sit: 0, mer: 1, qi: 0, pres: 1 }, sociable: { sit:
 const WEEK_SIDE = (c) => !c.week && !c.pres && !isCarryTask(c.id) && !['sit', 'mer', 'qi'].includes(c.kind) && !/^(Call it a day|Cultivate|Condense)/.test(c.label);
 function weekRun(model, g, cards, st) {
     let p = planHere(g);
-    if (!p && weekResume(g)) { const r = runWeek(g, SCENES); st.weekStops[r.stop] = (st.weekStops[r.stop] || 0) + 1; } // RV1 (L1): the week's end reported
+    if (!p && weekResume(g)) { const r = see(runWeek(g, SCENES)); st.weekStops[r.stop] = (st.weekStops[r.stop] || 0) + 1; } // RV1 (L1): the week's end reported
     if (!p) {
         p = planEnsure(g); if (!p) return false;
         // v0.11.225 (owner pick LO2, BK): the week starts from the amounts kept (KC1), as a player's: a tap only for a row that differs
@@ -226,10 +230,10 @@ function weekRun(model, g, cards, st) {
     }
     if (!p.running) st.taps.run++;
     const m0 = g.minutes, s0 = g.scene;
-    const r = runWeek(g, SCENES);
+    const r = see(runWeek(g, SCENES));
     st.weekStops[r.stop] = (st.weekStops[r.stop] || 0) + 1;
     // v0.11.214 (owner pick RD1, RB): a card with text not read yet: the model taps it (a card tap), reads it, and runs the week again
-    if (r.stop === 'read') { const id = planHere(g)?.read; if (id && taskOpen(g, SCENES, id)) { const rr = runTask(g, SCENES, id); noteReadTap(g, SCENES, id, rr); noteLines(g, rr.lines); st.cards++; st.taps.card++; return true; } }
+    if (r.stop === 'read') { const id = planHere(g)?.read; if (id && taskOpen(g, SCENES, id)) { const rr = see(runTask(g, SCENES, id)); noteReadTap(g, SCENES, id, rr); noteLines(g, rr.lines); st.cards++; st.taps.card++; return true; } }
     return g.minutes !== m0 || g.scene !== s0;
 }
 
@@ -242,10 +246,10 @@ function play(run, model, st, yuki, kept = false) {
     let off = 0; // v0.11.86: the Farmer's bites by choice, through the scenes the James tab's button leads to
     if (model === 'farmer') {
         for (let k = 0; k < FARM_BITES; k++) {
-            endCoil(g, 'choice', g.scene); goTo(g, SCENES, 'coil_end');
+            endCoil(g, 'choice', g.scene); see(goTo(g, SCENES, 'coil_end'));
             const w = sceneView(g, SCENES).choices.find((c) => /Wake at the first dawn/.test(c.label));
             if (!w) { assert(false, `farmer: no first dawn on the Coil screen (run ${run})`); return 'stuck'; }
-            choose(g, SCENES, w.index); choose(g, SCENES, 0); // the Coil screen, then the first dawn's Get up
+            see(choose(g, SCENES, w.index)); see(choose(g, SCENES, 0)); // the Coil screen, then the first dawn's Get up
         }
         off = FARM_BITES; st.farmMult = (st.farmMult || 0) + coilMult(g); st.farmN = (st.farmN || 0) + 1;
         model = 'completionist';
@@ -256,10 +260,14 @@ function play(run, model, st, yuki, kept = false) {
     let lastShown = null; // v0.11.134 (LP2, SV)
     const seenTrib = new Set();
     const maxSteps = (model === 'sitter' ? STEPS_SITTER : STEPS) * (kept ? 2 : 1);
+    let swPrint = null, swAt = '', swKey = ''; // v0.11.273 (P41-A, SW)
     for (let steps = 0; steps < maxSteps; steps++) {
         if (cn() > MAX_COIL) { if (kept && st !== real) { real.p1GaveUp = (real.p1GaveUp || 0) + 1; real.games--; return 'noClear'; } st.gaveUp++; return 'gaveUp'; } // KA1's RV1 (L3): a first pass that gives up has no second
         const act = g.coil.act || 0;
         const key = `${act}:${cn()}`;
+        { const sp = skillPrint(g); // v0.11.273 (P41-A, SW): the last step moved a skill and showed no XP line
+          if (swPrint !== null && sp !== swPrint && key === swKey) { const w = st.skillWatch || (st.skillWatch = { steps: 0, silent: 0, at: {} }); w.steps++; if (silentSkill(swPrint, sp, swSeen)) { w.silent++; w.at[swAt] = (w.at[swAt] || 0) + 1; } }
+          swPrint = sp; swSeen = []; swAt = g.scene; swKey = key; } // a new Coil starts the skills over (the Coil screen says so): not compared
         if (key !== coilKey) { // a new Coil: the days start over
             coilKey = key; mem.done = {}; mem.walked = new Set(); // v0.11.163 (W1, RS): the doors walked into while forced, this Coil
             mem.qi = {}; mem.texts = new Set(); // v0.11.132 (E1, RP): the texts shown this Coil; v0.11.85 (Fable review): the Sitter's gather-Qi hours start over too (a rewind restores the day count)
@@ -297,10 +305,10 @@ function play(run, model, st, yuki, kept = false) {
             if (!ACT1_WON.includes(g.flags.a1_outcome)) { real.noClear = (real.noClear || 0) + 1; real.games--; return 'noClear'; } // RV1 (L3): the second pass's lines count only games that play one
             real.p1Realm = (real.p1Realm || 0) + g.james.realm; real.p1Coil = (real.p1Coil || 0) + cn(); real.p1N = (real.p1N || 0) + 1;
             if (KEPT_CLEARS) { g.stats = g.stats || {}; g.stats.clears = Math.max(g.stats.clears || 0, Number(KEPT_CLEARS) - 1); } // P40-A (KC): the bite below adds this clear
-            goTo(g, SCENES, 'a1_again');
+            see(goTo(g, SCENES, 'a1_again'));
             const w = sceneView(g, SCENES).choices.find((c) => /start of the whole game/.test(c.label));
             if (!w) { assert(false, `${model}: no whole-game bite at a1_again after a won Act 1 (run ${run})`); return 'stuck'; }
-            choose(g, SCENES, w.index); real.keptStart = (real.keptStart || 0) + g.james.realm;
+            see(choose(g, SCENES, w.index)); real.keptStart = (real.keptStart || 0) + g.james.realm;
             st = real; mem = { done: {}, tried: mem.tried, tribLost: 0, shenBites: 0, st }; off = g.coil.n - 1;
             coilKey = ''; deadKey = ''; takenKey = ''; nightKey = ''; crossed = false; bitShen = false; seenTrib.clear(); lastShown = null; for (const k of Object.keys(gateKey)) delete gateKey[k];
             continue;
@@ -350,7 +358,7 @@ function play(run, model, st, yuki, kept = false) {
                     const c = cards.find((x) => x.id === id);
                     if (c && !EAT.test(c.label)) st.work++;
                     const m0 = g.minutes;
-                    const rr = runTask(g, SCENES, id); st.cards++; st.taps.card++; if (CAL) noteLines(g, rr.lines); // v0.11.214 (RD1): what a tap shows is read
+                    const rr = see(runTask(g, SCENES, id)); st.cards++; st.taps.card++; if (CAL) noteLines(g, rr.lines); // v0.11.214 (RD1): what a tap shows is read
                     if (model === 'sociable' && c?.kind === 'door' && SOCIAL.test(c.label)) st.talks = (st.talks || 0) + 1; // v0.11.160 (NX2, CN; RV1 TC)
                     const ck = c && (c.kind === 'chore' && /^(Cultivate|Condense)/.test(c.label) ? 'sit' : c.kind); // a hub's own Cultivate chore is a sit
                     if (CULT_KINDS.includes(ck)) st.cult[ck] = (st.cult[ck] || 0) + (g.minutes - m0); // v0.11.142 (CV1): cultivation on task screens
@@ -364,11 +372,11 @@ function play(run, model, st, yuki, kept = false) {
                 const done = doneSet(mem, g);
                 const c = careLike(model) ? forcedPick(open, done, mem.walked, dayKey(g)) : oldForcedPick(open, done); // v0.11.163 (W1, RS; tests/lib/forced.mjs)
                 done.add(c.id); st.forced++; st.cards++; st.taps.card++;
-                const rr = runTask(g, SCENES, c.id); if (CAL) noteLines(g, rr.lines); // v0.11.214 (RD1)
+                const rr = see(runTask(g, SCENES, c.id)); if (CAL) noteLines(g, rr.lines); // v0.11.214 (RD1)
                 continue;
             }
             const i = storyPick(model, g, stops, mem); mem.tried.add(`${g.scene}:${i}`);
-            { if (CAL) noteEvening(g, g.scene, i); /* v0.11.250 (YM-A): an evening's choice noted, as main.js storyTap */ const cr = choose(g, SCENES, i); if (CAL) noteLines(g, cr.lines); runCombat(g, cr, st, smart); } st.taps.story++; // v0.11.214 (RD1): the long calendar reads the result
+            { if (CAL) noteEvening(g, g.scene, i); /* v0.11.250 (YM-A): an evening's choice noted, as main.js storyTap */ const cr = see(choose(g, SCENES, i)); if (CAL) noteLines(g, cr.lines); runCombat(g, cr, st, smart); } st.taps.story++; // v0.11.214 (RD1): the long calendar reads the result
             if (CAL && !g.combat) st.taps.fold += foldNight(g, SCENES).steps; // v0.11.204 (W1, R3): as main.js does after a story choice
             continue;
         }
@@ -377,13 +385,13 @@ function play(run, model, st, yuki, kept = false) {
         if (/^(arrival|clearing)$/.test(g.scene)) open = open.filter((c) => !/Stay lost/.test(c.label)); // no Long Forest
         if (g.scene === 'collectors_lost') { open = open.filter((c) => /Bite the tail/.test(c.label)); } // v0.11.251 (owner pick P21-E, TK): a lost tribute ends the Coil, nothing to accept
         if (g.scene === 'coil_end' && g.coil.why === 'tribute') open = open.filter((c) => /^Bite/.test(c.label));
-        if (model === 'random' && g.scene === 'rt_elder' && run % 10 === 0 && act === 1 && !bitShen) { goTo(g, SCENES, 'rt_taken'); continue; } // the tasks test's bot: 1 game in 10 goes with Shen Qiu on purpose
+        if (model === 'random' && g.scene === 'rt_elder' && run % 10 === 0 && act === 1 && !bitShen) { see(goTo(g, SCENES, 'rt_taken')); continue; } // the tasks test's bot: 1 game in 10 goes with Shen Qiu on purpose
         if (g.scene === 'rt_taken') { const bite = model === 'random' ? run % 5 === 0 && !bitShen : mem.shenBites < 3; open = open.filter((c) => bite === /Bite the tail/.test(c.label)); if (bite) { mem.shenBites++; bitShen = true; } }
         if (g.scene === 'coil_end' && act === 1) open = open.filter((c) => !/whole game/.test(c.label));
         if (g.scene === 'coil_end' && g.coil.why === 'shen') open = open.filter((c) => /start of Act 1/.test(c.label));
         if (!open.length) { assert(false, `${model}: no choice left at ${g.scene} (run ${run})`); return 'stuck'; }
         const i = storyPick(model, g, open, mem); mem.tried.add(`${g.scene}:${i}`);
-        { if (CAL) noteEvening(g, g.scene, i); /* v0.11.250 (YM-A): an evening's choice noted, as main.js storyTap */ const cr = choose(g, SCENES, i); if (CAL) noteLines(g, cr.lines); runCombat(g, cr, st, smart); } st.taps.story++; // v0.11.214 (RD1): the long calendar reads the result
+        { if (CAL) noteEvening(g, g.scene, i); /* v0.11.250 (YM-A): an evening's choice noted, as main.js storyTap */ const cr = see(choose(g, SCENES, i)); if (CAL) noteLines(g, cr.lines); runCombat(g, cr, st, smart); } st.taps.story++; // v0.11.214 (RD1): the long calendar reads the result
         if (CAL && !g.combat) st.taps.fold += foldNight(g, SCENES).steps; // v0.11.204 (W1, R3)
         if (careLike(model) && g.james.satiety < 30 && foodLeft(g)) { // RV1 (HN): the Sociable too; v0.11.163 (owner pick HN1): where, and how low
             st.hungry++; st.hungryAt[g.scene] = (st.hungryAt[g.scene] || 0) + 1;
@@ -510,6 +518,7 @@ if (!SHARD && CAL && !KEPT) { // v0.11.203 (TS8): the long calendar was never co
     }
 }
 for (const h of hungryLines) console.log(`  ${h}`); // v0.11.163 (HN1): log only, no NOTE
+for (const [m, st] of Object.entries(all)) if (st.skillWatch) console.log(`  ${skillWatchLine(m, st)}`); // v0.11.273 (owner pick P41-A, SW): log only
 // RV1 (TG12, the Opus review): the long calendar's bots by the week: each model's weeks end, it breaks through on a stay, and the
 // stays' weeks are worked (Careful, the Sociable and the Completionist stay the forest's three weeks: the tribute on Day 40 or later)
 if (CAL && !SHARD) for (const [m, st] of Object.entries(all)) {

@@ -2,6 +2,12 @@
 
 Started in v0.11.258, when `roadmap-done-4.md` would have passed about 45 KB with this move. Newer than `roadmap-done-4.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.273 (word for word; owner pick P41-A, 2026-11-25: the size rule MD, `roadmap.md` under 20 KB)
+
+### From `roadmap.md` section 2, one done line
+
+- *(v0.11.272, owner pick P40-A; the options: `claude/p40-options.md`; `project/research/p40-measure.md`)* **Done: section 2's measured leftovers** (tools and tests only; measured before the pick, 50 games a model, seed 0): **L3** (the P39 review's) closed: with 2 won clears kept (Core Formation from the start) the collectors at 0.7 and at 0.8 give the same: the kept pass's collectors 100% / 100% for every model, the whole game on Coil 1 100% / 100% (the Cultivator's tribute C1 won 98 / 100%, 1 game, none lost); **KC** `tests/models.test.mjs --kept --kept-clears N` (log only): with 2 the Completionist and the Cultivator start the kept pass at Core Formation (2.00) and end Act 1 at 3.00 / 5.08; Careful and the Sociable win Act 1 at Foundation (1.00, mean Coil 4.96), so no count of clears lifts them; with 5 the Cultivator starts at 4.02 and ends at 6.00; **KA's (a)** closed (`roadmap-retune.md`): a kept Core Formation and up reaches 2 bots (Yuki's forms from 2, the fights by realm); XW-a (realm 7) none (`roadmap-act2.md`'s KA line); **TG6** (the P35 review's) the fight texts as textlint's pool `fight`: 47 lines / 763 words (the traits' 8 tags left out), twice 0, tics 0, broken 0, shared with a scene 1; the snapshot re-saved. v0.11.271's done line moved word for word to `roadmap-done-5.md`.
+
 ## Moved in v0.11.272 (word for word; owner pick P40-A, 2026-11-25: the size rule MD, `roadmap.md` under 20 KB)
 
 ### From `roadmap.md` section 2, one done line

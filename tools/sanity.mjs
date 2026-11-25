@@ -19,13 +19,15 @@
 // 2026-11-22 targets); LU, --update needs the long numbers and saves tools/baseline-long.json and tools/models-baseline.json with
 // tools/baseline.json (v0.11.266 and v0.11.267 re-saved without --long, so the long file went stale); KS, --last reads the stats the
 // last full check kept (tools/.last-check/) and refuses if js/ or tests/ changed since.
+// v0.11.273 (owner pick P41-A, FZ + RR): one FROZEN line per frozen section's key number (tools/targets.json's `frozen`); a number out
+// of its band (by more than 2 × its standard error) fails the check. A section is frozen only on the owner's word (working-agreement.md).
 //   node tools/sanity.mjs --update --last                 save the last full check's numbers as the new baselines — ONLY after the
 //                                                         owner has seen the numbers of an intended change and said go
 //   node tools/sanity.mjs --update --tasks t --story s --long m   the same from given stats files
 import { spawnSync } from 'node:child_process';
 import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { band, flagged, K as NOISE_K, MIN as NOISE_MIN, LIMIT, NOTE_AT, driftKind } from './lib/noise.mjs';
-import { longMetricsOf, compareLong, shareTable, targetLines, readKept } from './lib/longguard.mjs'; // v0.11.268 (P36-A)
+import { longMetricsOf, compareLong, shareTable, targetLines, frozenLines, readKept } from './lib/longguard.mjs'; // v0.11.268 (P36-A); frozenLines v0.11.273 (P41-A, FZ)
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import os from 'node:os';
@@ -138,7 +140,7 @@ for (const [name, m] of Object.entries(metrics)) if (!base[name] && m.n >= MIN_N
 for (const f of flags) console.log(`  DRIFT  ${f}`);
 for (const w of moved) console.log(`  NOTE  moved more than ${NOTE_AT} points (log only)  ${w}`);
 for (const w of wobble) console.log(`  noise-scaled (log only)  ${w}`);
-let longFlags = 0, longSum = '';
+let longFlags = 0, longSum = '', frozenFails = 0;
 if (L) { // v0.11.268 (P36-A, LG): a guard like tools/baseline.json (log only v0.11.251–267)
     const lb = existsSync(BASE_LONG) ? JSON.parse(readFileSync(BASE_LONG, 'utf8')).metrics : null;
     if (!lb) { longFlags = 1; console.log('  DRIFT  long calendar: no tools/baseline-long.json (node tools/sanity.mjs --update --last, after the owner\'s go)'); }
@@ -150,9 +152,16 @@ if (L) { // v0.11.268 (P36-A, LG): a guard like tools/baseline.json (log only v0
         longSum = `; long calendar: ${r.compared} compared (of ${r.total}), ${r.flags.length} drifted, ${r.notes.length} noted`;
     }
     // v0.11.268 (P36-A, TT): the owner's 2026-11-22 targets, log only
-    if (existsSync(TARGETS)) for (const t of targetLines(JSON.parse(readFileSync(TARGETS, 'utf8')).targets, L)) console.log(t);
+    if (existsSync(TARGETS)) {
+        const TJ = JSON.parse(readFileSync(TARGETS, 'utf8'));
+        for (const t of targetLines(TJ.targets, L)) console.log(t);
+        // v0.11.273 (P41-A, FZ): the frozen sections' key numbers; out fails the check (none frozen until the owner's word)
+        const fz = frozenLines(TJ.frozen, L);
+        for (const l of fz.lines) console.log(l);
+        frozenFails = fz.fails;
+    }
 }
 console.log(`  noise-scaled drift (log only, ${NOISE_K} × each number's noise, at least ${NOISE_MIN} points, every n): ${wobble.length} would flag; ${small} numbers under n ${MIN_N} are not compared by the ±${LIMIT} rule`);
-const total = fails + flags.length + longFlags;
+const total = fails + flags.length + longFlags + frozenFails;
 console.log(`${compared} numbers compared (±${LIMIT} points, n ≥ ${MIN_N}): ${flags.length} drifted, ${moved.length} moved more than ${NOTE_AT} (log only)${longSum}, ${fails} invariant(s) failed`);
 process.exit(total ? 1 : 0);

@@ -104,6 +104,28 @@ export function targetLines(targets, L) {
     return lines;
 }
 
+/* ---------- FZ: the frozen sections (v0.11.273, owner pick P41-A) ---------- */
+/**
+ * RR: a section is frozen only on the owner's word, with one key number each (tools/targets.json's `frozen`, the same fields as
+ * a target plus `section`). One line per frozen number and model: in and near are log only; out (outside its band by more
+ * than 2 × its standard error) fails the check. `fails` counts the outs; a model not played in this run fails nothing.
+ */
+export function frozenLines(frozen, L) {
+    const lines = [];
+    let fails = 0;
+    for (const f of frozen || []) {
+        const min = f.min ?? f.target - f.about, max = f.max ?? f.target + f.about;
+        for (const m of f.models) {
+            const r = measure(L[m], f.metric);
+            if (!r) { lines.push(`  FROZEN  ${f.id} ${f.section} ${m}: not played in this run`); continue; }
+            const v = verdict(r.v, r.se, min, max);
+            if (v === 'out') fails++;
+            lines.push(`  FROZEN  ${f.id} ${f.section} ${m} ${f.what}: ${r.v}${r.unit} (frozen ${+min.toFixed(2)}–${+max.toFixed(2)}${r.unit}; n ${r.n}): ${v}${v === 'out' ? ' (fails the check)' : ''}`);
+        }
+    }
+    return { lines, fails };
+}
+
 /* ---------- KS: the kept stats ---------- */
 /** A hash of every file under js/ and tests/ (the game and the bots): kept stats are saved only while it matches. */
 export function codeStamp(root) {

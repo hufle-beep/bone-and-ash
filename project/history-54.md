@@ -2,6 +2,36 @@
 
 Started 2026-11-24 (v0.11.271), when `history-53.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-53.md` … `history.md`.
 
+## Moved from the handover in v0.11.273 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-25 (Europe/Budapest). **Version:** 0.11.272 (`sw.js` VERSION `bone-ash-0.11.272`): **section 2's measured leftovers (P40-A, the owner 2026-11-25 00:56: "P40-a go"; tools and tests only, the game as 0.11.271):** **L3** (the P39 review's) closed: a kept Core Formation start (2 won clears) meets the collectors at 0.7 and at 0.8 alike: the kept pass's collectors 100% / 100% for every model, the whole game on Coil 1 100% / 100% (the Cultivator's tribute C1 won 98 / 100%, 1 game, none lost); **KC** `tests/models.test.mjs --kept --kept-clears N` (log only): with 2 the Completionist and the Cultivator start the kept pass at Core Formation (2.00; Act 1's end 3.00 / 5.08), Careful and the Sociable win Act 1 at Foundation (mean Coil 4.96) and keep it; with 5 the Cultivator starts at 4.02 (Act 1's end 6.00); **KA's (a)** closed (XW-a from realm 7 reaches no bot); **TG6** (the P35 review's) the fight texts as textlint's pool `fight` (47 lines / 763 words, tics 0, broken 0, shared with a scene 1; the snapshot re-saved). **Next push:** open, options later.
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** Section 2's measured leftovers (v0.11.272); the Cultivator back inside T1 (v0.11.271); systems before Act 2 (v0.11.270). Open, options later (on the roadmap: `roadmap.md` section 2): the rest of section 2 (`roadmap-retune.md`'s knobs and tools: the tuning tools and rules (the tuning-notes doc, the pins for frozen sections, simruns, skillWatch, Careful's eating under Fed 30, the retune rules, the check order, the engine's times lint, the "tuned up to" note), BD and HN (their numbers from v0.11.222 / v0.11.244, before P21–P39: measured again first), the older notes), then 5b, systems, Act 2, art, later. *(The entry as it stood, word for word, in `history-54.md`.)*
+
+*(from Decided in chat)*
+
+- **v0.11.270: P38-A (the owner 2026-11-24 21:04: "move step 8 before act 2, the game should be mature before we start working on it."; 21:06: "P38-a go").** The options as laid out in chat (`claude/p38-options.md`, the project doc): **P38-A 🟢 (picked, recommended)** RO + SL + HW + BM (all of section 4 before Act 2; the docs agree); P38-B 🟡 the display half of section 4 before Act 2 (about 5–8 pushes), the balance half after it; P38-C 🟠 the Order line only; P38-D 🔴 hold. No review (rule 9: docs only).
+
+## v0.11.270 — Systems before Act 2 (P38-A)
+
+- **Files:** `sw.js`; tests: `tests/tools.test.mjs` (the P38-A block; PL-A's Order pin re-pinned; T1 this push's move), `tests/README.md`; docs: `project/roadmap.md` (the Order line, the A2 and 2b headings, section 0's note; v0.11.267's done line moved, MD), `project/roadmap-2.md` (section 4's heading and BM note), `project/roadmap-act2.md` (its top note), `project/roadmap-done-5.md`, the four docs, `history-53.md`.
+- **What:** see the version line. No What's new line: nothing a player sees changed.
+- **Checks:** docs only (rule 2): the tools test (617 passed) and `bash tools/check.sh quick` (exit 0, 638.7 s). Two older pins re-pinned before it (PG, the established pattern): v0.11.216's Order pin reads Act 2 as step 7, and P37-A's section-0 pin no longer needs its note first. **How it touches the rest:** docs only; the game and its numbers as 0.11.268.
+- **Opus:** none (rule 9). **Fable:** none.
+
+## Moved from `reference.md` in v0.11.273 (word for word; owner pick P41-A, CO: the dice era's balance block)
+
+**Balance (v0.4.0, smart combat, random hub choices; `s` = extra days trained) — historical, the dice era; today's numbers: the bots and `tools/baseline.json`:**
+- Enemies grow per extra day with `grow()` in `js/story/common.js`: HP +15%, DC to hit +0.45, attack +0.6 (to the half point). Lu Han: HP +5%, DC +0.35, attack +0.5. That tracks the average gain per day, so a player who trains harder than average wins more.
+- Jackals (night 3 adds a yearling): ~99%. Gao Feng: 84% (s1) / 95% (s2). Boar: 91% / 99%. Collectors: 37% (s3) / 58% (s4). Night fights (crows, rats, lizard): 97–100%. Far hunt (wolves, thornback bull): ~80%. Arson: ~97%.
+- Player at the jackals: GU check ~2.8, Convergence Use ~1.7 after two full forest days (was 1.2 / 0.6 on night 1).
+- Old saves (no `long` flag) keep the original numbers and route.
+- Re-tune with the balance script pattern: random hub choices, smart combat, group win rate by `s` (see git history, `bal.mjs` in the session that built v0.4.0).
+
 ## Moved from the handover in v0.11.272 (word for word)
 
 *(the version line as it stood)*
