@@ -36,8 +36,8 @@ None yet. A section is frozen only on the owner's word, with one key number (`to
 
 ## The log-only tools
 - `tools/sanity.mjs`: TARGET lines (v0.11.268), FROZEN lines (v0.11.273).
-- `tests/models.test.mjs`: the hungry line (HN1), skillWatch (SW, v0.11.273: a skill that moved in a step with no XP line; 0 in plain runs; `liftKept`'s kept-realm XP shows no line but falls on a Coil's restart, which the watch leaves out), `--kept` / `--kept-clears`.
-- `node tools/timelint.mjs [--list]` (TL, v0.11.273): the choices on the default time against Rules Engine C's times per activity (v0.11.273: 855 choices, 202 linted, 30 off the engine's time; most are sleeps and talks). Applying them is a balance change of its own.
+- `tests/models.test.mjs`: the hungry line (HN1; v0.11.274, HL: counted only where nothing to eat is open), skillWatch (SW, v0.11.273: a skill that moved in a step with no XP line; 0 in plain runs; v0.11.274, LK: `liftKept`'s kept-realm XP now shows three summed lines on the bite, and a kept Coil's restart is compared with the skills it started over from, by skill too), `--kept` / `--kept-clears`.
+- `node tools/timelint.mjs [--list]` (TL, v0.11.273): the choices on the default time against Rules Engine C's times per activity (v0.11.273: 855 choices, 202 linted, 34 off the engine's time, counted 30 at the time; v0.11.274, P42-A: 19 talks set to 10 min (TL-a) and 15 kept with their reasons in `REVIEWED` (TL-r: 7 sleeps slept on a later screen, 7 misreads, `fo_spy:1` whose result takes an hour): 0 off). A new time is a balance change of its own.
 
 ## The logs
 `project/research/p21-*` … `p41-measure.md` (one per push's measuring), `claude/pNN-options.md` in the claude.ai project, `project/history-*.md` (the decisions), `tools/models-baseline.json` and `tools/baseline*.json` (the numbers the check compares with).

@@ -643,7 +643,7 @@ He sees you. He takes in the white coat, ${byForm(g, 'the cat', 'the white beast
         choices: [
             { text: (g) => (g.flags.lf_human === 'lf_rogue' ? 'Let him make his speech. Then answer it.' : 'Let them make their speech. Then answer it.'), // v0.11.179 (LB1, K3): Fang Wei alone, the Tans two
               combat: (g) => fight(g.flags.lf_human)(g), to: 'lf_human_won' },
-            { text: (g) => (g.flags.lf_human === 'lf_rogue' ? 'Talk your way past him. You\'re very good at being underestimated.' : 'Talk your way past them. You\'re very good at being underestimated.'),
+            { time: 10, text: (g) => (g.flags.lf_human === 'lf_rogue' ? 'Talk your way past him. You\'re very good at being underestimated.' : 'Talk your way past them. You\'re very good at being underestimated.'),
               check: { skill: 'GU', dc: 5 }, to: 'lf_human_talked', fail: 'lf_human_talked' },
             { text: 'Walk the other way. Not every fool needs a lesson today.', time: 30, to: 'lf_hub' },
         ],

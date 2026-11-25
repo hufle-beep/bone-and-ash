@@ -598,7 +598,7 @@ Mei Lin looks at you. She is waiting, you understand, for the joke: the one that
 
 For once in your life, you don't make it.`,
         choices: [
-            { text: '"I want both of you. I have for days. I\'m forty and I\'ve stopped pretending."', do: (g) => { g.flags.throuple = true; trioStep(g, 4); bumpRel(g, 'Mei Lin', 6, 15); bumpRel(g, 'Ya', 6, 15); g.flags.romance = true; g.flags.ya_romance = true; return []; }, to: 'rt_trio_night' },
+            { time: 10, text: '"I want both of you. I have for days. I\'m forty and I\'ve stopped pretending."', do: (g) => { g.flags.throuple = true; trioStep(g, 4); bumpRel(g, 'Mei Lin', 6, 15); bumpRel(g, 'Ya', 6, 15); g.flags.romance = true; g.flags.ya_romance = true; return []; }, to: 'rt_trio_night' },
             { text: 'Take Mei Lin\'s other hand, so she\'s holding both of you. Let her decide.', do: (g) => { g.flags.throuple = true; trioStep(g, 4); bumpRel(g, 'Mei Lin', 8, 15); bumpRel(g, 'Ya', 4, 15); g.flags.romance = true; g.flags.ya_romance = true; return []; }, to: 'rt_trio_night' },
             { text: '"Not tonight. Ask me again when we\'re alive the day after tomorrow."', do: (g) => { bumpRel(g, 'Ya', -2, 0); bumpRel(g, 'Mei Lin', 3, 0); return ['Ya groans like a dying boar and falls flat on the floorboards, arms out. Mei Lin lets out a breath, very quietly. Neither one lets go of your hands.']; }, to: 'rt_quiet_night' },
         ],

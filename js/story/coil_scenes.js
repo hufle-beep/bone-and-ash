@@ -42,9 +42,11 @@ let cardScenes = {};
 /** Rewind to 'act' (the act's first dawn) or 'game' (the arrival); the line the player sees. v0.11.26 */
 function bite(g, to) {
     const whole = to === 'game' && actOf(g) === 1;
-    const n = rewind(g, { to });
+    const xp = []; // v0.11.274 (owner pick P42-A, LK): the kept realm's XP, shown after its line
+    const n = rewind(g, { to, xpOut: xp });
     const out = [`Coil ${n}.${whole ? ' Day 1 again: the forest, the stream, the whole of it.' : ''} The hammerspace is empty, and so are your hands. Your head is not${coilMult(g) > 1 ? `: you learn ×${fmtMult(coilMult(g))} as fast` : ''}.`]; // v0.11.86: no "×1 as fast"
     if (g.coil.kept) out.push(keptLine(g)); // v0.11.227 (KA1, KT): the realm kept for won clears
+    if (g.coil.kept) out.push(...xp);
     return out;
 }
 

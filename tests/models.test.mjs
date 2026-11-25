@@ -59,11 +59,11 @@ import { noFold, OUTCOME_SCENES, againView, noteRead, noteLines } from '../js/st
 import { shareNote } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1, EB)
 import { smartAction } from './lib/smartfight.mjs'; // v0.11.96 (BT1)
 import { SOCIAL, EAT } from './lib/social.mjs'; // v0.11.160 (NX2, CN): the Sociable's talk doors; v0.11.181 (RV1, TG7): EAT moved there
-import { forcedPick, oldForcedPick, skipNotNow, hungryLine } from './lib/forced.mjs'; // v0.11.163 (owner pick W1): RS and NN
+import { forcedPick, oldForcedPick, skipNotNow, hungryLine, EAT_CHOICE, eatOpen } from './lib/forced.mjs'; // v0.11.163 (owner pick W1): RS and NN
 import { sparePlan } from './lib/spare.mjs'; // v0.11.142 (owner pick CV1): the Cultivator's spare time
 import { SHARD, myRuns, seedOf, launch, collect, emit, mergeInto } from './lib/shard.mjs';
 import { shareTable } from '../tools/lib/longguard.mjs'; // v0.11.268 (P36-A, MB)
-import { skillPrint, linesOf, silentSkill, skillWatchLine } from './lib/skillwatch.mjs'; // v0.11.273 (owner pick P41-A, SW)
+import { skillPrint, linesOf, silentSkill, skillWatchLine, movedUnnamed } from './lib/skillwatch.mjs'; // v0.11.273 (owner pick P41-A, SW)
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const i = argv.indexOf(`--${n}`); return i >= 0 && argv[i + 1] != null ? argv[i + 1] : d; };
@@ -194,6 +194,9 @@ function storyPick(model, g, choices, mem) {
     if (model === 'cultivator') model = 'completionist'; // v0.11.142 (CV1)
     // v0.11.163 (W1, NN): every model but Random takes "Not now." only when nothing else is open; Careful's calm choices first,
     // so it never fights to avoid "Not now."
+    // v0.11.274 (owner pick P42-A, EB): Careful and the Sociable eat on a story screen as on a task screen (Fed under 50, an Eat
+    // choice open: "Eat something." or the camp's "Cook and eat."); before, they picked at random and walked past it (heart_hub, bl_camp)
+    if (careLike(model) && g.james.satiety < 50) { const e = choices.find((c) => EAT_CHOICE.test(c.label)); if (e) return e.index; }
     if (careLike(model)) { const calm = choices.filter((c) => !/fight/.test(c.tag || '')); return pick(skipNotNow(calm.length ? calm : choices)).index; }
     if (model !== 'random') choices = skipNotNow(choices);
     if (model === 'completionist') { const untried = choices.filter((c) => !mem.tried.has(`${g.scene}:${c.index}`)); return pick(untried.length ? untried : choices).index; }
@@ -260,14 +263,18 @@ function play(run, model, st, yuki, kept = false) {
     let lastShown = null; // v0.11.134 (LP2, SV)
     const seenTrib = new Set();
     const maxSteps = (model === 'sitter' ? STEPS_SITTER : STEPS) * (kept ? 2 : 1);
-    let swPrint = null, swAt = '', swKey = ''; // v0.11.273 (P41-A, SW)
+    let swPrint = null, swAt = '', swKey = '', swSnap = null, swAct = 0; // v0.11.273 (P41-A, SW); swSnap, swAct: v0.11.274 (P42-A, LK)
+    const swWhole = (gg) => swAct === 1 && (gg.coil.act || 0) === 0; // the whole game again: rewind's fresh start
     for (let steps = 0; steps < maxSteps; steps++) {
         if (cn() > MAX_COIL) { if (kept && st !== real) { real.p1GaveUp = (real.p1GaveUp || 0) + 1; real.games--; return 'noClear'; } st.gaveUp++; return 'gaveUp'; } // KA1's RV1 (L3): a first pass that gives up has no second
         const act = g.coil.act || 0;
         const key = `${act}:${cn()}`;
         { const sp = skillPrint(g); // v0.11.273 (P41-A, SW): the last step moved a skill and showed no XP line
           if (swPrint !== null && sp !== swPrint && key === swKey) { const w = st.skillWatch || (st.skillWatch = { steps: 0, silent: 0, at: {} }); w.steps++; if (silentSkill(swPrint, sp, swSeen)) { w.silent++; w.at[swAt] = (w.at[swAt] || 0) + 1; } }
-          swPrint = sp; swSeen = []; swAt = g.scene; swKey = key; } // a new Coil starts the skills over (the Coil screen says so): not compared
+          // v0.11.274 (owner pick P42-A, LK): a new Coil with a kept realm is compared with the skills it started over from (the act's
+          // snapshot, or a new game's for the whole game again): the lift's XP must show its lines on the bite's screen
+          else if (swPrint !== null && key !== swKey && g.coil?.kept) { const from = skillPrint(swWhole(g) ? newGame(g.seed, { closed: true }) : swSnap); const w = st.skillWatch || (st.skillWatch = { steps: 0, silent: 0, at: {} }); if (sp !== from) { w.steps++; if (silentSkill(from, sp, swSeen) || movedUnnamed(from, sp, swSeen).length) { /* TG5 (the P42-A review): by skill too */ w.silent++; w.at[`${swAt} (restart)`] = (w.at[`${swAt} (restart)`] || 0) + 1; } } }
+          swPrint = sp; swSeen = []; swAt = g.scene; swKey = key; swSnap = g.coil?.snap; swAct = act; } // a new Coil starts the skills over (the Coil screen says so)
         if (key !== coilKey) { // a new Coil: the days start over
             coilKey = key; mem.done = {}; mem.walked = new Set(); // v0.11.163 (W1, RS): the doors walked into while forced, this Coil
             mem.qi = {}; mem.texts = new Set(); // v0.11.132 (E1, RP): the texts shown this Coil; v0.11.85 (Fable review): the Sitter's gather-Qi hours start over too (a rewind restores the day count)
@@ -393,7 +400,8 @@ function play(run, model, st, yuki, kept = false) {
         const i = storyPick(model, g, open, mem); mem.tried.add(`${g.scene}:${i}`);
         { if (CAL) noteEvening(g, g.scene, i); /* v0.11.250 (YM-A): an evening's choice noted, as main.js storyTap */ const cr = see(choose(g, SCENES, i)); if (CAL) noteLines(g, cr.lines); runCombat(g, cr, st, smart); } st.taps.story++; // v0.11.214 (RD1): the long calendar reads the result
         if (CAL && !g.combat) st.taps.fold += foldNight(g, SCENES).steps; // v0.11.204 (W1, R3)
-        if (careLike(model) && g.james.satiety < 30 && foodLeft(g)) { // RV1 (HN): the Sociable too; v0.11.163 (owner pick HN1): where, and how low
+        // v0.11.274 (owner pick P42-A, HL): counted only where nothing to eat is open (no Eat choice, no Eat card), as the line says
+        if (careLike(model) && g.james.satiety < 30 && foodLeft(g) && !eatOpen(hereLabels(g))) { // RV1 (HN): the Sociable too; v0.11.163 (owner pick HN1): where, and how low
             st.hungry++; st.hungryAt[g.scene] = (st.hungryAt[g.scene] || 0) + 1;
             const b = g.james.satiety < 10 ? 'f0' : g.james.satiety < 20 ? 'f10' : 'f20'; st.hungryFed[b] = (st.hungryFed[b] || 0) + 1;
         }
@@ -401,6 +409,8 @@ function play(run, model, st, yuki, kept = false) {
     assert(false, `${model}: run ${run} finishes in ${maxSteps} steps (at ${g.scene})`);
     return 'stuck';
 }
+/** v0.11.274 (P42-A, HL): the labels open on the screen now (its enabled choices, and its open task cards on a task screen). */
+const hereLabels = (g) => [...sceneView(g, SCENES).choices.filter((c) => !c.disabled).map((c) => c.label), ...(isTaskHub(g) ? taskCards(g, SCENES).filter((c) => c.status === 'open').map((c) => c.label) : [])];
 const foodLeft = (g) => Object.entries(g.inventory || {}).some(([k, n]) => n > 0 && /raw|meat|berry|cress|honey|crab|fowl|hare|venison|egg|dried_bracket/.test(k));
 
 /** v0.11.130 (YB1, LN): the last-night split, by g.flags.final_night (yuki_path.js): her four nights count as Yuki's. */

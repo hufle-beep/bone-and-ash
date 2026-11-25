@@ -326,7 +326,7 @@ ${g.flags.sky_witness ? 'And under all of it, the thing nobody says out loud: th
         id: 'fo_letter', title: 'The Letter', art: 'council', place: `${P} — the elder's house`,
         text: (g) => countsFill(g, LETTER[ending(g) === 'lost' ? (g.flags.sky_witness ? 'lost' : 'lostUnseen') : 'fought']), // v0.11.224 (TX2, DC12, DC13): the counts from the calendar // v0.11.188 (N1, LL)
         choices: [
-            { text: (g) => `"Then we use the ${daysWord(elderLeft(g))}."`, // v0.11.224 (TX2, DC12)
+            { time: 10, text: (g) => `"Then we use the ${daysWord(elderLeft(g))}."`, // v0.11.224 (TX2, DC12)
               do: (g) => { bumpRel(g, 'Village', 4, 0); bumpRel(g, 'Old Wen', 3, 0); return []; }, to: 'fo_elder_named' },
             { text: '"I could leave. If I\'m gone, there\'s nobody for him to weigh."', to: 'fo_leave_offer' },
         ],
@@ -338,7 +338,7 @@ ${g.flags.sky_witness ? 'And under all of it, the thing nobody says out loud: th
 "If you leave," he says, "the Elder weighs the village without you. Ashfall raised its hand. Ashfall will be weighed. That is the law." The one good eye holds you. "You did not make us raise our hand, Bone-Maker. We raised it. Do not insult us by taking that away."
 
 ${g.flags.romance ? 'Mei Lin, at the back of the room, says nothing. She has no need to. Her look sits on the side of your face like sunburn.' : 'At the back of the room Mei Lin snorts, aloud, in council, and three elders turn to stare at her. She stares back. Somebody\'s grandmother makes a small, scandalised sign against bad luck.'}`,
-        choices: [{ text: '"Understood. I\'m staying."', do: (g) => { bumpRel(g, 'Village', 6, 0); bumpRel(g, 'Mei Lin', 3, 2); return []; }, to: 'fo_elder_named' }],
+        choices: [{ time: 10, text: '"Understood. I\'m staying."', do: (g) => { bumpRel(g, 'Village', 6, 0); bumpRel(g, 'Mei Lin', 3, 2); return []; }, to: 'fo_elder_named' }],
     },
     fo_envoy: {
         id: 'fo_envoy', title: 'An Invitation', art: 'envoy', place: `${P} — the tribute post`,
@@ -707,8 +707,8 @@ Then she sees you. And Yuki. Her nostrils flare, and all the play leaves her fac
 
 She means Mei Lin, behind you, who has come out on the step with a knife in one fist and a bunch of herbs in the other, and outrage all over her face. ${meiLovers(g) ? 'Ya\'s nose wrinkles. She looks from Mei Lin to you and back. "Oh. *Oh.* You two." She sounds pleased, the way a fox sounds pleased to find two hens.' : 'Ya\'s grin widens. "Oh, I like her. She looks like she bites."'}`,
         choices: [
-            { text: '"James. That\'s Mei Lin. The one behind you is Old Hu, and he\'s about to challenge you."', to: 'ya_challenge' },
-            { text: (g) => '"You followed me for weeks and didn\'t say hello?"', // v0.11.224 (TX2, DN1)
+            { time: 10, text: '"James. That\'s Mei Lin. The one behind you is Old Hu, and he\'s about to challenge you."', to: 'ya_challenge' },
+            { time: 10, text: (g) => '"You followed me for weeks and didn\'t say hello?"', // v0.11.224 (TX2, DN1)
               do: (g) => { bumpRel(g, 'Ya', 3, 2); return ['"Saying hello is how you get speared," she says, patiently, as one explains fire to the very young.']; }, to: 'ya_challenge' },
         ],
     },
@@ -725,7 +725,7 @@ Ya notices, and *brightens*. "A fight? Good. Days and days I\'ve been walking."
 Old Hu's eyes are on you now, and what is in them is nearly hope. Take the fight, and his face is saved. Decline it, and he must fight her himself.`,
         choices: [
             { text: 'Take the fight. "Your spear against my blade. No armour. Nobody dies."', combat: yaBrawl, to: 'ya_won' }, // v0.11.82: Fable's
-            { text: 'Talk her down: "You came for salt. Insulting the salt-keeper is a bad trade."', check: { skill: 'GU', dc: 6 }, do: (g) => { g.flags.ya_brawl = 'talked'; bumpRel(g, 'Ya', -1, 1); bumpRel(g, 'Village', 2, 0); return ['She turns it over. Then she bows to Old Hu, badly and sideways, a dog\'s impression of a person, and says, "Sorry your face smells like a goat." Old Hu, in visible agony, accepts this as an apology.']; }, failDo: (g) => { bumpRel(g, 'Ya', -3, 0); return ['"Coward," she says, offended down to the marrow. Then she hits you regardless.']; }, fail: 'ya_forced', to: 'ya_talk' },
+            { time: 10, text: 'Talk her down: "You came for salt. Insulting the salt-keeper is a bad trade."', check: { skill: 'GU', dc: 6 }, do: (g) => { g.flags.ya_brawl = 'talked'; bumpRel(g, 'Ya', -1, 1); bumpRel(g, 'Village', 2, 0); return ['She turns it over. Then she bows to Old Hu, badly and sideways, a dog\'s impression of a person, and says, "Sorry your face smells like a goat." Old Hu, in visible agony, accepts this as an apology.']; }, failDo: (g) => { bumpRel(g, 'Ya', -3, 0); return ['"Coward," she says, offended down to the marrow. Then she hits you regardless.']; }, fail: 'ya_forced', to: 'ya_talk' },
         ],
     },
     ya_forced: {
@@ -757,7 +757,7 @@ Mei Lin, up on her step, has laid her knife down. She is looking at Ya, and you 
 "Eventually." She stays where she is. Past her shoulder you have a view of the step, where Mei Lin stands with her knuckles white on her knife, and of Old Hu, whose headband is on again and whose dignity is whole: there was a fight, so his face is saved, whoever did the fighting.
 
 ${yukiForm(g) === 'human' ? 'Yuki, who was asked to stand on the left and not to rescue anyone, stands on the left and rescues no one.' : yukiForm(g) === 'tiger' ? 'Yuki leans on the fence, which leans, and offers no help whatsoever.' : 'Yuki sits on the fence and offers no help whatsoever.'}`, // v0.11.82: Fable's human-form line; v0.11.128 (OF2, YF; Fable's MAIN): the great root-kin's
-        choices: [{ text: '"Eventually would be now."', to: 'ya_talk' }],
+        choices: [{ time: 10, text: '"Eventually would be now."', to: 'ya_talk' }],
     },
     ya_talk: {
         id: 'ya_talk', title: 'Salt and Iron', art: 'ya_close', place: `${P} — Mei Lin's step`,
@@ -793,9 +793,9 @@ The quiet after that could be struck like a bell.
 
 Ya's grin has gone uncertain. She is reading Mei Lin's face, and you can watch the conclusion arrive, slowly: she has offended. Then you can watch her take offence at *that*, hackles lifting like a dog's. "What? I was being *nice*."`,
         choices: [
-            { text: 'To Ya: "In Ashfall, you ask that quietly, in private, after several years."', do: (g) => { bumpRel(g, 'Ya', 1, 3); bumpRel(g, 'Mei Lin', 2, 0); trioStep(g, 1); return ['Ya gives this real thought. "Several *years*? You\'ll all be dead."']; }, to: 'fo_ashfall' },
+            { time: 10, text: 'To Ya: "In Ashfall, you ask that quietly, in private, after several years."', do: (g) => { bumpRel(g, 'Ya', 1, 3); bumpRel(g, 'Mei Lin', 2, 0); trioStep(g, 1); return ['Ya gives this real thought. "Several *years*? You\'ll all be dead."']; }, to: 'fo_ashfall' },
             { text: 'To Mei Lin: "She meant it as a compliment. I think. In wolf."', do: (g) => { bumpRel(g, 'Mei Lin', 1, 1); bumpRel(g, 'Ya', 2, 2); trioStep(g, 1); return ['Mei Lin stalks indoors. Then the door opens again, and she comes out, sits down at the far end of the step, and says nothing. But she stays.']; }, to: 'fo_ashfall' },
-            { text: '"Ya. No."', do: (g) => { bumpRel(g, 'Ya', -3, -2); bumpRel(g, 'Mei Lin', 4, 2); return ['Ya sulks, on a grand scale. She goes up onto the shrine roof and will not come down before supper.']; }, to: 'fo_ashfall' },
+            { time: 10, text: '"Ya. No."', do: (g) => { bumpRel(g, 'Ya', -3, -2); bumpRel(g, 'Mei Lin', 4, 2); return ['Ya sulks, on a grand scale. She goes up onto the shrine roof and will not come down before supper.']; }, to: 'fo_ashfall' },
         ],
     },
     fo_ya_time: {
@@ -849,8 +849,8 @@ Your Convergence is humming so loudly that it seems remiss of everyone else not 
 
 "Salt and iron," she agrees. "And a fight every ${blSpan(g) > 1 ? 'few' : 'three'} days. A real one. No bowing." One finger goes up. "And in the forest I sleep next to you. Not across the fire, like a guest." A second finger. "And *she* comes." Both fingers swing to Mei Lin's house, over the lane. "You'll be miserable without her, and I don't travel with miserable people. They taste of fear."`,
         choices: [
-            { text: '"Done. All of it."', do: (g) => { g.flags.ya_price = 'all'; bumpRel(g, 'Ya', 5, 4); return likesMei(g) && likesYa(g) ? trioStep(g, 1) : []; }, to: 'fo_mei_insists' },
-            { text: '"Salt, iron and the fights. The sleeping arrangements, we negotiate."', check: { skill: 'GU', dc: 5 }, do: (g) => { g.flags.ya_price = 'haggled'; bumpRel(g, 'Ya', 4, 2); return ['"Negotiate," she says, trying the word out, delighted, as if you had offered her a new sort of fight.']; }, failDo: (g) => { g.flags.ya_price = 'all'; bumpRel(g, 'Ya', 2, 3); return ['"No," she says. The negotiation has now been held.']; }, to: 'fo_mei_insists' },
+            { time: 10, text: '"Done. All of it."', do: (g) => { g.flags.ya_price = 'all'; bumpRel(g, 'Ya', 5, 4); return likesMei(g) && likesYa(g) ? trioStep(g, 1) : []; }, to: 'fo_mei_insists' },
+            { time: 10, text: '"Salt, iron and the fights. The sleeping arrangements, we negotiate."', check: { skill: 'GU', dc: 5 }, do: (g) => { g.flags.ya_price = 'haggled'; bumpRel(g, 'Ya', 4, 2); return ['"Negotiate," she says, trying the word out, delighted, as if you had offered her a new sort of fight.']; }, failDo: (g) => { g.flags.ya_price = 'all'; bumpRel(g, 'Ya', 2, 3); return ['"No," she says. The negotiation has now been held.']; }, to: 'fo_mei_insists' },
         ],
     },
     fo_mei_insists: {

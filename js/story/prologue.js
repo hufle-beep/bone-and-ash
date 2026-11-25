@@ -564,7 +564,7 @@ Your Parallel Cognition filed him before he finished speaking. His Qi sits like 
 
 He gives you one glance, the quick weighing kind that cultivators here spend on everybody — *root? realm? threat?* — and it comes back empty. No root. No Qi. Not a flicker. ${byForm(g, "His eyes slide off you the way they'd slide off a fence post.", "His eyes go over you as over a fence post, and over Yuki as over a second, larger one.", "His eyes go over you as over a fence post, and over Yuki as over a second, shorter one: they catch on the ears for exactly as long as dignity permits, which is not long.")} By his reckoning, you are scenery.`, // v0.11.130 (YB1, HG; Fable's MAIN): the human's glance
         choices: [
-            { text: '"Morning. Is this a private extortion or can anyone join?"', check: { skill: 'GU', dc: 4 }, to: 'gao_talked', fail: 'gao_fight_start' },
+            { time: 10, text: '"Morning. Is this a private extortion or can anyone join?"', check: { skill: 'GU', dc: 4 }, to: 'gao_talked', fail: 'gao_fight_start' },
             { text: 'A bone needle through the back of his hand, before he knows you\'re here.', show: (g) => !!g.flags.sneak, qi: 3, check: { skill: 'GU', xpTo: 'Convergence Use', dc: 3 }, do: set('gao_hand'), to: 'gao_hand', fail: 'gao_fight_start' },
             { text: 'Step in front of her and let him make the first mistake.', to: 'gao_fight_start' },
         ],
@@ -579,7 +579,7 @@ His stare goes to the white needle. To you. And then comes the interesting part:
 
 "No beast grows that," he says. "No sect makes it. What *are* you?"`,
         choices: [
-            { text: '"Leaving. Is what you are. Now."', check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.gao_humiliated = true; bumpRel(g, 'Mei Lin', 10, 3); return []; }, to: 'gao_fled', fail: 'gao_fight_start' },
+            { time: 10, text: '"Leaving. Is what you are. Now."', check: { skill: 'GU', dc: 3 }, do: (g) => { g.flags.gao_humiliated = true; bumpRel(g, 'Mei Lin', 10, 3); return []; }, to: 'gao_fled', fail: 'gao_fight_start' },
             { text: 'Don\'t answer. Grow a blade instead.', to: 'gao_fight_start' },
         ],
     },

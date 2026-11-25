@@ -108,7 +108,21 @@ export const keptAfterClear = (g) => Math.max(0, Math.min((g?.stats?.clears || 0
  *  the Extraordinary 8 and their 28 collaterals too, whose window (Golden Core to Soul Embryo) a kept realm walks past (XW-a: challenging,
  *  one each). Returns the realm lifted to, or 0 when James is already there (nothing changes). */
 export const KEPT_EXTRA_FROM = 7;
-export function liftKept(g) {
+/** v0.11.274 (owner pick P42-A, LK): awardXp's lines summed by skill, one line each in first-seen order (the XP added up, the last
+ *  rank reached; a skill that only met its cap keeps the cap line), so a lift's 20 or 56 awards show as three lines, not 60 or 168. */
+export function sumXpLines(lines) {
+    const by = new Map();
+    for (const l of lines) {
+        const m = /^(.*?) \+(\d+)( XP)?(?: → (.+))?$/.exec(l);
+        const name = m ? m[1] : l.replace(/ at T10 L10 \(cap\)$/, '');
+        const r = by.get(name) || { xp: 0, unit: '', to: null, cap: null };
+        if (m) { r.xp += Number(m[2]); r.unit = m[3] || r.unit; if (m[4]) r.to = m[4]; } else r.cap = l;
+        by.set(name, r);
+    }
+    return [...by].map(([name, r]) => (r.xp ? `${name} +${r.xp}${r.unit}${r.to ? ` → ${r.to}` : ''}` : r.cap)).filter(Boolean); // the review's L6
+}
+/** `out` (v0.11.274, LK): an array that gets the lift's XP as summed lines (sumXpLines); before, the lines were dropped. */
+export function liftKept(g, out = null) {
     const k = keptRealm(g), j = g.james, y = g.yuki;
     if (!k || (j.realm || 0) >= k) return 0;
     const shut = (12 - (j.primaries ?? 12)) + (COL_GROUPS.length - colGroupsOpen(g));
@@ -116,8 +130,10 @@ export function liftKept(g) {
     Object.assign(j, { primaries: 12, collaterals: 66, colSealed: false, merWork: 0, colWork: 0, realm: k, saturation: 0 });
     Object.assign(y, { primaries: 12, collaterals: 66, realm: Math.max(y.realm || 0, k) });
     if (k >= KEPT_EXTRA_FROM) Object.assign(j, { extra8: 8, extraCollaterals: 28, e8Work: 0, ecWork: 0 });
-    for (let i = 0; i < shut; i++) awardXp(g, 'Convergence Use', 'standard');
-    for (let i = 0; i < e8 + ec; i++) awardXp(g, 'Convergence Use', 'challenging');
+    const xp = [];
+    for (let i = 0; i < shut; i++) xp.push(...awardXp(g, 'Convergence Use', 'standard'));
+    for (let i = 0; i < e8 + ec; i++) xp.push(...awardXp(g, 'Convergence Use', 'challenging'));
+    if (out) out.push(...sumXpLines(xp));
     j.hp = null; j.qi = null; y.hp = null; y.qi = null; // ensureBars fills them to the new Max
     return k;
 }
@@ -158,7 +174,7 @@ export function targetsText(g) {
  * Rewind, in place. to: 'act' (the snapshot: the act's first dawn) or 'game' (v0.11.26, from Act 1: a fresh start at the
  * arrival, Day 1, the prologue's Coil). Returns the new Coil number (one count per save).
  */
-export function rewind(g, { to = 'act' } = {}) {
+export function rewind(g, { to = 'act', xpOut = null } = {}) { // xpOut: v0.11.274 (P42-A, LK), the kept lift's XP lines
     const c = coil(g);
     const whole = to === 'game' && (c.act || 0) === 1;
     const fresh = whole ? coilSnap(newGame(g.seed, { closed: true })) : null; // v0.11.260 (P28-A, OC2): the long calendar, as every game (the `cal` option gone) // the arrival as a new game has it
@@ -211,7 +227,7 @@ export function rewind(g, { to = 'act' } = {}) {
     delete base.coil.played; delete base.coil.replay; // v0.11.26: "same days again" is gone (older saves keep the fields; nothing reads them)
     for (const k of Object.keys(g)) delete g[k];
     Object.assign(g, base);
-    g.coil.kept = liftKept(g); // v0.11.227 (KA1 + XW-a): the kept realm, on every rewind (the act's and the whole game's)
+    g.coil.kept = liftKept(g, xpOut); // v0.11.227 (KA1 + XW-a): the kept realm, on every rewind (the act's and the whole game's)
     if (!g.coil.kept) delete g.coil.kept;
     ensureBars(g);
     g.coil.start = coilStart(g);

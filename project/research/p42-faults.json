@@ -1,0 +1,93 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_heart.js",
+  "find": "const heartEat = (to) => ({ text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85,",
+  "replace": "const heartEat = (to) => ({ text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 80,",
+  "note": "the Eat shows below 80, not 85"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_heart.js",
+  "find": "do: (g) => eatBest(g, { fire: true }), to });",
+  "replace": "do: (g) => eatBest(g), to });",
+  "note": "eaten raw (no fire) on the way in"
+ },
+ {
+  "id": "F3",
+  "file": "js/story/act1_heart.js",
+  "find": "heartEat('heart_gate'), // v0.11.274 (P42-A, EH)",
+  "replace": "heartEat('heart_hall'), // v0.11.274 (P42-A, EH)",
+  "note": "heart_gate's Eat walks into the hall"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/coil.js",
+  "find": "if (m) { r.xp += Number(m[2]); r.unit = m[3] || r.unit; if (m[4]) r.to = m[4]; } else r.cap = l;",
+  "replace": "if (m) { r.xp += Number(m[2]); r.unit = m[3] || r.unit; } else r.cap = l;",
+  "note": "the summed line loses its rank"
+ },
+ {
+  "id": "F5",
+  "file": "js/core/coil.js",
+  "find": "    if (out) out.push(...sumXpLines(xp));",
+  "replace": "",
+  "note": "the lift's lines dropped again"
+ },
+ {
+  "id": "F6",
+  "file": "js/story/coil_scenes.js",
+  "find": "    if (g.coil.kept) out.push(...xp);",
+  "replace": "    if (g.coil.kept) out.unshift(...xp);",
+  "note": "the XP lines above the Coil line, not after the kept line"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/act1_fallout.js",
+  "find": "{ time: 10, text: '\"Eventually would be now.\"', to: 'ya_talk' }",
+  "replace": "{ text: '\"Eventually would be now.\"', to: 'ya_talk' }",
+  "note": "one talk back on the default"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/act1_heart.js",
+  "find": "choices: [{ text: 'Walk to the doorway.', time: 30, to: 'heart_gate' }, heartEat('ht_start')]",
+  "replace": "choices: [heartEat('ht_start'), { text: 'Walk to the doorway.', time: 30, to: 'heart_gate' }]",
+  "note": "Eat first on ht_start, the way on second"
+ },
+ {
+  "id": "C1",
+  "file": "js/core/coil.js",
+  "find": "return [...by].map(([name, r]) => (r.xp ? `${name}",
+  "replace": "return [...by].map(([name, r]) => (r.xp && !r.cap ? `${name}",
+  "note": "a skill that gains XP and then meets its cap mid-lift shows only the cap line (partial cap untested)"
+ },
+ {
+  "id": "C2",
+  "file": "js/core/coil.js",
+  "find": "if (m) { r.xp += Number(m[2]); r.unit = m[3] || r.unit; if (m[4]) r.to = m[4]; } else r.cap = l;",
+  "replace": "if (m) { r.xp += Number(m[2]); r.unit = m[3] || r.unit; if (m[4] && !r.to) r.to = m[4]; } else r.cap = l;",
+  "note": "the summed line names the first rank reached, not the last"
+ },
+ {
+  "id": "C3",
+  "file": "js/core/coil.js",
+  "find": "g.coil.kept = liftKept(g, xpOut);",
+  "replace": "g.coil.kept = liftKept(g, whole ? xpOut : null);",
+  "note": "an act rewind (Act 1's dawn) lifts silently again; only the whole game shows the lines"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/act1_fallout.js",
+  "find": "return ['Ya sulks, on a grand scale.",
+  "replace": "g.minutes += 20; return ['Ya sulks, on a grand scale.",
+  "note": "one of the 20 talks still takes 30 min on the tap path (its field says 10)"
+ },
+ {
+  "id": "C5",
+  "file": "js/story/coil_scenes.js",
+  "find": "const xp = []; // v0.11.274",
+  "replace": "const xp = bite.xp || (bite.xp = []); // v0.11.274",
+  "note": "the lines pile up across bites: a later Coil shows an earlier lift's XP too"
+ }
+]

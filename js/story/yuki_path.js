@@ -570,7 +570,7 @@ export function installYukiPath(SCENES) {
         { text: 'Go out to the grove with Yuki. Just Yuki.', show: (g) => ykLover(g) && ykHuman(g), to: 'yk_night_solo' },
         { text: (g) => byForm(g, 'Call the cat off the stove, and follow Mei Lin up to the loft.', 'Call the cat off the floor, and follow Mei Lin up the ladder.', 'Ask Yuki up off the bench, and follow Mei Lin to the loft.'), show: (g) => ykLover(g) && ykHuman(g) && likesMei(g) && meiOpen(g), to: 'yk_night_mei' }, // v0.11.127 (LQ2, HL): the label by her form (the great root-kin keeps "the cat"); v0.11.128 (OF2, MO): the scene's opening too
         { text: 'Go after Ya to the grove, and leave the door open.', show: (g) => ykLover(g) && ykHuman(g) && likesYa(g), to: 'yk_night_ya' },
-        { text: 'All of you. Let Ya and Yuki say it.', show: (g) => ykLover(g) && ykHuman(g) && likesMei(g) && likesYa(g) && (trioReady(g) || meiOpen(g)), to: 'yk_night_all' });
+        { time: 10, text: 'All of you. Let Ya and Yuki say it.', show: (g) => ykLover(g) && ykHuman(g) && likesMei(g) && likesYa(g) && (trioReady(g) || meiOpen(g)), to: 'yk_night_all' });
     for (const [id, f] of [['rt_trio_night', 'trio'], ['rt_mei_night', 'mei'], ['rt_ya_night', 'ya'], ['rt_quiet_night', 'none']]) {
         const s = SCENES[id];
         const e = s.enter;

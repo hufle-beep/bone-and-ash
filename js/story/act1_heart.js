@@ -141,6 +141,10 @@ function wake(g) {
     return out;
 }
 
+/** v0.11.274 (owner pick P42-A, EH): "Eat something." on the Heart's way in (ht_start, heart_gate, heart_hall), heart_hub's rule
+ *  (food, Fed under 85, 15 min, eaten as at the camp's fire), so a hungry James can eat before the hub (the hungry count 571 → 97). */
+const heartEat = (to) => ({ text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: true }), to });
+
 export const HEART = {
     ht_start: {
         id: 'ht_start', title: 'The Heart', art: 'heart_gate', place: P,
@@ -151,7 +155,7 @@ You saw it from the ridge. You felt it through the soles of your feet for days, 
 Last night something in there sang, faint as breathing, and your Convergence sang back. This morning the doorway stands a little wider than it did, and your Convergence sings to it and gets nothing at all. That is the worst part. You are used to Hearth Trees that answer.
 
 ${ya(g) ? '"Huh," says Ya, under her breath; you have never heard her say anything that quietly. Then, at her usual volume: "Bigger dead than I remember. Okay. Fine. Love it."\n\n' : ''}Mei Lin says nothing at all. ${byForm(g, "She has reached up to your shoulder and laid two fingers on Yuki's back, and Yuki is letting her.", "She has a hand on Yuki's back, sunk to the wrist in white fur, and Yuki is letting her.", "She has taken hold of Yuki's sleeve, like a child at a river crossing, and Yuki is letting her.")}`,
-        choices: [{ text: 'Walk to the doorway.', time: 30, to: 'heart_gate' }], // v0.11.173 (P6A, SM; owner pick CA1): was 'Cross the clearing.' (they slept at the doorway)
+        choices: [{ text: 'Walk to the doorway.', time: 30, to: 'heart_gate' }, heartEat('ht_start')], // v0.11.173 (P6A, SM; owner pick CA1): was 'Cross the clearing.' (they slept at the doorway)
     },
     heart_gate: {
         id: 'heart_gate', title: 'The Split', art: 'heart_gate', place: P,
@@ -164,6 +168,7 @@ ${g.flags.gate_listened ? 'You have put your hands to it and listened already. W
             { text: 'Put both hands on the trunk and listen with your Convergence.', show: (g) => !g.flags.gate_listened, check: { skill: 'Convergence Use', dc: 3, band: 'challenging' }, time: 20, do: (g) => { g.flags.gate_listened = true; return ['Far down, and then further down than that, a single note: held, as a sleeper hums.']; }, failDo: (g) => { g.flags.gate_listened = true; return ['Nothing. A grey, complete, unhurried silence. If anything is down there, it has not made up its mind to talk to you.']; }, to: 'heart_gate' },
             { text: 'Walk the trunk\'s base first. Look for anything that isn\'t tree.', show: (g) => !g.flags.sect_marks, time: 60, do: set('sect_marks'), to: 'heart_gate_marks' },
             { text: 'Go in.', time: 15, to: 'heart_hall' },
+            heartEat('heart_gate'), // v0.11.274 (P42-A, EH)
         ],
     },
     heart_gate_marks: {
@@ -190,7 +195,7 @@ Four centuries of dust have fallen on the floor and stayed soft. Your steps make
 ${ya(g) ? 'Ya has her back to a wall and her spear up. "I don\'t like it," she tells the hall at large. "I want that written down. Ya does not like it."\n\n' : ''}"It's beautiful," Mei Lin whispers; and then, angrily, as if the word had insulted somebody: "It's a *grave*."
 
 Both, you think. More the second.`,
-        choices: [{ text: 'Make this the base. Look around.', time: 30, to: 'heart_hub' }],
+        choices: [{ text: 'Make this the base. Look around.', time: 30, to: 'heart_hub' }, heartEat('heart_hall')], // v0.11.274 (P42-A, EH)
     },
 
     /* ---------- the hub inside the trunk ---------- */
@@ -770,7 +775,7 @@ The tree kept a piece of itself back. Hidden. Waiting. Four centuries it held on
 ${g.flags.regrow_idea ? 'A heart can be cut out. A heart can be put back. On the bridge it was a thought; here it is a fact.\n\n' : ''}${ya(g) ? 'Ya, for once, has nothing to say at all. ' : ''}Mei Lin's hand has gone to her mouth again. Yuki walks to the edge of the hollow, looks down at the seed, then up at you, and her eyes are very bright.`,
         choices: [
             { text: 'Take the seed-sliver. Gently. The way they taught you.', do: (g) => { addItem(g, 'seed_sliver', 1); g.flags.seed = true; return ['+1 Seed-sliver. It settles in your palm as if your palm were where it had been waiting all along.']; }, to: 'heart_core_after' },
-            { text: 'Ask Mei Lin to take it. It was her people\'s tree too.', do: (g) => { addItem(g, 'seed_sliver', 1); g.flags.seed = true; g.flags.mei_carried_seed = true; bumpRel(g, 'Mei Lin', 8, 3); return ['+1 Seed-sliver. Mei Lin wraps it in her own sleeve and carries it out against her heart, and her hand does not leave it once.']; }, to: 'heart_core_after' },
+            { time: 10, text: 'Ask Mei Lin to take it. It was her people\'s tree too.', do: (g) => { addItem(g, 'seed_sliver', 1); g.flags.seed = true; g.flags.mei_carried_seed = true; bumpRel(g, 'Mei Lin', 8, 3); return ['+1 Seed-sliver. Mei Lin wraps it in her own sleeve and carries it out against her heart, and her hand does not leave it once.']; }, to: 'heart_core_after' },
         ],
     },
     heart_core_after: {

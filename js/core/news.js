@@ -102,6 +102,7 @@ export const NOTES = [
     ['0.11.266', 'Hard hitters show their big blow a round early from the prologue on, not only from Act 1: Lu Han at the tribute and the Ironhide boar among them. Guard avoids it outright; a person who hits that hard no longer postures, so Say something doesn\'t open on them (FAQ: Fights).'],
     ['0.11.267', 'Practise the bone blade (about 20 rounds, kept across Coils) and James reads Lu Han\'s stance at the tribute: his big blow comes with a speech, and Say something on that round stops it. Guard still works (FAQ: Fights).'],
     ['0.11.271', 'A James at Core Formation or above wears the tribute\'s collectors down sooner: Lu Han has less health against him (Gao Feng or the disciple too, once the forest and the village have grown), on every Coil, so cultivating before the tribute pays off there. Below Core Formation the fight is as it was.'],
+    ['0.11.274', 'You can eat on the way into the Old Tree: "Eat something." now shows on the morning at the roots, at the doorway and in the hall, as it already did at the base inside (15 minutes, with food on you and not full). A Coil that starts at the realm kept from a won Act 1 now shows what it gives you (Convergence Use, GU and Yuki\'s Qi Use), under its line. Nineteen short answers in conversation (Gao Feng, the Fallout, Ya, the trio, the Old Tree and the Long Forest) now take 10 minutes, as talk does, not 20 or 30.'],
 ];
 
 const parts = (v) => (/^\d+(\.\d+)*$/.test(String(v ?? '')) ? String(v).split('.').map(Number) : null);

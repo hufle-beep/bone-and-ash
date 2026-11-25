@@ -30,6 +30,18 @@ export function forcedPick(open, done, walked, day) {
     return c;
 }
 
+//   EB + HL (v0.11.274, owner pick P42-A) Careful and the Sociable take an open Eat choice on a story screen when Fed is under 50
+//       (EAT_CHOICE, as on a task screen); the hungry count only where nothing to eat is open (eatOpen: no Eat choice, no Eat card;
+//       before, heart_hub and bl_camp were counted though both have one). Measured with EH (the Heart's three Eat choices):
+//       Careful 571 → 97 / the Sociable 589 → 80 by the old count, Fed 0–9 127 → 0 / 111 → 0 (100 games each).
+
+/** EB: the Eat choices a careful bot takes on a story screen. */
+export const EAT_CHOICE = /^(Eat something|Cook and eat)\b/;
+/** HL: anything to eat on the screen: a story choice or a task card (the hammerspace, the communal pot, the camp's cooking, the ghost-gill). */
+export const EAT_ANY = /^(Eat something|Eat at the communal pot|Cook and eat|Chew a ghost-gill)\b/;
+/** HL: true when one of the screen's open labels eats. */
+export const eatOpen = (labels) => labels.some((l) => EAT_ANY.test(l));
+
 /** HN1: the hungry count's log line: per game, the Fed bands (st.hungryFed: f20, f10, f0) and the five places it happens most. */
 export function hungryLine(m, st) {
     const top = Object.entries(st.hungryAt || {}).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, n]) => `${k} ${n}`).join(', ');

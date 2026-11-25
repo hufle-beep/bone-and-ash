@@ -28,6 +28,35 @@ export function engineFor(kind, cls) {
     return null;
 }
 
+/** v0.11.274 (owner pick P42-A, TL-r): the choices read off the engine's time and kept as they are, each with its reason (15; fo_spy:1 from the P42-A review's M1); a key
+ *  is `scene:index` and the text's start, so a choice that moves or changes is linted again. (TL-a gave 19 talks their
+ *  engine's 10 min; P41's count of 30 off was 34: 20 talks, 7 sleeps, 3 studies, 2 meetings, a meal, a training.) */
+const SLEPT = 'the night is slept on a later screen (sleepUntil), so 480 min here would count it twice';
+export const REVIEWED = Object.freeze({
+    'evening:2': ['Thank her for dinner and sleep', SLEPT],
+    'fo_last_night:2': ['Sleep.', SLEPT],
+    'fo_last_night:6': ['Tonight, sleep.', SLEPT],
+    'bl_fireside:4': ['Stay up with Mei Lin', SLEPT],
+    'heart_camp:5': ['Sleep.', SLEPT],
+    'rt_evening:7': ['Sleep by the stove with Yuki.', SLEPT],
+    'heart_read:0': ['Climb down and sleep.', SLEPT],
+    'hunt:2': ['Leave it.', 'a misread: walking away, not study'],
+    'fo_spy:2': ['Leave him.', 'a misread: walking away, not study'],
+    'rt_parley:0': ['Make your offer:', 'a misread: a parley\'s offer, not study'],
+    'fo_envoy:2': ['Ask him, quietly,', 'a misread: a question at the envoy\'s visit, not a meeting of its own'],
+    'rt_yk_talk:1': ['"The best spot is still yours.', 'a misread: a line to Yuki, not a meeting'],
+    'ya_mocks:0': ['Side with Mei Lin.', 'a misread: a line at the meal, not the meal'],
+    'rt_elder:3': ['Go with him.', 'a misread: going with the Elder, not training'],
+    // the P42-A review's M1: a talk whose result takes an hour ("It takes an hour, with diagrams") and walks home: kept at its 30
+    'fo_spy:1': ['Talk. "Your ledger', 'a talk that takes an hour by its own result and walks home: kept at 30 (an hour is the owner\'s call)'],
+});
+/** TL-r: the reviewed reason for a row, or null (the key and the text's start must both match). */
+export const reviewedOf = (at, text) => { const r = REVIEWED[at]; return r && String(text || '').startsWith(r[0]) ? r[1] : null; };
+
+/** A choice's text for the lint: a string as it is, a function drawn on an empty game (its plainest form), else ''. v0.11.274 (P42-A,
+ *  TL-r): here, so the command and the tools test read the same texts (was tools/timelint.mjs's own). */
+export const textOfChoice = (c) => (typeof c.text === 'string' ? c.text : typeof c.text === 'function' ? (() => { try { return String(c.text({ flags: {}, james: {}, yuki: {}, tasks: {}, stats: {} }) || ''); } catch { return ''; } })() : '');
+
 /** Code that moves the clock itself (a night, a sleep, an advance): the choice's `do` or its target's `enter`. Not linted. */
 export const CLOCKED = /\b(sleepUntil|nightRest|nightTo|advance)\(/;
 
@@ -54,7 +83,8 @@ export function lintTimes(scenes, defaultMinutes, textOf) {
             count.defaults++;
             const text = textOf(c), kind = kindOf(text), cls = CLS[m] || String(m), eng = engineFor(kind, cls);
             const off = !eng ? null : m < eng.min ? eng.min - m : m > eng.max ? m - eng.max : 0;
-            rows.push({ at: `${id}:${i}`, text, minutes: m, cls, kind, engine: eng, off });
+            const at = `${id}:${i}`, reviewed = off ? reviewedOf(at, text) : null; // TL-r: kept as it is, with its reason
+            rows.push({ at, text, minutes: m, cls, kind, engine: eng, off: reviewed ? 0 : off, reviewed });
         }
     }
     return { rows, count };
@@ -67,10 +97,10 @@ export function timeLintLines({ rows, count }, { list = false } = {}) {
     const by = (k) => rows.filter((r) => r.cls === k).length;
     out.push(`  the defaults by class: act 30 min ${by('act')}, move 20 min ${by('move')}, talk 10 min ${by('talk')}`);
     const kinds = {};
-    for (const r of rows) { const k = r.engine?.by || 'unsorted'; const e = kinds[k] || (kinds[k] = { n: 0, off: 0, minutes: 0 }); e.n++; if (r.off) { e.off++; e.minutes += r.off; } }
+    for (const r of rows) { const k = r.engine?.by || 'unsorted'; const e = kinds[k] || (kinds[k] = { n: 0, off: 0, minutes: 0, rev: 0 }); e.n++; if (r.off) { e.off++; e.minutes += r.off; } if (r.reviewed) e.rev++; }
     for (const [k, e] of Object.entries(kinds).sort((a, b) => b[1].n - a[1].n)) {
         const eng = k === 'travel' ? `${ENGINE_MINUTES.local}–${ENGINE_MINUTES.wilderness}` : k === 'unsorted' ? '—' : ENGINE_MINUTES[k];
-        out.push(`  ${k} (engine ${eng} min): ${e.n} choices, ${e.off} off the engine's time${e.off ? ` (${e.minutes} min in all)` : ''}`);
+        out.push(`  ${k} (engine ${eng} min): ${e.n} choices, ${e.off} off the engine's time${e.off ? ` (${e.minutes} min in all)` : ''}${e.rev ? `, ${e.rev} reviewed and kept` : ''}`);
     }
     if (list) for (const r of rows.filter((x) => x.off)) out.push(`    ${r.at} ${r.cls} ${r.minutes} → ${r.engine.by} ${r.engine.min === r.engine.max ? r.engine.min : `${r.engine.min}–${r.engine.max}`}: ${r.text.slice(0, 70)}`);
     return out;
