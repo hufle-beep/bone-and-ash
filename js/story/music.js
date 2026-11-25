@@ -82,7 +82,7 @@ const lineText = (g, stretch, k, i) => lineWords(g, MUSIC_LINES[stretch]?.[k]?.[
  * The line under this screen, or null: { text, key }. `v` the scene view ({ id, text }). Notes the day's pick in the save's
  * `lines` record; call it once per draw (main.js proseHtml, after againView, which notes the visit).
  */
-export function musicLine(g, v, { newVisit = true } = {}) {
+export function musicLine(g, v, { newVisit = true, afterAction = false } = {}) {
     const id = v?.id || g.scene;
     const L = linesOf(g);
     const d = textDay(g);
@@ -93,6 +93,9 @@ export function musicLine(g, v, { newVisit = true } = {}) {
     const sg = SONG_AT[id];
     if (sg) {
         const sv = isRec(L.sg) ? L.sg : null;
+        // v0.11.275 (owner pick P43-A, L3; the P42 review's L3): once a visit: a redraw after an action that kept you on the screen (a meal,
+        // a cook, a sit; main.js `sameVisit`) leaves the song out; a form change, a breakthrough or a door card still keeps it (newVisit false)
+        if (afterAction && sv && sv.d === d && sv.song === sg && sv.at === id && L.cur.sg === id) return null;
         if (sv && sv.d === d && sv.song === sg && sv.at === id && (L.cur.sg === id || newVisit === false)) { L.cur.sg = id; return { text: songShown(g, sg, sv.p), key: `song.${sg}` }; }
         if (songDue(g, id)) {
             // N1 (L8b, SK1): `p`, the day's earlier song, kept so a redraw of this visit keeps the opening sentence (older saves: none)

@@ -2,6 +2,12 @@
 
 Started in v0.11.274, when `roadmap-done-5.md` would have passed about 45 KB with this move. Newer than `roadmap-done-5.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.275 (word for word; owner picks P43-A and R-A, 2026-11-25: the size rule MD, `roadmap.md` under 20 KB)
+
+### From `roadmap.md` section 2, one done line
+
+- *(v0.11.274, owner pick P42-A; the options: `claude/p42-options.md`; `project/research/p42-measure.md`)* **Done: P41's three leftovers** (a game change; cold review on Opus, 13 of 13 planted faults caught): **EH** "Eat something." on the Heart's way in (`ht_start`, `heart_gate`, `heart_hall`; `heart_hub`'s rule), **EB** Careful and the Sociable eat on story screens under Fed 50, **HL** the hungry line only where nothing to eat is open (Careful 0.4 a game, Fed 0–9 none; was 5.7); **LK** `liftKept`'s XP as three summed lines on the bite, skillWatch on a kept Coil's restart (0 silent); **TL-a** 19 talks at 10 min, **TL-r** 15 reviewed (the lint 0 off; P41's 30 was 34). T1 22.5 / 29.5%, T2 0 / 0%, T3 4.96 / 4.97: in. New, open, options later (the P42 review's lows): the talks' times on one screen (L1, with `fo_spy:1`'s hour), the cooked meal at the roots and the doorway (L2), the hall's song after a meal (L3), the skip's two stops (L4), "The skills went the usual way" under the kept lines (L5). Left in `roadmap-retune.md`: the older notes and the "tuned up to" note (after the retune). v0.11.273's done line moved word for word to `roadmap-done-6.md`.
+
 ## Moved in v0.11.274 (word for word; owner pick P42-A, 2026-11-25: the size rule MD, `roadmap.md` under 20 KB)
 
 ### From `roadmap.md` section 2, one done line

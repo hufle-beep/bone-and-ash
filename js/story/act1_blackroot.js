@@ -1416,7 +1416,7 @@ The knife stops. At last she looks at you, eyes narrowed.
 "Hm," she says. A silence follows, and then her fist comes out with something in it: a wolf's tooth, long and yellow, on a cord. "I bit that off a wolf when I was eleven. It's the best thing I own." She shoves it against your chest. "Don't laugh at me again."`,
         choices: [
             { text: 'Take the tooth. Put it on. "I won\'t."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 6, 6); return [`The cord is greasy and the tooth is warm from her fist. You put it on. She watches you do it with the stillness of something deciding whether to bolt, and then goes back to the hare as if nothing has happened, except that she's sitting a hand's width closer than she was.`, '+1 Ya\'s wolf tooth.']; }, to: 'ah_hub' },
-            { time: 10, text: '"I\'m keeping this. Come back to camp, and bring Mei Lin a tooth too. She\'s been looking for you."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 4, 3); bumpRel(g, 'Mei Lin', 2, 2); trioStep(g, 2); return [`You take the tooth, cord and all, and hang it round your neck before she can change her mind. She hears the rest out with her head on one side. "One each," she decides, wipes the knife on her thigh and stands. "Hers will be smaller."`, '+1 Ya\'s wolf tooth. Ya sets off to find a second wolf.']; }, to: 'ah_hub' },
+            { time: 30 /* v0.11.275 (P43-A, L1-w): as :0, the talk and the walk back to camp */, text: '"I\'m keeping this. Come back to camp, and bring Mei Lin a tooth too. She\'s been looking for you."', do: (g) => { addItem(g, 'ya_tooth', 1); bumpRel(g, 'Ya', 4, 3); bumpRel(g, 'Mei Lin', 2, 2); trioStep(g, 2); return [`You take the tooth, cord and all, and hang it round your neck before she can change her mind. She hears the rest out with her head on one side. "One each," she decides, wipes the knife on her thigh and stands. "Hers will be smaller."`, '+1 Ya\'s wolf tooth. Ya sets off to find a second wolf.']; }, to: 'ah_hub' },
         ],
     },
     trio_kiss: {
@@ -1438,8 +1438,8 @@ Ya is not bothered. She licks her lip and turns round. "Oh, good," she says. "Sc
 
 You are putting real effort into not looking pleased. Yuki, next to you, is putting in none.`,
         choices: [
-            { time: 10, text: '"Nobody has to say yes to anything. Not today. Not ever, if you don\'t want."', do: (g) => { bumpRel(g, 'Mei Lin', 4, 4); return ['The breath Mei Lin lets go seems to have been in her since Ashfall. Ya rolls her eyes, and hooks an arm round each of your necks regardless.']; }, to: 'ah_hub' },
-            { time: 10, text: '"For the record: I have no objections. Scientifically speaking."', do: (g) => { bumpRel(g, 'Ya', 3, 5); bumpRel(g, 'Mei Lin', 1, 3); return ['Ya laughs herself backwards into the spring. Mei Lin throws a rock at you, and it goes wide. On purpose, you suspect.']; }, to: 'ah_hub' },
+            { time: 20 /* v0.11.275 (P43-A, L1-w): the walk back to camp (the move default) */, text: '"Nobody has to say yes to anything. Not today. Not ever, if you don\'t want."', do: (g) => { bumpRel(g, 'Mei Lin', 4, 4); return ['The breath Mei Lin lets go seems to have been in her since Ashfall. Ya rolls her eyes, and hooks an arm round each of your necks regardless.']; }, to: 'ah_hub' },
+            { time: 20 /* v0.11.275 (P43-A, L1-w): the walk back to camp (the move default) */, text: '"For the record: I have no objections. Scientifically speaking."', do: (g) => { bumpRel(g, 'Ya', 3, 5); bumpRel(g, 'Mei Lin', 1, 3); return ['Ya laughs herself backwards into the spring. Mei Lin throws a rock at you, and it goes wide. On purpose, you suspect.']; }, to: 'ah_hub' },
         ],
     },
     ah_ridge_end: {

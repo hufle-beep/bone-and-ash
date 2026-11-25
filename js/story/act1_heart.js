@@ -143,7 +143,10 @@ function wake(g) {
 
 /** v0.11.274 (owner pick P42-A, EH): "Eat something." on the Heart's way in (ht_start, heart_gate, heart_hall), heart_hub's rule
  *  (food, Fed under 85, 15 min, eaten as at the camp's fire), so a hungry James can eat before the hub (the hungry count 571 → 97). */
-const heartEat = (to) => ({ text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, do: (g) => eatBest(g, { fire: true }), to });
+/** v0.11.275 (owner pick P43-A, L2; the P42 review's L2; owner pick R-A, HF, the P43 review's L1): no fire on the way in: the roots,
+ *  the doorway and the hall eat raw (no fire in their texts; a hare 35 → 18, a fowl 30 → 15, a crab 20 → 12); cooked from heart_hub's
+ *  camp. `skipPast` (L4): the skip walks past it while James isn't hungry (again.js skipStep; R-A, SH). */
+const heartEat = (to) => ({ text: 'Eat something.', show: (g) => foodCount(g) > 0 && g.james.satiety < 85, time: 15, skipPast: true, do: (g) => eatBest(g, { fire: false }), to });
 
 export const HEART = {
     ht_start: {
@@ -775,7 +778,7 @@ The tree kept a piece of itself back. Hidden. Waiting. Four centuries it held on
 ${g.flags.regrow_idea ? 'A heart can be cut out. A heart can be put back. On the bridge it was a thought; here it is a fact.\n\n' : ''}${ya(g) ? 'Ya, for once, has nothing to say at all. ' : ''}Mei Lin's hand has gone to her mouth again. Yuki walks to the edge of the hollow, looks down at the seed, then up at you, and her eyes are very bright.`,
         choices: [
             { text: 'Take the seed-sliver. Gently. The way they taught you.', do: (g) => { addItem(g, 'seed_sliver', 1); g.flags.seed = true; return ['+1 Seed-sliver. It settles in your palm as if your palm were where it had been waiting all along.']; }, to: 'heart_core_after' },
-            { time: 10, text: 'Ask Mei Lin to take it. It was her people\'s tree too.', do: (g) => { addItem(g, 'seed_sliver', 1); g.flags.seed = true; g.flags.mei_carried_seed = true; bumpRel(g, 'Mei Lin', 8, 3); return ['+1 Seed-sliver. Mei Lin wraps it in her own sleeve and carries it out against her heart, and her hand does not leave it once.']; }, to: 'heart_core_after' },
+            { time: 30 /* v0.11.275 (P43-A, L1-s): as :0, the same act */, text: 'Ask Mei Lin to take it. It was her people\'s tree too.', do: (g) => { addItem(g, 'seed_sliver', 1); g.flags.seed = true; g.flags.mei_carried_seed = true; bumpRel(g, 'Mei Lin', 8, 3); return ['+1 Seed-sliver. Mei Lin wraps it in her own sleeve and carries it out against her heart, and her hand does not leave it once.']; }, to: 'heart_core_after' },
         ],
     },
     heart_core_after: {

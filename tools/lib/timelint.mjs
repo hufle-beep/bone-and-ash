@@ -28,7 +28,7 @@ export function engineFor(kind, cls) {
     return null;
 }
 
-/** v0.11.274 (owner pick P42-A, TL-r): the choices read off the engine's time and kept as they are, each with its reason (15; fo_spy:1 from the P42-A review's M1); a key
+/** v0.11.274 (owner pick P42-A, TL-r): the choices read off the engine's time and kept as they are, each with its reason (14; fo_spy:1, here from the P42-A review's M1 to v0.11.275, has its own time); a key
  *  is `scene:index` and the text's start, so a choice that moves or changes is linted again. (TL-a gave 19 talks their
  *  engine's 10 min; P41's count of 30 off was 34: 20 talks, 7 sleeps, 3 studies, 2 meetings, a meal, a training.) */
 const SLEPT = 'the night is slept on a later screen (sleepUntil), so 480 min here would count it twice';
@@ -47,8 +47,7 @@ export const REVIEWED = Object.freeze({
     'rt_yk_talk:1': ['"The best spot is still yours.', 'a misread: a line to Yuki, not a meeting'],
     'ya_mocks:0': ['Side with Mei Lin.', 'a misread: a line at the meal, not the meal'],
     'rt_elder:3': ['Go with him.', 'a misread: going with the Elder, not training'],
-    // the P42-A review's M1: a talk whose result takes an hour ("It takes an hour, with diagrams") and walks home: kept at its 30
-    'fo_spy:1': ['Talk. "Your ledger', 'a talk that takes an hour by its own result and walks home: kept at 30 (an hour is the owner\'s call)'],
+    // v0.11.275 (owner pick P43-A, L1-h): fo_spy:1 (kept here at 30 since the P42-A review's M1) has its own time now, 80 (its hour and the walk home)
 });
 /** TL-r: the reviewed reason for a row, or null (the key and the text's start must both match). */
 export const reviewedOf = (at, text) => { const r = REVIEWED[at]; return r && String(text || '').startsWith(r[0]) ? r[1] : null; };

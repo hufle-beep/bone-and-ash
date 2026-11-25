@@ -970,7 +970,7 @@ for (let run = 0; run < 6; run++) {
             if (stop) { if (c === '{') depth++; if (c === '}') { if (depth === 0) { i++; return out; } depth--; } }
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
         const LABELS = Object.values(HEART).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-        const PIN = { 'act1_heart.js': '1d0c343d116d61bc', /* v0.11.274 (P42-A, EH): re-pinned: heartEat on ht_start, heart_gate, heart_hall; heart_core:1's talk at 10 min (TL-a) */ /* v0.11.264 (P32-A, L3c): re-pinned: the day keys by the one clock (hday) */ /* v0.11.263 (P31-A, the cold review's M1): re-pinned: ht_leave's clock never back (Math.max) */ /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (the watch line, the titles) */ /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '5486ba3c7c879cb7' /* v0.11.260 (P28-A, OC2): re-pinned: Ya's old-calendar posture line gone, its template wrapper with it (the cold review's L5) */ /* v0.11.251 (RV-A, HL): re-pinned: luHere reads lu_won (Lu Han beaten at the tribute stays away) */ /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'bec83968b8b676b9' /* v0.11.274 (P42-A, EH): the three Eat labels */ }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
+        const PIN = { 'act1_heart.js': '58426198b6166ed6', /* v0.11.275 (P43-A, R-A): re-pinned: heartEat raw on the way in and skipPast (L2, HF, L4); heart_core:1 at 30 (L1-s) */ /* v0.11.274 (P42-A, EH): re-pinned: heartEat on ht_start, heart_gate, heart_hall; heart_core:1's talk at 10 min (TL-a) */ /* v0.11.264 (P32-A, L3c): re-pinned: the day keys by the one clock (hday) */ /* v0.11.263 (P31-A, the cold review's M1): re-pinned: ht_leave's clock never back (Math.max) */ /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (the watch line, the titles) */ /* v0.11.224 (TX2, TS6): re-pinned: ht_start's day from the calendar (dayWord), the watch line's long-calendar version (DN15); */ /* v0.11.213 (FQ1, S3): re-pinned: the spring's and the fireside talks' days spaced (spacedFree); v0.11.203 (T1, TS1): re-pinned for the long calendar (late and the leave by the story's day) */ 'stomp_act1.js': '5486ba3c7c879cb7' /* v0.11.260 (P28-A, OC2): re-pinned: Ya's old-calendar posture line gone, its template wrapper with it (the cold review's L5) */ /* v0.11.251 (RV-A, HL): re-pinned: luHere reads lu_won (Lu Han beaten at the tribute stays away) */ /* v0.11.247 (P17-A, BW2): re-pinned: the table named STOMP_A1, the hawks' and the elk's easy wins wrapped by day (WIN_MORE) */ /* v0.11.231 (P4-2, AT; RV1: `??`): re-pinned: the hawks' easy wins read awayHawks (Ya or both away); v0.11.224 (RV1, MF1): Ya's fight opener by the calendar */, 'yuki_time.js': '746d1873838bd5ca', labels: 'bec83968b8b676b9' /* v0.11.274 (P42-A, EH): the three Eat labels */ }; // v0.11.209 (TF1, K): the labels re-pinned ("Smoke the catch." appended on heart_hub); v0.11.182 (RS1, RV1 L6): the labels re-pinned ("Read to Ya from your archive." appended on heart_camp)
         const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
         const got = { labels: hash(JSON.stringify(LABELS)) };
         for (const f of ['act1_heart.js', 'stomp_act1.js', 'yuki_time.js']) got[f] = hash(skel(readFileSync(new URL(`../js/story/${f}`, import.meta.url), 'utf8')));
@@ -1230,7 +1230,7 @@ for (const form of ['cat', 'human']) {
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
       const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
       const LABELS = Object.values(RETURN).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-      const PIN = { 'act1_return.js': '1b5ab682d2d03520' /* v0.11.274 (P42-A, TL-a): re-pinned: rt_trio's first answer at 10 min */ /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (rt_dawn's title, the mother's "nine days") */ /* v0.11.251 (RV-A, HL): luBeaten (Lu Han stays away and the two bled lines once beaten, lu_won) */, labels: '58e59f4e08e64332' }; // v0.11.250 (P20-A, FR; RV-A FY): the code re-pinned (rt_taken reads final_night for Ya's line, a1_end for Yuki's when neither woman likes him; FR_TEXT imported; the labels unchanged) // v0.11.224 (TX2, DN14; RV1 L1, MC): the code re-pinned (the days since the start for the tree from the calendar, the old line kept for the old calendar, rt_dawn's title; the labels unchanged) // v0.11.198 (S1, D1, SX; RV1 L1, M3): the code re-pinned (rt_start, rt_road and rt_ambush read party_flew; the SX block; sxRide; partyCarry imported; the labels unchanged); v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
+      const PIN = { 'act1_return.js': '576dc7cc57abd1d6' /* v0.11.275 (P43-A, L1-s): re-pinned: rt_trio's second answer at 10 min */ /* v0.11.274 (P42-A, TL-a): re-pinned: rt_trio's first answer at 10 min */ /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (rt_dawn's title, the mother's "nine days") */ /* v0.11.251 (RV-A, HL): luBeaten (Lu Han stays away and the two bled lines once beaten, lu_won) */, labels: '58e59f4e08e64332' }; // v0.11.250 (P20-A, FR; RV-A FY): the code re-pinned (rt_taken reads final_night for Ya's line, a1_end for Yuki's when neither woman likes him; FR_TEXT imported; the labels unchanged) // v0.11.224 (TX2, DN14; RV1 L1, MC): the code re-pinned (the days since the start for the tree from the calendar, the old line kept for the old calendar, rt_dawn's title; the labels unchanged) // v0.11.198 (S1, D1, SX; RV1 L1, M3): the code re-pinned (rt_start, rt_road and rt_ambush read party_flew; the SX block; sxRide; partyCarry imported; the labels unchanged); v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
       const got = { 'act1_return.js': hash(skel(RSRC)), labels: hash(JSON.stringify(LABELS)) };
       for (const [k, v] of Object.entries(PIN)) assert(got[k] === v, `P7A (RV1, TG1): ${k}'s code and ids as pinned in v0.11.174 (${got[k]}; update the pin only with a push that means to change them)`); }
     // TG2: the mechanical parts of the Return's result lines, exactly
@@ -9373,8 +9373,8 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
         const m0 = g.minutes, f0 = g.james.satiety, n0 = g.inventory.smoked_meat; const r = choose(g, SCENES, c.index);
         assert(g.scene === id && g.minutes - m0 === 15 && g.james.satiety > f0 && g.inventory.smoked_meat === n0 - 1 && r.lines.some((l) => /^You eat: smoked meat\. \+\d+ satiety\.$/.test(l)), `${T} (EH): ${id}: eating takes 15 min, one food, stays on the screen (${g.scene}, ${g.minutes - m0} min, ${r.lines.join(' / ')})`);
         assert(sceneView(at(id, 84), SCENES).choices.some((x) => x.label === 'Eat something.') && !sceneView(at(id, 85), SCENES).choices.some((x) => x.label === 'Eat something.') && !sceneView(at(id, 40, 0), SCENES).choices.some((x) => x.label === 'Eat something.'), `${T} (EH): ${id}: Eat at Fed 84, none at 85, none without food`);
-        { const h = at(id, 40, 0); Gm.addItem(h, 'hare_raw', 1); const r2 = choose(h, SCENES, sceneView(h, SCENES).choices.find((x) => x.label === 'Eat something.').index);
-          assert(r2.lines.some((l) => /^You eat: glassback hare, cooked\. \+\d+ satiety\.$/.test(l)), `${T} (EH): ${id}: eaten as at the hub's fire (a raw hare cooked: ${r2.lines.join(' / ')})`); }
+        { const h = at(id, 40, 0); Gm.addItem(h, 'hare_raw', 1); h.flags.fire = true; /* P43-A TG3: the prologue's fire flag set */ const r2 = choose(h, SCENES, sceneView(h, SCENES).choices.find((x) => x.label === 'Eat something.').index);
+          assert(r2.lines.some((l) => /^You eat: glassback hare\. \+18 satiety\.$/.test(l)), `${T} (EH; P43-A L2, R-A HF): ${id}: raw, no fire on the way in (${r2.lines.join(' / ')})`); } // v0.11.275: cooked from heart_hub's camp
     }
     const labels = (id) => HEART[id].choices.map((c) => (typeof c.text === 'string' ? c.text : '(fn)')).join(' | ');
     assert(labels('ht_start') === 'Walk to the doorway. | Eat something.' && labels('heart_hall') === 'Make this the base. Look around. | Eat something.' && /\| Go in\. \| Eat something\.$/.test(labels('heart_gate')), `${T} (EH): the way on comes first, Eat last (${labels('heart_gate')})`);
@@ -9400,11 +9400,12 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // TG4 (the review): two bites in one run: each shows its own lift's lines, no more
     { const shown = [42007, 42007].map((seed) => { const g = won(seed, 2), r = bite(g), i = r.lines.findIndex((l) => /^Kept from/.test(l)); return r.lines.slice(i + 1); });
       assert(shown.every((x) => x.length === 3 && x.every((l) => XPL.test(l))) && JSON.stringify(shown[0]) === JSON.stringify(shown[1]), `${T} (TG4): two bites of the same game in one run show the same three lines, nothing carried over (${shown.map((x) => x.join(' / ')).join(' || ')})`); }
-    // TL-a: the 20 talks at 10 min (Rules Engine C's talk); TL-r's 14 kept as they are (tools test)
-    const TLA = 'herb_girl:0 gao_hand:0 fo_letter:0 fo_leave_offer:0 ya_meets:0 ya_meets:1 ya_challenge:1 ya_lost:0 ya_share:0 ya_share:2 fo_price:0 fo_price:1 ya_found:1 trio_kiss:0 trio_kiss:1 heart_core:1 rt_evening:6 rt_trio:0 lf_wanderers:1'.split(' ');
+    // TL-a: the 20 talks at 10 min (Rules Engine C's talk); TL-r's 14 kept as they are (tools test). v0.11.275 (P43-A, L1): 16: ya_found:1,
+    // trio_kiss:0/1 (their walks back), heart_core:1 and rt_evening:6 (their screens' time) out; ya_share:1 and rt_trio:1 (their siblings' 10) in
+    const TLA = 'herb_girl:0 gao_hand:0 fo_letter:0 fo_leave_offer:0 ya_meets:0 ya_meets:1 ya_challenge:1 ya_lost:0 ya_share:0 ya_share:1 ya_share:2 fo_price:0 fo_price:1 rt_trio:0 rt_trio:1 lf_wanderers:1'.split(' ');
     const miss = TLA.filter((k) => { const [id, i] = k.split(':'); return SCENES[id].choices[+i]?.time !== 10; });
-    assert(TLA.length === 19 && miss.length === 0 && SCENES.fo_spy.choices[1].time == null, `${T} (TL-a): the 19 talks take 10 min; fo_spy:1 kept on its default (the review's M1) (${miss.join(', ')})`);
-    // TG3 (the review): every one of the 19 tapped takes exactly 10 min; TG6: none of their results says it takes an hour or hours
+    assert(TLA.length === 16 && miss.length === 0 && SCENES.fo_spy.choices[1].time == null, `${T} (TL-a; P43-A L1): the 16 talks take 10 min; fo_spy:1 on the act default, its success's hour in its do (P43-A R-A, FS-a) (${miss.join(', ')})`);
+    // TG3 (the review): every one of the 16 tapped takes exactly 10 min; TG6: none of their results says it takes an hour or hours
     { const bad = [], hour = [];
       for (const k of TLA) { const [id, i] = k.split(':'); const c = SCENES[id].choices[+i], show = c.show;
           c.show = () => true; // the tap's time alone, whatever state shows the choice (rt_evening:6 needs the trio and Yuki human)
@@ -9412,9 +9413,67 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
               const m0 = g.minutes; const r = choose(g, SCENES, +i); const d = g.minutes - m0; if (d !== 10) bad.push(`${k}: ${d} min`);
               if ((r.lines || []).some((l) => /\b(an hour|hours)\b/i.test(l))) hour.push(k);
           } catch (e) { bad.push(`${k}: ${e.message}`); } finally { if (show === undefined) delete c.show; else c.show = show; } }
-      assert(bad.length === 0, `${T} (TG3): each of the 19 talks takes 10 min when tapped (${bad.join('; ')})`);
+      assert(bad.length === 0, `${T} (TG3): each of the 16 talks takes 10 min when tapped (${bad.join('; ')})`);
       assert(hour.length === 0, `${T} (TG6): no TL-a result says it takes an hour (${hour.join(', ')})`); }
     { const g = ensureBars(newGame(42005, { closed: true })); goTo(g, SCENES, 'ya_lost'); const m0 = g.minutes; choose(g, SCENES, 0); assert(g.minutes - m0 === 10, `${T} (TL-a): ya_lost's "Eventually would be now." takes 10 min on the tap path (${g.minutes - m0})`); }
+}
+// v0.11.275 (owner pick P43-A; `claude/p43-options.md`; the P42 review's L1–L5): L1 one time per screen, the walks back and fo_spy:1's hour;
+// L2 + R-A's HF no fire on the Heart's way in (the EH lines above); R-A's FS-a fo_spy:1's hour on its success; SH the skip stops at the Eat under Fed 30; L3 a song once a visit; L4 the skip past the Heart's Eat; L5 the kept dawn's refund
+{
+    const T = 'P43-A';
+    const M = await import('../js/story/music.js'), SG = await import('../js/story/songs.js'), AG = await import('../js/story/again.js'), Gm = await import('../js/core/game.js');
+    // L1: the times on the tap path, and one time per screen where the answers stay or go together
+    const tap = (id, i, flags = {}) => { const c = SCENES[id].choices[i], show = c.show; c.show = () => true;
+        try { const g = ensureBars(newGame(43001, { closed: true })); Object.assign(g.flags, { lf_human: 'lf_bandits', ya_party: true, mei_party: true }, flags); goTo(g, SCENES, id); const m0 = g.minutes; choose(g, SCENES, i); return g.minutes - m0; }
+        finally { if (show === undefined) delete c.show; else c.show = show; } };
+    const want = { 'ya_found:1': 30, 'trio_kiss:0': 20, 'trio_kiss:1': 20, 'heart_core:1': 30, 'rt_evening:6': 20, 'ya_share:1': 10, 'rt_trio:1': 10 };
+    const off = Object.entries(want).map(([k, m]) => { const [id, i] = k.split(':'); const d = tap(id, +i); return d === m ? null : `${k} ${d} (want ${m})`; }).filter(Boolean);
+    assert(off.length === 0, `${T} (L1-s, L1-w): the walks back and the screens' one time on the tap path (${off.join('; ')})`);
+    // L1-h with R-A's FS-a (the P43 review's M1, TG1): the success takes the hour and the 60-min way down (120); a failure 30, then fled's 60
+    { const spy = (gu) => { const g = ensureBars(newGame(43002, { closed: true })); if (gu) g.james.gu = { tier: 2, level: 5, xp: 0 }; goTo(g, SCENES, 'fo_spy'); const m0 = g.minutes; const r = choose(g, SCENES, 1); return { g, r, d: g.minutes - m0 }; };
+      const ok = spy(true), no = spy(false);
+      assert(ok.r.roll?.success && ok.g.scene === 'fo_ashfall' && ok.g.flags.spy === 'talked' && ok.d === 120, `${T} (L1-h, FS-a): fo_spy:1's success: the hour with diagrams and the way down, 120 min (${ok.d}, ${ok.g.scene})`);
+      const m1 = no.g.minutes; choose(no.g, SCENES, 0);
+      assert(!no.r.roll?.success && no.d === 30 && no.g.scene === 'fo_ashfall' && no.g.minutes - m1 === 60, `${T} (L1-h, FS-a): its failure: 30, then fled's 60 down, 90 in all (${no.d} + ${no.g.minutes - m1})`); }
+    assert(tap('heart_core', 0) === tap('heart_core', 1) && tap('ya_found', 0) === tap('ya_found', 1) && tap('ya_found', 0) === 30 && [0, 1, 2].every((i) => tap('ya_share', i) === 10) && [0, 1].every((i) => tap('rt_trio', i) === 10), `${T} (L1-s, TG2): the default siblings take their screen's one time on the tap path`);
+    const mins = (id, i) => SCENES[id].choices[i].time;
+    assert([0, 1, 2].every((i) => mins('ya_share', i) === 10) && [0, 1].every((i) => mins('rt_trio', i) === 10) && mins('heart_core', 1) === 30 && mins('ya_found', 1) === 30, `${T} (L1-s): ya_share's and rt_trio's answers 10 each, heart_core's and ya_found's two the same act`);
+    // L3: a song once a visit: shown, left out on a redraw after an action, kept on a form change's return (newVisit false), shown on a first draw after an action
+    { const g = ensureBars(newGame(43003, { closed: true })); g.scene = 'heart_hall'; g.minutes = 15 * 1440 + 22 * 60; Object.assign(g.flags, { mei_party: true, ya_party: true, songs: 'reflect' }); g.coil = { ...(g.coil || {}), act: 1 }; linesOf(g).at = 'heart_hall';
+      const view = { id: 'heart_hall', text: 'A screen.' };
+      const a = M.musicLine(g, view, { afterAction: true }); // the visit's first draw: an action before it (a skip) does not hide it
+      const b = M.musicLine(g, view, { afterAction: true });
+      linesOf(g).cur = {}; const c = M.musicLine(g, view, { newVisit: false });
+      const d = M.musicLine(g, view);
+      assert(a && a.key === `song.${SG.SONG_AT.heart_hall}` && b === null && c && c.key === a.key && d && d.key === a.key, `${T} (L3): the hall's song once a visit: shown, none after a meal, kept on a form change's return and a plain redraw (${a?.key}, ${b}, ${c?.key}, ${d?.key})`); }
+    // TG4 (the review): a music line (no song) is not hidden by afterAction
+    { const g = ensureBars(newGame(77002, { closed: true })); g.scene = 'camp'; g.minutes = 2 * 1440 + 20 * 60; g.flags.songs = Object.keys(SG.SONG_TEXTS).join(','); linesOf(g).at = 'camp'; const v = { id: 'camp', text: 'A screen.' }; // as CM2's state (every song heard)
+      const a = M.musicLine(g, v), b = M.musicLine(g, v, { afterAction: true });
+      assert(!SG.SONG_AT.camp && a && b && a.key === b.key, `${T} (L3, TG4): the camp's music line stays on a redraw after an action (${a?.key} / ${b?.key})`); }
+    { const MS = (await import('node:fs')).readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(/musicLine\(g, v, \{ newVisit: a\.newVisit, afterAction: !!\(sameVisit && sameVisit\.g === g && sameVisit\.id === v\.id\) \}\)/.test(MS), `${T} (L3): main.js tells musicLine a redraw follows an action that kept you on the screen (sameVisit)`); }
+    // L4: the skip walks past "Eat something." at ht_start and heart_hall, and still stops where Eat sits beside another choice (heart_gate)
+    for (const [id, next] of [['ht_start', 'heart_gate'], ['heart_hall', null]]) {
+      const g = ensureBars(newGame(43004, { closed: true })); Gm.addItem(g, 'smoked_meat', 2); g.james.satiety = 40; goTo(g, SCENES, id);
+      noteRead(g, sceneView(g, SCENES).text); g.coil.n = 2; g.seen = { ...(g.seen || {}), [id]: 1 };
+      const v = sceneView(g, SCENES), eat = v.choices.find((x) => x.label === 'Eat something.');
+      const i = AG.skipStep(g, SCENES);
+      assert(eat && !eat.disabled && i >= 0 && i !== eat.index && (next === null || SCENES[id].choices[i].to === next), `${T} (L4): ${id}: the skip takes the way on past an open Eat (${i}, Eat ${eat?.index})`);
+      g.james.satiety = 29.9; assert(AG.skipStep(g, SCENES) === -1, `${T} (L4, R-A SH, TG6): ${id}: under Fed 30 the open Eat stops the skip`);
+      g.james.satiety = 30; assert(AG.skipStep(g, SCENES) === i, `${T} (L4, R-A SH): ${id}: at Fed 30 the skip walks past it again`);
+    }
+    // TG5 (the review): heart_gate stops the skip with its own choices open, walks on with both flags; a self-returning choice with no skipPast still stops it
+    { const at = (flags) => { const g = ensureBars(newGame(43005, { closed: true })); Gm.addItem(g, 'smoked_meat', 2); g.james.satiety = 40; Object.assign(g.flags, flags); goTo(g, SCENES, 'heart_gate'); noteRead(g, sceneView(g, SCENES).text); g.coil.n = 2; g.seen = { ...(g.seen || {}), heart_gate: 1 }; return g; };
+      const a = at({}), b = at({ gate_listened: true, sect_marks: true }), bi = AG.skipStep(b, SCENES);
+      assert(AG.skipStep(a, SCENES) === -1 && bi >= 0 && SCENES.heart_gate.choices[bi].text !== 'Eat something.', `${T} (L4, TG5): heart_gate: no skip with its choices open; with both flags the skip goes in, past the Eat (${bi})`);
+      const w = ensureBars(newGame(43008, { closed: true })); goTo(w, SCENES, 'hollow'); noteRead(w, sceneView(w, SCENES).text); w.coil.n = 2; w.seen = { ...(w.seen || {}), hollow: 1 };
+      assert(AG.skipStep(w, SCENES) === -1, `${T} (L4, TG5): a screen with self-returning choices and one way on (hollow) still stops the skip`); }
+    assert(Object.entries(SCENES).every(([id, sc]) => (sc.choices || []).every((c) => !c.skipPast || (c.to === id && c.text === 'Eat something.'))), `${T} (L4): skipPast only on the Heart's Eat, back to its own screen`);
+    // L5: the kept dawn's refund (Fable's D3) under the lift's lines; the plain dawn as before
+    { const g = ensureBars(newGame(43006, { closed: true })); g.coil.kept = 2; goTo(g, SCENES, 'coil_dawn'); const t = sceneView(g, SCENES).text;
+      const h = ensureBars(newGame(43007, { closed: true })); goTo(h, SCENES, 'coil_dawn'); const u = sceneView(h, SCENES).text;
+      const ref = (/less a small refund from the open channels: ([^.]*)\./.exec(t) || [])[1] || '';
+      assert(/\bthe song\b/.test(ref) && /whatever you have no skill for/.test(ref) && /Yuki's end of the bond/.test(ref) && !/\bQi\b/.test(ref) && /What you know never left your head, a library nobody thought to burn/.test(t) && !u.includes('small refund') && u.includes('The meridians are ash again.'), `${T} (L5; the review's M2, L5, TG7): the kept dawn's refund names the three lines' channels (Convergence Use's song, General Use's knack, Yuki's bond; no "Qi" for GU) and the library is what you know; the plain dawn as before (${ref})`); }
 }
 // v0.11.271 (owner pick P39-A, RG; `claude/p39-options.md`): the collectors' HP by James's realm: 0.8 below Core Formation, 0.7 from it; every other fight as before
 {

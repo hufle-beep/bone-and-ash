@@ -16,7 +16,7 @@
  * the same text right after an action that kept you there folds too (no memory line; main.js passes the screen before).
  */
 import { sceneView, choose, seenBefore, isMenuScene, isTimeless } from '../core/story.js';
-import { fnv1a } from '../core/game.js';
+import { fnv1a, HUNGRY_AT } from '../core/game.js'; // v0.11.275 (P43-A R-A, SH): HUNGRY_AT
 import { NUM_WORDS } from '../core/calendar.js'; // v0.11.214 (RD1, RV1 L3): the read stop's record with its numbers aside
 import { TASK_HUBS } from './task_hubs.js';
 import { sceneMemory } from './remember.js'; // v0.11.184 (S1): a scene's own memory line
@@ -273,7 +273,7 @@ export function skipStep(g, scenes) {
     if (!s || g.combat || s.end || !seenBefore(g) || noFold(g.scene)) return -1;
     const v = sceneView(g, scenes);
     if (v.end) return -1;
-    const open = v.choices.filter((c) => !c.disabled);
+    const open = v.choices.filter((c) => !c.disabled && !(s.choices[c.index]?.skipPast && g.james.satiety >= HUNGRY_AT)); // v0.11.275 (P43-A, L4): the Heart's "Eat something." (skipPast) doesn't stop the skip while James isn't hungry (R-A, SH: under Fed 30 it stops him where he can eat; a fight's ONE_MOVE index has no entry; the review's L6)
     if (open.length !== 1 || open[0].index >= 1000) return -1;
     const c = s.choices[open[0].index];
     if (!c || c.check || c.combat || c.fail) return -1;

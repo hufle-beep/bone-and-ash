@@ -322,7 +322,7 @@ function proseHtml(v) {
     if (a.newVisit) readAllScene = null; // v0.11.152 (RV1, L2; Fable's review): "Read it all again" shuts with each new visit
     shownScreen = { id: v.id, text: v.text, g };
     if (!noFold(v.id) && !v.end) noteRead(g, v.text); // v0.11.133 (FP2): what the screen shows is read; RF1 (M2): only screens that can fold (their record is what a later Coil's fold reads)
-    const mu = v.end ? null : musicLine(g, v, { newVisit: a.newVisit }); // v0.11.182 (CB1: ML): the day's music or archive line, under the text, folded or not; RV1 (L1): kept back from a meta screen
+    const mu = v.end ? null : musicLine(g, v, { newVisit: a.newVisit, afterAction: !!(sameVisit && sameVisit.g === g && sameVisit.id === v.id) }); // v0.11.182 (CB1: ML): the day's music or archive line, under the text, folded or not; RV1 (L1): kept back from a meta screen; v0.11.275 (P43-A, L3): a song once a visit (afterAction)
     const muHtml = mu ? `<p class="music">${md(mu.text)}</p>` : '';
     if (!a.fold) return `<div class="prose">${paras(v.text)}${muHtml}</div>`;
     const all = readAllScene === `${g.scene}#${g.coil?.n || 1}`; // per scene and Coil (Fable review)

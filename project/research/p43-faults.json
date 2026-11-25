@@ -1,0 +1,19 @@
+[
+ {"id":"F1","file":"js/story/act1_heart.js","find":"eatBest(g, { fire: false })","replace":"eatBest(g, { fire: true })","note":"L2/HF: cooked on the way in again"},
+ {"id":"F2","file":"js/story/act1_heart.js","find":"eatBest(g, { fire: false })","replace":"eatBest(g)","note":"L2/HF: falls back on g.flags.fire (the reviewer's C3, re-aimed)"},
+ {"id":"F3","file":"js/story/again.js","find":"!c.disabled && !(s.choices[c.index]?.skipPast && g.james.satiety >= HUNGRY_AT)","replace":"!c.disabled","note":"L4: the skip stops at the Eat again"},
+ {"id":"F4","file":"js/story/act1_heart.js","find":"time: 15, skipPast: true, do:","replace":"time: 15, do:","note":"L4: the Eat loses its skip mark"},
+ {"id":"F5","file":"js/story/music.js","find":"        if (afterAction && sv && sv.d === d && sv.song === sg && sv.at === id && L.cur.sg === id) return null;\n","replace":"","note":"L3: the song redrawn after a meal"},
+ {"id":"F6","file":"js/main.js","find":"afterAction: !!(sameVisit && sameVisit.g === g && sameVisit.id === v.id)","replace":"afterAction: false","note":"L3: main.js never says an action kept you there"},
+ {"id":"F7","file":"js/story/act1_blackroot.js","find":"{ time: 30 /* v0.11.275 (P43-A, L1-w): as :0, the talk and the walk back to camp */","replace":"{ time: 10 /* v0.11.275 (P43-A, L1-w): as :0, the talk and the walk back to camp */","note":"L1-w: ya_found:1 loses its walk"},
+ {"id":"F8","file":"js/story/act1_fallout.js","find":"...advance(g, 90)]","replace":"...advance(g, 50)]","note":"FS-a: the success without the way down"},
+ {"id":"F9","file":"js/story/coil_scenes.js","find":"the song, the knack for whatever you have no skill for, Yuki's end of the bond","replace":"the song, the Qi in you, Yuki's end of the bond","note":"L5/M2: GU named as Qi again"},
+ {"id":"F10","file":"js/story/act1_return.js","find":"{ time: 10 /* v0.11.275 (P43-A, L1-s): as its two siblings */, text: 'Take Mei Lin","replace":"{ text: 'Take Mei Lin","note":"L1-s: rt_trio:1 back on the move default"},
+ {"id":"F11","file":"js/story/yuki_path.js","find":"{ time: 20 /* v0.11.275 (P43-A, L1-s): like the other night moves */","replace":"{ time: 10 /* v0.11.275 (P43-A, L1-s): like the other night moves */","note":"L1-s: rt_evening:6 at 10 again"},
+ {"id":"F12","file":"js/story/again.js","find":"g.james.satiety >= HUNGRY_AT)","replace":"g.james.satiety >= 0)","note":"SH: a starving James skipped past food again"},
+ {"id":"C1","file":"js/story/music.js","find":"const same = m.i >= 0 && m.at === id && (L.cur.mu === id || newVisit === false);","replace":"const same = !afterAction && m.i >= 0 && m.at === id && (L.cur.mu === id || newVisit === false);","note":"L3 spread to the music line"},
+ {"id":"C2","file":"js/story/act1_fallout.js","find":"do: (g) => { g.flags.spy = 'talked'; g.flags.elder_intel = true; return [","replace":"do: (g) => { g.flags.spy = 'talked'; g.flags.elder_intel = true; advance(g, 40); return [","note":"FS-a: the success's clock moved"},
+ {"id":"C4","file":"js/story/act1_heart.js","find":"{ text: 'Take the seed-sliver. Gently. The way they taught you.', do:","replace":"{ time: 10, text: 'Take the seed-sliver. Gently. The way they taught you.', do:","note":"L1-s: heart_core:0 at 10"},
+ {"id":"C5","file":"js/story/again.js","find":"!(s.choices[c.index]?.skipPast && g.james.satiety >= HUNGRY_AT)","replace":"!((s.choices[c.index]?.skipPast || s.choices[c.index]?.to === g.scene) && g.james.satiety >= HUNGRY_AT)","note":"L4 spread to every self-returning choice"},
+ {"id":"C6","file":"js/story/act1_blackroot.js","find":"{ text: 'Take the tooth. Put it on. \"I won\\'t.\"'","replace":"{ time: 10, text: 'Take the tooth. Put it on. \"I won\\'t.\"'","note":"L1-s: ya_found:0 at 10"}
+]

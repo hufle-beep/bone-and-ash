@@ -535,7 +535,9 @@ He has been counting your stakes. He has drawn the barley line, accurately, with
 He has not seen you yet.`,
         choices: [
             { text: 'Take him.', combat: spyFight, to: 'fo_spy_won' },
-            { text: 'Talk. "Your ledger\'s very good. Shame about the perspective on the stakes."', check: { skill: 'GU', dc: 5 }, do: (g) => { g.flags.spy = 'talked'; g.flags.elder_intel = true; return ['He stares. Then, being very young and very correct, he corrects you on the perspective. It takes an hour, with diagrams. He goes home with his ledger, and you go home knowing that the Elder means to arrive in the morning, by the north road, with twelve disciples.']; }, failDo: () => ['He is off like a hare from its form. You let him go; the ledger drops out of his robe on the second bound.'], fail: 'fo_spy_fled', to: 'fo_ashfall' },
+            /* v0.11.275 (owner picks P43-A, L1-h, and R-A, FS-a; the P43 review's M1): the talk on the act default 30 either way; its success adds 90
+   (the result's hour with diagrams and the 60-min way down, as fo_spy_won's and fo_spy_fled's): 120 in all; a failure 30, then fled's 60 */
+            { text: 'Talk. "Your ledger\'s very good. Shame about the perspective on the stakes."', check: { skill: 'GU', dc: 5 }, do: (g) => { g.flags.spy = 'talked'; g.flags.elder_intel = true; return ['He stares. Then, being very young and very correct, he corrects you on the perspective. It takes an hour, with diagrams. He goes home with his ledger, and you go home knowing that the Elder means to arrive in the morning, by the north road, with twelve disciples.', ...advance(g, 90)]; }, failDo: () => ['He is off like a hare from its form. You let him go; the ledger drops out of his robe on the second bound.'], fail: 'fo_spy_fled', to: 'fo_ashfall' },
             { text: 'Leave him. Let the Sect see exactly how ready you are.', do: (g) => { g.flags.spy = 'left'; return []; }, to: 'fo_ashfall' },
         ],
     },
@@ -794,7 +796,7 @@ The quiet after that could be struck like a bell.
 Ya's grin has gone uncertain. She is reading Mei Lin's face, and you can watch the conclusion arrive, slowly: she has offended. Then you can watch her take offence at *that*, hackles lifting like a dog's. "What? I was being *nice*."`,
         choices: [
             { time: 10, text: 'To Ya: "In Ashfall, you ask that quietly, in private, after several years."', do: (g) => { bumpRel(g, 'Ya', 1, 3); bumpRel(g, 'Mei Lin', 2, 0); trioStep(g, 1); return ['Ya gives this real thought. "Several *years*? You\'ll all be dead."']; }, to: 'fo_ashfall' },
-            { text: 'To Mei Lin: "She meant it as a compliment. I think. In wolf."', do: (g) => { bumpRel(g, 'Mei Lin', 1, 1); bumpRel(g, 'Ya', 2, 2); trioStep(g, 1); return ['Mei Lin stalks indoors. Then the door opens again, and she comes out, sits down at the far end of the step, and says nothing. But she stays.']; }, to: 'fo_ashfall' },
+            { time: 10 /* v0.11.275 (P43-A, L1-s): as its two siblings */, text: 'To Mei Lin: "She meant it as a compliment. I think. In wolf."', do: (g) => { bumpRel(g, 'Mei Lin', 1, 1); bumpRel(g, 'Ya', 2, 2); trioStep(g, 1); return ['Mei Lin stalks indoors. Then the door opens again, and she comes out, sits down at the far end of the step, and says nothing. But she stays.']; }, to: 'fo_ashfall' },
             { time: 10, text: '"Ya. No."', do: (g) => { bumpRel(g, 'Ya', -3, -2); bumpRel(g, 'Mei Lin', 4, 2); return ['Ya sulks, on a grand scale. She goes up onto the shrine roof and will not come down before supper.']; }, to: 'fo_ashfall' },
         ],
     },

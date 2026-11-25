@@ -3,7 +3,7 @@
  "totals": {
   "scenes": 333,
   "words": 37899,
-  "variantWords": 159073,
+  "variantWords": 159100,
   "labels": 858,
   "labelWords": 5825,
   "sharedChunks": 771,
@@ -19,7 +19,7 @@
   "prologue+shared": {
    "scenes": 81,
    "words": 11149,
-   "variantWords": 39807,
+   "variantWords": 39834,
    "labels": 170,
    "labelWords": 1249,
    "sharedScenes": 32,
