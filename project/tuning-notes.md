@@ -22,6 +22,9 @@ The design rule first (the owner's words; `reference.md`'s rules as implemented)
 | T2 the whole game on Coil 1 | Careful, the Sociable | 0% | 0%, 0% |
 | T3 Act 1 cleared, mean Coil | Careful, the Sociable | 4.38 ± 0.75 | 4.96, 4.96 (100 games each) |
 
+## Accepted as they are (v0.11.277)
+- **DF, the death farm** (owner pick P45-D): dying on purpose early still adds the Coil bonus (+0.25 a death, no cap): one Day-1 death lifts the Completionist 21% → 91% on its first real Coil, Careful's 4 deaths (54 taps) cut his game 1,060 → 564 taps. Kept as the catch-up for early-dying play: every measured shape that stops it locks that play out (R42: the random player's Act 1 58% → 2%). Numbers: `project/research/p45-measure.md`; the R42 diff `p45-r42.patch`.
+
 ## The knobs by section (values as of v0.11.272)
 - **Whole game, pace:** `js/core/game.js` `XP_RATE` 0.6 (v0.11.85), `COIL_GROWTH` 0.25 (the Coil bonus a Coil), `LONG_XP` 0.7, `LONG_SAT_DIV` 4 (`LONG_SAT_HIGH` 6 from True Core, `LONG_SAT_FROM` 3, P26-A), `LONG_MER_MULT` 4, `LONG_SIT_MIN` 0.1, `FAIL_XP_FRACTION` 0.25 (`formulas.js`); `js/core/coil.js` `HEAD_START` 0.25, `KEPT_EXTRA_FROM` 7.
 - **Fights, every section:** `js/story/act1_tune.js` `TUNE` (per encounter: DC and attack +t, HP +10%·t), `TUNE_LOW` below `LOW_REALM` 2 (the rot ape 11, P25-A); `js/story/fight_tune.js` `HP_TUNE` (per encounter HP factor), `HP_TUNE_HIGH` from `HIGH_REALM` 2 (the collectors 0.7, P39-A); `js/core/game.js` `NO_DICE_DC_SHIFT` 2, `NO_DICE_ROUND_CAP` 30, `BEAST_UP` 0.5, `QI_SHIELD_PER_TIER` 3, `NIGHT_FIGHT_HEAL` 0.5.
@@ -40,7 +43,7 @@ None yet. A section is frozen only on the owner's word, with one key number (`to
 - `node tools/timelint.mjs [--list]` (TL, v0.11.273): the choices on the default time against Rules Engine C's times per activity (v0.11.273: 855 choices, 202 linted, 34 off the engine's time, counted 30 at the time; v0.11.274, P42-A: 19 talks set to 10 min (TL-a) and 15 kept with their reasons in `REVIEWED` (TL-r: 7 sleeps slept on a later screen, 7 misreads, `fo_spy:1` whose result takes an hour): 0 off). A new time is a balance change of its own.
 
 ## The logs
-`project/research/p21-*` … `p41-measure.md` (one per push's measuring), `claude/pNN-options.md` in the claude.ai project, `project/history-*.md` (the decisions), `tools/models-baseline.json` and `tools/baseline*.json` (the numbers the check compares with).
+`project/research/p21-*` … `p45-measure.md` (one per push's measuring), `claude/pNN-options.md` in the claude.ai project, `project/history-*.md` (the decisions), `tools/models-baseline.json` and `tools/baseline*.json` (the numbers the check compares with).
 
 ## Afterwards
 A "tuned up to" note for players when the retune ends (roadmap-retune.md, TU).
