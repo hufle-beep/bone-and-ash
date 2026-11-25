@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-23",
+ "saved": "2026-11-24",
  "totals": {
   "scenes": 333,
   "words": 37899,
@@ -346,6 +346,15 @@
    "broken": 0,
    "spacing": 0,
    "cardTics": 0
+  },
+  "fight": {
+   "lines": 47,
+   "words": 763,
+   "dupes": 0,
+   "sceneShared": 1,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
   },
   "stomp": {
    "lines": 38,

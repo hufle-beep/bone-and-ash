@@ -2,6 +2,12 @@
 
 Started in v0.11.258, when `roadmap-done-4.md` would have passed about 45 KB with this move. Newer than `roadmap-done-4.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.272 (word for word; owner pick P40-A, 2026-11-25: the size rule MD, `roadmap.md` under 20 KB)
+
+### From `roadmap.md` section 2, one done line
+
+- *(v0.11.271, owner picks P39-A, JW-A; the options: `claude/p39-options.md`; `project/research/p39-review.md`, `p39-mutate.md`)* **Done: the Cultivator back inside T1** (measured before the pick, 200 games a model, seed 0 and seed 1): **RG** the collectors' HP for a James at Core Formation or above 0.8 → 0.7 (`fight_tune.js` `hpTuneFor`; on every Coil): the Cultivator's whole game on Coil 1 19.5 / 15.5% → 32.5 / 21.5% (mean 27, T1 in), the Completionist (Foundation at the tribute) 21.5%, Careful and the Sociable 0% and Act 1 4.96 unchanged; **MN** Careful's Mei Lin last nights closed as by design (`fo_last_night`'s trio branch whenever both women are liked; P25-A's longer Act 1); **UC** (log only) the collectors' `up` a cliff for the Cultivator (4.375: 19.5%; 4.25 and 4.0: 66.5%); **JW-A** `journey.02` checked directly in the story test. Open, options later: the review's L3 (the kept realm meets 0.7 from a later Coil's start; `--kept` not measured). v0.11.268's done line moved word for word to `roadmap-done-5.md`.
+
 ## Moved in v0.11.271 (word for word; owner pick P39-A, 2026-11-24: the size rule MD, `roadmap.md` under 20 KB)
 
 ### From `roadmap.md` section 2, one done line

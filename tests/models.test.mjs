@@ -17,6 +17,8 @@
 //                                                     tools/models-baseline.json; without it they are compared with it, log only (a NOTE
 //                                                     past 5 points and past 3 × the noise; tools/lib/textlint.mjs shareNote). Save
 //                                                     only with the owner's go on an intended change, as tools/baseline.json.
+//   node tests/models.test.mjs --kept --kept-clears 2  v0.11.272 (owner pick P40-A, KC): the kept pass as if Act 1 had been won N times
+//                                                     (its start realm the lower of N and the realm at the clear; log only)
 //
 // The models (tests/README.md has the details):
 //   random         the tasks test's bot (tests/tasks.test.mjs): random cards and story choices, half its games fight at
@@ -79,6 +81,11 @@ const TEXTS = argv.includes('--texts'); // v0.11.132 (E1, RP)
 // pass alone (its Coils from 1; RV1 L3: only games that play one, a first pass not won or given up is named in the kept line); the first
 // pass's realm and Coil at the clear in their own line. Log only; the seeds are the plain games'.
 const KEPT = argv.includes('--kept');
+// v0.11.272 (owner pick P40-A, KC; KA1's review L4, the P39 review's L3): --kept-clears N (with --kept) holds at least N - 1 won clears in
+// the save before the first pass's bite, which adds its own: the second pass starts at the lower of N and the realm at the clear
+// (keptRealm), so a kept Core Formation and up reaches the bots that clear Act 1 at it (the Completionist, the Cultivator). Log only.
+const KEPT_CLEARS = opt('kept-clears', null);
+if (KEPT_CLEARS != null && !(KEPT && Number.isInteger(Number(KEPT_CLEARS)) && Number(KEPT_CLEARS) >= 1)) { console.error(`--kept-clears needs --kept and a whole number of won clears, 1 or more (${KEPT_CLEARS})`); process.exit(2); }
 const SAVE_BASE = argv.includes('--save-baseline'); // v0.11.132 (E1, EB)
 const MODELS_BASE = new URL('../tools/models-baseline.json', import.meta.url);
 const OFF = Math.max(0, Number(opt('off', 300)) || 0);
@@ -289,6 +296,7 @@ function play(run, model, st, yuki, kept = false) {
         if (kept && st !== real && (v.end || g.scene === 'a1_end')) { // KA1 (KM): the first pass ends: a won Act 1 goes round again from Day 1
             if (!ACT1_WON.includes(g.flags.a1_outcome)) { real.noClear = (real.noClear || 0) + 1; real.games--; return 'noClear'; } // RV1 (L3): the second pass's lines count only games that play one
             real.p1Realm = (real.p1Realm || 0) + g.james.realm; real.p1Coil = (real.p1Coil || 0) + cn(); real.p1N = (real.p1N || 0) + 1;
+            if (KEPT_CLEARS) { g.stats = g.stats || {}; g.stats.clears = Math.max(g.stats.clears || 0, Number(KEPT_CLEARS) - 1); } // P40-A (KC): the bite below adds this clear
             goTo(g, SCENES, 'a1_again');
             const w = sceneView(g, SCENES).choices.find((c) => /start of the whole game/.test(c.label));
             if (!w) { assert(false, `${model}: no whole-game bite at a1_again after a won Act 1 (run ${run})`); return 'stuck'; }
@@ -461,7 +469,7 @@ for (const [m, st] of Object.entries(all)) {
     const sum = (o) => Object.values(o).reduce((a, b) => a + b, 0);
     console.log(`  cleared: prologue ${pct(sum(st.prologueClear), st.games)} (mean Coil ${avg(st.prologueClear)}) · Act 1 ${pct(sum(st.act1Clear), st.games)} (mean Coil ${avg(st.act1Clear)}) · the whole game on Coil 1 ${pct(st.oneCoil, st.games)}`);
     if (st.talks) console.log(`  talk doors: ${(st.talks / Math.max(1, st.games)).toFixed(1)} a game (Ya and Mei Lin)`); // v0.11.160 (NX2, CN)
-    if (st.p1N || st.noClear || st.p1GaveUp) console.log(`  kept (KA1, KM): the first pass won ${st.p1N || 0} of ${(st.p1N || 0) + (st.noClear || 0) + (st.p1GaveUp || 0)}${st.noClear || st.p1GaveUp ? ` (${st.noClear || 0} not won, ${st.p1GaveUp || 0} gave up: no second pass, left out of this block)` : ''} (realm at its clear ${st.p1N ? (st.p1Realm / st.p1N).toFixed(2) : '—'}, mean Coil ${st.p1N ? (st.p1Coil / st.p1N).toFixed(2) : '—'}); this second pass starts at realm ${st.p1N ? (st.keptStart / st.p1N).toFixed(2) : '—'}, with its Coil bonus; Coils above counted from its first`);
+    if (st.p1N || st.noClear || st.p1GaveUp) console.log(`  kept (KA1, KM): the first pass won ${st.p1N || 0} of ${(st.p1N || 0) + (st.noClear || 0) + (st.p1GaveUp || 0)}${st.noClear || st.p1GaveUp ? ` (${st.noClear || 0} not won, ${st.p1GaveUp || 0} gave up: no second pass, left out of this block)` : ''} (realm at its clear ${st.p1N ? (st.p1Realm / st.p1N).toFixed(2) : '—'}, mean Coil ${st.p1N ? (st.p1Coil / st.p1N).toFixed(2) : '—'}); this second pass starts at realm ${st.p1N ? (st.keptStart / st.p1N).toFixed(2) : '—'}${KEPT_CLEARS ? ` (${KEPT_CLEARS} won clears held, --kept-clears)` : ''}, with its Coil bonus; Coils above counted from its first`);
     if (st.farmN) console.log(`  farmer: ${FARM_BITES} bites by choice at the first dawn first, then ×${(st.farmMult / st.farmN).toFixed(2)} (a bite by choice adds no bonus); Coils above counted from its first real one`);
     const fl = KEY_FIGHTS.filter((k) => st.fights[k]).map((k) => { const f = st.fights[k]; const n = f.win + f.lose + (f.flee || 0); return `${k} ${pct(f.win, n)} (${n})`; });
     console.log(`  key fights won: ${fl.join(' · ') || '—'}`);

@@ -18,6 +18,8 @@
 // v0.11.200 (owner pick D1, S5): and the result lines of every choice, as the screen shows them (the reply under the scene, `splitLine`;
 // the gains and engine lines left out), forced as a success and, with a check, as a failure on six sample states (each form on its first
 // and a later day, as tools/packet.mjs's), as the pool `results`; and the canon card's tic list over them (a log line, CT).
+// v0.11.272 (owner pick P40-A, TG6; the P35 review's TG6): and the fight texts (game.js TELL_TEXT, SAY_TEXT, FOE_TRAITS; the traits' tags,
+// short labels, left out) as the pool `fight`.
 // Not read yet: the task cards' texts (open, options later).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
@@ -32,7 +34,7 @@ if (CORPUS && !/^[^-]/.test(argv[argv.indexOf('--corpus') + 1] || '')) { console
 const js = (f) => path.join(ROOT, 'js', f);
 
 const { SCENES } = await import(js('story/prologue.js'));
-const { newGame, ensureBars } = await import(js('core/game.js'));
+const { newGame, ensureBars, TELL_TEXT, SAY_TEXT, FOE_TRAITS } = await import(js('core/game.js'));
 
 /** The story areas: the scene tables of each file; everything else (the prologue, the Coil, Yuki's path, the one-offs) is 'prologue+shared'. */
 export const AREAS = [['wilds', 'wilds', 'WILDS'], ['ashfall', 'ashfall', 'ASHFALL'], ['fallout', 'act1_fallout', 'FALLOUT'], ['blackroot', 'act1_blackroot', 'BLACKROOT'], ['heart', 'act1_heart', 'HEART'], ['return', 'act1_return', 'RETURN'], ['longforest', 'longforest', 'LONGFOREST']];
@@ -263,6 +265,9 @@ for (const s of Object.values(SCENES)) (s.choices || []).forEach((c0, i) => {
     }
 });
 POOLS.results = resultLines;
+// v0.11.272 (owner pick P40-A, TG6): the fight texts, every string in the three tables but the traits' tags, once each
+{ const fl = []; const walk = (v) => { if (typeof v === 'string') fl.push(v); else if (Array.isArray(v)) v.forEach(walk); else if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) if (k !== 'tag') walk(x); };
+  for (const tbl of [TELL_TEXT, SAY_TEXT, FOE_TRAITS]) walk(tbl); POOLS.fight = [...new Set(fl)]; }
 // v0.11.247 (owner pick P17-A, BW2): the cinder hawks' and the bone-elk's easy and crushing wins (stomp_act1.js: they replace the win screen), each
 // day's text (1st–3rd) by form, the hawks' with Ya away too, as the pool `stomp`: no sample state reaches them (a `lastWin`)
 { const { STOMP } = await import(js('story/power.js')); const st = [];
