@@ -2,6 +2,27 @@
 
 Started 2026-11-25 (v0.11.275), when `history-54.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-54.md` … `history.md`.
 
+## Moved from the handover in v0.11.276 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-25 (Europe/Budapest). **Version:** 0.11.275 (`sw.js` VERSION `bone-ash-0.11.275`): **the P42 review's lows (P43-A, the owner 2026-11-25 12:44: "P43-a go"; R-A at the build's stop, 13:36: "R-A go"; a game change):** **L1** one time per screen (`ya_share:1` and `rt_trio:1` 20 → 10, `rt_evening:6` 10 → 20, `heart_core:1` 10 → 30), the walks back (`ya_found:1` 10 → 30, `trio_kiss:0/1` 10 → 20), `fo_spy:1`'s hour on its success only (R-A, FS-a: the act default 30 and +90 in its `do`, 120 in all; a failure 30 + `fo_spy_fled`'s 60; never past 19:00 from the latest arrival); TL-a 19 → 16, `REVIEWED` 15 → 14, the lint 0 off; **L2 + HF** no fire on the Heart's way in: `ht_start`, `heart_gate` and `heart_hall` eat raw (a hare 35 → 18), cooked from `heart_hub`'s camp; **L3** a song once a visit (`musicLine`'s `afterAction`, from `main.js`'s `sameVisit`: a meal, a cook or a sit on its screen no longer draws it again; a form change's return keeps it); **L4 + SH** the skip walks past the Heart's Eat (`skipPast`) while Fed is 30 or more; under 30 the Eat stops it; **L5** the kept dawn names the refund (Fable's redraft R1: "…less a small refund from the open channels: the song, the knack for whatever you have no skill for, Yuki's end of the bond. What you know never left your head, …"). T1 21 / 32%, T3 4.94 / 4.97: unchanged (100 games each). Measured: `project/research/p43-measure.md`; the review `p43-review.md`, the faults `p43-mutate.md` (17 of 17 caught). **Next push:** open, options later.
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** The P42 review's lows (v0.11.275); Eat through the Heart, the kept realm's XP lines and the engine's times (v0.11.274); the retune's tools and rules, BD and HN (v0.11.273). Open, options later (on the roadmap: `roadmap.md` section 2, `roadmap-retune.md`): the rest of section 2 (`roadmap-retune.md`'s older notes), then 5b, systems, Act 2, art, later; the "tuned up to" note after the retune. *(The entry as it stood, word for word, in `history-55.md`.)*
+
+*(from Decided in chat)*
+
+- **v0.11.273: P41-A (the owner 2026-11-25 07:59: "P41-a go. give me the new project instructions to paste please").** The options as laid out in chat (`claude/p41-options.md`, the project doc): **P41-A 🟢 (picked, recommended)** TN + FZ/RR + SW + CO + TL built; MT, SR, FE, FB, HN closed; BD closed as not taken (11 of 12, TU waits; the targets unchanged); P41-B 🟡 TN + CO built, the closes (8 of 12); P41-C 🟠 P41-A with BD built (11 of 12, T1's Cultivator out); P41-D 🔴 hold. Not offered: the older notes, no Eat card through the Heart, `liftKept`'s line. The project's Instructions to paste: `CLAUDE.md` word for word, sent as a file in chat (07:59; the field mirrors it, `working-agreement.md`).
+
+## v0.11.273 — The retune's tools and rules, BD and HN (P41-A)
+
+- **Files:** `tools/lib/longguard.mjs` (`frozenLines`), `tools/sanity.mjs` (the FROZEN lines; an out fails), `tools/targets.json` (`frozen`, `frozen_note`), `tools/lib/report.mjs` (FROZEN in the compact output), `tests/lib/skillwatch.mjs` (new), `tests/models.test.mjs` (SW: `see()` on every shown result, the watch at each step, its log line), `tools/lib/timelint.mjs` + `tools/timelint.mjs` (new), `sw.js`; tests: `tests/tools.test.mjs` (the P41-A block: FZ, SW, TL; the v0.11.251 sanity pin widened for `frozenFails`; the moves), `tests/README.md`; docs: `project/tuning-notes.md` (new), `working-agreement.md` (RR, CO), `reference.md` (CO), `project/research/p41-measure.md` (repo only), `roadmap.md` (section 2's done line, the Order line, section 0's note; v0.11.272's done line moved, MD), `roadmap-retune.md` (the tools line, BD, HN), `roadmap-done-5.md`, `changelog-6.md` (0.11.250 moved), `restore-points-4.md` (0.11.240 moved), the four docs, `history-54.md`.
+- **What:** see the version line. No What's new line: nothing a player sees changed.
+- **Checks:** tools, tests and docs only (rule 2): the models test on 6 games each (Careful, the Completionist, the Cultivator, the Completionist's kept pass: skillWatch 0), the times lint, the tools test (654 passed) and `bash tools/check.sh quick`: exit 0, 955.5 s (skillWatch 0 silent changes for every watched model, the kept passes too). Before it the tools test stopped on old pins (PG, the established pattern): `roadmap-retune.md`'s pinned block (the tools line's status went to a new "Status notes" heading at its end instead), the 11 handover pins re-pinned to v0.11.271 (the oldest kept), P39-A's restore-point range and P40-A's done line (now in `roadmap-done-5.md`). **How it touches the rest:** the FROZEN lines print nothing while `frozen` is empty; `frozenLines` runs in `sanity.mjs` for the first time in the next full check (its code is in the tools test, `sanity.mjs` syntax-checked); skillWatch and the lint are log only and change no number; the bots' choices are as before (`see()` only reads what a step returns).
+- **Opus:** none (rule 9: no game logic, balance or story text). **Fable:** none.
+
 ## Moved from the handover in v0.11.275 (word for word)
 
 *(the version line as it stood)*
