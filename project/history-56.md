@@ -2,6 +2,27 @@
 
 Started 2026-11-26 (v0.11.278), when `history-55.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-55.md` … `history.md`.
 
+## Moved from the handover in v0.11.280 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-26 (Europe/Budapest). **Version:** 0.11.279 (`sw.js` VERSION `bone-ash-0.11.279`): **5b's texts (P47-B, the owner 2026-11-26 08:10: "P-47b go"; the drafts D1, 08:19: "D1 go"; the build's stop after the Opus cold review RV-A, 09:28: "RV-A go"; its drafts E1, 09:34: "E1 go"):** **YM-3** (`act1_fallout.js` `YM_PAIRS`, `ymPair`: Ya's manners at story day 9's supper in three pairs of words taken in turn by the supper text's own day index, the old pair first; the same two choices and gains; `week.js` `AGAIN_EVE` knows every label; the same pair again in one Coil 2.06 / 2.67 → 0 a game for Careful / the Sociable); **L3** (`game.js` `postureCount`, `SAY_TEXT.holdNowMany` and `tagNowMany`, drawn by `main.js` when two or more foes posture: 0.65 / 8.05 / 6.34 rounds a game for Careful / the Completionist / the Rusher); **PN-f** (7 text notes fixed: the journey talks' coat, limp, path and basket, Ya's herb-girl lines after the spring (`YA_KISSED`), the bracket fungus, the honeycomb supper, the slopes' honest answer on a later pick (`lines.js` `lastReply`)); **PN-x** (4 closed as accepted: 0 or near 0 in 600 games); **FC-w closed as accepted** (FC-o kept; FC-w2, the whole village sees it, open, options later). **RV-A** (the review's M1, M2, L1–L6; L7 accepted): `ya_romance`'s opening, five more place words in the talks, Ya's sulk, the blush line, the plural tag, two cuts, the remark's rule shared; TG1–TG6. Measured: `project/research/p47-measure.md`. **Found while building (open, options later):** the talks' last place words in the Drowned Wood (TG1's seven listed lines, not the two similes), HS (b) and (c) (the bruised text's order, a third week-2 visit). **Next push:** open, options later (SF; then systems, Act 2, art, later).
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** 5b's texts (v0.11.279: YM-3, L3, PN-f, PN-x, FC-w closed; RV-A); 5b's first push (v0.11.278: NF-g, PK, LT, TC kept, PN-c); DF, the death farm, closed as accepted (v0.11.277). Open, options later (on the roadmap: `roadmap.md`'s Order line): **SF** (found in v0.11.278: one-paragraph fold texts and `shownEarlierDay`), the v0.11.279 finds (the talks' last place words in the Drowned Wood, HS (b) and (c), FC-w2; `roadmap-e.md`), then systems, Act 2, art, later; the "tuned up to" note (TU, `roadmap-retune.md`) after the retune. *(The entry as it stood, word for word, in `history-56.md`.)*
+
+*(from Decided in chat)*
+
+- **v0.11.277: P45-A (the owner 2026-11-25 21:13: "P45-a go"); B3 (23:17: "b3", the build's stop); P45-D (23:34: "d").** The options as laid out in chat (`claude/p45-options.md`, the project doc): first P45-A 🟢 R42 (a death adds by the days its Coil lasted, full from 42); P45-B 🟡 R28; P45-C 🟠 R7; **P45-D 🔴 (recommended)** close as accepted; not offered S1, CP, R14, LV. P45-A picked and built; the build's stop (MR, TK, SW, PN): B1 🟢 go on with the tests' bots counted in full (TB1 + SW1) and the pins (PN); B2 🟡 go on with the test bots under R42; **B3 🔴 (picked, recommended)** hold. Again with MR: P45-A 🟢 R42 + TB1 + SW1 + PN; P45-C 🟠 R7 + the same; **P45-D 🔴 (picked, recommended)** close as accepted, the R42 diff kept aside; not offered R28 (not measured on MR's models).
+
+## v0.11.277 — DF, the death farm, closed as accepted (P45-D)
+
+- **Files:** docs: `project/roadmap-retune.md` (TU left; the v0.11.277 note), `roadmap-done-6.md` (the v0.11.277 move: v0.11.276's done line, the #53 line and DF's status note with the closing note), `roadmap.md` (section 2's done line, the Order line, section 0's note), `tuning-notes.md` (Accepted as they are: DF; the logs line), this file, `history-55.md`, `changelog.md`, `changelog-6.md` (0.11.253 moved), `restore-points.md`, `restore-points-4.md` (0.11.244 moved), `project/research/p45-measure.md` and `p45-r42.patch` (repo only); tests: `tests/tools.test.mjs` (the P45-D block; older docs pins taking the moves), `tests/README.md`; `sw.js`.
+- **What:** see the version line. No What's new line: nothing a player sees changed (the R42 build was never pushed).
+- **Checks:** docs and tests only (rule 2): the tools test (687 passed; before it 8 docs pins of earlier moves: the oldest-kept handover version, now v0.11.275, and the restore points' range, re-pinned (PG, the established pattern)) and `bash tools/check.sh quick`: **exit 0, 10 m 17 s**. **How it touches the rest:** no game, tool or bot file changed, so no number can move; the measuring ran on scratch copies and the held local build only (`p45-measure.md`).
+- **Opus:** none (rule 9: no game logic, balance or story text pushed). **Fable:** none.
+
 ## Moved from the handover in v0.11.279 (word for word)
 
 *(the version line as it stood)*
