@@ -258,7 +258,7 @@ They've followed you.`,
     /* ---------- foraging ---------- */
     wild_forage: {
         id: 'wild_forage', title: 'Foraging', art: 'forage', place: `${P} — the banks`,
-        text: (g) => `By now you know where this bank keeps its food. ${pantry(g)}`,
+        text: 'By now you know where this bank keeps its food.', // v0.11.283 (owner pick RV-A, M1-c): the pantry cut: drawn above the card's result now (MT-d), it was read before the card, the camp's own after it
         choices: [
             { text: 'The mushroom ring under the black oaks.', show: daily('ring'), check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 50, do: (g) => { markDaily(g, 'ring'); addItem(g, 'jade_bracket', 3); return [`+3 Jade bracket fungus. ${DR_RING(g)}`]; }, failDo: (g) => { markDaily(g, 'ring'); addItem(g, 'jade_bracket', 1); g.james.hp -= 2; return ['One sound cap, and one that only looked it: +1 Jade bracket, −2 HP.']; }, to: 'wild_forage' },
             { text: 'River cress in the shallows.', show: daily('cress'), check: { skill: 'GU', dc: 2 }, time: 40, do: (g) => { markDaily(g, 'cress'); addItem(g, 'river_cress', 4); return [`+4 River cress. ${DR_CRESS(g)}`]; }, failDo: (g) => { markDaily(g, 'cress'); addItem(g, 'river_cress', 2); return [`${DR_CRESS_F(g)} +2 River cress anyway.`]; }, to: 'wild_forage' },

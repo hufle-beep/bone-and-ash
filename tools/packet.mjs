@@ -6,7 +6,7 @@
 //      sample states, and the next screen's opening with its labels
 //   C2 when it shows: the code's show / req conditions (once a day where it has a daily key), and the days, hours and picks per
 //      game it had in a bot run (random task-mode games, as tools/snap.mjs plays)
-//   C3 task mode: is the text drawn (a story screen, a hub above its cards, a work or door menu whose text is never drawn), and
+//   C3 task mode: is the text drawn (a story screen, a hub above its cards, a work or door menu's own text once a Coil since v0.11.283, MT-d; an emptied one never), and
 //      is the label drawn (a hub's entry to a work menu is not: the cards sit under the menu's group label)
 //   C4 forms: the text and every label for the cat, the great root-kin and the woman, side by side where they differ
 //   C5 the whole text as drawn (on the first day and a later one; and as seen in play)
@@ -157,12 +157,17 @@ export function byForms(x, samples = SAMPLES) {
 }
 const formTag = (forms, later) => `${forms.length === 3 ? 'all forms' : forms.join('/')}${later ? ', later days' : ''}`;
 
+/** v0.11.283 (MT-d): a menu with a text of its own (a function, or a string with words); P9A's emptied menus have none. */
+const menuHasText = (id) => { const t = SCENES[id]?.text; return typeof t === 'function' || !!String(t || '').trim(); };
 /** C3: how the scene is drawn in task mode. */
 export function sceneStatus(id, hubs = TASK_HUBS) {
     for (const [h, cfg] of Object.entries(hubs)) {
         if (h === id) return { kind: 'hub', drawn: true, hub: h, words: 'task hub: its text is drawn above the cards' };
-        if ((cfg.menus || {})[id]) return { kind: 'work menu', drawn: false, hub: h, group: cfg.menus[id].label, words: `work menu of ${h} (the group "${cfg.menus[id].label}"): its text is NEVER drawn in task mode; each option is a card (label, then the result)` };
-        if ((cfg.doorMenus || {})[id]) return { kind: 'door menu', drawn: false, hub: h, group: cfg.doorMenus[id].label, words: `door menu of ${h} (the group "${cfg.doorMenus[id].label}"): its text is never drawn; each option is a door card that opens its scene` };
+        // v0.11.283 (owner pick P51-A, MT-d): a menu's own text is drawn once a Coil per text, above the first card's result
+        // (tasks.js menuText); an emptied one (P9A) has none
+        const shown = menuHasText(id);
+        if ((cfg.menus || {})[id]) return { kind: 'work menu', drawn: shown, hub: h, group: cfg.menus[id].label, words: `work menu of ${h} (the group "${cfg.menus[id].label}"): ${shown ? 'its text is drawn once a Coil (a new opening sentence is a new text), above the first card\'s result' : 'its text is empty (never drawn)'}; each option is a card (label, then the result)` };
+        if ((cfg.doorMenus || {})[id]) return { kind: 'door menu', drawn: false, hub: h, group: cfg.doorMenus[id].label, words: `door menu of ${h} (the group "${cfg.doorMenus[id].label}"): its text is never drawn (v0.11.283, RV-A M2-x: under the scene it opens it read out of order); each option is a door card that opens its scene` };
     }
     return { kind: 'story', drawn: true, words: 'story screen: its text is drawn' };
 }

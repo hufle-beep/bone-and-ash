@@ -4,7 +4,7 @@
 
 ## How to read (cheaply)
 - Start from `git diff` of the push and the context packet of its changed lines (`node tools/packet.mjs <scene:index>…`, v0.11.180, CP1): the whole text by form, every label on the screen with when it shows (code, a bot run's days and hours) and whether task mode draws it, the result and the screen after. Beyond it read **only the scenes around each change** (grep, line ranges), never whole story files.
-- **Task mode first:** a work menu's text is never drawn and a hub's entry to a menu is no label (the packet's C3); judge a line as the player meets it (v0.11.179 H, R11).
+- **Task mode first:** a work menu's text shows once a Coil and a hub's entry to a menu is no label (the packet's C3); judge a line as the player meets it (v0.11.179 H, R11).
 - Render changed texts in the three forms (cat, great root-kin, human) and on the days and flags their branches use, in a scratch copy; never edit the working copy.
 - Planted faults: write them as `faults.json` and run `node tools/mutate.mjs faults.json --jobs 2`; report the missed ones as a test gap.
 

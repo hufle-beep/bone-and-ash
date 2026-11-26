@@ -1,0 +1,11 @@
+[
+ {"id":"F1","file":"js/core/tasks.js","find":"    g.flags[k] = true;\n    return [t];","replace":"    return [t];","note":"MT: the menu's text every time (the flag never set)"},
+ {"id":"F2","file":"js/core/tasks.js","find":" if (g.scene === card.menu) lines.push(...menuText(g, scenes, card.menu)); }","replace":" }","note":"MT: a door menu's text dropped (the Wilds' Explore)"},
+ {"id":"F3","file":"js/core/tasks.js","find":"`mt:${menu}#${fnv1a(menuFirst(t))}`","replace":"`mt:${menu}#${fnv1a(t)}`","note":"MT: keyed by the whole text (the pantry's counts make a new text)"},
+ {"id":"F4","file":"js/core/tasks.js","find":"lines.push(...goTo(g, scenes, card.menu), ...menuText(g, scenes, card.menu)); // MT-d","replace":"lines.push(...goTo(g, scenes, card.menu)); // MT-d","note":"MT: a work menu's text dropped"},
+ {"id":"F5","file":"js/core/game.js","find":"    if (g.flags[k] === day) return [];","replace":"    if (g.flags[k]) return [];","note":"CP: the cap line once a Coil, not once a day"},
+ {"id":"F6","file":"js/core/game.js","find":"out.push(...capLine(g, 'GU at T10 L10 (cap)'))","replace":"out.push('GU at T10 L10 (cap)')","note":"CP: GU's cap line on every result again"},
+ {"id":"F7","file":"js/core/tasks.js","find":"if (stop === 'shut' && hub && TASK_HUBS[hub] && end != null)","replace":"if (stop === 'shut' && end != null)","note":"SU: the evening named off a task hub too"},
+ {"id":"F8","file":"js/core/meditate.js","find":"sitStopText(r.stop, { hub, end: g.minutes })","replace":"sitStopText(r.stop, { hub, end: g.minutes - 60 })","note":"SU: the result names the wrong hour"},
+ {"id":"F9","file":"js/core/tasks.js","find":".split(/(?<=[.!?])[\"*]*\\s+/)[0]","replace":".split(/\\n/)[0]","note":"MT: the key from the first line, not the first sentence"}
+]

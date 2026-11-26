@@ -2,6 +2,28 @@
 
 Started 2026-11-26 (v0.11.281), when `history-56.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-56.md` … `history.md`.
 
+## Moved from the handover in v0.11.283 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-26 (Europe/Budapest). **Version:** 0.11.282 (`sw.js` VERSION `bone-ash-0.11.282`): **FC-w2, the village sees the first flight (P50-A, the owner 2026-11-26 15:44: "P50-a go"; the drafts D1, 16:47: "D1 go"):** a canon call, FC-o replaced: in Ashfall the whole street now watches James's first flight (`first_flight`'s village paragraphs, Fable's run P), and a new world flag **`sky_flew`** (set by the flight in Ashfall, reset with each Coil, carried into Act 1) gives nine later lines their flight version (`flight_texts.js` `FW2`: the collectors' street, Old Wen's rung, the fungus return, Lu Han's report, Wen's realm lesson; Act 1's tea, the Return's street, Wen's warning, Shen Qiu; Fable's runs P and A). The read first (`project/research/p50-measure.md`: 100 / 100 / 100 / 0 / 68 / 0 games fly in the village). Cold review on Opus: no High; M1, M2, L1 fixed in the reviewer's wording, L2 a cut; planted faults 16 of 16. **Step 5b done.** **Next push:** open, options later (step 6, systems: G1 first, `roadmap-open.md`).
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** FC-w2, the village sees the first flight (v0.11.282): step 5b done; 5b's measured items (v0.11.281); the open roadmap checked and ordered (v0.11.280: `roadmap-open.md`). Open, options later, in the order of **`roadmap-open.md`**: step 6, systems (G1–G8, G1 first), then Act 2, art, later. *(The entry as it stood, word for word, in `history-57.md`.)*
+
+*(from Decided in chat)*
+
+- **v0.11.280: RM-A (the owner 2026-11-26 11:58: "RM-a go").** The owner 11:54: "check and order any dangling/unordered open items to the open roadmap items. Create and update the new open roadmap. Then share it with me, with time estimates." The options as laid out in chat (`claude/p48-options.md`, the project doc, with the draft): **RM-A 🟢 (picked, recommended)** DG (SF placed) + FL (the three finds listed) + ST (the stale marks closed) + BN (step 6 in eight bundles) + ES (the estimates) with a new `roadmap-open.md`; RM-B 🟡 the same without the new doc; RM-C 🟠 DG + ES; RM-D 🔴 nothing in the repo.
+
+## v0.11.280 — The open roadmap checked and ordered (RM-A)
+
+- **Files:** docs: `project/roadmap-open.md` (new), `roadmap.md` (section 2b: SF and the finds; the Order line's estimates and pointer; section 0's note), `roadmap-e.md` (the repeats line's closing note), `roadmap-retune.md` (the status note's), `roadmap-time.md` (no open line), this file, `history-56.md`, `changelog.md`, `changelog-6.md` (0.11.257 moved), `restore-points.md`, `restore-points-4.md` (0.11.248 moved); tests: `tests/tools.test.mjs` (the RM-A block; the docs pins re-pinned to the moves), `tests/README.md`; `sw.js`.
+- **What:** see the version line. No What's new line: nothing a player sees changed.
+- **Checks:** docs and tests only (rule 2): the tools test (727 passed; before it, the docs pins of this push's moves re-pinned, the established pattern: the oldest-kept handover version v0.11.278, MD's tails 27, the restore points' range, three H2 pins) and `bash tools/check.sh quick`: **exit 0, 880.9 s**. **How it touches the rest:** no game, tool or bot file changed, so no number can move; the new doc is pointers only, so a later move of a line needs its pointer kept (the RM-A block checks each step's pointer files exist and SF's line is open in section 2b).
+- **Opus:** none (rule 9: no game logic, balance or story text). **Fable:** none.
+- **Scope note:** the options counted ten stale marks; section 5's "Docs and tests" line was already marked done in v0.11.176 (its last note, `rt_serpent_forced`, log only), so nine closed.
+
 ## Moved from the handover in v0.11.282 (word for word)
 
 *(the version line as it stood)*

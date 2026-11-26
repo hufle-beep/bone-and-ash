@@ -10,7 +10,7 @@ import { CONDENSE_SIT_COST } from './formulas.js';
 import { goTo, checkDeath, choose, choiceOpen } from './story.js';
 import { btTarget, MER_LINES, lineWindow, lineWait, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
-import { BT_TASK, SIT_TASK, QI_TASK, QI_MINUTES, qiNotFull, qiFed, sitOpen, merLineTask, merLineChoice, isQueueScreen, sitLoop, sitLoopPlan, SIT_STOP_TEXT, sitSummary } from './tasks.js';
+import { BT_TASK, SIT_TASK, QI_TASK, QI_MINUTES, qiNotFull, qiFed, sitOpen, merLineTask, merLineChoice, isQueueScreen, sitLoop, sitLoopPlan, SIT_STOP_TEXT, sitStopText, sitSummary } from './tasks.js';
 const hrs = (m) => (m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`);
 
 /** No meditating here: urgent moments and screens that are already about it. */
@@ -65,7 +65,7 @@ export function medCards(g, scenes) {
     else out.push({ ...sit, id: 'med:sit', ...((sit.open || sit.late) && sitOpen(g, scenes) ? { task: SIT_TASK } : {}) }); // v0.11.12: queueable on a task screen with no Cultivate of its own
     if (sit.open && !sit.late && !sitUseless(g) && !hubShut) { // v0.11.64 (owner 02:07, pick C1): sit after sit until the limit; shown when two sits or more fit
         const p = sitLoopPlan(g, scenes);
-        if (p.sits >= 2) out.push({ id: 'med:sitall', label: `Cultivate until the limit: ${p.sits} sits, ${hrs(p.minutes)}, ${p.qi} Qi → Saturation ${p.saturation}% (${SIT_STOP_TEXT[p.stop] || 'then it stops'}).`, tag: `${p.qi} Qi`, open: true, minutes: p.minutes, plan: p });
+        if (p.sits >= 2) out.push({ id: 'med:sitall', label: `Cultivate until the limit: ${p.sits} sits, ${hrs(p.minutes)}, ${p.qi} Qi → Saturation ${p.saturation}% (${sitStopText(p.stop, { hub: g.scene, end: g.minutes + p.minutes })}).`, tag: `${p.qi} Qi`, open: true, minutes: p.minutes, plan: p });
     }
     if (qiNotFull(g)) { // v0.11.46 (owner 19:26, pick Q1): recover Qi by meditating, an hour at the resting rate
         const fed = qiFed(g); // v0.11.47 (the Fable review of v0.11.46): at Fed 0 there is no regen, so it is locked with the reason
@@ -90,9 +90,10 @@ export function runMed(g, scenes, id) {
     if (!canMeditate(g, scenes)) throw new Error('Not here');
     const back0 = g.scene;
     if (id === 'med:sitall') { // v0.11.64 (C1): each sit exactly one tap of the sit card
+        const hub = g.scene;
         const r = sitLoop(g, scenes);
         if (!r.sits) throw new Error('No sit possible');
-        return { lines: [`${r.sits} sits, ${hrs(r.minutes)}, ${r.qi} Qi: Saturation ${r.saturation}% (${SIT_STOP_TEXT[r.stop] || 'then it stops'}).`, ...sitSummary(r.lines)], moved: g.scene !== back0 };
+        return { lines: [`${r.sits} sits, ${hrs(r.minutes)}, ${r.qi} Qi: Saturation ${r.saturation}% (${sitStopText(r.stop, { hub, end: g.minutes })}).`, ...sitSummary(r.lines)], moved: g.scene !== back0 };
     }
     if (id === 'med:sit') {
         const r = condense(g);

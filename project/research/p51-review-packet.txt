@@ -1,0 +1,518 @@
+## clinic — work menu of ashfall (the group "Clinic"): its text is drawn once a Coil (a new opening sentence is a new text), above the first card's result; each option is a card (label, then the result)
+when (C2): not seen in the bot run
+led in by (C6): ashfall[5] "Run a clinic: the sick and the hurt line up at the well."
+[text · all forms]
+¶1 Word of the boy has gone round. Now there is a line at the well: an old man whose hand has gone purple, a girl with a burn, a hunter with a wound that smells wrong, a mother with a baby that will not stop crying.
+¶2 The fungus is gone. You have two hands, a bone lancet, boiling water and a doctorate. They will have to do.
+
+> [0] Treat them with the jade bracket. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): show: (g) => hasItem(g, 'jade_bracket') · check: GU · seen in 68 games: day 4–25, hour 6–10, Coil 0:2–0:22, picked up to 2× a game
+  result (C1, success, all forms): Nobody goes home worse, and most go home mended. Ashfall is keeping count.
+  result (C1, failure, all forms): Most of them. Not the hunter. He thanks you gravely anyway, which is worse.
+  then (C1): ashfall: "Morning. Ashfall is up, and already at work. The tribute is one day off. The hammerspace holds no food. Infinite space, …" [its labels: Visit Old Wen. / Go to the coughing house. A child is sick. / Hunt the ironhide boar past the oak hollow. / Bone workshop: make things the village needs. / Drill the village hunters. They'll be standing nex… / Hunt beyond the oak hollow. / Eat at the communal pot. / Cultivate behind the shrine: one sit, 10 Qi. / and 5 more]
+  result (C1, seen in play): Word of the boy has gone round. Now there is a line at the well: an old man whose hand has gone purple, a girl with a burn, a hunter with a wound that smells wrong, a mother with a baby that will not stop crying.
+
+You have jade bracket in the hammerspace. Fifteen years of mycology, and it comes down to a stone well and a queue. A week's work: 31 h 44 min in all, 21 h 59 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): Word of the boy has gone round. Now there is a line at the well: an old man whose hand has gone purple, a girl with a burn, a hunter with a wound that smells wrong, a mother with a baby that will not stop crying.
+
+You have jade bracket in the hammerspace. Fifteen years of mycology, and it comes down to a stone well and a queue. A week's work: 39 h 40 min in all, 31 h 12 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): The day's sit: Word of the boy has gone round. Now there is a line at the well: an old man whose hand has gone purple, a girl with a burn, a hunter with a wound that smells wrong, a mother with a baby that will not stop crying.
+
+You have jade bracket in the hammerspace. Fifteen years of mycology, and it comes down to a stone well and a queue. A week's work: 39 h 40 min in all, 30 h 16 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+
+> [1] Treat them with what you have. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: GU · seen in 200 games: day 4–41, hour 6–12, Coil 0:2–0:22, picked up to 4× a game
+  result (C1, success, all forms): Clean water, a sharp lancet, and more confidence than the doctorate strictly covers. It holds.
+  result (C1, failure, all forms): You do what two hands can. The line was longer than that.
+  then (C1): as [0]
+  result (C1, seen in play): Word of the boy has gone round. Now there is a line at the well: an old man whose hand has gone purple, a girl with a burn, a hunter with a wound that smells wrong, a mother with a baby that will not stop crying.
+
+The fungus is gone. You have two hands, a bone lancet, boiling water and a doctorate. They will have to do. A week's work: 39 h 40 min in all, 32 h 20 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): The day's sit: Word of the boy has gone round. Now there is a line at the well: an old man whose hand has gone purple, a girl with a burn, a hunter with a wound that smells wrong, a mother with a baby that will not stop crying.
+
+The fungus is gone. You have two hands, a bone lancet, boiling water and a doctorate. They will have to do. A week's work: 36 h 3 min in all, 26 h 12 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): Breakfast: Barley and bean stew, ladled by a woman who addresses you as "honoured guest" in the tone of someone who has not yet ruled on whether you are one: +25 satiety. The day's sit: Word of the boy has gone round. Now there is a line at the well: an old man whose hand has gone purple, a girl with a burn, a hunter with a wound that smells wrong, a mother with a baby that will not stop crying.
+
+The fungus is gone. You have two hands, a bone lancet, boiling water and a doctorate. They will have to do. A week's work: 39 h 40 min in all, 30 h 46 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+
+> [2] Not today. Back to the village. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): not seen in the bot run
+  result (C1, taken, all forms): (no line)
+  then (C1): as [0]
+
+## drill — work menu of ashfall (the group "Militia"): its text is drawn once a Coil (a new opening sentence is a new text), above the first card's result; each option is a card (label, then the result)
+when (C2): not seen in the bot run
+led in by (C6): ashfall[7] "Drill the village hunters. They'll be standing next to you at the post."
+[text · all forms]
+¶1 Eight hunters: two of them white-bearded and old enough to be bowed to in the street, and one of them twelve. They have bows, boar spears, and the faces of men who have knelt to the Crimson Lotus every year of their lives.
+¶2 You are no soldier. You are, however, a man who has just spent several days learning to stay alive against things with more teeth than he has. That much you can teach.
+
+> [0] Teach them to fight together: shields of bone, spears behind, nobody alone. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: GU · seen in 200 games: day 4–38, hour 6–12, Coil 0:2–0:22, picked up to 4× a game
+  result (C1, success, all forms): By the end the eight of them move as one animal. Not a graceful animal. But one.
+  result (C1, failure, all forms): Two of them hit each other. The apologies are faultless.
+  then (C1): ashfall: "Morning. Ashfall is up, and already at work. The tribute is one day off. The hammerspace holds no food. Infinite space, …" [its labels: Visit Old Wen. / Go to the coughing house. A child is sick. / Hunt the ironhide boar past the oak hollow. / Bone workshop: make things the village needs. / Drill the village hunters. They'll be standing nex… / Hunt beyond the oak hollow. / Eat at the communal pot. / Cultivate behind the shrine: one sit, 10 Qi. / and 5 more]
+  result (C1, seen in play): A week's work: 32 h 26 min in all, 24 h 41 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): Breakfast: Barley and bean stew, ladled by a woman who addresses you as "honoured guest" in the tone of someone who has not yet ruled on whether you are one: +25 satiety. The day's sit: A week's work: 37 h 20 min in all, 27 h 51 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): A week's work: 37 h 20 min in all, 27 h 42 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+
+> [1] Spar with the best of them, and let Yuki show them what speed looks like. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: GU · seen in 200 games: day 4–38, hour 6–12, Coil 0:2–0:22, picked up to 5× a game
+  result (C1, success, cat): You win most of yours. Yuki wins all of hers. Yuki Fight held at James's GU (T1 L1)
+  result (C1, failure, all forms): The twelve-year-old tips you onto your back, hauls you up again, and begs pardon in full form for the disrespect. Of the two, the pardon hurts more. −2 HP. Yuki Fight held at James's GU (T1 L1)
+  result (C1, success, great): You win most of yours. Yuki is conceded hers with a bow, and demonstrates anyway, so that they know what was spared. Yuki Fight held at James's GU (T1 L1)
+  result (C1, success, human): You win most of yours. Yuki wins all of hers in a long dress, and hands each man back his spear. Yuki Fight held at James's GU (T1 L1)
+  then (C1): as [0]
+  result (C1, seen in play): Breakfast: thornback egg, cooked. +15 satiety. The day's sit: Eight hunters: two of them white-bearded and old enough to be bowed to in the street, and one of them twelve. They have bows, boar spears, and the faces of men who have knelt to the Crimson Lotus every year of their lives.
+
+You are no soldier. You are, however, a man who has just spent several days learning to stay alive against things with more teeth than he has. That much you can teach. A week's work: 30 h 20 min in all, 20 h 36 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): Eight hunters: two of them white-bearded and old enough to be bowed to in the street, and one of them twelve. They have bows, boar spears, and the faces of men who have knelt to the Crimson Lotus every year of their lives.
+
+You are no soldier. You are, however, a man who has just spent several days learning to stay alive against things with more teeth than he has. That much you can teach. A week's work: 30 h 20 min in all, 21 h 31 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): Breakfast: Barley and bean stew, ladled by a woman who addresses you as "honoured guest" in the tone of someone who has not yet ruled on whether you are one: +25 satiety. The day's sit: Eight hunters: two of them white-bearded and old enough to be bowed to in the street, and one of them twelve. They have bows, boar spears, and the faces of men who have knelt to the Crimson Lotus every year of their lives.
+
+You are no soldier. You are, however, a man who has just spent several days learning to stay alive against things with more teeth than he has. That much you can teach. A week's work: 30 h 20 min in all, 21 h 1 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+
+> [2] Not today. Back to the village. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): not seen in the bot run
+  result (C1, taken, all forms): (no line)
+  then (C1): as [0]
+
+## fo_clinic — work menu of fo_ashfall (the group "Clinic"): its text is drawn once a Coil (a new opening sentence is a new text), above the first card's result; each option is a card (label, then the result)
+when (C2): not seen in the bot run
+led in by (C6): fo_ashfall[4] "Run the clinic at the well."
+[text · all forms]
+¶1 The line at the well is longer than it was before the tribute, and it has changed: fewer fevers, more hands torn on stakes, a scalp split by a falling beam, a boy who tried to put a spear's edge on a scythe.
+¶2 They wait by age, eldest first, and will not alter it even with the boy bleeding at the back. When you object, an old woman explains the matter to you, kindly, as one explains rain to a child: the order is the order.
+¶3 You have no fungus left. You have clean water, a lancet of bone and fifteen years of reading about infection.
+
+> [0] Work through the line properly. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: GU · seen in 200 games: day 44–61, hour 6–11, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, success, all forms): Everyone walks home. The boy with the scythe cut goes last, being the youngest, and goes on his own feet.
+  result (C1, failure, all forms): Mostly. You'll check the split scalp again tonight.
+  then (C1): fo_ashfall: "Morning. Axes, hammers, and a work-chant kept going so that nobody has to think. 102 days until the Elder. The hammerspa…" [its labels: Build the bone palisade: stakes along the barley l… / Sit in council with Old Wen. / Drill the hunters. / Run the clinic at the well. / Find Mei Lin. / Pay your respects to Mei Lin's mother. / Somebody has been watching Ashfall from the ridge.… / Eat at the communal pot. / and 8 more]
+  result (C1, seen in play): The day's sit: The line at the well is longer than it was before the tribute, and it has changed: fewer fevers, more hands torn on stakes, a scalp split by a falling beam, a boy who tried to put a spear's edge on a scythe.
+
+They wait by age, eldest first, and will not alter it even with the boy bleeding at the back. When you object, an old woman explains the matter to you, kindly, as one explains rain to a child: the order is the order.
+
+You have no fungus left. You have clean water, a lancet of bone and fifteen years of reading about infection. A week's work: 37 h 20 min in all, 27 h 41 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): The day's sit: The line at the well is longer than it was before the tribute, and it has changed: fewer fevers, more hands torn on stakes, a scalp split by a falling beam, a boy who tried to put a spear's edge on a scythe.
+
+They wait by age, eldest first, and will not alter it even with the boy bleeding at the back. When you object, an old woman explains the matter to you, kindly, as one explains rain to a child: the order is the order.
+
+You have no fungus left. You have clean water, a lancet of bone and fifteen years of reading about infection. A week's work: 37 h 20 min in all, 27 h 36 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): The day's sit: A week's work: 33 h 57 min in all, 24 h 8 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+
+> [1] Treat the youngest first, and take the old woman's disapproval. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: GU · seen in 200 games: day 44–62, hour 6–12, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, success, all forms): The old woman watches you break the order as she would watch a temple burn. Mei Lin, passing with her basket, catches your eye and very nearly smiles.
+  result (C1, failure, all forms): You reach the boy first. It helps less than you wanted it to.
+  then (C1): as [0]
+  result (C1, seen in play): A week's work: 24 h 16 min in all, 15 h 41 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): The day's sit: A week's work: 30 h 20 min in all, 20 h 31 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): The day's sit: The line at the well is longer than it was before the tribute, and it has changed: fewer fevers, more hands torn on stakes, a scalp split by a falling beam, a boy who tried to put a spear's edge on a scythe.
+
+They wait by age, eldest first, and will not alter it even with the boy bleeding at the back. When you object, an old woman explains the matter to you, kindly, as one explains rain to a child: the order is the order.
+
+You have no fungus left. You have clean water, a lancet of bone and fifteen years of reading about infection. A week's work: 27 h 32 min in all, 17 h 44 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+
+> [2] Not today. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): not seen in the bot run
+  result (C1, taken, all forms): (no line)
+  then (C1): as [0]
+
+## fo_council — work menu of fo_ashfall (the group "Council"): its text is drawn once a Coil (a new opening sentence is a new text), above the first card's result; each option is a card (label, then the result)
+when (C2): not seen in the bot run
+led in by (C6): fo_ashfall[2] "Sit in council with Old Wen."
+[text · all forms]
+¶1 The council of Ashfall is seven old people at a table, drinking tea so weak that it is closer to a rumour of tea, and deciding whether forty houses live or die.
+¶2 The question before them is whether the children should be sent over the pass to the salt villages. It is debated in full form: each speaker stands, bows to Old Wen, sets out the case for and the case against, and sits. Nobody interrupts. Nobody raises a voice. A woman with three grandchildren on the list speaks for sending them, in a voice steady enough to hold up a roof.
+¶3 Old Wen turns to you. "The stranger will speak."
+[text · state: the long calendar's story day 9, day 1 of its sequences; the long calendar's story day 9, day 2 of its sequences; the long calendar's story day 9, day 3 of its sequences; the long calendar's story day 9, day 4 of its sequences; the long calendar's story day 9, day 5 of its sequences; the long calendar's story day 9, day 6 of its sequences; the long calendar's story day 9, day 7 of its sequences; the long calendar's story day 9, day 1 of its sequences, Ya not met; the long calendar's story day 9, day 2 of its sequences, Ya not met; the long calendar's story day 9, day 3 of its sequences, Ya not met; the long calendar's story day 9, day 4 of its sequences, Ya not met; the long calendar's story day 9, day 5 of its sequences, Ya not met; the long calendar's story day 9, day 6 of its sequences, Ya not met; the long calendar's story day 9, day 7 of its sequences, Ya not met: as the first, without ¶1, ¶2, ¶3, and with:]
++ Second council, on thinner tea. The matter of the children is closed: they stay. The salt villages would hand them to the Sect for less than Ashfall pays in tribute.
++ Today's business is the Old Tree. Each hunter at the table had the same tale from his grandfather. Once the forest's heart *sang*, and while it sang the beasts were mild and the herbs grew clean. Then the Sect came, in the days before it was called the Sect, and the song ended.
++ "Your cat," Old Wen says, "faces north in her sleep. As you do."
+[text · state: the long calendar's story day 10, day 1 of its sequences; the long calendar's story day 10, day 2 of its sequences; the long calendar's story day 10, day 3 of its sequences; the long calendar's story day 10, day 4 of its sequences; the long calendar's story day 10, day 5 of its sequences; the long calendar's story day 10, day 6 of its sequences; the long calendar's story day 10, day 1 of its sequences, Ya not met; the long calendar's story day 10, day 2 of its sequences, Ya not met; the long calendar's story day 10, day 3 of its sequences, Ya not met; the long calendar's story day 10, day 4 of its sequences, Ya not met; the long calendar's story day 10, day 5 of its sequences, Ya not met; the long calendar's story day 10, day 6 of its sequences, Ya not met: as the first, without ¶1, ¶2, ¶3, and with:]
++ Third council, and the last before the north path. The tea has gone beyond weak into memory: hot water, served with the full ceremony of tea. The map still lies on the table from this morning. Nobody has presumed to roll it up.
++ The business is short. Who answers for the palisade line. Who drills the line. Who keeps the well while the Bone-Maker is in the Blackroot with the herb-gatherer and the wild woman, and forty-five days stand on the tally. Each matter is stood for, bowed over and settled. Nobody says *if he comes back*. It sits at the table all the same, an eighth elder.
++ Then Old Hu rises, bows to Old Wen, and puts the question his hunters have put to him: why a man walks toward a dead tree while an Elder is walking toward his door.
++ Old Wen's good eye comes round to you. "The council has heard my reasons. The stranger may add his own, or keep them."
+
+> [0] Speak for the children: keep them close, keep them hidden, and build. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: GU · seen in 200 games: day 44–62, hour 6–11, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, success, all forms): The council bows to you, one elder after another, in order of age. It takes as long as it takes. Nobody hurries.
+  result (C1, failure, all forms): The words come out lame. The council takes the meaning regardless, and bows a finger's width short.
+  then (C1): fo_ashfall: "Morning. Axes, hammers, and a work-chant kept going so that nobody has to think. 102 days until the Elder. The hammerspa…" [its labels: Build the bone palisade: stakes along the barley l… / Sit in council with Old Wen. / Drill the hunters. / Run the clinic at the well. / Find Mei Lin. / Pay your respects to Mei Lin's mother. / Somebody has been watching Ashfall from the ridge.… / Eat at the communal pot. / and 8 more]
+  result (C1, seen in play): The day's sit: Second council, on thinner tea. The matter of the children is closed: they stay. The salt villages would hand them to the Sect for less than Ashfall pays in tribute.
+
+Today's business is the Old Tree. Each hunter at the table had the same tale from his grandfather. Once the forest's heart *sang*, and while it sang the beasts were mild and the herbs grew clean. Then the Sect came, in the days before it was called the Sect, and the song ended.
+
+"Your cat," Old Wen says, "faces north in her sleep. As you do." A week's work: 29 h 45 min in all, 19 h 57 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): Second council, on thinner tea. The matter of the children is closed: they stay. The salt villages would hand them to the Sect for less than Ashfall pays in tribute.
+
+Today's business is the Old Tree. Each hunter at the table had the same tale from his grandfather. Once the forest's heart *sang*, and while it sang the beasts were mild and the herbs grew clean. Then the Sect came, in the days before it was called the Sect, and the song ended.
+
+"Your cat," Old Wen says, "faces north in her sleep. As you do." A week's work: 28 h 21 min in all, 23 h 34 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): The day's sit: Second council, on thinner tea. The matter of the children is closed: they stay. The salt villages would hand them to the Sect for less than Ashfall pays in tribute.
+
+Today's business is the Old Tree. Each hunter at the table had the same tale from his grandfather. Once the forest's heart *sang*, and while it sang the beasts were mild and the herbs grew clean. Then the Sect came, in the days before it was called the Sect, and the song ended.
+
+"Your cat," Old Wen says, "faces north in her sleep. As you do." A week's work: 29 h 45 min in all, 19 h 56 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+
+> [1] Listen. Say nothing. Learn how these people decide things. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): seen in 200 games: day 44–62, hour 6–11, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, taken, all forms): Old Wen marks your silence, and approves of it. The surest way to be approved of here, it turns out, is to say nothing, formally.
+  then (C1): as [0]
+  result (C1, seen in play): The council of Ashfall is seven old people at a table, drinking tea so weak that it is closer to a rumour of tea, and deciding whether forty houses live or die.
+
+The question before them is whether the children should be sent over the pass to the salt villages. It is debated in full form: each speaker stands, bows to Old Wen, sets out the case for and the case against, and sits. Nobody interrupts. Nobody raises a voice. A woman with three grandchildren on the list speaks for sending them, in a voice steady enough to hold up a roof.
+
+Old Wen turns to you. "The stranger will speak." A week's work: 32 h 40 min in all, 27 h 6 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): A bone plough-share for the barley field: left unfinished when the stay ended; nothing comes of it. Treat them with what you have: left unfinished when the stay ended; nothing comes of it. Needles and fishhooks for half the village: left unfinished when the stay ended; nothing comes of it. The day's sit: The council of Ashfall is seven old people at a table, drinking tea so weak that it is closer to a rumour of tea, and deciding whether forty houses live or die.
+
+The question before them is whether the children should be sent over the pass to the salt villages. It is debated in full form: each speaker stands, bows to Old Wen, sets out the case for and the case against, and sits. Nobody interrupts. Nobody raises a voice. A woman with three grandchildren on the list speaks for sending them, in a voice steady enough to hold up a roof.
+
+Old Wen turns to you. "The stranger will speak." A week's work: 32 h 40 min in all, 23 h 46 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): Third council, and the last before the north path. The tea has gone beyond weak into memory: hot water, served with the full ceremony of tea. The map still lies on the table from this morning. Nobody has presumed to roll it up.
+
+The business is short. Who answers for the palisade line. Who drills the line. Who keeps the well while the Bone-Maker is in the Blackroot with the herb-gatherer and the wild woman, and forty-three days stand on the tally. Each matter is stood for, bowed over and settled. Nobody says *if he comes back*. It sits at the table all the same, an eighth elder.
+
+Then Old Hu rises, bows to Old Wen, and puts the question his hunters have put to him: why a man walks toward a dead tree while an Elder is walking toward his door.
+
+Old Wen's good eye comes round to you. "The council has heard my reasons. The stranger may add his own, or keep them." A week's work: 29 h 45 min in all, 21 h 47 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+
+## fo_drill — work menu of fo_ashfall (the group "Militia"): its text is drawn once a Coil (a new opening sentence is a new text), above the first card's result; each option is a card (label, then the result)
+when (C2): not seen in the bot run
+led in by (C6): fo_ashfall[3] "Drill the hunters."
+[text · all forms]
+¶1 The hunters are drawn up in two straight lines when you arrive, spears grounded, faces set. Old Hu, the head hunter, salutes you as he would a general, which alarms you more than any wolf has managed to.
+¶2 They have never fought anything that could think. They are about to.
+[text · state: the long calendar's story day 9, day 1 of its sequences; the long calendar's story day 9, day 2 of its sequences; the long calendar's story day 9, day 3 of its sequences; the long calendar's story day 9, day 4 of its sequences; the long calendar's story day 9, day 5 of its sequences; the long calendar's story day 9, day 6 of its sequences; the long calendar's story day 9, day 7 of its sequences; the long calendar's story day 10, day 1 of its sequences; the long calendar's story day 10, day 2 of its sequences; the long calendar's story day 10, day 3 of its sequences; the long calendar's story day 10, day 4 of its sequences; the long calendar's story day 10, day 5 of its sequences; the long calendar's story day 10, day 6 of its sequences: as the first, with:]
++ Ya watches from the woodpile, eating a raw turnip and heckling. Old Hu, with enormous dignity, declines to know that she exists.
+
+> [0] Run the line: bone in front, spears through the gaps, no one out on their own. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: GU · seen in 200 games: day 44–61, hour 6–11, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, success, all forms): The line closes, opens and closes again without a word spoken. One animal, grim and silent, with a great many spears.
+  result (C1, failure, all forms): A spear goes through a bone shield and all but through a cousin. Nobody laughs. Nobody here was ever going to.
+  then (C1): fo_ashfall: "Morning. Axes, hammers, and a work-chant kept going so that nobody has to think. 102 days until the Elder. The hammerspa…" [its labels: Build the bone palisade: stakes along the barley l… / Sit in council with Old Wen. / Drill the hunters. / Run the clinic at the well. / Find Mei Lin. / Pay your respects to Mei Lin's mother. / Somebody has been watching Ashfall from the ridge.… / Eat at the communal pot. / and 8 more]
+  result (C1, seen in play): The day's sit: A week's work: 32 h 26 min in all, 22 h 37 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): A week's work: 37 h 20 min in all, 29 h 49 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): The hunters are drawn up in two straight lines when you arrive, spears grounded, faces set. Old Hu, the head hunter, salutes you as he would a general, which alarms you more than any wolf has managed to.
+
+They have never fought anything that could think. They are about to. A week's work: 37 h 20 min in all, 29 h 46 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+
+> [1] Go a round with Yuki while they watch, and let them count what they missed. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: GU · seen in 200 games: day 44–62, hour 6–12, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, success, cat): Not a hunter breathes until it is over. Then Old Hu bows to the cat. Yuki Fight held at James's GU (T1 L1)
+  result (C1, failure, all forms): Yuki wins. Decisively. −2 HP. Yuki Fight held at James's GU (T1 L1)
+  result (C1, success, great): Not a hunter breathes until it is over. Then Old Hu bows to the great beast, from a distance he has plainly measured. Yuki Fight held at James's GU (T1 L1)
+  result (C1, success, human): Not a hunter breathes until it is over. Then Old Hu bows to Yuki, and to nobody else. Yuki Fight held at James's GU (T1 L1)
+  then (C1): as [0]
+  result (C1, seen in play): The day's sit: The hunters are drawn up in two straight lines when you arrive, spears grounded, faces set. Old Hu, the head hunter, salutes you as he would a general, which alarms you more than any wolf has managed to.
+
+They have never fought anything that could think. They are about to. A week's work: 23 h 20 min in all, 13 h 41 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): A bone plough-share for the barley field: left unfinished when the stay ended; nothing comes of it. Needles and fishhooks for half the village: left unfinished when the stay ended; nothing comes of it. Teach them to fight together: shields of bone, spears behind, nobody alone: left unfinished when the stay ended; nothing comes of it. Breakfast: Bean and barley stew, ladled out wordlessly and handed over with a short bow: +25 satiety. The day's sit: The hunters are drawn up in two straight lines when you arrive, spears grounded, faces set. Old Hu, the head hunter, salutes you as he would a general, which alarms you more than any wolf has managed to.
+
+They have never fought anything that could think. They are about to. A week's work: 23 h 20 min in all, 15 h 6 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): The day's sit: A week's work: 23 h 20 min in all, 13 h 36 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+
+> [2] Not today. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): not seen in the bot run
+  result (C1, taken, all forms): (no line)
+  then (C1): as [0]
+
+## fo_palisade — work menu of fo_ashfall (the group "Palisade"): its text is drawn once a Coil (a new opening sentence is a new text), above the first card's result; each option is a card (label, then the result)
+when (C2): not seen in the bot run
+led in by (C6): fo_ashfall[1] "Build the bone palisade: stakes along the barley line."
+[text · all forms]
+¶1 The hunters have laid out the line in chalk and string, dead straight, as though straightness were itself a defence. Here it may be. Everyone in Ashfall who can lift a mallet is standing along it, waiting for you to begin.
+¶2 The stakes rise to your singing, out of the earth and out of whatever old bone the hunters carry to you: jackal, boar, one long shin from a beast no one will put a name to. Every stake is paid for in Qi, and in a second coin as well: a little more of the man who is still astonished that he can do it.
+
+> [0] Sing a full stretch of the line. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: Convergence Use · seen in 200 games: day 44–60, hour 6–10, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, success, all forms): Palisade: 1/3 stretches. The stakes come up white and even, humming one note between them. The hunters lay a palm on the nearest, as on a doorpost.
+  result (C1, failure, all forms): Every other stake crumbles at a mallet's first tap. The hunters cut pine for the gaps, wordlessly, and the silence says the rest.
+  then (C1): fo_ashfall: "Morning. Axes, hammers, and a work-chant kept going so that nobody has to think. 102 days until the Elder. The hammerspa…" [its labels: Build the bone palisade: stakes along the barley l… / Sit in council with Old Wen. / Drill the hunters. / Run the clinic at the well. / Find Mei Lin. / Pay your respects to Mei Lin's mother. / Somebody has been watching Ashfall from the ridge.… / Eat at the communal pot. / and 8 more]
+  result (C1, seen in play): The day's sit: The hunters have laid out the line in chalk and string, dead straight, as though straightness were itself a defence. Here it may be. Everyone in Ashfall who can lift a mallet is standing along it, waiting for you to begin.
+
+The stakes rise to your singing, out of the earth and out of whatever old bone the hunters carry to you: jackal, boar, one long shin from a beast no one will put a name to. Every stake is paid for in Qi, and in a second coin as well: a little more of the man who is still astonished that he can do it. A week's work: 42 h 28 min in all, 32 h 39 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): A week's work: 46 h 40 min in all, 37 h 1 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): A week's work: 46 h 40 min in all, 39 h 21 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+
+> [1] Teach the hunters to set your stakes in pits, angled, the way the jackals taught you. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: GU · seen in 200 games: day 44–61, hour 6–10, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, success, all forms): Palisade: 1/3 stretches. Ugly pits, at the jackals' own angle. They will work, and nobody here asked for handsome.
+  result (C1, failure, all forms): Under a foot of soil the ground is solid stone. You find this out with a mattock, and with both wrists.
+  then (C1): as [0]
+  result (C1, seen in play): The day's sit: The hunters have laid out the line in chalk and string, dead straight, as though straightness were itself a defence. Here it may be. Everyone in Ashfall who can lift a mallet is standing along it, waiting for you to begin.
+
+The stakes rise to your singing, out of the earth and out of whatever old bone the hunters carry to you: jackal, boar, one long shin from a beast no one will put a name to. Every stake is paid for in Qi, and in a second coin as well: a little more of the man who is still astonished that he can do it. A week's work: 39 h 40 min in all, 29 h 58 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): The day's sit: The hunters have laid out the line in chalk and string, dead straight, as though straightness were itself a defence. Here it may be. Everyone in Ashfall who can lift a mallet is standing along it, waiting for you to begin.
+
+The stakes rise to your singing, out of the earth and out of whatever old bone the hunters carry to you: jackal, boar, one long shin from a beast no one will put a name to. Every stake is paid for in Qi, and in a second coin as well: a little more of the man who is still astonished that he can do it. A week's work: 39 h 40 min in all, 30 h 1 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+  result (C1, seen in play): The day's sit: The hunters have laid out the line in chalk and string, dead straight, as though straightness were itself a defence. Here it may be. Everyone in Ashfall who can lift a mallet is standing along it, waiting for you to begin.
+
+The stakes rise to your singing, out of the earth and out of whatever old bone the hunters carry to you: jackal, boar, one long shin from a beast no one will put a name to. Every stake is paid for in Qi, and in a second coin as well: a little more of the man who is still astonished that he can do it. A week's work: 39 h 40 min in all, 29 h 55 min still to go (Go on, from tomorrow morning; its result when it is done). → fo_ashfall
+
+> [2] Not now. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): not seen in the bot run
+  result (C1, taken, all forms): (no line)
+  then (C1): as [0]
+
+## rr_scout — work menu of rr_hub (the group "Scout"): its text is drawn once a Coil (a new opening sentence is a new text), above the first card's result; each option is a card (label, then the result)
+when (C2): not seen in the bot run
+led in by (C6): rr_hub[5] "Scout ahead with Ya."
+[text · all forms]
+¶1 Ya teaches tracking as she learned it herself: nose first.
+¶2 "Eyes lie," she says, crouched on the root with her face almost in the moss. "Ears lie. Nose doesn't. Wolf went by here before dawn. Pissed on that, see? Young male. Showing off." Another sniff. "And *that's* you."
+¶3 "Me?"
+¶4 "Way back, before the village: your camp, by the stream. The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. Weeks it took me, working out what you were."
+¶5 Further on, where the roots braid together, the moss runs greener along a line that points at the heart of the forest. "Something walks here at night," Ya says. "Not an animal. I don't follow it."
+
+> [0] Learn it properly. Nose in the moss and everything. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: GU · seen in 200 games: day 65–68, hour 6–18, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, success, all forms): "Eyes lie. Ears lie. Nose doesn't," says Ya, and holds your face down in the moss until you agree. You can smell wolf now. You will never again be able to stop smelling wolf. Ya is extremely proud of you.
+  result (C1, failure, all forms): You smell moss. Chiefly moss. Ya pats you on the head.
+  then (C1): rr_hub: "Morning. The root runs ahead of you, broad enough for a cart, rising and dipping across the forest floor like the backbo…" [its labels: Eat with the others. / Forage along the roots. / Hunt. / Scout ahead with Ya. / Put your hand flat on the root and listen. / Talk to Mei Lin. / Talk to Ya. / Train. / and 6 more]
+  result (C1, seen in play): Ya teaches tracking as she learned it herself: nose first.
+
+"Eyes lie," she says, crouched on the root with her face almost in the moss. "Ears lie. Nose doesn't. Wolf went by here before dawn. Pissed on that, see? Young male. Showing off." Another sniff. "And *that's* you."
+
+"Me?"
+
+"Way back, before the village: your camp, by the stream. The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. Weeks it took me, working out what you were."
+
+Further on, where the roots braid together, the moss runs greener along a line that points at the heart of the forest. "Something walks here at night," Ya says. "Not an animal. I don't follow it." "Eyes lie. Ears lie. Nose doesn't," says Ya, and holds your face down in the moss until you agree. You can smell wolf now. You will never again be able to stop smelling wolf. Ya is extremely proud of you. → rr_hub
+  result (C1, seen in play): Teach the hunters to set your stakes in pits, angled, the way the jackals taught you: left unfinished when the stay ended; nothing comes of it. Work through the line properly: left unfinished when the stay ended; nothing comes of it. Sing a full stretch of the line: left unfinished when the stay ended; nothing comes of it. "It's calling me. I think it was one of ours — my people's. I need to see it.": left unfinished when the stay ended; nothing comes of it. Treat the youngest first, and take the old woman's disapproval: left unfinished when the stay ended; nothing comes of it. Run the line: bone in front, spears through the gaps, no one out on their own: left unfinished when the stay ended; nothing comes of it. Ya teaches tracking as she learned it herself: nose first.
+
+"Eyes lie," she says, crouched on the root with her face almost in the moss. "Ears lie. Nose doesn't. Wolf went by here before dawn. Pissed on that, see? Young male. Showing off." Another sniff. "And *that's* you."
+
+"Me?"
+
+"Way back, before the village: your camp, by the stream. The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. Weeks it took me, working out what you were."
+
+Further on, where the roots braid together, the moss runs greener along a line that points at the heart of the forest. "Something walks here at night," Ya says. "Not an animal. I don't follow it." "Eyes lie. Ears lie. Nose doesn't," says Ya, and holds your face down in the moss until you agree. You can smell wolf now. You will never again be able to stop smelling wolf. Ya is extremely proud of you. → rr_hub
+
+> [1] "You followed me for weeks?" {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): seen in 200 games: day 65–68, hour 6–18, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, taken, all forms): "From the start. Your first camp, by the stream. The wolves weren't the only ones going round it." She shrugs. "You fed the cat first, so: not Sect. You were interesting. Most things aren't."
+  then (C1): as [0]
+  result (C1, seen in play): Sing a full stretch of the line: left unfinished when the stay ended; nothing comes of it. Treat the youngest first, and take the old woman's disapproval: left unfinished when the stay ended; nothing comes of it. Work through the line properly: left unfinished when the stay ended; nothing comes of it. "It's calling me. I think it was one of ours — my people's. I need to see it.": left unfinished when the stay ended; nothing comes of it. Listen. Say nothing. Learn how these people decide things: left unfinished when the stay ended; nothing comes of it. Ya teaches tracking as she learned it herself: nose first.
+
+"Eyes lie," she says, crouched on the root with her face almost in the moss. "Ears lie. Nose doesn't. Wolf went by here before dawn. Pissed on that, see? Young male. Showing off." Another sniff. "And *that's* you."
+
+"Me?"
+
+"Way back, before the village: your camp, by the stream. The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. Weeks it took me, working out what you were."
+
+Further on, where the roots braid together, the moss runs greener along a line that points at the heart of the forest. "Something walks here at night," Ya says. "Not an animal. I don't follow it." "From the start. Your first camp, by the stream. The wolves weren't the only ones going round it." She shrugs. "You fed the cat first, so: not Sect. You were interesting. Most things aren't." → rr_hub
+  result (C1, seen in play): Ya teaches tracking as she learned it herself: nose first.
+
+"Eyes lie," she says, crouched on the root with her face almost in the moss. "Ears lie. Nose doesn't. Wolf went by here before dawn. Pissed on that, see? Young male. Showing off." Another sniff. "And *that's* you."
+
+"Me?"
+
+"Way back, before the village: your camp, by the stream. The wolves weren't the only ones circling it. I smelled you every night." She grins without looking up. "You smell like lightning and soap. Nobody here smells like soap. Weeks it took me, working out what you were."
+
+Further on, where the roots braid together, the moss runs greener along a line that points at the heart of the forest. "Something walks here at night," Ya says. "Not an animal. I don't follow it." "From the start. Your first camp, by the stream. The wolves weren't the only ones going round it." She shrugs. "You fed the cat first, so: not Sect. You were interesting. Most things aren't." → rr_hub
+
+## rt_hunters — work menu of rt_ashfall (the group "Militia"): its text is drawn once a Coil (a new opening sentence is a new text), above the first card's result; each option is a card (label, then the result)
+when (C2): not seen in the bot run
+led in by (C6): rt_ashfall[2] "Drill the hunters one last time."
+[text · all forms]
+¶1 The hunters fall into line for you unasked. Eight of them, old boar spears in their fists, every face set like stone. None of them has ever stood against the Crimson Lotus. They have decided to try.
+¶2 From the fence Ya chews a grass stem and supplies commentary. "That one holds his spear like a broom. That one's afraid. That one's handsome but afraid. That one—"
+¶3 "Ya."
+¶4 "I'm *helping*."
+
+> [0] Drill them hard: line tight, spears set, a shoulder on either side of everyone. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: GU · seen in 200 games: day 102, hour 8–18, Coil 1:2–1:22, picked up to 3× a game
+  result (C1, success, all forms): By the end they move as one body. Whether one body is enough against an Elder, nobody asks aloud.
+  result (C1, failure, all forms): It never quite locks. Tomorrow they will stand all the same. That is the worst of it.
+  then (C1): rt_ashfall: "Morning. Tomorrow, Shen Qiu. The village works as frightened people work once they have agreed not to show it: carefully…" [its labels: Raise a palisade of bone along the north lane. / Drill the hunters again. Practice only. / Sit with the elders in council. / Find out where Ya has got to. You have a bad feeli… / Cultivate behind the shrine: one sit, 10 Qi. / Rest an hour. / Sit with Yuki. / Take tea with Old Wen. / and 5 more]
+  result (C1, seen in play): The hunters fall into line for you unasked. Eight of them, old boar spears in their fists, every face set like stone. None of them has ever stood against the Crimson Lotus. They have decided to try.
+
+From the fence Ya chews a grass stem and supplies commentary. "That one holds his spear like a broom. That one's afraid. That one's handsome but afraid. That one—"
+
+"Ya."
+
+"I'm *helping*." By the end they move as one body. Whether one body is enough against an Elder, nobody asks aloud. → rt_ashfall
+  result (C1, seen in play): Clean from first call to last. You call the turn and the whole line swings like a door on a good hinge. Nothing gained but sweat, formally acknowledged. → rt_ashfall
+  result (C1, seen in play): The hunters fall into line for you unasked. Eight of them, white bone spearheads on their shafts, every face set like stone. None of them has ever stood against the Crimson Lotus. They have decided to try.
+
+From the fence Ya chews a grass stem and supplies commentary. "That one holds his spear like a broom. That one's afraid. That one's handsome but afraid. That one—"
+
+"Ya."
+
+"I'm *helping*." By the end they move as one body. Whether one body is enough against an Elder, nobody asks aloud. → rt_ashfall
+
+> [1] Let Ya teach them how she hunts. What could go wrong. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): seen in 200 games: day 102, hour 8–18, Coil 1:2–1:22, picked up to 2× a game
+  result (C1, taken, all forms): One dislocated finger, two black eyes, and eight hunters who have begun to move like a thing that is hungry. The elders of Ashfall are gravely offended. It works.
+  then (C1): rt_ashfall: "Morning. Tomorrow, Shen Qiu. The village works as frightened people work once they have agreed not to show it: carefully…" [its labels: Raise a palisade of bone along the north lane. / Drill the hunters again. Practice only. / Sit with the elders in council. / Find out where Ya has got to. You have a bad feeli… / Cultivate behind the shrine: one sit, 10 Qi. / Rest an hour. / Sit with Yuki. / Take tea with Old Wen. / and 4 more]
+  result (C1, seen in play): The hunters fall into line for you unasked. Eight of them, white bone spearheads on their shafts, every face set like stone. None of them has ever stood against the Crimson Lotus. They have decided to try.
+
+From the fence Ya chews a grass stem and supplies commentary. "That one holds his spear like a broom. That one's afraid. That one's handsome but afraid. That one—"
+
+"Ya."
+
+"I'm *helping*." One dislocated finger, two black eyes, and eight hunters who have begun to move like a thing that is hungry. The elders of Ashfall are gravely offended. It works. → rt_ashfall
+  result (C1, seen in play): Ya has them stalk a goat across the threshing floor in silence. The goat is not fooled. 'Closer than a villager should get,' Ya allows. → rt_ashfall
+  result (C1, seen in play): The hunters fall into line for you unasked. Eight of them, old boar spears in their fists, every face set like stone. None of them has ever stood against the Crimson Lotus. They have decided to try.
+
+From the fence Ya chews a grass stem and supplies commentary. "That one holds his spear like a broom. That one's afraid. That one's handsome but afraid. That one—"
+
+"Ya."
+
+"I'm *helping*." One dislocated finger, two black eyes, and eight hunters who have begun to move like a thing that is hungry. The elders of Ashfall are gravely offended. It works. → rt_ashfall
+
+## wild_explore — door menu of wilds (the group "Explore"): its text is drawn once a Coil, above the door card's result; each option is a door card that opens its scene
+when (C2): not seen in the bot run
+led in by (C6): wilds[3] "Explore deeper into the forest (takes the afternoon)."
+[text · all forms]
+¶1 Your threads have been drawing a map while you were busy. Every blank left on it carries the same label, in your own handwriting: *what is that*.
+
+> [0] The Bone Field — the white you saw from the rise. {all forms}
+  drawn (C3): a door card: label, then its scene
+  when (C2): show: (g) => !g.flags.v_bone · seen in 200 games: day 2–10, hour 6–15, Coil 0:1–0:22, picked up to 13× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): bone_field: "The valley is full of bones. It was never a battlefield; it is a graveyard, and the dead in it were *things*. Ribs stand…" [its labels: Put your hand on the great skull and sing to it. / Grind a pouch of old bone into meal. Your stakes c… / Walk back before the light goes. / Head back before the light goes.]
+  result (C1, seen in play): Your threads have been drawing a map while you were busy. Every blank left on it carries the same label, in your own handwriting: *what is that*. → bone_field
+  result (C1, seen in play): The day's sit: Your threads have been drawing a map while you were busy. Every blank left on it carries the same label, in your own handwriting: *what is that*. → bone_field
+
+> [1] The Mire — where the fowl come from and the smell goes to. {all forms}
+  drawn (C3): a door card: label, then its scene
+  when (C2): show: (g) => !g.flags.v_mire · seen in 200 games: day 2–10, hour 6–15, Coil 0:1–0:22, picked up to 10× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): mire: "Black water lies between grey hummocks, under a smell of eggs kept too long in a cellar, and the quiet over it feels *he…" [its labels: Harvest the ghost-gills. Carefully. Properly. / Wait for the somethings to come up. Then deal with… / Wade back out while you still have both boots.]
+  result (C1, seen in play): Your threads have been drawing a map while you were busy. Every blank left on it carries the same label, in your own handwriting: *what is that*. → mire
+  result (C1, seen in play): The day's sit: → mire
+
+> [2] The Hollow — the place your Convergence keeps leaning toward. {all forms}
+  drawn (C3): a door card: label, then its scene
+  when (C2): show: (g) => !g.flags.v_hollow · seen in 200 games: day 2–9, hour 6–15, Coil 0:1–0:22, picked up to 9× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): hollow: "The ground falls away into a bowl, and roots fill the bowl. Roots, though not a tree's, or not *only* a tree's: each as …" [its labels: Sit among the roots and cultivate. Let the song in… / Follow one root as far as you dare. / Go back. You'll come back here. You know you will.]
+  result (C1, seen in play): Supper: jade bracket fungus, cooked. +15 satiety. Your threads have been drawing a map while you were busy. Every blank left on it carries the same label, in your own handwriting: *what is that*. → hollow
+  result (C1, seen in play): The day's sit: Your threads have been drawing a map while you were busy. Every blank left on it carries the same label, in your own handwriting: *what is that*. → hollow
+
+> [3] Never mind. Back to the stream. {all forms}
+  drawn (C3): a door card: label, then its scene
+  when (C2): not seen in the bot run
+  result (C1, taken, all forms): (no line)
+  then (C1): wilds: "Morning light comes through the canopy in red bars. The hammerspace holds no food. Infinite space, zero snacks. …" [its labels: Forage. / Hunt. / Explore deeper into the forest (takes the afternoo… / Train: darts, blade, footwork, and a sparring part… / Cultivate: one sit, 10 Qi toward Saturation. / Rest in the shade for an hour. / Enough of the forest. Follow the stream out — toda… / Sit with Yuki. / and 4 more]
+
+## wild_forage — work menu of wilds (the group "Forage"): its text is drawn once a Coil (a new opening sentence is a new text), above the first card's result; each option is a card (label, then the result)
+when (C2): not seen in the bot run
+led in by (C6): wilds[1] "Forage."
+[text · all forms]
+¶1 By now you know where this bank keeps its food. The hammerspace holds no food. Infinite space, zero snacks.
+
+> [0] The mushroom ring under the black oaks. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): once a day (key ring) · check: GU · seen in 200 games: day 2–21, hour 6–14, Coil 0:1–0:22, picked up to 7× a game
+  result (C1, success, all forms): (no line)
+  result (C1, failure, all forms): One sound cap, and one that only looked it: +1 Jade bracket, −2 HP.
+  then (C1): wild_forage: "By now you know where this bank keeps its food. In the hammerspace: 6 jade bracket fungus.…" [its labels: The mushroom ring under the black oaks. / River cress in the shallows. / The honey tree Yuki found. A needle through the co… / Needleberries, if the bushes have any left. / Back to the stream.]
+  result (C1, seen in play): The day's sit: By now you know where this bank keeps its food. The hammerspace holds no food. Infinite space, zero snacks. One sound cap, and one that only looked it: +1 Jade bracket, −2 HP. It goes in deeper than it should: another −2 HP. A week's work: 14 h 28 min in all, 5 h 46 min still to go (Go on, from tomorrow morning). → wilds
+  result (C1, seen in play): The day's sit: By now you know where this bank keeps its food. The hammerspace holds no food. Infinite space, zero snacks. A week's work: 11 h 12 min in all, 2 h 26 min still to go (Go on, from tomorrow morning). → wilds
+  result (C1, seen in play): The day's sit: By now you know where this bank keeps its food. In the hammerspace: 5 jade bracket fungus. A week's work: 6 h 4 min, done. → wilds
+
+> [1] River cress in the shallows. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): once a day (key cress) · check: GU · seen in 200 games: day 2–19, hour 6–14, Coil 0:1–0:22, picked up to 7× a game
+  result (C1, success, all forms): (no line)
+  result (C1, failure, all forms): Leeches. +2 River cress anyway.
+  then (C1): wild_forage: "By now you know where this bank keeps its food. In the hammerspace: 8 river cress.…" [its labels: The mushroom ring under the black oaks. / River cress in the shallows. / The honey tree Yuki found. A needle through the co… / Needleberries, if the bushes have any left. / Back to the stream.]
+  result (C1, seen in play): The day's sit: By now you know where this bank keeps its food. The hammerspace holds no food. Infinite space, zero snacks. Leeches. +2 River cress anyway. A week's work: 9 h 27 min in all, 38 min still to go (Go on, from tomorrow morning). → wilds
+  result (C1, seen in play): The day's sit: By now you know where this bank keeps its food. The hammerspace holds no food. Infinite space, zero snacks. A week's work: 6 h 25 min, done. → wilds
+  result (C1, seen in play): Midday: jade bracket fungus, cooked. +15 satiety. A week's work: 4 h 54 min in all, 2 h 8 min still to go (Go on, from tomorrow morning). → wilds
+
+> [2] The honey tree Yuki found. A needle through the comb's stalk, from below. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): once a day (key honey) · check: GU · seen in 200 games: day 2–21, hour 6–14, Coil 0:1–0:22, picked up to 8× a game
+  result (C1, success, all forms): (no line)
+  result (C1, failure, all forms): Stung. A lot. +1 Wild honeycomb, −3 HP.
+  then (C1): wild_forage: "By now you know where this bank keeps its food. In the hammerspace: 4 wild honeycomb.…" [its labels: The mushroom ring under the black oaks. / River cress in the shallows. / The honey tree Yuki found. A needle through the co… / Needleberries, if the bushes have any left. / Back to the stream.]
+  result (C1, seen in play): By now you know where this bank keeps its food. The hammerspace holds no food. Infinite space, zero snacks. Stung. A lot. +1 Wild honeycomb, −3 HP. It goes in deeper than it should: another −3 HP. A week's work: 10 h 44 min in all, 1 h 56 min still to go (Go on, from tomorrow morning). → wilds
+  result (C1, seen in play): A week's work: 5 h 43 min in all, 1 h 8 min still to go (Go on, from tomorrow morning). → wilds
+  result (C1, seen in play): By now you know where this bank keeps its food. The hammerspace holds no food. Infinite space, zero snacks. Stung. A lot. +1 Wild honeycomb, −3 HP. It goes in deeper than it should: another −3 HP. A week's work: 14 h in all, 10 h 12 min still to go (Go on, from tomorrow morning). → wilds
+
+> [3] Needleberries, if the bushes have any left. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): once a day (key berries) · check: GU · seen in 200 games: day 2–20, hour 6–14, Coil 0:1–0:22, picked up to 9× a game
+  result (C1, success, all forms): (no line)
+  result (C1, failure, all forms): Birds got there first.
+  then (C1): wild_forage: "By now you know where this bank keeps its food. In the hammerspace: 10 needleberries.…" [its labels: The mushroom ring under the black oaks. / River cress in the shallows. / The honey tree Yuki found. A needle through the co… / Needleberries, if the bushes have any left. / Back to the stream.]
+  result (C1, seen in play): Breakfast: needleberries. +3 satiety. The day's sit: By now you know where this bank keeps its food. In the hammerspace: 1 needleberries. Birds got there first. A week's work: 8 h 10 min, done. → wilds
+  result (C1, seen in play): Birds got there first. A week's work: 6 h 18 min, done. → wilds
+  result (C1, seen in play): The thorns collect a small fee in blood. The berries are worth it, barely. A week's work: 4 h 19 min in all, 3 h 38 min still to go (Go on, from tomorrow morning). → wilds
+
+> [4] Back to the stream. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): not seen in the bot run
+  result (C1, taken, all forms): (no line)
+  then (C1): wilds: "Morning light comes through the canopy in red bars. The hammerspace holds no food. Infinite space, zero snacks. …" [its labels: Forage. / Hunt. / Explore deeper into the forest (takes the afternoo… / Train: darts, blade, footwork, and a sparring part… / Cultivate: one sit, 10 Qi toward Saturation. / Rest in the shade for an hour. / Enough of the forest. Follow the stream out — toda… / Sit with Yuki. / and 4 more]
+
+## workshop — work menu of ashfall (the group "Workshop"): its text is drawn once a Coil (a new opening sentence is a new text), above the first card's result; each option is a card (label, then the result)
+when (C2): not seen in the bot run
+led in by (C6): ashfall[6] "Bone workshop: make things the village needs."
+[text · all forms]
+¶1 The smith lends you his bench and takes up a position well back from it. You sing bone into the shapes Ashfall has needed for years and cannot afford in iron. The children gather at a safe distance, and then at an unsafe one.
+
+> [0] Needles and fishhooks for half the village. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): check: Convergence Use · seen in 200 games: day 4–40, hour 6–13, Coil 0:2–0:22, picked up to 3× a game
+  result (C1, success, all forms): A set for every house. The seamstress bows to you three times, very low, and is working up to a fourth.
+  result (C1, failure, all forms): A few come out brittle. Fishhooks, all the same.
+  then (C1): ashfall: "Morning. Ashfall is up, and already at work. The tribute is one day off. The hammerspace holds no food. Infinite space, …" [its labels: Visit Old Wen. / Go to the coughing house. A child is sick. / Hunt the ironhide boar past the oak hollow. / Bone workshop: make things the village needs. / Drill the village hunters. They'll be standing nex… / Hunt beyond the oak hollow. / Eat at the communal pot. / Cultivate behind the shrine: one sit, 10 Qi. / and 5 more]
+  result (C1, seen in play): The smith lends you his bench and takes up a position well back from it. You sing bone into the shapes Ashfall has needed for years and cannot afford in iron. The children gather at a safe distance, and then at an unsafe one. A week's work: 30 h 20 min in all, 21 h 11 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): Breakfast: ash-deer venison, cooked. +40 satiety. The day's sit: A week's work: 24 h 16 min in all, 14 h 25 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): A week's work: 30 h 20 min in all, 22 h 41 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+
+> [1] Spearheads for the hunters. They'll need them when the collectors come. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): show: (g) => hasForm(g, form) && (was ? was(g) : true) · check: Convergence Use · seen in 198 games: day 4–41, hour 6–13, Coil 0:2–0:22, picked up to 3× a game
+  result (C1, success, all forms): Six white spearheads, hard as antler and sharp as an insult.
+  result (C1, failure, all forms): They crack on the first test. The smith says nothing, with great formality.
+  then (C1): as [0]
+  result (C1, seen in play): A week's work: 30 h 20 min in all, 20 h 58 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): A week's work: 26 h 22 min in all, 17 h 10 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): The day's sit: A week's work: 26 h 22 min in all, 16 h 33 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+
+> [2] A bone plough-share for the barley field. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): show: (g) => !g.flags.plough · check: Convergence Use · seen in 200 games: day 4–39, hour 6–13, Coil 0:2–0:22, picked up to 4× a game
+  result (C1, success, all forms): It goes through the black earth like a knife through curd. Old Wen comes out to watch, and says nothing until the furrow is done.
+  result (C1, failure, all forms): It breaks on a root. The farmers bow to the two halves and say nothing. You would have preferred words.
+  then (C1): as [0]
+  result (C1, seen in play): A week's work: 26 h 43 min in all, 22 h 8 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): The day's sit: The smith lends you his bench and takes up a position well back from it. You sing bone into the shapes Ashfall has needed for years and cannot afford in iron. The children gather at a safe distance, and then at an unsafe one. A week's work: 37 h 20 min in all, 27 h 56 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+  result (C1, seen in play): A week's work: 23 h 20 min in all, 13 h 39 min still to go (Go on, from tomorrow morning; its result when it is done). → ashfall
+
+> [3] Not today. Back to the village. {all forms}
+  drawn (C3): a work card: label, then the result
+  when (C2): not seen in the bot run
+  result (C1, taken, all forms): (no line)
+  then (C1): as [0]

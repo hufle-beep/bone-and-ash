@@ -5880,7 +5880,9 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       // v0.11.224 (owner pick TX2, TS6): the pins below re-pinned for two texts only (measured against v0.11.223's code: the same steps, stops and save
       // but for the texts): the wilds' ring reply (DN20: "…the gaps you left in it.") and the Fallout mother's count (DC12: "{Days}" from the calendar);
       // RV1 (VK): and the night fold's record (week.js hash: numbers in words aside too), the same nights folded
-      const out = build(); Tk.PT1.on = false; let old, v216; try { v216 = build(); Tk.CF1.on = false; old = build(); } finally { Tk.CF1.on = true; Tk.PT1.on = true; } const GT0 = Gm.GAIN_ONCE.splice(0); let gtOff; try { gtOff = build(); } finally { Gm.GAIN_ONCE.push(...GT0); } // v0.11.249 (P19-A, GT1): the runs with GT1 switched off, for the pins as they stood // v0.11.217 (PT1): v0.11.216's runs with PT1 off; v0.11.214's with CF1 off too
+      // v0.11.283 (P51-A, MT-d): the pins below as they stood, with MT switched off (a menu's text now comes with its first card: new
+      // lines and a world flag); `outMT` the runs with it on
+      Tk.MT.on = false; let out, old, v216, gtOff; try { out = build(); Tk.PT1.on = false; try { v216 = build(); Tk.CF1.on = false; old = build(); } finally { Tk.CF1.on = true; Tk.PT1.on = true; } const GT0 = Gm.GAIN_ONCE.splice(0); try { gtOff = build(); } finally { Gm.GAIN_ONCE.push(...GT0); } } finally { Tk.MT.on = true; } const outMT = build(); // v0.11.249 (P19-A, GT1): the runs with GT1 switched off, for the pins as they stood // v0.11.217 (PT1): v0.11.216's runs with PT1 off; v0.11.214's with CF1 off too
       // v0.11.232 (P5-B, V3b): the Fallout's three pins re-pinned for the save's day record only (RV1 CL: its new key `s:fo_mei:8`; these runs reach only
       // fo_mei's first, old text): measured on v0.11.231's code and this one with the day record left out, all six runs hash the same (steps, stops, lines, save); RV1 (PS-a): re-pinned again for the plan memo's signature hash only (the
       // same comparison with each pick's `sig` left out too: the same six on both codes)
@@ -5891,7 +5893,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(JSON.stringify(v216) === '{"wilds":"00d4c5f6","fallout":"b3094536","ashfall":"c8d8939d","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.217, PT1): with PT1 switched off the three runs are v0.11.216's exactly (${JSON.stringify(v216)})`);
       assert(JSON.stringify(gtOff) === '{"wilds":"00d4c5f6","fallout":"7f851a9f","ashfall":"1e4a6b32","cards":"workshop:0,workshop:2,drill:0"}', `${T} (v0.11.249, P19-A GT1): with GT1 switched off, the runs as v0.11.248 pinned them (${JSON.stringify(gtOff)})`);
       // v0.11.249 (P19-A, GT1; RV-A's GT1c, keyed by the choice): the Fallout's three re-pinned for GT1 only (Mei Lin's and Ya's repeated gains in the planned Fallout week; GT1 off: the old pins, above)
-      assert(JSON.stringify(out) === '{"wilds":"00d4c5f6","fallout":"b43e605e","ashfall":"1e4a6b32","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.217's code runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1 and its RV1: no card waits behind another's work, a card that gives no food pays at its end, a start needs its old length left today and, with no food, its whole work left in the stay; before, for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`); }
+      assert(JSON.stringify(out) === '{"wilds":"00d4c5f6","fallout":"b43e605e","ashfall":"1e4a6b32","cards":"workshop:0,workshop:2,drill:0"}', `${T} (RV1, TG2): none set: the wilds, the Fallout and Ashfall runs as v0.11.217's code runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1 and its RV1: no card waits behind another's work, a card that gives no food pays at its end, a start needs its old length left today and, with no food, its whole work left in the stay; before, for S3 and the rest row; with the spacing off and the rest row taken out they run as v0.11.210's: the VQ1 block) (${JSON.stringify(out)})`);
+      assert(JSON.stringify(outMT) === '{"wilds":"17e4fe7d","fallout":"d1158b26","ashfall":"a5f6f3bf","cards":"workshop:0,workshop:2,drill:0"}' /* RV-A (M1-c): the wilds' re-pinned for Forage's text without the pantry (was 0ed7a32d) */, `${T} (v0.11.283, P51-A MT-d): with MT on, the three runs with the menus' texts (measured: with those lines and the mt: flags left out, the same three hashes as MT off: the same steps, stops and save) (${JSON.stringify(outMT)})`); }
     // RV1 (TG3): one row a step: Smoke the catch is seen by the step's watch each day it smokes (a row that ran and let the next one
     // run in the same step hid it, and skipped the step's checks: hurt, hungry)
     { const g = ensureBars(newGame(99502, { closed: true })); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); Gm.addItem(g, 'hare_raw', 2);
@@ -6070,7 +6073,9 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         return o; });
       // v0.11.224 (owner pick TX2, TS6): the pins below re-pinned for two texts only (measured against v0.11.223's code: the same steps, stops and save
       // but for the texts): the wilds' ring reply (DN20: "…the gaps you left in it.") and the Fallout mother's count (DC12: "{Days}" from the calendar)
-      const out = build(); Tk.PT1.on = false; let old, v216; try { v216 = build(); Tk.CF1.on = false; old = build(); } finally { Tk.CF1.on = true; Tk.PT1.on = true; } const GT0 = Gm.GAIN_ONCE.splice(0); let gtOff; try { gtOff = build(); } finally { Gm.GAIN_ONCE.push(...GT0); } // v0.11.249 (P19-A, GT1): the runs with GT1 switched off, for the pins as they stood // v0.11.217 (PT1): v0.11.216's runs with PT1 off; v0.11.214's with CF1 off too
+      // v0.11.283 (P51-A, MT-d): the pins below as they stood, with MT switched off (a menu's text now comes with its first card: new
+      // lines and a world flag); `outMT` the runs with it on
+      Tk.MT.on = false; let out, old, v216, gtOff; try { out = build(); Tk.PT1.on = false; try { v216 = build(); Tk.CF1.on = false; old = build(); } finally { Tk.CF1.on = true; Tk.PT1.on = true; } const GT0 = Gm.GAIN_ONCE.splice(0); try { gtOff = build(); } finally { Gm.GAIN_ONCE.push(...GT0); } } finally { Tk.MT.on = true; } const outMT = build(); // v0.11.249 (P19-A, GT1): the runs with GT1 switched off, for the pins as they stood // v0.11.217 (PT1): v0.11.216's runs with PT1 off; v0.11.214's with CF1 off too
       // v0.11.232 (P5-B, V3b): the Fallout's three pins re-pinned for the save's day record only (RV1 CL: its new key `s:fo_mei:8`; these runs reach only
       // fo_mei's first, old text): measured on v0.11.231's code and this one with the day record left out, all six runs hash the same (steps, stops, lines, save); RV1 (PS-a): re-pinned again for the plan memo's signature hash only (the
       // same comparison with each pick's `sig` left out too: the same six on both codes)
@@ -6081,7 +6086,8 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
       assert(JSON.stringify(v216) === '{"wilds":"f997b7f1","fallout":"e3e27378","ashfall":"eb5b2dc3"}', `${T} (v0.11.217, PT1): with PT1 switched off, v0.11.216's runs exactly (${JSON.stringify(v216)})`);
       assert(JSON.stringify(gtOff) === '{"wilds":"f997b7f1","fallout":"c33f1c41","ashfall":"d853a742"}', `${T} (v0.11.249, P19-A GT1): with GT1 switched off, the runs as v0.11.248 pinned them (${JSON.stringify(gtOff)})`);
       // v0.11.249 (P19-A, GT1): the Fallout's three re-pinned for GT1 only, as PR2's above
-      assert(JSON.stringify(out) === '{"wilds":"f997b7f1","fallout":"ec0ab198","ashfall":"d853a742"}', `${T} (TG): spacing off, rest row out: v0.11.210's three runs exactly as v0.11.217 runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1: no card waits behind another's work, a card that gives no food pays at its end) (${JSON.stringify(out)})`); }
+      assert(JSON.stringify(out) === '{"wilds":"f997b7f1","fallout":"ec0ab198","ashfall":"d853a742"}', `${T} (TG): spacing off, rest row out: v0.11.210's three runs exactly as v0.11.217 runs them (v0.11.217, PT1: the Fallout and Ashfall re-pinned for the pot's meals, the wilds unchanged; re-pinned for CF1: no card waits behind another's work, a card that gives no food pays at its end) (${JSON.stringify(out)})`);
+      assert(JSON.stringify(outMT) === '{"wilds":"222a715c","fallout":"443ea2a0","ashfall":"35913507"}' /* RV-A (M1-c): the wilds' re-pinned for Forage's text without the pantry (was 7bbd77bc) */, `${T} (v0.11.283, P51-A MT-d): with MT on, the three runs with the menus' texts (only the menus' lines and their flags added; PR2's measure) (${JSON.stringify(outMT)})`); }
     // RV1 (TG2, L1): the spring found, its row at 1 and the wash open: one row, the wash's, and the run washes
     { const g = mk('heart_hub', 17); g.flags.spring_found = true; Wk.planEnsure(g); Wk.planSet(g, 'door:yk_time', 0); Wk.planSet(g, 'door:heart_spring', 1);
       const rs = Wk.doorCards(g, SCENES).filter((x) => x.scene === 'heart_spring'); const r = Wk.runWeek(g, SCENES);
@@ -10038,6 +10044,97 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     assert(txt('fo_elder_named', { a1_sky_seen: true, sky_flew: true }).includes(`${FT.FW2.tea} bone out of the air`) && txt('rt_wen', { a1_sky_seen: true, sky_flew: true }).includes(`He will have heard of ${FT.FW2.wen}`), `${T} RV (TG4): an Act 1 flight: the tea and rt_wen`);
     // What's new
     { const N = await import('../js/core/news.js'); const n = N.NOTES.find(([v]) => v === '0.11.282'); assert(!!n && /whole street now watches/.test(n[1]) && /Golden Core/.test(n[1]) && /Shen Qiu/.test(n[1]), `${T}: What's new names the watched flight`); }
+}
+// v0.11.283 (owner pick P51-A; `claude/p51-options.md`, `project/research/p51-measure.md`): G1, the small fixes: MT-d (a work menu's own
+// text drawn with its first card, once a Coil per text), CP-1 (the "(cap)" line once a day per skill), SU-n (the sit-all names the evening)
+{
+    const T = 'P51-A';
+    const Tk = await import('../js/core/tasks.js'); const Gm = await import('../js/core/game.js'); const Md = await import('../js/core/meditate.js');
+    const D = 1440;
+    const fresh = () => ensureBars(newGame(51001, { closed: true }));
+    const MENUS = ['clinic', 'drill', 'fo_clinic', 'fo_council', 'fo_drill', 'fo_palisade', 'rr_scout', 'rt_hunters', 'wild_explore', 'wild_forage', 'workshop'];
+    // MT: every hub menu outside the emptied ones (DEAD_MENUS) has a text, and it is drawn once, then not; off, never
+    const all = [...new Set(Object.values(TASK_HUBS).flatMap((h) => [...Object.keys(h.menus || {}), ...Object.keys(h.doorMenus || {})]))].filter((m) => !DEAD_MENUS.has(m)).sort();
+    assert(all.join() === MENUS.join(), `${T} (MT): the eleven menus with a text (${all.join(', ')})`);
+    for (const m of MENUS) {
+        const g = fresh(); g.scene = m; const a = Tk.menuText(g, SCENES, m), b = Tk.menuText(g, SCENES, m);
+        const tx = SCENES[m].text, want = String(typeof tx === 'function' ? tx(g) : tx).trim();
+        assert(a.length === 1 && a[0] === want && a[0].split(/\s+/).length >= 10 /* RV-A (M1-c): Forage's 10 */ && b.length === 0 && g.flags[Tk.menuTextKey(m, want)] === true, `${T} (MT): ${m}: its text once, then not`);
+        const h = fresh(); h.scene = m; Tk.MT.on = false; let off; try { off = Tk.menuText(h, SCENES, m); } finally { Tk.MT.on = true; }
+        assert(off.length === 0 && !Object.keys(h.flags).some((k) => k.startsWith('mt:')), `${T} (MT): ${m}: switched off, nothing (the old lines)`);
+    }
+    assert(!KEEP_FLAGS.some((f) => f.startsWith('mt:') || f.startsWith('cap:')), `${T} (MT, CP): the new flags are world flags, reset with the Coil`);
+    // MT: the key is the first sentence: the drill's militia and spears (later sentences) make no new text; the council's three days do
+    { const g = fresh(); g.scene = 'drill'; const t0 = String(SCENES.drill.text(g)), k0 = Tk.menuTextKey('drill', t0); g.flags.militia = 1; g.flags.spears = true; const t1 = String(SCENES.drill.text(g));
+      assert(t1 !== t0 && Tk.menuTextKey('drill', t1) === k0, `${T} (MT): the drill's later sentences are no new text`); }
+    assert(Tk.menuFirst('Second council, on thinner tea. The matter') === 'Second council, on thinner tea.' && Tk.menuFirst('"Eyes lie," she says. "Ears lie."') === '"Eyes lie," she says.' && Tk.menuFirst('One.\n\nTwo.') === 'One.', `${T} (MT): the first sentence`);
+    // MT: the real path: the Fallout's council on story days 8, 9 and 10 (the long calendar's Days 43, 50, 57), each day's own text above the result
+    { const keys = [];
+      for (const [day, re] of [[43, /^The council of Ashfall is seven old people/], [50, /^Second council, on thinner tea\./], [57, /^Third council, and the last before the north path\./]]) {
+        const g = fresh(); goTo(g, SCENES, 'fo_ashfall'); g.minutes = day * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30);
+        const c = taskCards(g, SCENES).find((x) => x.id === 'fo_council:1' && x.status === 'open'); const r = c ? runTask(g, SCENES, c.id) : { lines: [] };
+        const i = r.lines.findIndex((l) => re.test(l)), j = r.lines.findIndex((l) => /^A week's work:/.test(l));
+        assert(!!c && i >= 0 && (j < 0 || i < j) && r.lines.filter((l) => re.test(l)).length === 1, `${T} (MT): the council on story day ${storyDay(g)}: its text above the result (${r.lines.map((l) => l.slice(0, 30)).join(' | ')})`);
+        g.scene = 'fo_council'; assert(Tk.menuText(g, SCENES, 'fo_council').length === 0, `${T} (MT): the council's day ${storyDay(g)} text not again`); g.scene = 'fo_ashfall';
+        keys.push(Object.keys(g.flags).filter((k) => k.startsWith('mt:fo_council#')).join()); }
+      assert(new Set(keys).size === 3 && keys.every((k) => k && !k.includes(',')), `${T} (MT): three days, three texts (${keys.join(' ')})`); }
+    // MT: the prologue's Ashfall: the workshop's text with its first card; the clinic's with its own
+    { const g = fresh(); goTo(g, SCENES, 'ashfall'); g.minutes = 9 * D + 7 * 60; g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 60);
+      const r = runTask(g, SCENES, 'workshop:0');
+      assert(r.lines.filter((l) => /^The smith lends you his bench/.test(l)).length === 1, `${T} (MT): the workshop's text with its first card`);
+      g.scene = 'workshop'; assert(Tk.menuText(g, SCENES, 'workshop').length === 0, `${T} (MT): and not with the next`); g.scene = 'ashfall'; }
+    // MT (RV-A, M2-x): a door menu (the Wilds' Explore): its text stays undrawn (under the scene the door opens it read out of order)
+    { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30);
+      const c = taskCards(g, SCENES).find((x) => /^wild_explore:/.test(x.id) && x.status === 'open'); const r = c ? runTask(g, SCENES, c.id) : { lines: [] };
+      assert(!!c && !r.lines.some((l) => /Your threads have been drawing a map/.test(l)) && !Object.keys(g.flags).some((k) => k.startsWith('mt:wild_explore#')), `${T} (MT, RV-A M2-x): the Explore door's text not drawn (${c?.id})`); }
+    // MT (RV-A, M1-c): Forage's text without the pantry (the camp's own draws it after the card); TG5: the forage card's reply and the camp
+    // under it never name the food twice
+    { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'jade_bracket', 3);
+      const c = taskCards(g, SCENES).find((x) => /^wild_forage:/.test(x.id) && x.status === 'open'); const r = c ? runTask(g, SCENES, c.id) : { lines: [] };
+      const mt = r.lines.find((l) => /^By now you know where this bank keeps its food/.test(l)) || '';
+      assert(!!c && mt === 'By now you know where this bank keeps its food.' && !r.lines.some((l) => /In the hammerspace:|The hammerspace holds no food/.test(l)), `${T} (MT, RV-A M1-c; RV TG5): Forage's text without the pantry, the pantry only in the camp's text (${mt})`); }
+    // RV-A (L1-c, L2-s, L2-y): the council's day 10 without "from this morning"; the drill's spears after the workshop's; Ya's lesson not twice
+    { const g = fresh(); g.scene = 'fo_council'; g.minutes = 57 * D + 7 * 60; const t10 = String(SCENES.fo_council.text(g));
+      assert(/^Third council/.test(t10) && t10.includes('The map still lies on the table. Nobody has presumed') && !/from this morning/.test(t10), `${T} RV-A (L1-c): the council's day 10`);
+      const d = fresh(); d.scene = 'drill'; const d0 = String(SCENES.drill.text(d)); d.flags.spears = true; const d1 = String(SCENES.drill.text(d));
+      assert(d0.includes('They have bows, boar spears, and the faces of men') && d1.includes('They have bows, white bone spearheads on their shafts, and the faces of men'), `${T} RV-A (L2-s): the drill's spears by the workshop's`);
+      const y = fresh(); y.scene = 'rr_scout'; const yr = SCENES.rr_scout.choices[0].do(y).join(' ');
+      assert(String(SCENES.rr_scout.text(y)).includes('"Ears lie. Nose doesn\'t.') && !/Eyes lie/.test(yr) && /^Ya holds your face down in the moss until you agree\./.test(yr), `${T} RV-A (L2-y): Ya's lesson once, in the text`); }
+    // MT: a rewind starts the Coil's record over (the text comes again)
+    { const g = fresh(); startActCoil(g, 1); g.scene = 'fo_council'; Tk.menuText(g, SCENES, 'fo_council'); g.scene = 'fo_ashfall'; rewind(g);
+      assert(!Object.keys(g.flags).some((k) => k.startsWith('mt:')), `${T} (MT): a rewind clears the record`); }
+    // CP: at T10 L10 the "(cap)" lines once a day per skill, then nothing; the next day again; switched off, every time
+    { const capAll = (g) => { for (const nm of ['GU', 'Convergence Use']) Object.assign(Gm.getSkill(g, nm), { tier: 10, level: 10 }); Object.assign(g.yuki.qiUse, { tier: 10, level: 10 }); };
+      const g = fresh(); capAll(g); g.minutes = 3 * D + 9 * 60;
+      const a = Gm.awardXp(g, 'Convergence Use'), b = Gm.awardXp(g, 'Convergence Use'); g.minutes += D; const c = Gm.awardXp(g, 'Convergence Use');
+      const caps = (l) => l.filter((x) => / at T10 L10 \(cap\)$/.test(x)).length;
+      assert(caps(a) === 3 && a.length === 3 && b.length === 0 && caps(c) === 3, `${T} (CP): three cap lines the first time a day, none the second, three the next day (${a.length} / ${b.length} / ${c.length})`);
+      const gu = Gm.awardXp(g, 'GU'); assert(gu.length === 0, `${T} (CP): GU's own award the same day: nothing (its line said already)`);
+      const h = fresh(); capAll(h); Gm.CAP_ONCE.on = false; let x, y; try { x = Gm.awardXp(h, 'Convergence Use'); y = Gm.awardXp(h, 'Convergence Use'); } finally { Gm.CAP_ONCE.on = true; }
+      assert(caps(x) === 3 && caps(y) === 3 && !Object.keys(h.flags).some((k) => k.startsWith('cap:')), `${T} (CP): switched off, every time (the old lines)`);
+      const k = fresh(); Object.assign(Gm.getSkill(k, 'Convergence Use'), { tier: 10, level: 10 }); const z = Gm.awardXp(k, 'Convergence Use');
+      assert(caps(z) === 1 && z.some((l) => /^GU \+\d+ XP/.test(l)) && z.some((l) => /^Yuki \(bond\) Qi Use \+\d+/.test(l)), `${T} (CP): one skill at its cap, the others still gain`); }
+    // SU: the sit-all names the evening on a task hub (Ashfall 19:00); elsewhere and for the other stops the old words
+    { assert(Tk.sitStopText('shut', { hub: 'ashfall', end: 5 * D + 19 * 60 }) === 'until the evening, 19:00' && Tk.sitStopText('shut', { hub: 'heart_hub', end: 5 * D + 18 * 60 + 30 }) === 'until the evening, 18:30', `${T} (SU): a hub's evening, its hour`);
+      assert(Tk.sitStopText('shut', { hub: 'meridians', end: 600 }) === 'then it stops' && Tk.sitStopText('shut') === 'then it stops' && Object.entries(Tk.SIT_STOP_TEXT).filter(([k]) => k !== 'shut').every(([k, v]) => Tk.sitStopText(k, { hub: 'ashfall', end: 600 }) === v), `${T} (SU): off a hub, and every other stop, as before`);
+      const zl = await import('node:zlib'); const raw = readFileSync(new URL('../saves/2026-11-08-0020-incremental-ashfall.txt', import.meta.url), 'utf8').trim(); // the owner's save in Ashfall (a progress report), unpacked
+      const g = deserialize(zl.gunzipSync(Buffer.from(raw.slice(5), 'base64')).toString()); g.minutes = Math.floor(g.minutes / D) * D + 10 * 60; g.james.qi = 999; g.james.saturation = 0; g.james.satiety = 100;
+      const card = Md.medCards(g, SCENES).find((m) => m.id === 'med:sitall');
+      assert(!!card && /\(until the evening, 19:00\)\.$/.test(card.label), `${T} (SU): Ashfall's "Cultivate until the limit" names 19:00 (${card?.label})`);
+      const r = Md.runMed(g, SCENES, 'med:sitall'); assert(/\(until the evening, 19:00\)\.$/.test(r.lines[0]) && Gm.clockParts(g.minutes).hh === 19, `${T} (SU): and its result, ending at 19:00 (${r.lines[0]})`); }
+    // RV (TG6): CP-1 through a real "Cultivate until the limit" at the cap: the summary's "(cap)" once a skill; a second sit-all that day, none
+    { const zl = await import('node:zlib'); const ld = (f) => deserialize(zl.gunzipSync(Buffer.from(readFileSync(new URL(`../saves/${f}`, import.meta.url), 'utf8').trim().slice(5), 'base64')).toString());
+      const g = ld('2026-11-08-0020-incremental-ashfall.txt'); const day0 = Math.floor(g.minutes / D) * D; g.minutes = day0 + 8 * 60; g.james.qi = 999; g.james.saturation = 0; g.james.satiety = 100;
+      for (const nm of ['GU', 'Convergence Use']) Object.assign(Gm.getSkill(g, nm), { tier: 10, level: 10 }); Object.assign(g.yuki.qiUse, { tier: 10, level: 10 });
+      const caps = (l) => l.filter((x) => / at T10 L10 \(cap\)$/.test(x));
+      const a = Md.runMed(g, SCENES, 'med:sitall'); g.minutes = day0 + 8 * 60 + 30; g.james.qi = 999; g.james.saturation = 0; const b = Md.runMed(g, SCENES, 'med:sitall');
+      assert(caps(a.lines).length === 3 && new Set(caps(a.lines)).size === 3 && caps(b.lines).length === 0 && /\(until the evening, 19:00\)\.$/.test(b.lines[0]), `${T} RV (TG6): a sit-all at the cap says each "(cap)" once; a second the same day none (${caps(a.lines).length} / ${caps(b.lines).length})`);
+      // RV (TG7): the Heart's evening is 18:00 (the owner's save in the hall)
+      const h = ld('2026-11-08-0220-incremental-heart_hub.txt'); h.minutes = Math.floor(h.minutes / D) * D + 10 * 60; h.james.qi = 999; h.james.saturation = 0; h.james.satiety = 100;
+      const hc = Md.medCards(h, SCENES).find((m) => m.id === 'med:sitall'), hr = hc ? Md.runMed(h, SCENES, 'med:sitall') : { lines: [''] };
+      assert(h.scene === 'heart_hub' && /\(until the evening, 18:00\)\.$/.test(hc?.label || '') && /\(until the evening, 18:00\)\.$/.test(hr.lines[0]) && Gm.clockParts(h.minutes).hh === 18, `${T} RV (TG7): the Heart's sit-all names 18:00 (${hc?.label})`); }
+    // What's new
+    { const N = await import('../js/core/news.js'); const n = N.NOTES.find(([v]) => v === '0.11.283'); assert(!!n && /menu/i.test(n[1]) && /cap/.test(n[1]) && /evening/.test(n[1]) && /parts/.test(n[1]) && /Welcome back/.test(n[1]), `${T}: What's new names the five`); }
 }
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);

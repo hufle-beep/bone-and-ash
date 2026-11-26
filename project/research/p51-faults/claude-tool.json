@@ -1,0 +1,3 @@
+[
+ {"id":"F14","file":"tools/joinsave.mjs","find":".replace(/\\r?\\n$/, '')","replace":"","note":"SV-p: GitHub's last newline kept in the joined save"}
+]

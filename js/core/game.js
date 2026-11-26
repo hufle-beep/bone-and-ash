@@ -307,6 +307,17 @@ function addXp(n, amount) {
     return ups;
 }
 
+/** v0.11.283 (owner pick P51-A, CP-1): a skill at T10 L10 says "(cap)" once a day, then nothing (before: on every result, 2–3 lines
+ *  a result; the owner's v0.11.164 save, about 150 results on Days 18–21). A world flag `cap:<line>` holds the day it was said
+ *  (reset with the Coil). The tests switch it off to read the old lines. */
+export const CAP_ONCE = { on: true };
+export function capLine(g, line) {
+    if (!CAP_ONCE.on) return [line];
+    const day = clockParts(g.minutes).day, k = `cap:${line.replace(/ at T10 L10 \(cap\)$/, '')}`;
+    if (g.flags[k] === day) return [];
+    g.flags[k] = day;
+    return [line];
+}
 /**
  * Standard award, as in the engine: pool = band × the skill's tier, split equally between the skill and GU;
  * Yuki (bonded) gets a share of the same size to her Qi Use. A failed attempt pays 25%.
@@ -323,14 +334,14 @@ export function awardXp(g, skillName, band = 'standard', { fail = false, factor 
     const heads = name === 'GU' ? 1 : 2;
     const share = Math.floor(pool / heads);
     const up1 = addXp(n, share);
-    out.push(atSkillCap(n) && !up1.length ? `${name} at T10 L10 (cap)` : `${name} +${share} XP${up1.length ? ` → ${up1.at(-1)}` : ''}`);
+    if (atSkillCap(n) && !up1.length) out.push(...capLine(g, `${name} at T10 L10 (cap)`)); else out.push(`${name} +${share} XP${up1.length ? ` → ${up1.at(-1)}` : ''}`);
     if (name !== 'GU') {
         const up2 = addXp(g.james.gu, share);
-        out.push(atSkillCap(g.james.gu) && !up2.length ? 'GU at T10 L10 (cap)' : `GU +${share} XP${up2.length ? ` → ${up2.at(-1)}` : ''}`);
+        if (atSkillCap(g.james.gu) && !up2.length) out.push(...capLine(g, 'GU at T10 L10 (cap)')); else out.push(`GU +${share} XP${up2.length ? ` → ${up2.at(-1)}` : ''}`);
     }
     const yShare = Math.floor(pool / 2);
     const up3 = addXp(g.yuki.qiUse, yShare);
-    out.push(atSkillCap(g.yuki.qiUse) && !up3.length ? 'Yuki (bond) Qi Use at T10 L10 (cap)' : `Yuki (bond) Qi Use +${yShare}${up3.length ? ` → ${up3.at(-1)}` : ''}`);
+    if (atSkillCap(g.yuki.qiUse) && !up3.length) out.push(...capLine(g, 'Yuki (bond) Qi Use at T10 L10 (cap)')); else out.push(`Yuki (bond) Qi Use +${yShare}${up3.length ? ` → ${up3.at(-1)}` : ''}`);
     ensureBars(g);
     return out;
 }

@@ -14,7 +14,7 @@
  */
 import { hasForm } from './forms.js';
 import { choose, goTo, choiceOpen, choiceTag, gives, setTimeless, defaultMinutes, movesPlace, wasPicked, isMenuScene, isTimeless, setFamiliar, doorMinutes } from './story.js';
-import { gainAt, NIGHT_TO, d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, takeSpoilNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, USE_CAP, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
+import { fnv1a, gainAt, NIGHT_TO, d8, itemCap, yukiForm, advance, clockParts, actingCheck, actingName, awardXp, awardYukiFightXp, spendQi, setLootMult, takeCapNotes, takeSpoilNotes, itemNames, addItem, canBreakThrough, btMinutes, realmName, condense, sitMinutes, useSpeed, USE_N, USE_CAP, nightLock, endsLate, sitUseless, jamesQiMax, SATIETY_PER_HOUR, breakAt, coilMult, fmtMult, YUKI_HELD_TEXT } from './game.js';
 import { CONDENSE_SIT_COST } from './formulas.js';
 import { btTarget, MER_LINES, lineWindow, lineIndex, lineName } from '../story/meridians.js';
 import { TASK_HUBS } from '../story/task_hubs.js';
@@ -38,6 +38,23 @@ export const ADAPT_STEP = 0.5, ADAPT_MAX = 2, TRANSFER = 0.25, DRILL_SHARE = 0.2
 export const YUKI_HOURS = [6, 19]; // v0.11.83: exported for the FAQ
 
 const asText = (v, g) => (typeof v === 'function' ? v(g) : v);
+/** v0.11.283 (owner pick P51-A, MT-d): a work menu's own text was never drawn on a task screen (the card goes to its menu and
+ *  straight back). Now it comes with the first card from that menu, above the card's own lines, once a Coil per text: a world
+ *  flag `mt:<menu>#<hash of its first sentence>` (reset with the Coil, as every flag outside KEEP_FLAGS). A text whose opening
+ *  changes (the council's three days, the palisade's stages) is a new text; one whose later sentences change with the state (the
+ *  pantry, the militia) is not. A door menu's (the Wilds' Explore) is not drawn (RV-A, M2-x). The tests switch it off. */
+export const MT = { on: true };
+export const menuFirst = (t) => String(t || '').trim().split(/(?<=[.!?])["*]*\s+/)[0];
+export const menuTextKey = (menu, t) => `mt:${menu}#${fnv1a(menuFirst(t))}`;
+export function menuText(g, scenes, menu) {
+    if (!MT.on || !menu) return [];
+    const t = String(asText(scenes[menu]?.text, g) || '').trim();
+    if (!t) return [];
+    const k = menuTextKey(menu, t);
+    if (g.flags[k]) return [];
+    g.flags[k] = true;
+    return [t];
+}
 const r1 = (x) => Math.round(x * 10) / 10;
 export const famTier = (f) => (f >= 18 ? 3 : f >= 8 ? 2 : f >= 2 ? 1 : 0);
 /** v0.11.15 (B1-b): a card's speed by use: 1 + 9 × (familiarity ÷ 18), up to ×10 (= the tiers' ×2 / ×5 / ×10 at 2 / 8 / 18). */
@@ -320,7 +337,7 @@ function resolveWork(g, scenes, hubId, card, id) {
     const lines = [];
     const tier = famTier(t.fam[id] || 0);
     if (card.entry?.do) lines.push(...(card.entry.do(g) || []));
-    if (card.menu) lines.push(...goTo(g, scenes, card.menu));
+    if (card.menu) lines.push(...goTo(g, scenes, card.menu), ...menuText(g, scenes, card.menu)); // MT-d
     if (c.qi && !spendQi(g, c.qi)) throw new Error('Not enough Qi');
     const once = Math.round((((card.entry?.time || 0) + (c.time || 0)) * NEW_LENGTH) / cardSpeed(t.fam[id] || 0));
     // v0.11.204 (owner pick W1, S1): on a stay of the long calendar a week's card is ×7 its time: today's share up to the evening,
@@ -562,7 +579,7 @@ export function runTask(g, scenes, id) {
         // time too (not a sit, a rest or the Long Forest's season: their time is cultivation or healing, by their own rules)
         const speed = card.kind === 'door' || (card.kind === 'chore' && choreSpeeds(g.scene, card.c)) ? cardSpeed(st(g).fam[id] || 0) : 0;
         const take = (index) => { const r = choose(g, scenes, index, { task: true, speed }); lines.push(...r.lines); if (r.roll && !r.roll.success) fail = true; if (r.combat) throw new Error(`A task can't start a fight (${id})`); };
-        if (card.menu) take(card.entryIndex);
+        if (card.menu) take(card.entryIndex); // v0.11.283 (owner pick RV-A, M2-x): a door menu's text stays undrawn (its reply would sit under the scene it opens)
         if (!card.menu || g.scene === card.menu) take(card.p.index);
         if (card.kind === 'chore' || card.kind === 'door') learn(g, scenes, hubId, card, id, 1);
         if (card.kind === 'door' && g.scene !== hubId) st(g).door = { id, speed }; // v0.11.141 (FX1, DI): the scenes behind it run at its speed (story.js)
@@ -714,6 +731,17 @@ export function sitSummary(lines) {
     return [...out, ...rest];
 }
 export const SIT_STOP_TEXT = { sat: 'the breakthrough point', qi: 'then Qi runs out', night: 'then the day ends', fed: 'then you need food', shut: 'then it stops', left: 'the story moves on', max: 'a long session' };
+/** v0.11.283 (owner pick P51-A, SU-n): on a task hub the screen's own Cultivate closes in the evening (Ashfall and the Fallout 19:00,
+ *  the Heart 18:00, the Long Forest 20:00): "Cultivate until the limit" now names that hour instead of "then it stops". `end` is the
+ *  game minute the sits end (the plan's start + its minutes). */
+export const SIT_EVENING_TEXT = 'until the evening, {hh}';
+export function sitStopText(stop, { hub = null, end = null } = {}) {
+    if (stop === 'shut' && hub && TASK_HUBS[hub] && end != null) {
+        const p = clockParts(end);
+        return SIT_EVENING_TEXT.replace('{hh}', `${String(p.hh).padStart(2, '0')}:${String(p.mm).padStart(2, '0')}`);
+    }
+    return SIT_STOP_TEXT[stop] || 'then it stops';
+}
 
 /* ---------- v0.11.204 (owner pick W1; roadmap-time.md TS2 + TS3): the week, long calendar only ---------- */
 /**

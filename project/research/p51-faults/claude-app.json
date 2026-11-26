@@ -1,0 +1,6 @@
+[
+ {"id":"F10","file":"js/main.js","find":"partName(name0, i + 1, parts.length)","replace":"partName(name0, 1, parts.length)","note":"SV-p: every part named part 1"},
+ {"id":"F11","file":"js/core/app.js","find":"const d = Math.floor(h / 24);","replace":"const d = Math.ceil(h / 24);","note":"WB-y: the days away rounded up"},
+ {"id":"F12","file":"js/core/app.js","find":"if (Number.isFinite(p.seen) && p.seen > 0) o.seen = p.seen;","replace":"if (p.seen) o.seen = p.seen;","note":"WB-y: a junk time kept"},
+ {"id":"F13","file":"js/core/app.js","find":"const top = below + h <= vh - gap ? below :","replace":"const top = below + h <= vh ? below :","note":"L7-f: the tooltip touches the window's bottom edge"}
+]

@@ -326,4 +326,5 @@ button.card, button.choice { -webkit-touch-callout: none; -webkit-user-select: n
   .below .split { grid-template-columns: minmax(0, 1.6fr) minmax(15rem, 1fr); }
   .below .pane.results { top: 0; max-height: calc(100vh - 8.4rem); }
   #tip { right: auto; width: min(28rem, calc(100% - 1rem)); } /* v0.11.210 (owner pick N1, TT): not the whole width on a PC (was 1,350 px at 1366) */
+  #tip.beside { bottom: auto; } /* v0.11.283 (owner pick P51-A, L7-f): beside the held card (main.js placeTip sets left and top) */
 }

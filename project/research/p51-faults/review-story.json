@@ -1,0 +1,30 @@
+[
+ {
+  "id": "C1",
+  "file": "js/core/tasks.js",
+  "find": "        if (card.menu) take(card.entryIndex); // v0.11.283",
+  "replace": "        if (card.menu) { take(card.entryIndex); if (g.scene === card.menu) lines.push(...menuText(g, scenes, card.menu)); } // v0.11.283",
+  "note": "re-aimed after RV-A (M2-x): the reviewer's C1 dropped the door's text, which RV-A now does on purpose; this one draws it again (under the scene it opens). Expect caught (P51-A, RV-A M2-x)."
+ },
+ {
+  "id": "C2",
+  "file": "js/core/tasks.js",
+  "find": "fnv1a(menuFirst(t))",
+  "replace": "fnv1a(t)",
+  "note": "MT-d: keyed on the whole text, so the pantry's food count (wild_forage) or the militia line makes a new text and it shows again. story.test P51-A 'the pantry's count is no new text'. Expect caught."
+ },
+ {
+  "id": "C3",
+  "file": "js/core/game.js",
+  "find": "if (g.flags[k] === day) return [];",
+  "replace": "if (g.flags[k] != null) return [];",
+  "note": "CP-1: '(cap)' once a Coil instead of once a day. story.test P51-A 'three the next day'. Expect caught."
+ },
+ {
+  "id": "C4",
+  "file": "js/core/meditate.js",
+  "find": "sitStopText(r.stop, { hub, end: g.minutes })",
+  "replace": "sitStopText(r.stop, { hub, end: g.minutes - r.minutes })",
+  "note": "SU-n: the sit-all's result names the hour it started, not 19:00. story.test P51-A 'its result, ending at 19:00'. Expect caught."
+ }
+]

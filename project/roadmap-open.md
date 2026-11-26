@@ -2,7 +2,7 @@
 
 New in v0.11.280 (owner pick RM-A, 2026-11-26 11:58; `claude/p48-options.md`). One list of every open item, in the order of `roadmap.md`'s Order line, with its bundle, its size and a pointer to the line that holds its words. **This file holds no item's words:** the lines stay where they are (`roadmap.md`, `roadmap-2.md`, `roadmap-act2.md`, `roadmap-e.md`, `roadmap-retune.md`); a push that finishes an item moves its line as before and updates this list. Each push still gets its own options and pick; the estimates are pushes, at 5–8 pushes a day (the pace since 2026-11-17: 76 pushes in 9 days; text and game pushes 3–5 a day).
 
-**Totals (v0.11.282):** about **55–95 pushes, 8–19 working days**; Act 2 starts after about **15–25 pushes (2–5 days)**. *(v0.11.281's estimate: 57–98, Act 2 after 17–28; v0.11.280's: 58–99, Act 2 after 18–29; v0.11.270's: 55–95, Act 2 after 19–33.)*
+**Totals (v0.11.283):** about **54–92 pushes, 8–19 working days**; Act 2 starts after about **14–22 pushes (2–4 days)**. *(v0.11.282's estimate: 55–95, Act 2 after 15–25; v0.11.281's estimate: 57–98, Act 2 after 17–28; v0.11.280's: 58–99, Act 2 after 18–29; v0.11.270's: 55–95, Act 2 after 19–33.)*
 
 ## Step 5. The retune: done
 
@@ -15,9 +15,9 @@ New in v0.11.280 (owner pick RM-A, 2026-11-26 11:58; `claude/p48-options.md`). O
 - ~~**HS (b) and (c), the slopes**~~ ((b) done in v0.11.281, HS-b2, Fable's run A; (c) closed as accepted, 0 of 600): `roadmap-e.md`'s PN line.
 - ~~**FC-w2, the village sees the first flight**~~ (done in v0.11.282, P50-A: the read, the canon call and Fable's texts in one push; `project/research/p50-measure.md`): `roadmap-e.md`'s flight line; `roadmap.md` section 2b.
 
-## Step 6. Systems (`roadmap-2.md` section 4): 15–25 pushes, by bundle
+## Step 6. Systems (`roadmap-2.md` section 4): 14–22 pushes left, by bundle
 
-- **G1 Android and small fixes (1–3):** "Systems from the open items" (a) a menu's own text never drawn, (b)–(f), (g) the update check off the API, (h) target SDK 35/36 edge-to-edge, (i) Welcome back; "New in v0.11.210" (L4 the forecast's redraw, L7 the PC tooltip).
+- ~~**G1 Android and small fixes**~~ (done in v0.11.283, one push, P51-A + RV-A + TG-a: (a), (b), (d), (e), (i), L7 done; (c), (g), (h), L4 closed as accepted; `claude/p51-options.md`, `project/research/p51-measure.md`): the two lines in `roadmap-done-7.md` (Moved in v0.11.283).
 - **G2 The plan (1–2):** "Measured, not picked": KR (the kept amount's row), BP (a plan for the Blackroot's camps).
 - **G3 Game UI (2–3):** "Game UI and systems from group h".
 - **G4 The threads' new design (3–5; a design talk first; balance and save):** "Threads need a new design", "The threads' new design, from the games", "From the cultivation games" (its threads rules).

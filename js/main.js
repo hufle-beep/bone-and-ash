@@ -18,7 +18,7 @@ import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMedit
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
 import { meridianRow } from './story/meridians.js';
 import { APK_URL, UPDATE_KEY, CHECK_DELAY, UPDATE_TEXT, updPrefs, inApp, makeUpdater, goLabel, offerBrowser } from './core/update.js'; // v0.11.147 (UP1; RV1: makeUpdater; v0.11.187 U1: goLabel, offerBrowser)
-import { exportRoute, canSaveToFile, wantsServiceWorker, savedName, resultPlace, FILE_TEXT } from './core/app.js'; // v0.11.148 (EX1; RX1: savedName, resultPlace)
+import { exportRoute, canSaveToFile, wantsServiceWorker, savedName, resultPlace, FILE_TEXT, tipBox, TIP_WIDE, saveParts, SAVE_PART_MAX, partName, PART_TEXT, WELCOME_KEY, welcomePrefs, welcomeDue, welcomeView, awayText, WELCOME_TEXT } from './core/app.js'; // v0.11.148 (EX1; RX1: savedName, resultPlace); v0.11.283 (P51-A: SV-p, WB-y)
 import { SEEN_KEY, NOTES, newsSince, versionLabel, statusPlace, takeoverNotice, recheckDue, READY_TEXT } from './core/news.js'; // v0.11.150 (BL1)
 import { realmShockHpBonus } from './core/formulas.js';
 import { EDITIONS, EDITION_KEY, getEdition, setEdition } from './core/edition.js'; // v0.11.182 (CB1, DF1: ES)
@@ -81,6 +81,15 @@ let lastPress = 0;
 // per-phone keys 'boneash.speed' and 'boneash.testspeeds' are no longer read (never renamed or reused).
 const PAUSE_DEATH_KEY = 'boneash.pausedeath'; // per phone: '0' = off; on by default (v0.10.0: pause before the forecast death; v0.11.64, B1: ask before a card that ends the Coil)
 let askFatal = store.get(PAUSE_DEATH_KEY) !== '0';
+// v0.11.283 (owner pick P51-A, WB-y): Welcome back after 6 hours away (app.js); the record kept on this phone, never in a save
+const welcome = welcomePrefs(store.get(WELCOME_KEY));
+let welcomeCard = null; // { away, view, g0 }: on screen until ✕ or the next tap that does something; RV (M3): only over the same game, unmoved (a new game, a load, a restore or a bite hides it)
+const welcomeKeep = () => { welcome.seen = Date.now(); store.set(WELCOME_KEY, JSON.stringify(welcome)); };
+/** WB-y: the game is on screen again: the card if it was away long enough (a new game has nothing to tell), then the time kept. */
+function welcomeCheck(now = Date.now()) {
+    if (welcomeDue(welcome, now) && g && !recovery) welcomeCard = { away: now - welcome.seen, view: welcomeView(g), g0: g };
+    welcomeKeep();
+}
 let fatalArmed = { id: null, at: 0 }; // v0.11.64 (B1): the card tapped once that would end the Coil
 // v0.11.10: checks are hidden on every card and in every result line (owner 2026-11-06: immersion); the James tab still shows the skills
 const SHOW_CHECKS_KEY = 'boneash.showchecks'; // per phone: '1' = show them (Settings → Show checks)
@@ -169,6 +178,7 @@ const relSnap = () => ({ rel: JSON.parse(JSON.stringify(g?.rel || {})), coil: `$
  * (`always`: an entry even with no gains, as a task card always had). */
 function land(title, lines, fail, snap0, { always = false, quiet = true } = {}) {
     noteLines(g, lines); // v0.11.214 (owner pick RD1, RU): what a tap shows is read (the plan stops before a line not read yet)
+    welcomeCard = null; // WB-y: the card goes with the next tap that does something
     const p = landParts(lines, snap0.rel, g.rel, { coilChanged: snap0.coil !== `${g.coil?.n}|${g.coil?.act}` });
     sameVisit = shownScreen && shownScreen.g === g && shownScreen.id === g.scene ? shownScreen : null; // v0.11.134 (LP2, SV): the action kept you on the screen
     lastResult = null;
@@ -372,7 +382,7 @@ function renderCardScreen() {
     const medOpen = med.filter((m) => m.open || m.late || m.show); // v0.11.46 (Q1): a sit short of Qi shows, locked, with the reason // v0.11.37 (D-a): a card that would end past the day's end (00:00 since v0.11.91) shows, locked, with that tag // v0.11.17 (pick 1a): only what can run now (collaterals until they open, locked sits and meridians, Break through until ready)
     const medHtml = medOpen.length ? groupHtml('Meditate', medOpen.map(medCardHtml), true) : ''; // v0.11.67 (D2): starts open, folds
     view.innerHTML = `<section class="fade-in">
-${statusHtml()}
+${welcomeHtml()}${statusHtml()}
 <div class="plate">${sceneArt(v.art)}</div>
 <header class="head"><div class="place">${esc(v.place || g.location)}</div><h1 class="title">${esc(v.title)}</h1></header>
 ${proseOut}
@@ -411,7 +421,7 @@ function renderCombatCards() {
     const yuki = `<div class="foe ally"><span>Yuki${c.yukiOut ? ' (watching)' : c.netted ? ' (under the net)' : ''}</span><div class="stroke"><i style="width:${pct(g.yuki.hp, yukiHpMax(g))}"></i></div></div>` // v0.11.210 (owner pick N1, HB): her bar drawn (was var(--bone), defined nowhere)
         + ((c.song || 0) > 0 && c.style !== 'spar' ? `<div class="foe song"><span>${esc(SONG_TEXT.label.replace('{n}', c.song).replace('{max}', SONG_MAX))}</span></div>` : ''); // v0.11.116 (WA2, SG)
     view.innerHTML = `<section>
-${statusHtml()}
+${welcomeHtml()}${statusHtml()}
 <div class="plate">${sceneArt(val(SCENES[g.scene].art))}</div>
 <header class="head"><div class="place">${esc(sceneTitle(g.scene))}</div><h1 class="title">Round ${c.round}</h1></header>
 <div class="prose round">${shownLines(combatLog || c.log).map((l) => dieHtml(l)).join('<br>') || 'The fight begins.'}</div>
@@ -532,7 +542,24 @@ function ghFileName(ext) {
     return `${when}-incremental-${String(g.scene).replace(/[^\w-]+/g, '-')}.${ext}`;
 }
 function openOut(url) { const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove(); }
+let ghParts = null; // v0.11.283 (SV-p): { parts, names, next, whole, g0 }: a long save's parts waiting for their taps (this page only; RV L4: dropped when the game changes)
+/** SV-p: the next part: copied, then GitHub's new-file page under the part's name; the button names the part after it. */
+function sharePart() {
+    const p = ghParts, i = p.next, n = p.parts.length;
+    const base = `https://github.com/${GH_REPO}/new/main?filename=${encodeURIComponent(`${GH_DIR}/${p.names[i]}`)}`;
+    copyText(p.parts[i], () => {
+        p.next += 1;
+        if (p.next >= n) ghParts = null;
+        openOut(base);
+        note(PART_TEXT.copied(i + 1, n, Math.round(p.parts[i].length / 1024)));
+        shareLabel();
+    }, () => { ghParts = null; shareLabel(); note(shareText(ghFileName('txt'), p.whole) ? FILE_TEXT.ghShared : 'The save could not be copied. Use "Download save file" instead.'); });
+}
+const partsLive = () => { if (ghParts && ghParts.g0 !== g) ghParts = null; return !!ghParts; }; // RV (L4): a new game or a load drops the old save's parts
+const shareLabelText = () => (partsLive() ? PART_TEXT.button(ghParts.next + 1, ghParts.parts.length) : 'Share to GitHub');
+function shareLabel() { const b = document.querySelector('[data-share]'); if (b) b.textContent = shareLabelText(); }
 async function shareToGitHub() {
+    if (partsLive() && ghParts.next < ghParts.parts.length) { sharePart(); return; } // SV-p: the next part of the save already split
     autosave();
     const json = serialize(g);
     const packed = await packText(json);
@@ -541,6 +568,8 @@ async function shareToGitHub() {
     const full = `${base}&value=${encodeURIComponent(body)}`;
     expMark();
     if (full.length <= GH_URL_MAX) { openOut(full); note('GitHub opens with the save filled in. Sign in, then tap "Commit changes".'); return; }
+    const parts = saveParts(body, packed ? SAVE_PART_MAX : SAVE_PART_MAX / 3); // v0.11.283 (owner pick P51-A, SV-p): a long save in parts, one GitHub page each; RV (L4): an unpacked one (no CompressionStream) by a third, so a part stays under 18,000 bytes with 3-byte characters
+    if (parts.length > 1) { const name0 = ghFileName(packed ? 'txt' : 'json'); ghParts = { parts, names: parts.map((_, i) => partName(name0, i + 1, parts.length)), next: 0, whole: body, g0: g }; sharePart(); return; }
     const go = (ok) => { if (!ok && shareText(ghFileName('txt'), body)) { note(FILE_TEXT.ghShared); return; } openOut(base); note(ok ? `Save copied (${Math.round(body.length / 1024)} KB): too long for a link. On GitHub, paste it into the empty file, then tap "Commit changes".` : 'The save could not be copied. Use "Download save file" instead.'); };
     copyText(body, () => go(true), () => go(false));
 }
@@ -704,6 +733,13 @@ window.addEventListener('unhandledrejection', (ev) => showError(ev.reason));
 
 /* ---------------- story ---------------- */
 
+/** WB-y: the Welcome back card, above the story's status. */
+function welcomeHtml() {
+    if (!welcomeCard || !g || welcomeCard.g0 !== g || g.minutes !== welcomeCard.view.minutes) return ''; // RV (M3)
+    const v = welcomeCard.view, shown = shownLines(v.lines); // RV (M4): the checks hidden as in the journal
+    const body = shown.length ? `<p class="note">${esc(WELCOME_TEXT.last)}</p>${shown.map((l) => `<div>${dieHtml(l)}</div>`).join('')}` : `<p class="note">${esc(WELCOME_TEXT.none)}</p>`;
+    return `<div class="wnew-box welcome" role="status"><div class="wnew-head"><b>${esc(WELCOME_TEXT.head)}</b><button class="btn" data-welcomeclose="1" aria-label="Close Welcome back">✕</button></div><p>${esc(WELCOME_TEXT.away(awayText(welcomeCard.away)))} ${esc(clockLabelG(g, v.minutes))}, ${esc(sceneTitle(v.scene))}.</p>${body}</div>`;
+}
 function statusHtml() {
     return `<div class="status">
 <div class="bar hp"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP${pbar(g.james.hp, jamesHpMax(g), 'HP')}</div>
@@ -787,8 +823,8 @@ ${slot(1)}${slot(2)}${slot(3)}
 ${bak.length ? bak.map((b) => `<div class="row"><span>${esc(b.name)}</span><span class="note">${esc(descOf(b.raw))}${b.when ? ` · saved ${esc(new Date(b.when).toLocaleString())}` : ''}</span><div class="btns sub"><button class="btn" data-bak="${b.k}">Restore</button></div></div>`).join('') : '<p class="note">No backups yet.</p>'}
 <h2>Move a save to another device</h2>
 <div class="btns"><button class="btn" data-export="1">Download save file</button>${canSaveToFile(window.AndroidBridge) ? '<button class="btn" data-exportfile="1">Save to a file</button>' : ''}<label class="btn">Load save file<input type="file" accept="application/json,.json,text/plain,.txt" data-import="1" hidden></label></div>
-<div class="btns"><button class="btn" data-share="1">Share to GitHub</button><button class="btn" data-status="1">Copy status as text</button></div>
-<p class="note">Share to GitHub opens GitHub's page for a new file in the game's saves folder with this save filled in; sign in and tap "Commit changes". Copy status is for bug reports.</p>
+<div class="btns"><button class="btn" data-share="1">${esc(shareLabelText())}</button><button class="btn" data-status="1">Copy status as text</button></div>
+<p class="note">Share to GitHub opens GitHub's page for a new file in the game's saves folder with this save filled in; sign in and tap "Commit changes". ${PART_TEXT.note} Copy status is for bug reports.</p>
 <h2>All saves</h2>
 <div class="btns"><button class="btn" data-exportall="1">Export all saves</button>${canSaveToFile(window.AndroidBridge) ? '<button class="btn" data-exportallfile="1">Save all to a file</button>' : ''}<label class="btn">Restore all saves<input type="file" accept="application/json,.json" data-import="1" hidden></label></div>
 ${pendingAll ? `<p class="note">This file holds a game at ${esc(descOf(pendingAll.auto))}, ${Object.keys(pendingAll.slots).length} slot${Object.keys(pendingAll.slots).length === 1 ? '' : 's'} and ${Object.keys(pendingAll.backups).length} backup${Object.keys(pendingAll.backups).length === 1 ? '' : 's'}${pendingAll.saved ? `, exported ${esc(new Date(pendingAll.saved).toLocaleString())}` : ''}${pendingAll.skipped ? ` (${pendingAll.skipped} unreadable, left out)` : ''}. Restoring replaces your autosave, slots and backups; this game is kept as the "before" backup.</p><div class="btns"><button class="btn primary" data-restoreall="1">Restore all</button><button class="btn" data-restoreall="">Cancel</button></div>` : ''}
@@ -802,6 +838,7 @@ function renderSettings() {
 <h2>The clock</h2>
 <p class="note">Everything happens at once: each card moves the clock by its time.</p>
 <div class="btns"><button class="btn${askFatal ? ' primary' : ''}" data-pausedeath="1">Ask before a card that ends the Coil: ${askFatal ? 'on' : 'off'}</button></div>
+<div class="btns"><button class="btn${welcome.on ? ' primary' : ''}" data-welcome="1">${WELCOME_TEXT.setting(welcome.on)}</button></div>
 <h2>Text size</h2>
 <div class="btns">${TEXT_SIZES.map((n) => `<button class="btn${n === textSize ? ' primary' : ''}" data-textsize="${n}">${n}%</button>`).join('')}</div>
 <h2>Checks</h2>
@@ -849,6 +886,18 @@ document.body.appendChild(announcer);
 let announcedScene = null;
 function announce(text) { if (!text) return; announcer.textContent = ''; setTimeout(() => { announcer.textContent = String(text).replace(/\*/g, ''); }, 30); }
 
+/** v0.11.283 (owner pick P51-A, L7-f): on a PC the tooltip opens beside the held card (app.js tipBox); the phone keeps the CSS bar. */
+// RV (L5): a resize, or a scroll while the tooltip sits beside its card, closes it (it would stay where the card was)
+window.addEventListener('resize', () => { if (!tipEl.hidden) { tipEl.hidden = true; tipEl.classList.remove('beside'); tipEl.style.left = tipEl.style.top = ''; } });
+window.addEventListener('scroll', () => { if (!tipEl.hidden && tipEl.classList.contains('beside')) tipEl.hidden = true; }, { capture: true, passive: true });
+function placeTip(b) {
+    const wide = window.innerWidth >= TIP_WIDE;
+    tipEl.classList.toggle('beside', wide);
+    if (!wide) { tipEl.style.left = tipEl.style.top = ''; return; }
+    const r = b.getBoundingClientRect(), t = tipEl.getBoundingClientRect();
+    const p = tipBox(r, t.width, t.height, window.innerWidth, window.innerHeight);
+    tipEl.style.left = `${p.left}px`; tipEl.style.top = `${p.top}px`;
+}
 const tipEl = document.createElement('div');
 tipEl.id = 'tip'; tipEl.setAttribute('role', 'dialog'); tipEl.setAttribute('aria-label', 'Card details'); tipEl.hidden = true;
 document.body.appendChild(tipEl);
@@ -924,7 +973,7 @@ view.addEventListener('pointerdown', (ev) => {
     holdStart = { x: ev.clientX, y: ev.clientY };
     holdTimer = setTimeout(() => {
         holdTimer = null;
-        try { tipEl.innerHTML = tipFor(b); tipEl.hidden = false; swallowUntil = Date.now() + 1500; swallowBtn = b; } catch (err) { showError(err); }
+        try { tipEl.innerHTML = tipFor(b); tipEl.hidden = false; placeTip(b); swallowUntil = Date.now() + 1500; swallowBtn = b; } catch (err) { showError(err); }
     }, HOLD_MS);
 });
 view.addEventListener('pointermove', (ev) => { if (holdStart && Math.hypot(ev.clientX - holdStart.x, ev.clientY - holdStart.y) > 10) cancelHold(); });
@@ -1060,6 +1109,7 @@ view.addEventListener('click', (ev) => {
             if (m === 'continue' || m === 'recovery') { hadSave = true; setTab('story'); return; } // v0.11.210 (owner pick N1, MS): setTab closes the menu itself, so the menu's own scroll is not kept as the game's (35 px at 1366x768, 130%)
             openMenu(m); return;
         }
+        if (b.dataset.welcomeclose) { welcomeCard = null; render(); return; } // WB-y
         if (b.dataset.newsclose) { news = []; render(); return; } // v0.11.150 (WN): the box closes for this visit (the version is already kept)
         if (b.dataset.textsize) { textSize = Number(b.dataset.textsize); store.set(TEXT_SIZE_KEY, String(textSize)); applyTextSize(); render(); return; }
         if (b.dataset.edition) { store.set(EDITION_KEY, setEdition(b.dataset.edition)); render(); return; } // v0.11.182 (ES)
@@ -1088,6 +1138,7 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.updauto || b.dataset.updinst) { const k = b.dataset.updauto ? 'auto' : 'autoInstall'; upd[k] = !upd[k]; store.set(UPDATE_KEY, JSON.stringify(upd)); render(); return; } // v0.11.147 (UP1)
         if (b.dataset.updcheck) { checkAppUpdate(true); return; }
         if (b.dataset.updgo) { updater.start(); return; }
+        if (b.dataset.welcome) { welcome.on = !welcome.on; welcomeKeep(); render(); return; } // WB-y
         if (b.dataset.pausedeath) { askFatal = !askFatal; store.set(PAUSE_DEATH_KEY, askFatal ? '1' : '0'); render(); return; }
         if (b.dataset.readall) { readAllScene = `${g.scene}#${g.coil?.n || 1}`; render(); return; } // v0.11.35 (P1-a)
         if (b.dataset.skip) { // v0.11.35 (P1-a): the stretch read before, at once; each choice as a tap would take it
@@ -1258,6 +1309,9 @@ load();
 const closeSave = () => { if (store.get(AUTO) === lastWritten) autosave(); };
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') closeSave(); });
 window.addEventListener('pagehide', closeSave);
+welcomeCheck(); // WB-y: on opening
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') welcomeKeep(); else if (document.visibilityState === 'visible') { const had = !!welcomeCard; welcomeCheck(); if (!had && welcomeCard) render(); } }); // WB-y: a page left open (the app in the background) counts its time away too
+window.addEventListener('pagehide', welcomeKeep);
 render();
 // v0.11.150 (BL1, WN): What's new since the version this phone last opened; kept as seen at once (Selene's), shown until ✕
 const hadSaveAtLoad = hadSave; // RW1 (HS): Begin sets hadSave; a new player stays a new player

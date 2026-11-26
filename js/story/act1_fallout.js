@@ -454,7 +454,7 @@ Old Wen turns to you. "The stranger will speak."`
 Today's business is the Old Tree. Each hunter at the table had the same tale from his grandfather. Once the forest's heart *sang*, and while it sang the beasts were mild and the herbs grew clean. Then the Sect came, in the days before it was called the Sect, and the song ended.
 
 ${byForm(g, "\"Your cat,\" Old Wen says,", "\"Your great beast,\" Old Wen says,", "\"Your companion,\" Old Wen says,")} "faces north in her sleep. As you do."`
-            : `Third council, and the last before the north path. The tea has gone beyond weak into memory: hot water, served with the full ceremony of tea. The map still lies on the table from this morning. Nobody has presumed to roll it up.
+            : `Third council, and the last before the north path. The tea has gone beyond weak into memory: hot water, served with the full ceremony of tea. The map still lies on the table. Nobody has presumed to roll it up.
 
 The business is short. Who answers for the palisade line. Who drills the line. Who keeps the well while the Bone-Maker is in the Blackroot with the herb-gatherer and the wild woman, and ${daysWord(elderLeft(g))} stand on the tally. Each matter is stood for, bowed over and settled. Nobody says *if he comes back*. It sits at the table all the same, an eighth elder.
 

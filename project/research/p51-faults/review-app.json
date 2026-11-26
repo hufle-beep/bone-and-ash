@@ -1,0 +1,16 @@
+[
+ {
+  "id": "C5",
+  "file": "js/main.js",
+  "find": "if (document.visibilityState === 'hidden') welcomeKeep(); else",
+  "replace": "if (false) welcomeKeep(); else",
+  "note": "WB-y: time away counted from when the page last came back, not from when it was hidden: 5 h of play and a 2 h break give a card. appfiles: no pin on the visibility listener. Measured MISSED."
+ },
+ {
+  "id": "C6",
+  "file": "css/style.css",
+  "find": "#tip.beside { bottom: auto; }",
+  "replace": "#tip.beside { }",
+  "note": "L7-f: on a PC the tooltip keeps its bottom and gets placeTip's top: stretched from the card to the bottom bar. appfiles pins main.js only. Expect MISSED."
+ }
+]

@@ -807,7 +807,7 @@ ${g.inventory.jade_bracket ? 'You have jade bracket in the hammerspace. Fifteen 
     drill: {
         id: 'drill', title: 'The Hunters', art: 'drill', place: `${P} — the threshing floor`,
         enter: (g) => { markDaily(g, 'drill'); return []; }, // v0.11.157 (NX1, PA): a mark for "Call it a day" only, no longer a gate
-        text: (g) => `Eight hunters: two of them white-bearded and old enough to be bowed to in the street, and one of them twelve. They have bows, boar spears, and the faces of men who have knelt to the Crimson Lotus every year of their lives.
+        text: (g) => `Eight hunters: two of them white-bearded and old enough to be bowed to in the street, and one of them twelve. They have bows, ${g.flags.spears ? 'white bone spearheads on their shafts' : 'boar spears'}, and the faces of men who have knelt to the Crimson Lotus every year of their lives.
 
 ${g.flags.militia ? 'They are faster than they were, and they stand differently. That may be the most dangerous thing you have done here.' : 'You are no soldier. You are, however, a man who has just spent several days learning to stay alive against things with more teeth than he has. That much you can teach.'}`,
         choices: [
