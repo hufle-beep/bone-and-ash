@@ -1,0 +1,15 @@
+a1:tea | A man Heaven's lightning would not strike, who rises off the street as only a Golden Core may, and sings
+a1:tea:alt | A man Heaven declined to punish, who flies with a sect master's right and none of the years, and sings
+a1:street | And you, whom the sky would not strike and the ground cannot keep, they regard as they would a verdict of Heaven: gravely, and with no thought of appeal.
+a1:street:alt | And on you their eyes rest as on a sect master who has mislaid his sect, his ceremony and some six hundred years: lowered, grave, and asking nothing.
+a1:wen | the tribulation that turned away from you and the flight you took from our street after it
+a1:wen:alt | a man Heaven would not strike, who then rose from our street as only a sect master may
+a1:shen | And I am told that the tribulation gathered over you and dispersed, and that you then rose from the street as I have seen only my master rise. I have lived three hundred years. I believe what I have looked at.
+a1:shen:alt | Two things are written of you: that Heaven's lightning came and withdrew, and that you fly, which is not yet given to me. I have lived three hundred years. I came to see what my disciples mistook.
+# notes
+- a1:tea and a1:wen are fragments, as the brief asks: tea ends in "and sings" so "bone out of the air" completes it; wen follows "He will have heard of" and reads with or without ", and of the disciples you sent home bleeding".
+- a1:shen: I ended the kept sentence at "years." so the old run "years, and I" is not carried over; "I have lived three hundred years" itself is the old five-word run the brief tells me to keep.
+- a1:shen assumes Shen Qiu has seen the sect master fly ("only my master"); the alt avoids that claim. Both assume the report reached him in writing or by word, not that he watched.
+- a1:tea assumes the envoys' reports can include the flight (they were not on the street); if not, Old Wen's sentence still reads as the narration's summary of the man, not of the report.
+- a1:street:alt names "six hundred years" (the card's Golden Core age); cut "and some six hundred years" if the street should not know it.
+- "Heaven's lightning" appears in two drafts (tea, shen:alt) and "would not strike" in three; no five-word run is shared.

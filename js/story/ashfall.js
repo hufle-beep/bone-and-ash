@@ -3,7 +3,7 @@
  * a night visit shaped by what James did to Gao Feng, and bonuses that pay off when the Sect comes on Day 7.
  */
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest, nightTo, canFly } from '../core/game.js';
-import { FW } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
+import { FW, FW2 } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
 import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply, seqText } from './common.js';
 import { dayIndex, lastReply } from '../core/lines.js'; // v0.11.279 (P47-B, PN-f k): lastReply // v0.11.232 (P5-B, V3b): the roof's lines by the text's index
 import { storyNight, weekMorning, tributeLeft, daysWord, DaysWord } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
@@ -824,7 +824,7 @@ ${g.flags.militia ? 'They are faster than they were, and they stand differently.
         text: (g) => (!g.flags.lore_realms
             ? `Old Wen pours tea and talks of cultivation as an old farmer talks of weather: without hope, without fear, and in exact detail, to the last hailstone.
 
-Mortal Vessel. Foundation. Core Formation. The realms stand one above another into cloud, and each costs more than the one below it. The Sect buys its rungs with villages like this one: grass, grain, children. "A ladder," he says, "is only a ladder while somebody holds the bottom."`
+${g.flags.sky_flew ? FW2.wl /* v0.11.282 (P50-A, WL) */ : `Mortal Vessel. Foundation. Core Formation. The realms stand one above another into cloud, and each costs more than the one below it. The Sect buys its rungs with villages like this one: grass, grain, children. "A ladder," he says, "is only a ladder while somebody holds the bottom."`}`
             : byDay(g, [(g) => `Today's lesson is the Old Tree, in the midst of the wilds — "there before the Sect, there before my grandfather's grandfather" — and what the hunters' tales hold of it: that it once sang, and the singing made the forest kind.
 
 "Then a day came when it sang no more. And the forest was kind no more." He turns the good eye your way. ${byForm(g, "\"Your cat has been staring toward it since you came.", "\"Your great beast has been staring toward it since you came.", "\"Your companion has been staring toward it since you came.")} So have you."`, (g) => `He comes back to the forest today, as you thought he might. To the Old Tree — "older than the Sect, older than the oldest grave on the hill" — and to what the hunters' grandfathers said of it: that in the years it sang, a child could sleep under any branch in the forest and wake with nothing worse than dew.

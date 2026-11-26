@@ -1,0 +1,12 @@
+[
+ { "id": "F1", "file": "js/story/prologue.js", "find": "if (ffPlace(g) === 'village') g.flags.sky_flew = true;", "replace": "g.flags.sky_flew = true;", "note": "the flag set by any first flight, not only Ashfall's" },
+ { "id": "F2", "file": "js/story/prologue.js", "find": "(g.flags.sky_flew ? FW2.er", "replace": "(false ? FW2.er", "note": "Wen's rung keeps 'Foundation' after the flight" },
+ { "id": "F3", "file": "js/story/prologue.js", "find": "(g.flags.sky_flew ? FW2.ha", "replace": "(g.flags.sky_witness ? FW2.ha", "note": "the fungus return reads the sky, not the flight" },
+ { "id": "F4", "file": "js/story/prologue.js", "find": "g.flags.sky_flew ? FW2.lh", "replace": "g.flags.sky_flew ? FW.luHanSky", "note": "Lu Han's report without the flight" },
+ { "id": "F5", "file": "js/story/prologue.js", "find": "return g.flags.sky_flew ? t.replace(SENT_MORTAL", "replace": "return false ? t.replace(SENT_MORTAL", "note": "the collectors' line still calls him a mortal" },
+ { "id": "F6", "file": "js/story/ashfall.js", "find": "${g.flags.sky_flew ? FW2.wl", "replace": "${!g.flags.sky_flew ? FW2.wl", "note": "the realm lesson inverted" },
+ { "id": "F7", "file": "js/story/act1_return.js", "find": "He will have heard of ${g.flags.sky_flew ? FW2.wen", "replace": "He will have heard of ${g.flags.sky_flew ? FW2.street", "note": "rt_wen shows the wrong line" },
+ { "id": "F8", "file": "js/core/coil.js", "find": "'lf_known', 'songs'];", "replace": "'lf_known', 'songs', 'sky_flew'];", "note": "the flag kept over a rewind (the village remembers)" },
+ { "id": "F9", "file": "js/story/act1_fallout.js", "find": "${g.flags.sky_flew ? FW2.tea", "replace": "${g.flags.sky_witness ? FW2.tea", "note": "the tea reads the sky, not the flight" },
+ { "id": "F10", "file": "js/story/prologue.js", "find": "the rising carries on, in the open street,", "replace": "the rising carries on, round the grain store,", "note": "the village flight's opening changed" }
+]

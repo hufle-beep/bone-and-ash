@@ -15,7 +15,7 @@
 - The **Ouroboros Axiom** composts the poisoned Qi: no herbs, no tribulations. **Parallel Cognition**: nine threads, instincts, never a voice.
 - **Bonesinger** braided with his Qi into one **Convergence**: bone from nowhere, instantly; darts, needles, a wraithbone blade.
 - **Locals can't sense his cultivation**: to them he looks mortal. They place him by what they see, never by a realm they feel.
-- **Flight** from Foundation, natural, by realm; locals fly only from Golden Core, so nobody in the prologue or Act 1 flies but him and Yuki. Never in the prologue's fights.
+- **Flight** from Foundation, natural, by realm; locals fly only from Golden Core, so nobody in the prologue or Act 1 flies but him and Yuki. Never in the prologue's fights. The first flight (once a game): Ashfall's whole street watches it (v0.11.282, FC-w2) and reads him as at least Golden Core; the Sect Master flies "with drums and a full court", and Shen Qiu has seen only his master fly.
 - Loves cooking and feeding people (Central and Eastern European, Italian, East Asian); music always on the omnitool, quiet, often no earphones; never while hunting. Throwaway remarks by others (never a speech) show the warm man under the deadpan. Real names (bands, songs, books, games) only through slots `{ref:id}`: two editions, named and general (v0.11.182).
 
 ## Yuki

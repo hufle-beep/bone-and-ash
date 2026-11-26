@@ -3,6 +3,7 @@
  * Day 21. Ashfall prepares. On Day 9 Ya walks out of the Blackroot. On Day 10 the expedition to the Old Tree is
  * planned, and at dawn on Day 11 it leaves (→ 'bl_start').
  */
+import { FW2 } from './flight_texts.js'; // v0.11.282 (owner picks P50-A, D1): the village saw the first flight
 import { addItem, eat, condense, advance, sleepUntil, jamesHpMax, hasItem, awardYukiFightXp, yukiForm, nightRest, nightTo } from '../core/game.js';
 import { daily, markDaily, hour, day, eatBest, pantry, foodCount, byForm, byDay, dayReply } from './common.js';
 import { encounter, rel, likesMei, likesYa, trioStep, bumpRel, KISS_YA } from './act1_common.js';
@@ -379,7 +380,7 @@ You ask about him, carefully. Voices drop. People describe Shen Qiu as they woul
 
 ${g.flags.elder_intel ? 'He has never lost a duel. He has never needed to hurry one.' : ''}
 
-One thing more, which Old Wen tells you over tea, so low that you have to lean in for it: the envoys, the watchers, Lu Han, each has carried home the same impossible report. *They cannot sense him.* ${g.flags.sky_witness ? 'A man who refuses tribulation and sings' : ending(g) === 'bluff' ? 'A senior of a mountain no one can name, who sings' : 'A man of no sect and no master, who sings'} bone out of the air, and to a cultivator's senses he is an empty chair. "To them that is not a mystery," Old Wen says. "It is an insult. The Elder is not coming to speak with a mortal. He is coming to learn what is hiding inside one."
+One thing more, which Old Wen tells you over tea, so low that you have to lean in for it: the envoys, the watchers, Lu Han, each has carried home the same impossible report. *They cannot sense him.* ${g.flags.sky_flew ? FW2.tea /* v0.11.282 (P50-A, A1) */ : g.flags.sky_witness ? 'A man who refuses tribulation and sings' : ending(g) === 'bluff' ? 'A senior of a mountain no one can name, who sings' : 'A man of no sect and no master, who sings'} bone out of the air, and to a cultivator's senses he is an empty chair. "To them that is not a mystery," Old Wen says. "It is an insult. The Elder is not coming to speak with a mortal. He is coming to learn what is hiding inside one."
 
 Meanwhile, whenever the wind goes round to the north, your Convergence lifts its head like a dog that has heard its name. North, beyond the Hollow, beyond the roots. The dead tree. It has been singing at you since the tribute, and it is not getting quieter.
 

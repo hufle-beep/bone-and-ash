@@ -1,0 +1,321 @@
+## collectors_sent — story screen: its text is drawn
+when (C2): seen in 71 games: day 24–43, hour 5, Coil 0:2–0:22
+led in by (C6): collectors_won[0] "Step back. Send him home."
+[text · all forms]
+¶1 "Go home," you tell him. "Tell your Sect Master Ashfall has a new neighbour. Tell him the neighbour doesn't eat grass, doesn't eat pills, and doesn't eat people, and would very much like to keep it that way."
+¶2 He goes. All of Ashfall watches him down the road. Then, slowly, they turn to look at you: the mortal who put a man of Foundation on his knees, which by every rule they were raised on cannot happen. In this world you have just done the one thing more dangerous than kneeling.
+¶3 You've given people hope.
+[text · as seen in play: as the first, without ¶2, and with:]
++ He goes. All of Ashfall watches him down the road. Then, slowly, they turn to look at you: the man who flies, whom nobody can sense, and who has sent the Sect's disciple home walking. Nothing they were taught as children allows for any of it. In this world you have just done the one thing more dangerous than kneeling.
+[text · as seen in play: as the first, without ¶1, ¶2, ¶3, and with:]
++ "Go home," you say. "Let your Sect Master know that Ashfall has acquired a neighbour. The neighbour eats no grass, no pills and no people, and would like very much to go on that way."
++ He goes. The whole village sees him off without a word. Then, slowly, every face turns to you, and you see what it is you have actually done. In this world it is more dangerous than kneeling.
++ You have handed people hope.
+[text · as seen in play: as the first, without ¶1, ¶2, ¶3, and with:]
++ "Home," you tell him. "And tell the Sect Master that Ashfall has a neighbour now. The neighbour eats no grass, no pills and no people, and means to keep it so."
++ He goes, nursing the worse arm. The whole village watches him go, then turns to look at you, and only then does it arrive: this is the one thing here more dangerous than kneeling. You have handed people hope.
+
+> [0] Breathe out. {all forms}
+  drawn (C3): a story choice
+  when (C2): seen in 71 games: day 24–43, hour 5, Coil 0:2–0:22, picked up to 1× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): epilogue: "By evening you are up on the ridge, with Yuki on your shoulder and nobody else. Down below, Ashfall lights its lamps, wi…" [its labels: Act 1: The Hearth Tree.]
+## elder — story screen: its text is drawn
+when (C2): seen in 200 games: day 3–25, hour 6–24, Coil 0:2–0:22
+led in by (C6): village[1] "Ask for the village elder."; ashfall[1] "Visit Old Wen."
+[text · cat]
+¶1 Old Wen is ninety in a village where sixty is Heaven being kind. He is blind in one eye, and he pours tea with the steady hand of a man who has outlived three sect masters and intends to outlive a fourth.
+¶2 "You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "Yet Mei Lin says you made a needle out of air. One of these things is untrue, and I am too old to believe it is her. And the beast on your shoulder has watched my kettle since you came through my door, and its eyes go where the steam will go before the steam does. That cannot be done. It is being done in front of me." He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
+¶3 "There does seem to be a consensus."
+¶4 "Then hear an old man's advice." He sets the cup down. "Tomorrow, the collectors come. An inner disciple leads them: Foundation, a rung no one in Ashfall has stood on. If you are here, they will see you. If they see you, they will want you. You may run tonight. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
+[text · great: as the first, without ¶2, and with:]
++ "You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "Yet Mei Lin says you made a needle out of air. One of these things is untrue, and I am too old to believe it is her. And the beast at your side has watched my kettle since you came through my door, and its eyes go where the steam will go before the steam does. That cannot be done. It is being done in front of me." He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
+[text · human: as the first, without ¶2, and with:]
++ "You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "Yet Mei Lin says you made a needle out of air. One of these things is untrue, and I am too old to believe it is her. And the beast beside you has watched my kettle since you came through my door, and its eyes go where the steam will go before the steam does. That cannot be done. It is being done in front of me." He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
+[text · as seen in play: as the first, without ¶2, ¶4, and with:]
++ "You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "Yet Mei Lin says you made a needle out of air. One of these things is untrue, and I am too old to believe it is her. And the beast on your shoulder: I have watched it since you came through my door. The steam of my kettle leans toward it, plainly and against the draught, small as it is, and there is no pill-smell on it. I am ninety, and I have seen steam do that only around the heirs of great sects." He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
++ "Then hear an old man's advice." He sets the cup down. "In nineteen days, the collectors come. An inner disciple leads them: Foundation, a rung no one in Ashfall has stood on. If you are here, they will see you. If they see you, they will want you. You may run before then. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
++ "You have also," he adds, with no change of voice, "shamed an outer disciple of the Sect on our slope already. Running may no longer be yours to choose."
+[text · as seen in play: as the first, without ¶2, ¶4, and with:]
++ "You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "Yet Mei Lin says you made a needle out of air. One of these things is untrue, and I am too old to believe it is her. And the beast on your shoulder: I have watched it since you came through my door. The steam of my kettle leans toward it, steeply and against the draught, small as it is, and there is no pill-smell on it. I am ninety, and I have seen steam do that only around the heirs of great sects." He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
++ "Then hear an old man's advice." He sets the cup down. "In twenty-one days, the collectors come. An inner disciple leads them: Foundation, a rung no one in Ashfall has stood on. If you are here, they will see you. If they see you, they will want you. You may run before then. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
++ "You have also," he adds, with no change of voice, "shamed an outer disciple of the Sect on our slope already. Running may no longer be yours to choose."
+[text · as seen in play: as the first, without ¶2, ¶4, and with:]
++ "You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "Yet Mei Lin says you made a needle out of air. One of these things is untrue, and I am too old to believe it is her. And the beast on your shoulder: I have watched it since you came through my door. The steam of my kettle leans toward it, plainly and against the draught, small as it is, and there is no pill-smell on it. I am ninety, and I have seen steam do that only around the heirs of great sects." He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
++ "Then hear an old man's advice." He sets the cup down. "In twenty-one days, the collectors come. An inner disciple leads them: Foundation, a rung no one in Ashfall has stood on. If you are here, they will see you. If they see you, they will want you. You may run before then. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
++ "You have also," he adds, with no change of voice, "shamed an outer disciple of the Sect on our slope already. Running may no longer be yours to choose."
+[text · as seen in play: as the first, without ¶2, ¶4, and with:]
++ "You eat no pills," he says, before you have finished sitting down. "You carry no smell of grass. And when I reach for you with the little sense ninety years have left me, I find nothing. No root. No sea of Qi. That chair might as well be empty." He frowns at the chair. "Yet you walked down out of the wilds alive, with no spear in your hand, and a whole street took care not to look at you. One of these things is untrue, and I am too old to doubt what a whole street will not look at. And the beast on your shoulder: I have watched it since you came through my door. The steam of my kettle leans toward it, plainly and against the draught, small as it is, and there is no pill-smell on it. I am ninety, and I have seen steam do that only around the heirs of great sects." He sips. "I would know what you are before the Crimson Lotus does. Their way of learning it is to cut you open."
++ "Then hear an old man's advice." He sets the cup down. "In twenty-one days, the collectors come. An inner disciple leads them: Foundation, a rung no one in Ashfall has stood on. If you are here, they will see you. If they see you, they will want you. You may run before then. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
+
+> [0] Thank him. Think about it. {all forms}
+  drawn (C3): a story choice
+  when (C2): seen in 200 games: day 3–25, hour 6–24, Coil 0:2–0:22, picked up to 6× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): village: "Ashfall Hamlet: forty grey stone houses gathered round a well, a shrine to some god whose face has been chiselled away, …" [its labels: Ask for the village elder. / There's a sick child — you can hear the coughing. … / Offer to hunt for the village. You need food; so d… / Evening. Mei Lin said something about dinner. / Sit with Yuki. / Yuki: change form. / Lean on Yuki a while. / Keep Yuki company.]
+  result (C1, seen in play): The day outlasts your body. You fold up where you stand, joint by joint, and the last thing you see is Yuki's face, very close and not at all impressed. → coil_end
+## first_flight — story screen: its text is drawn
+when (C2): seen in 166 games: day 7–42, hour 8–25, Coil 0:4–0:22
+led in by (C6): breakthrough[0] "Get up."
+[text · all forms]
+¶1 You get up, and the getting up does not stop where it usually does. Your boots clear the earth by the breadth of a palm and stay there. Nobody is about to witness this but Yuki, who has watched you do stupider things on purpose.
+¶2 The Qi here runs in currents, and has all along; only now do you have anything to catch it with. You lean into one as a swimmer leans into a river, and it takes your weight without comment. There is no trick to learn. It is walking, with one thing fewer to push against.
+¶3 You go up as far as seems reasonable, turn on a slow eddy and let a stronger flow carry you a dozen paces sideways. Your people do this from Foundation. Nobody at home would look up.
+¶4 Yuki steps off your shoulder onto nothing and stays level with your face, tail steering. *Finally,* she says. *All this time, carried about by a pedestrian. Keep up.* She takes the faster current. Naturally.
+¶5 You descend because you choose to, which is the whole difference. Yuki lands on your shoulder and washes one paw. *Adequate,* she says. *You held your arms out. Don't.* You had not noticed the arms.
+[text · as seen in play: as the first, without ¶1, ¶5, and with:]
++ You rise to your feet and the rising carries on, in the open street, with every face in Ashfall already turned your way. A strip of daylight opens under your soles. Somebody drops a basket. Nobody picks it up.
++ You sink back toward the street, where nobody has moved and several have forgotten to breathe. Those who can feel Qi at all are trying you and coming back with empty hands. "The Sect Master leaves the ground," Old Wen says, to the street and not to you. "At Golden Core, slowly, with drums and a full court. I felt nothing rise." "It was only a short one," you say. *Don't explain,* Yuki says. *It makes it worse.* Your boots find the dust, and Ashfall goes on standing round you, very carefully.
+[text · state: the first flight from rr_hub; the first flight from heart_hub: as the first, without ¶1, ¶5, and with:]
++ You stand. Mei Lin is asking whether you can walk, and stops halfway through a word. Ya's spear has swung round to point at your boots, and at the gap of plain air under them. You look down as well. It seems only polite.
++ Ya whoops, then scowls. "Scholar. You never said you could do that." "I couldn't, until just now." Mei Lin is watching the gap under your boots. "Sect masters fly," she says quietly. "Golden Core. Slowly, with attendants." "I'll skip the attendants," you say, and drift down to them.
+[text · state: the first flight from ah_hub: as the first, without ¶1, ¶5, and with:]
++ Mei Lin offers you a hand up. You take it, out of manners, and rise rather further than she pulled. She lets go quickly and studies the space beneath your boots, then you, with the expression of a herbalist handed a plant that is in no book.
++ Mei Lin watches you the whole way down. "Only Golden Core flies," she says, quite evenly. "Old men. They burn incense beforehand." "I didn't have any," you say. She laughs, against her better judgement, then checks the sky in case it heard.
+
+> [0] Carry on. {all forms}
+  drawn (C3): a story choice
+  when (C2): seen in 166 games: day 7–42, hour 8–25, Coil 0:4–0:22, picked up to 1× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): stream: "The stream runs dark over black stones, so cold that your teeth ache from looking at it. You are very thirsty. The red s…" [its labels: Test the water with the omnitool before drinking. / Forage along the bank — berries, fungi, anything t… / Hunt. Yuki has been staring at something in the re… / Keep walking downstream until dark. / Sit with Yuki. / Keep going downstream until dark. / Yuki: change form. / Lean on Yuki a while. / and 1 more]
+## fo_elder_named — story screen: its text is drawn
+when (C2): seen in 200 games: day 44, hour 6–7, Coil 1:2–1:22
+led in by (C6): fo_letter[0] ""Then we use the a hundred and two days.""; fo_leave_offer[0] ""Understood. I'm staying.""; fo_envoy[0] "Stall, like a senior: "This one is in seclusion. Return when the plum trees flower.""; fo_envoy[1] "Refuse plainly: "I don't drink tea with people who tax children.""; fo_envoy[2] "Ask him, quietly, what the Elder is like."; fo_lu_han[0] "Call after him: "Lu Han. If you want to be clean again, you know where I am.""; and 1 more
+[text · all forms]
+¶1 So that is how it stands. In a hundred and two days Outer Elder Shen Qiu of the Crimson Lotus comes down that road, and everything you have done here goes on the scales.
+¶2 You ask about him, carefully. Voices drop. People describe Shen Qiu as they would the weather in a mountain pass: a condition, not a person. He is old. He is courteous. He is the reason the village over the next ridge is no longer there.
+¶3 One thing more, which Old Wen tells you over tea, so low that you have to lean in for it: the envoys, the watchers, Lu Han, each has carried home the same impossible report. *They cannot sense him.* A senior of a mountain no one can name, who sings bone out of the air, and to a cultivator's senses he is an empty chair. "To them that is not a mystery," Old Wen says. "It is an insult. The Elder is not coming to speak with a mortal. He is coming to learn what is hiding inside one."
+¶4 Meanwhile, whenever the wind goes round to the north, your Convergence lifts its head like a dog that has heard its name. North, beyond the Hollow, beyond the roots. The dead tree. It has been singing at you since the tribute, and it is not getting quieter.
+¶5 A hundred and two days. You can spend them building walls. Or you can go and find out what is calling.
+[text · as seen in play: as the first, without ¶1, ¶3, ¶5, and with:]
++ So that is how it stands. In fifty-nine days Outer Elder Shen Qiu of the Crimson Lotus comes down that road, and everything you have done here goes on the scales.
++ One thing more, which Old Wen tells you over tea, so low that you have to lean in for it: the envoys, the watchers, Lu Han, each has carried home the same impossible report. *They cannot sense him.* A man Heaven declined to punish, who rises off the street as only a Golden Core may, and sings bone out of the air, and to a cultivator's senses he is an empty chair. "To them that is not a mystery," Old Wen says. "It is an insult. The Elder is not coming to speak with a mortal. He is coming to learn what is hiding inside one."
++ Fifty-nine days. You can spend them building walls. Or you can go and find out what is calling.
+[text · as seen in play: as the first, without ¶1, ¶3, ¶5, and with:]
++ So that is how it stands. In fifty-nine days Outer Elder Shen Qiu of the Crimson Lotus comes down that road, and everything you have done here goes on the scales.
++ He has never lost a duel. He has never needed to hurry one.
++ One thing more, which Old Wen tells you over tea, so low that you have to lean in for it: the envoys, the watchers, Lu Han, each has carried home the same impossible report. *They cannot sense him.* A man Heaven declined to punish, who rises off the street as only a Golden Core may, and sings bone out of the air, and to a cultivator's senses he is an empty chair. "To them that is not a mystery," Old Wen says. "It is an insult. The Elder is not coming to speak with a mortal. He is coming to learn what is hiding inside one."
++ Fifty-nine days. You can spend them building walls. Or you can go and find out what is calling.
+[text · as seen in play: as the first, without ¶1, ¶3, ¶5, and with:]
++ So that is how it stands. In fifty-nine days Outer Elder Shen Qiu of the Crimson Lotus comes down that road, and everything you have done here goes on the scales.
++ One thing more, which Old Wen tells you over tea, so low that you have to lean in for it: the envoys, the watchers, Lu Han, each has carried home the same impossible report. *They cannot sense him.* A man who refuses tribulation and sings bone out of the air, and to a cultivator's senses he is an empty chair. "To them that is not a mystery," Old Wen says. "It is an insult. The Elder is not coming to speak with a mortal. He is coming to learn what is hiding inside one."
++ Fifty-nine days. You can spend them building walls. Or you can go and find out what is calling.
+[text · as seen in play: as the first, without ¶1, ¶3, ¶5, and with:]
++ So that is how it stands. In fifty-nine days Outer Elder Shen Qiu of the Crimson Lotus comes down that road, and everything you have done here goes on the scales.
++ One thing more, which Old Wen tells you over tea, so low that you have to lean in for it: the envoys, the watchers, Lu Han, each has carried home the same impossible report. *They cannot sense him.* A man of no sect and no master, who sings bone out of the air, and to a cultivator's senses he is an empty chair. "To them that is not a mystery," Old Wen says. "It is an insult. The Elder is not coming to speak with a mortal. He is coming to learn what is hiding inside one."
++ Fifty-nine days. You can spend them building walls. Or you can go and find out what is calling.
+[text · state: the long calendar's story day 9, day 1 of its sequences; the long calendar's story day 9, day 2 of its sequences; the long calendar's story day 9, day 3 of its sequences; the long calendar's story day 9, day 4 of its sequences; the long calendar's story day 9, day 5 of its sequences; the long calendar's story day 9, day 6 of its sequences; the long calendar's story day 9, day 7 of its sequences; the long calendar's story day 9, day 1 of its sequences, Ya not met; the long calendar's story day 9, day 2 of its sequences, Ya not met; the long calendar's story day 9, day 3 of its sequences, Ya not met; the long calendar's story day 9, day 4 of its sequences, Ya not met; the long calendar's story day 9, day 5 of its sequences, Ya not met; the long calendar's story day 9, day 6 of its sequences, Ya not met; the long calendar's story day 9, day 7 of its sequences, Ya not met: as the first, without ¶1, ¶5, and with:]
++ So that is how it stands. In fifty-two days Outer Elder Shen Qiu of the Crimson Lotus comes down that road, and everything you have done here goes on the scales.
++ Fifty-two days. You can spend them building walls. Or you can go and find out what is calling.
+[text · state: the long calendar's story day 10, day 1 of its sequences; the long calendar's story day 10, day 2 of its sequences; the long calendar's story day 10, day 3 of its sequences; the long calendar's story day 10, day 4 of its sequences; the long calendar's story day 10, day 5 of its sequences; the long calendar's story day 10, day 6 of its sequences; the long calendar's story day 10, day 1 of its sequences, Ya not met; the long calendar's story day 10, day 2 of its sequences, Ya not met; the long calendar's story day 10, day 3 of its sequences, Ya not met; the long calendar's story day 10, day 4 of its sequences, Ya not met; the long calendar's story day 10, day 5 of its sequences, Ya not met; the long calendar's story day 10, day 6 of its sequences, Ya not met: as the first, without ¶1, ¶5, and with:]
++ So that is how it stands. In forty-five days Outer Elder Shen Qiu of the Crimson Lotus comes down that road, and everything you have done here goes on the scales.
++ Forty-five days. You can spend them building walls. Or you can go and find out what is calling.
+[text · state: the long calendar's story day 8, day 1 of its sequences; the long calendar's story day 8, day 2 of its sequences; the long calendar's story day 8, day 3 of its sequences; the long calendar's story day 8, day 4 of its sequences; the long calendar's story day 8, day 5 of its sequences; the long calendar's story day 8, day 6 of its sequences; the long calendar's story day 8, day 7 of its sequences: as the first, without ¶1, ¶5, and with:]
++ So that is how it stands. In fifty-nine days Outer Elder Shen Qiu of the Crimson Lotus comes down that road, and everything you have done here goes on the scales.
++ Fifty-nine days. You can spend them building walls. Or you can go and find out what is calling.
+
+> [0] Start with the walls. Today, at least. {all forms}
+  drawn (C3): a story choice
+  when (C2): seen in 200 games: day 44, hour 6–7, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): fo_ashfall: "Morning. Axes, hammers, and a work-chant kept going so that nobody has to think. 102 days until the Elder. The hammerspa…" [its labels: Build the bone palisade: stakes along the barley l… / Sit in council with Old Wen. / Drill the hunters. / Run the clinic at the well. / Find Mei Lin. / Pay your respects to Mei Lin's mother. / Somebody has been watching Ashfall from the ridge.… / Eat at the communal pot. / and 8 more]
+## heal_again — story screen: its text is drawn
+when (C2): seen in 26 games: day 3–12, hour 8–20, Coil 0:5–0:18
+led in by (C6): heal[2] "Go back to the stream for the fungus. It's two hours there and back. | Fly back to the stream for the fungus. It's two hours, nearly all of it cutting and carrying."
+[text · cat]
+¶1 You come back mud to the knees, carrying two shelves of pale green fungus, and the mother looks at them as if you had brought her the moon.
+[text · great/human: as the first, without ¶1, and with:]
++ You land out of sight behind the last house and walk in with two shelves of pale green fungus. The mother looks at them as if you had brought her the moon. You went nowhere near that high.
+
+> [0] Get to work. {all forms}
+  drawn (C3): a story choice
+  when (C2): check: GU · seen in 26 games: day 3–12, hour 8–20, Coil 0:5–0:18, picked up to 2× a game
+  result (C1, success, all forms): The fever breaks before dark. Ashfall will remember it.
+  result (C1, failure, all forms): It helps, slowly.
+  then (C1): village: "Ashfall Hamlet: forty grey stone houses gathered round a well, a shrine to some god whose face has been chiselled away, …" [its labels: Ask for the village elder. / There's a sick child — you can hear the coughing. … / Offer to hunt for the village. You need food; so d… / Evening. Mei Lin said something about dinner. / Sit with Yuki. / Yuki: change form. / Lean on Yuki a while. / Keep Yuki company.]
+## rt_arrive — story screen: its text is drawn
+when (C2): seen in 200 games: day 102, hour 6, Coil 1:2–1:22
+led in by (C6): rt_dawn[0] "Go home."
+[text · cat]
+¶1 Ashfall receives you as it receives everything: silent, drawn up in a line, hands folded.
+¶2 They have heard already. Hunters talk, and nobody now alive can name a party that walked into the heart of the Blackroot and came out again. Old Wen stands in front, his pipe cold in his fist. Behind him stands the street. No one smiles. Somebody's grandmother puts her forehead to the dust as you go by, gets up, and does it a second time to be sure.
+¶3 Their eyes go to Ya and stay there. Bare arms, a necklace of wolf teeth, a spear, a scar through one eyebrow, and a grin that amounts to a challenge.
+¶4 "She is with us," Mei Lin tells the whole street, loud and clear. No woman of Ashfall says such a thing. The street makes a note.
+¶5 And you, the stranger who walked into the forest and walked back out, they regard like a sum that has stopped adding up.
+[text · great: as the first, without ¶3, and with:]
++ Their eyes go to Yuki first: white, long as a handcart, pacing at your heel like a dog that has never heard of dogs. Ashfall has seen the outlander's beast before. It has not got smaller. They look, gravely, once, as at a matter that belongs to the outlander and is therefore not to be remarked on. Then they go to Ya and stay there. Bare arms, a necklace of wolf teeth, a spear, a scar through one eyebrow, and a grin that amounts to a challenge.
+[text · human: as the first, without ¶3, and with:]
++ Their eyes go to Yuki first — the white hair, the ears, the tail — and move on, gravely, as from a matter that belongs to the outlander and is therefore not to be looked at twice. Then they go to Ya and stay there. Bare arms, a necklace of wolf teeth, a spear, a scar through one eyebrow, and a grin that amounts to a challenge.
+[text · as seen in play: as the first, without ¶3, ¶5, and with:]
++ Their eyes go to Yuki first: white, long as a handcart, pacing at your heel like a dog that has never heard of dogs. Ashfall has seen the outlander's beast before. It has not got smaller. They look, gravely, once, as at a matter that belongs to the outlander and is therefore not to be remarked on. Then they go to Ya and stay there. Bare arms, a necklace of wolf teeth, a spear, a scar through one eyebrow, and a grin that amounts to a challenge.
++ And you, whom the sky would not strike and the ground cannot keep, they regard as they would a verdict of Heaven: gravely, and with no thought of appeal.
+[text · as seen in play: as the first, without ¶5, and with:]
++ And you, whom the sky would not strike and the ground cannot keep, they regard as they would a verdict of Heaven: gravely, and with no thought of appeal.
+[text · as seen in play: as the first, without ¶5, and with:]
++ And you they regard as they did once the sky had come for you and left again: as weather.
+[text · as seen in play: as the first, without ¶3, ¶5, and with:]
++ Their eyes go to Yuki first: white, long as a handcart, pacing at your heel like a dog that has never heard of dogs. Ashfall has seen the outlander's beast before. It has not got smaller. They look, gravely, once, as at a matter that belongs to the outlander and is therefore not to be remarked on. Then they go to Ya and stay there. Bare arms, a necklace of wolf teeth, a spear, a scar through one eyebrow, and a grin that amounts to a challenge.
++ And you they regard as they did once the sky had come for you and left again: as weather.
+
+> [0] Go to Old Wen first. Formally. {all forms}
+  drawn (C3): a story choice
+  when (C2): seen in 200 games: day 102, hour 6, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): rt_wen: "Old Wen takes the whole account without one interruption: the roots, the hall, Selene asleep in her hull of grown wood, …" [its labels: Go and plant it.]
+
+> [1] Mei Lin's mother is in the doorway. Face her. {all forms}
+  drawn (C3): a story choice
+  when (C2): seen in 200 games: day 102, hour 6, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): rt_mother: "Mei Lin's mother looks her daughter over: filthy, and scratched from zero days in the deep forest. She looks at you. At …" [its labels: Wash. Then the seed.]
+## rt_elder — story screen: its text is drawn
+when (C2): seen in 200 games: day 103, hour 8, Coil 1:2–1:22
+led in by (C6): rt_trio_night[0] "A few more hours. Then the Elder."; rt_ya_night[0] "Sleep in the grove. The song keeps you warm."; rt_mei_night[0] "Sleep. A few hours of this."; rt_quiet_night[0] "Dawn."; yk_night_solo[0] "Dawn."; yk_night_mei[0] "A few hours. Then the Elder."; and 2 more
+[text · cat]
+¶1 He comes up the road at the hour of the dragon, on foot, twelve disciples in crimson at his back and Lu Han at his right hand, with a face like a pond iced over.
+¶2 Outer Elder Shen Qiu is old as mountains are old. His white hair is bound up under a small black crown. His robe is the red of blood gone dry, with one lotus embroidered on it; his hands are folded into its sleeves, and from the left one shows the end of a closed fan of red lacquer. He walks slowly, and the air keeps step with him: heavy, sweet, rotten, this world's poisoned Qi gathered round him so thick that the roadside grass turns grey where he has passed.
+¶3 At the tribute post he stops. He considers Ashfall: the people who have not knelt. Then his face turns, slowly, toward the grove, and at last something moves in it.
+¶4 "So," he says. The voice is soft, courteous, and has no warmth in it anywhere. "It is true. Someone has planted a song in my mountains." His eyes arrive at you. "And you are the one. Every report that crossed my table said there was nothing in you to report. I have lived three hundred years, and I have never before had to look at a man to know that he was there." His head inclines, by exactly one degree.
+¶5 Then he does what all of them do, and reaches for you with his Qi-sense. This one is an Outer Elder's: it arrives like weather, like the pressure ahead of a storm, and goes over you, through you, into every corner you own.
+¶6 It comes back empty. There is no root in you for it to find, no sea, no core: a mortal in a strange coat.
+¶7 Now Shen Qiu's face does change. Not to anger. To something far older and colder: three hundred years of knowing precisely what stands before him, and here stands the exception. "I cannot feel you," he says, very softly. "Do you understand? Not hidden. Not sealed. *Absent.* As if Heaven had forgotten to write you down." His sleeves settle. "Tell me what you are, young man, and I will decide what to do with it."
+¶8 Behind you Mei Lin's hand closes on her knife. Ya's lips peel back from her teeth. Yuki, on your shoulder, has gone perfectly still.
+[text · great: as the first, without ¶8, and with:]
++ Behind you Mei Lin's hand closes on her knife. Ya's lips peel back from her teeth. Yuki, at your side, has gone perfectly still.
+[text · human: as the first, without ¶8, and with:]
++ Behind you Mei Lin's hand closes on her knife. Ya's lips peel back from her teeth. Yuki, at your elbow, has gone perfectly still.
+[text · as seen in play: as the first, without ¶1, ¶3, ¶4, ¶8, and with:]
++ He comes up the road at the hour of the dragon, on foot, twelve disciples in crimson at his back and, conspicuously, no Lu Han. Last of all, in an open litter, his sword arm still strapped to his chest, comes Gao Feng. He is here to watch. His lips never stop moving, the same few words round and round, and you are fairly sure they are your name.
++ At the tribute post he stops. He considers Ashfall: the hunters in their line with their spears grounded, the people who have not knelt. Then his face turns, slowly, toward the grove, and at last something moves in it.
++ "So," he says. The voice is soft, courteous, and has no warmth in it anywhere. "It is true. Someone has planted a song in my mountains." His eyes arrive at you. "And I am told that the tribulation gathered over you and dispersed, and that you then rose from the street as I have seen only my master rise. I have lived three hundred years. I believe what I have looked at." His head inclines, by exactly one degree.
++ Behind you Mei Lin's hand closes on her knife. Ya's lips peel back from her teeth. Yuki, at your side, has gone perfectly still.
+[text · as seen in play: as the first, without ¶1, ¶3, ¶4, ¶8, and with:]
++ He comes up the road at the hour of the dragon, on foot, twelve disciples in crimson at his back and, conspicuously, no Lu Han.
++ At the tribute post he stops. He considers Ashfall: the hunters in their line with their spears grounded, the people who have not knelt. Then his face turns, slowly, toward the grove, and at last something moves in it.
++ "So," he says. The voice is soft, courteous, and has no warmth in it anywhere. "It is true. Someone has planted a song in my mountains." His eyes arrive at you. "And I am told that the tribulation gathered over you and dispersed, and that you then rose from the street as I have seen only my master rise. I have lived three hundred years. I believe what I have looked at." His head inclines, by exactly one degree.
++ Behind you Mei Lin's hand closes on her knife. Ya's lips peel back from her teeth. Yuki, at your side, has gone perfectly still.
+[text · as seen in play: as the first, without ¶1, ¶3, ¶4, and with:]
++ He comes up the road at the hour of the dragon, on foot, twelve disciples in crimson at his back and, conspicuously, no Lu Han.
++ At the tribute post he stops. He considers Ashfall: the hunters in their line with their spears grounded, the people who have not knelt. Then his face turns, slowly, toward the grove, and at last something moves in it.
++ "So," he says. The voice is soft, courteous, and has no warmth in it anywhere. "It is true. Someone has planted a song in my mountains." His eyes arrive at you. "And the sky came for you, and went away ashamed. I have lived three hundred years, and I did not expect to see that." His head inclines, by exactly one degree.
+[text · as seen in play: as the first, without ¶1, ¶3, ¶4, ¶8, and with:]
++ He comes up the road at the hour of the dragon, on foot, twelve disciples in crimson at his back and, conspicuously, no Lu Han.
++ At the tribute post he stops. He considers Ashfall: the white palisade, the hunters in their line with their spears grounded, the people who have not knelt. Then his face turns, slowly, toward the grove, and at last something moves in it.
++ "So," he says. The voice is soft, courteous, and has no warmth in it anywhere. "It is true. Someone has planted a song in my mountains." His eyes arrive at you. "And I am told that the tribulation gathered over you and dispersed, and that you then rose from the street as I have seen only my master rise. I have lived three hundred years. I believe what I have looked at." His head inclines, by exactly one degree.
++ Behind you Mei Lin's hand closes on her knife. Ya's lips peel back from her teeth. Yuki, at your side, has gone perfectly still.
+
+> [0] Fight him. Here, in front of the grove. {all forms}
+  drawn (C3): a story choice
+  when (C2): starts a fight · seen in 200 games: day 103, hour 8, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): (a fight starts)
+
+> [1] Parley. Formally. Give him the face he needs and none of what he wants. {all forms}
+  drawn (C3): a story choice
+  when (C2): seen in 200 games: day 103, hour 8, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): rt_parley: "You bow properly, as Old Wen taught you: the exact depth a guest owes a great elder of a great sect. Shen Qiu notes it. …" [its labels: Make your offer: the grove stays, Ashfall stays, a…]
+
+> [2] Show him the truth: take him to the grove and let him breathe clean Qi, which he has not done in three hundred years. {all forms}
+  drawn (C3): a story choice
+  when (C2): req: (g) => (g.james.qi >= 12 ? true : 'needs 12 Qi') · seen in 200 games: day 103, hour 8, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): rt_truth: "You don't argue. You walk to the grove. Shen Qiu lets you get ten paces before he follows, out of curiosity or contempt …" [its labels: Open the Convergence and sing the grove's note thr…]
+
+> [3] Go with him. Spare Ashfall. {all forms}
+  drawn (C3): a story choice
+  when (C2): show: (g) => !!g.flags.offered_self · seen in 3 games: day 103, hour 8, Coil 1:13–1:15
+  result (C1, taken, all forms): (no line)
+  then (C1): rt_taken: "You walk out to him. At your back the street makes a sound you will carry for the rest of your life: no cry, no word, on…" [its labels: Walk. / Bite the tail. (Wake at the start of Act 1 or of t…]
+## rt_wen — story screen: its text is drawn
+when (C2): seen in 189 games: day 102, hour 7, Coil 1:2–1:22
+led in by (C6): rt_arrive[0] "Go to Old Wen first. Formally."
+[text · all forms]
+¶1 Old Wen takes the whole account without one interruption: the roots, the hall, Selene asleep in her hull of grown wood, the founder who cut the heart out of the world's filter and named it cultivation.
+¶2 When you are done he sits unmoving, long enough for the tea to go cold.
+¶3 "Then everything we have knelt to," he says at last, "is built on a grave." His voice stays level. "Our children went up that road to feed a thief."
+¶4 He puts his cup down with great care.
+¶5 "At dusk the hunters saw Sect colours on the switchbacks: a column on foot, a dozen and more. Only an Outer Elder walks with so many." His good eye settles on you. "Shen Qiu. Tomorrow he will be at our gate. He will have heard of the stranger no envoy of theirs could sense. He will want to see with his own eyes what you are."
+¶6 "And then?"
+¶7 "And then he will decide whether Ashfall goes on existing." Old Wen bows his head to you, formally. He has never done that before. "Whatever you carried out of that tree: if it is to be planted, plant it today."
+[text · as seen in play: as the first, without ¶5, and with:]
++ "At dusk the hunters saw Sect colours on the switchbacks: a column on foot, a dozen and more. Only an Outer Elder walks with so many." His good eye settles on you. "Shen Qiu. Tomorrow he will be at our gate. He will have heard of the tribulation that turned away from you and the flight you took from our street after it, and of the disciples you sent home bleeding. He will want to see with his own eyes what you are."
+[text · as seen in play: as the first, without ¶5, and with:]
++ "At dusk the hunters saw Sect colours on the switchbacks: a column on foot, a dozen and more. Only an Outer Elder walks with so many." His good eye settles on you. "Shen Qiu. Tomorrow he will be at our gate. He will have heard of the tribulation that refused to fall, and of the disciples you sent home bleeding. He will want to see with his own eyes what you are."
+[text · as seen in play: as the first, without ¶5, and with:]
++ "At dusk the hunters saw Sect colours on the switchbacks: a column on foot, a dozen and more. Only an Outer Elder walks with so many." His good eye settles on you. "Shen Qiu. Tomorrow he will be at our gate. He will have heard of the stranger no envoy of theirs could sense, and of the disciples you sent home bleeding. He will want to see with his own eyes what you are."
+
+> [0] Go and plant it. {all forms}
+  drawn (C3): a story choice
+  when (C2): seen in 189 games: day 102, hour 7, Coil 1:2–1:22, picked up to 1× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): rt_plant: "No seed. What you have is a shard of Selene's hull, a thousand years old and warm yet, and a theory. Half the village ha…" [its labels: By the well, where the whole village draws water. / In front of the faceless shrine. Give the god a ne… / At the edge of the village, facing the forest. Ya …]
+## tribute — story screen: its text is drawn
+when (C2): seen in 200 games: day 24–43, hour 5, Coil 0:2–0:22
+led in by (C6): romance[0] "Sleep. For a few hours, the world is just this."; tribute_dawn_talk[0] "Dawn."; tribute_dawn_sleep[0] "Dawn."
+[text · cat]
+¶1 They come with the sun: four men in crimson, walking up the road as if they owned it, which they do. At their head is a tall man in a deeper red, a long sword on his back and a face as still as a frozen pond. *Inner Disciple Lu Han*, the whisper runs down the line, and after it, lower, *Foundation*, said as other villages say *flood*. Beside him, his face carefully blank and his eyes not, is Gao Feng.
+¶2 Ashfall stands in line at the tribute post with its baskets of grass and grain.
+¶3 Lu Han's gaze goes over the baskets, over the people, and stops at you. Then at Yuki. There it stays.
+¶4 "Interesting," he says. His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal." The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "And yet the beast on your shoulder watched my sense cross the road to it, and no common beast sees such a thing: a sealed jar, and nevertheless one that looks back. A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+¶5 "I've been offered worse," you say. "Not recently."
+[text · great: as the first, without ¶4, and with:]
++ "Interesting," he says. His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal." The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "And yet the beast at your side watched my sense cross the road to it, and no common beast sees such a thing: a sealed jar, and nevertheless one that looks back. A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+[text · human: as the first, without ¶4, and with:]
++ "Interesting," he says. His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal." The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "And yet the beast beside you watched my sense cross the road to it, and no common beast sees such a thing: a sealed jar, and nevertheless one that looks back. A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+[text · as seen in play: as the first, without ¶1, ¶4, and with:]
++ They come with the sun: four men in crimson, walking up the road as if they owned it, which they do. At their head is a tall man in a deeper red, a long sword on his back and a face as still as a frozen pond. *Inner Disciple Lu Han*, the whisper runs down the line, and after it, lower, *Foundation*, said as other villages say *flood*. Gao Feng is with them, carried in a litter at the rear, his sword arm bound to his chest and his face grey; at its poles are two porters pressed from some village lower down the road, who are not in crimson and are counted by nobody. He sees you and says nothing. His eyes cover the rest.
++ "The report from this village names a tribulation that withdrew," he says, to the road in general. "It names also a man who then rose off the street unaided, as the Sect Master rises. The runner was questioned with some care." Down the length of the post, heads go lower. Nobody answers him.
++ "Interesting." His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal. Villages exaggerate." The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "And yet the banners on that post lean toward the beast on your shoulder, against the wind, as banners lean toward a sect's heir. A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+[text · as seen in play: as the first, without ¶4, and with:]
++ "The report from this village names a tribulation that withdrew," he says, to the road in general. "It names also a man who then rose off the street unaided, as the Sect Master rises. The runner was questioned with some care." Down the length of the post, heads go lower. Nobody answers him.
++ "Interesting." His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal. Villages exaggerate." The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "And yet the banners on that post lean toward the beast on your shoulder, against the wind, as banners lean toward a sect's heir. A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+[text · as seen in play: as the first, without ¶4, and with:]
++ "A tribulation was reported over this village," he says, to the road in general. "And under it a man whom it did not burn." All along the post, heads go lower. Nobody points. Nobody needs to.
++ "Interesting." His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal. Villages exaggerate." The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "And yet the banners on that post lean toward the beast on your shoulder, against the wind, as banners lean toward a sect's heir. A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+[text · as seen in play: as the first, without ¶2, ¶4, and with:]
++ Ashfall stands in line at the tribute post with its baskets of grass and grain. The mother of the boy you healed has placed herself very close behind you. So has half the street.
++ "A tribulation was reported over this village," he says, to the road in general. "And under it a man whom it did not burn." All along the post, heads go lower. Nobody points. Nobody needs to.
++ "Interesting." His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal. Villages exaggerate." The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "And yet the banners on that post lean toward the beast on your shoulder, against the wind, as banners lean toward a sect's heir. A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+
+> [0] Step forward. "I'm not kneeling, and nobody's paying you today." {all forms}
+  drawn (C3): a story choice
+  when (C2): starts a fight · seen in 200 games: day 24–43, hour 5, Coil 0:2–0:22, picked up to 2× a game
+  result (C1, taken, all forms): (no line)
+  then (C1): (a fight starts)
+
+> [1] Bluff: a wandering senior of a hidden sect, testing the Crimson Lotus's manners. Let a little bone show. {all forms}
+  drawn (C3): a story choice
+  when (C2): show: () => false · check: GU · not seen in the bot run
+  result (C1, success/failure, all forms): (no line)
+  then (C1): bluff_win / bluff_fail: "Lu Han kneels alone in the dust, his disciples gone, and you do not send him anywhere. You step back and let white bone …" [its labels: Breathe out. / Fight.]
+
+> [2] Offer tribute they've never seen: sing a wraithbone hairpin, flawless, and pay the village's due with it. {all forms}
+  drawn (C3): a story choice
+  when (C2): show: () => false · check: Convergence Use · not seen in the bot run
+  result (C1, success/failure, all forms): (no line)
+  then (C1): tribute_paid / bluff_fail: "Lu Han is still on his knees when you begin to sing, and it takes everything the fight left you: a hairpin the length of…" [its labels: Breathe out. / Fight.]
+## wen_lesson — story screen: its text is drawn
+when (C2): seen in 200 games: day 4–31, hour 6–19, Coil 0:2–0:22
+led in by (C6): ashfall[8] "Sit with Old Wen and listen."
+[text · all forms]
+¶1 Old Wen pours tea and talks of cultivation as an old farmer talks of weather: without hope, without fear, and in exact detail, to the last hailstone.
+¶2 Mortal Vessel. Foundation. Core Formation. The realms stand one above another into cloud, and each costs more than the one below it. The Sect buys its rungs with villages like this one: grass, grain, children. "A ladder," he says, "is only a ladder while somebody holds the bottom."
+[text · as seen in play: as the first, without ¶1, ¶2, and with:]
++ Today's lesson is the Old Tree, in the midst of the wilds — "there before the Sect, there before my grandfather's grandfather" — and what the hunters' tales hold of it: that it once sang, and the singing made the forest kind.
++ "Then a day came when it sang no more. And the forest was kind no more." He turns the good eye your way. "Your cat has been staring toward it since you came. So have you."
+[text · as seen in play: as the first, without ¶1, ¶2, and with:]
++ He comes back to the forest today, as you thought he might. To the Old Tree — "older than the Sect, older than the oldest grave on the hill" — and to what the hunters' grandfathers said of it: that in the years it sang, a child could sleep under any branch in the forest and wake with nothing worse than dew.
++ "I do not say it is true. I say it was said, and by serious men." He turns his cup a quarter turn, exactly. "Your cat sits facing it. Every day, the same way, like a needle. You do the same, and do not know that you do it."
+[text · as seen in play: as the first, without ¶1, ¶2, and with:]
++ Today's lesson is the Old Tree, in the midst of the wilds — "there before the Sect, there before my grandfather's grandfather" — and what the hunters' tales hold of it: that it once sang, and the singing made the forest kind.
++ "Then a day came when it sang no more. And the forest was kind no more." He turns the good eye your way. "Your great beast has been staring toward it since you came. So have you."
+
+> [0] Listen. Ask. Take notes in a mind with nine threads. {all forms}
+  drawn (C3): a story choice
+  when (C2): check: GU · seen in 200 games: day 4–31, hour 6–19, Coil 0:2–0:22, picked up to 5× a game
+  result (C1, success, all forms): You take it down rung by rung, in a thread of its own, and ask who holds the bottom of the ladder here. Old Wen's good eye stays on you until the tea has stopped steaming. "Now you have asked the right question," he says. "Nobody in Ashfall has asked it since my father's time."
+  result (C1, failure, all forms): Your attention drifts. He notices, and forgives it.
+  then (C1): ashfall: "Morning. Ashfall is up, and already at work. The tribute is one day off. The hammerspace holds no food. Infinite space, …" [its labels: Visit Old Wen. / Go to the coughing house. A child is sick. / Hunt the ironhide boar past the oak hollow. / Bone workshop: make things the village needs. / Drill the village hunters. They'll be standing nex… / Hunt beyond the oak hollow. / Eat at the communal pot. / Cultivate behind the shrine: one sit, 10 Qi. / and 5 more]
+  result (C1, seen in play): You ask what the singing sounded like, in the hunters' tales. He weighs the question with great seriousness. "Like a thing you have heard before," he says at last, "and cannot name." You do not tell him that this is exactly right. Yuki, on your knee, has not once looked away from the forest. → ashfall
+  result (C1, seen in play): You ask when it stopped: what season, what year. He gives you the season, and is ashamed that he cannot give the year. "It was told to me as a man tells of a death in the house," he says. "Quietly. Once." You put that in a thread of its own. Yuki, on your knee, has turned her ears toward the forest and left them there. → ashfall

@@ -34,7 +34,7 @@ import { installCoil } from './coil_scenes.js';
 import { installOnce } from './oneoff.js';
 import { installRomance } from './romance.js'; // v0.11.249 (owner pick P19-A: TB, RL, AL)
 import { markWalks } from './walks.js'; // v0.11.109 (owner pick MW1)
-import { FW, BT_CLOSER } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1): the lines for a James who can fly
+import { FW, FW2, BT_CLOSER } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1): the lines for a James who can fly
 /** v0.11.131 (XB2, FL; RC2, L5): the great root-kin's line in night_attack_forced, both texts (Fable's MAIN). */
 const NA_TIGER = " Yuki, who was never going to run, gets up. *Good,* says the bond. *I outweigh them. All of them, together.*";
 
@@ -77,6 +77,9 @@ const gaoFight = (g) => ({
  *  Coil-1 wins came from Gao out of the fight (18 → 0%); LH, Lu Han +1.5 long-calendar steps (common.js LONG_STEPS); RR, he reads
  *  James's realm by what he sees (lore: no local can sense it): +LU_READS to his DC and attack for each realm above Foundation, long
  *  calendar only (the Cultivator's Coil-1 wins 98 → 15%); NT, his net holds Yuki for the whole fight (`net`). */
+/** v0.11.282 (owner pick P50-A, CS): the village watched him fly, so SENT[1] no longer calls him a mortal (FW2.cs). */
+export const SENT_MORTAL = 'Then, slowly, they turn to look at you: the mortal who put a man of Foundation on his knees, which by every rule they were raised on cannot happen.';
+export const sentText = (g) => { const t = SENT[g.flags.lu_won] || SENT[1]; return g.flags.sky_flew ? t.replace(SENT_MORTAL, () => FW2.cs) : t; };
 /** v0.11.251 (MT): the victory's speech, moved word for word from the won screens (collectors_won; STOMP collectors win[2], win[3]). */
 export const SENT = {
     1: `"Go home," you tell him. "Tell your Sect Master Ashfall has a new neighbour. Tell him the neighbour doesn't eat grass, doesn't eat pills, and doesn't eat people, and would very much like to keep it that way."
@@ -93,6 +96,7 @@ You have handed people hope.`,
 
 He goes, nursing the worse arm. The whole village watches him go, then turns to look at you, and only then does it arrive: this is the one thing here more dangerous than kneeling. You have handed people hope.`,
 };
+if (!SENT[1].includes(SENT_MORTAL)) throw new Error('P50-A (CS): SENT[1] has lost the sentence FW2.cs replaces');
 /** The bluff's bonus (moved from `tribute` with v0.11.251's MT, unchanged). */
 const bluffBonus = (g) => (g.flags.healed === true ? 1 : 0) + (g.flags.boar ? 1 : 0) + (g.flags.gao_beaten ? 1 : 0) + (g.flags.scouted ? 1 : 0) + (g.flags.gao_turned || g.flags.gao_warned ? 1 : 0) + (g.flags.token_silenced ? 1 : 0) + ((g.rel.Village?.f || 0) >= 40 ? 1 : 0) - Math.floor((forestScale(g) + villageScale(g)) / 2);
 export const LU_DISCIPLE = { hp: 8, dc: 4, atk: 5, dmg: 4, dr: 1 };
@@ -756,7 +760,7 @@ ${tributeLeft(g) > 1 ? `The tribute falls due in ${daysWord(tributeLeft(g))}, at
 
 "There does seem to be a consensus."
 
-"Then hear an old man's advice." He sets the cup down. "${tributeLeft(g) > 1 ? `In ${daysWord(tributeLeft(g))}` : 'Tomorrow'}, the collectors come. An inner disciple leads them: ${g.flags.sky_witness ? FW.elderRung /* v0.11.195 (F1, D1: EW-4) */ : 'Foundation, a rung no one in Ashfall has stood on.'} If you are here, they will see you. If they see you, they will want you. You may run ${g.flags.long ? 'before then' : 'tonight'}. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
+"Then hear an old man's advice." He sets the cup down. "${tributeLeft(g) > 1 ? `In ${daysWord(tributeLeft(g))}` : 'Tomorrow'}, the collectors come. An inner disciple leads them: ${g.flags.sky_witness ? (g.flags.sky_flew ? FW2.er /* v0.11.282 (P50-A, ER) */ : FW.elderRung) /* v0.11.195 (F1, D1: EW-4) */ : 'Foundation, a rung no one in Ashfall has stood on.'} If you are here, they will see you. If they see you, they will want you. You may run ${g.flags.long ? 'before then' : 'tonight'}. No one would blame you." A pause. "Or you may stand in front of us. No one has done that in forty years."
 
 ${g.flags.gao_beaten || g.flags.gao_humiliated ? '"You have also," he adds, with no change of voice, "shamed an outer disciple of the Sect on our slope already. Running may no longer be yours to choose."' : ''}`,
         choices: [{ text: 'Thank him. Think about it.', do: (g) => { bumpRel(g, 'Old Wen', 3, 0); return []; }, to: hubOf }], // v0.11.139 (owner pick MW1, MB): Wen +3
@@ -775,7 +779,7 @@ You are not a doctor. You are a man who has spent fifteen years on the question 
     },
     heal_again: {
         id: 'heal_again', title: 'The Coughing House', art: 'healer', place: 'Ashfall Hamlet — the coughing house',
-        text: (g) => (canFly(g) ? FW.healAgain : `You come back mud to the knees, carrying two shelves of pale green fungus, and the mother looks at them as if you had brought her the moon.`), // v0.11.195 (F1, D1: HL-A)
+        text: (g) => (canFly(g) ? (g.flags.sky_flew ? FW2.ha /* v0.11.282 (P50-A, HA) */ : FW.healAgain) : `You come back mud to the knees, carrying two shelves of pale green fungus, and the mother looks at them as if you had brought her the moon.`), // v0.11.195 (F1, D1: HL-A)
         choices: [{ text: 'Get to work.', check: { skill: 'GU', dc: 3, bonus: () => 2 }, time: 60, do: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = true; bumpRel(g, 'Village', 15, 0); return ['The fever breaks before dark. Ashfall will remember it.']; }, failDo: (g) => { addItem(g, 'jade_bracket', -1); g.flags.healed = 'partly'; bumpRel(g, 'Village', 6, 0); return ['It helps, slowly.']; }, to: hubOf }],
     },
     village_hunt: {
@@ -863,7 +867,7 @@ Ashfall stands in line at the tribute post with its baskets of grass and grain. 
 
 Lu Han's gaze goes over the baskets, over the people, and stops at you. Then at Yuki. There it stays.
 
-${g.flags.sky_witness ? `${FW.luHanSky}\n\n"Interesting."` : '"Interesting," he says.' /* v0.11.195 (F1, D1: LH; RV1 M3): the village watched the sky; a runner went up */} His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal.${g.flags.sky_witness ? ` ${FW.luHanTail}` : ''}" The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "${yukiMerLu(g)} A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
+${g.flags.sky_witness ? `${g.flags.sky_flew ? FW2.lh /* v0.11.282 (P50-A, LH) */ : FW.luHanSky}\n\n"Interesting."` : '"Interesting," he says.' /* v0.11.195 (F1, D1: LH; RV1 M3): the village watched the sky; a runner went up */} His Qi-sense reaches for you — it goes over you like a draught under a door — and finds nothing. "No root. No pill-smell. No cultivation at all. A mortal.${g.flags.sky_witness ? ` ${FW.luHanTail}` : ''}" The same sense moves on to Yuki and reads no realm there either. His gaze sharpens all the same. "${yukiMerLu(g)} A mortal holding a treasure he cannot possibly understand." He tilts his head. "Kneel, stranger, and come with us. The Sect Master will wish to dissect you personally. It is an honour. Few are offered it."
 
 "I've been offered worse," you say. "Not recently."`,
         choices: [
@@ -913,7 +917,7 @@ Your hands are shaking. It isn't fear. It is that the thing worked.`),
     collectors_sent: {
         id: 'collectors_sent', title: TT.sentTitle, art: 'collectors_down', place: 'Ashfall Hamlet — the tribute post',
         enter: (g) => { if (g.flags.lu_won) bumpRel(g, 'Village', 25, 0); return []; }, // RV-A (OS): an old save's won screen already gave it
-        text: (g) => `${g.flags.lu_fail === 'bluff' ? `${TT.failBluff}\n\n` : g.flags.lu_fail === 'pin' ? `${TT.failPin}\n\n` : ''}${SENT[g.flags.lu_won] || SENT[1]}`, // RV-A (FL)
+        text: (g) => `${g.flags.lu_fail === 'bluff' ? `${TT.failBluff}\n\n` : g.flags.lu_fail === 'pin' ? `${TT.failPin}\n\n` : ''}${sentText(g)}`, // RV-A (FL); v0.11.282 (P50-A, CS): sentText
         choices: [{ text: 'Breathe out.', to: 'epilogue' }],
     },
     collectors_lost: {
@@ -1215,12 +1219,13 @@ ${seen || a1seen
 }
 /** v0.11.246 (owner pick P16-A, FC with FC-o; Fable's run FC, Claude's cuts): the first flight, once a game: after the first
  *  Foundation breakthrough's "Get up." (the Coil in which `breakthrough` was first read). Out of sight in Ashfall (only Yuki sees
- *  it); Mei Lin and Ya see it in the Blackroot (Mei Lin alone while Ya is away). Yuki is the cat at Foundation. */
-export const FF = { open: { alone: "You get up, and the getting up does not stop where it usually does. Your boots clear the earth by the breadth of a palm and stay there. Nobody is about to witness this but Yuki, who has watched you do stupider things on purpose.", village: "You get up carefully, because your heels have stopped agreeing with the street. Ashfall has gone back to staring at the emptied sky, and you use the chance to walk, flat-footed and with great concentration, round the grain store and out behind the last wall. There you stop concentrating, and rise as far as the top course of stones and no further.", party: "You stand. Mei Lin is asking whether you can walk, and stops halfway through a word. Ya's spear has swung round to point at your boots, and at the gap of plain air under them. You look down as well. It seems only polite.", mei: "Mei Lin offers you a hand up. You take it, out of manners, and rise rather further than she pulled. She lets go quickly and studies the space beneath your boots, then you, with the expression of a herbalist handed a plant that is in no book." }, body: `The Qi here runs in currents, and has all along; only now do you have anything to catch it with. You lean into one as a swimmer leans into a river, and it takes your weight without comment. There is no trick to learn. It is walking, with one thing fewer to push against.
+ *  it); Mei Lin and Ya see it in the Blackroot (Mei Lin alone while Ya is away). Yuki is the cat at Foundation.
+ *  v0.11.282 (owner picks P50-A, D1; FC-w2; Fable's run P, Claude's cuts): in Ashfall the whole street watches it (`sky_flew`). */
+export const FF = { open: { alone: "You get up, and the getting up does not stop where it usually does. Your boots clear the earth by the breadth of a palm and stay there. Nobody is about to witness this but Yuki, who has watched you do stupider things on purpose.", village: "You rise to your feet and the rising carries on, in the open street, with every face in Ashfall already turned your way. Clear air opens under your soles. Somebody drops a basket. Nobody picks it up.", party: "You stand. Mei Lin is asking whether you can walk, and stops halfway through a word. Ya's spear has swung round to point at your boots, and at the gap of plain air under them. You look down as well. It seems only polite.", mei: "Mei Lin offers you a hand up. You take it, out of manners, and rise rather further than she pulled. She lets go quickly and studies the space beneath your boots, then you, with the expression of a herbalist handed a plant that is in no book." }, body: `The Qi here runs in currents, and has all along; only now do you have anything to catch it with. You lean into one as a swimmer leans into a river, and it takes your weight without comment. There is no trick to learn. It is walking, with one thing fewer to push against.
 
 You go up as far as seems reasonable, turn on a slow eddy and let a stronger flow carry you a dozen paces sideways. Your people do this from Foundation. Nobody at home would look up.
 
-Yuki steps off your shoulder onto nothing and stays level with your face, tail steering. *Finally,* she says. *All this time, carried about by a pedestrian. Keep up.* She takes the faster current. Naturally.`, close: { alone: "You descend because you choose to, which is the whole difference. Yuki lands on your shoulder and washes one paw. *Adequate,* she says. *You held your arms out. Don't.* You had not noticed the arms.", village: "The top of the wall is as high as you went, and nobody beyond it has looked round; Ashfall is still discussing the sky. You settle onto the earth with the stones between you and the street. *They would build you a shrine,* Yuki says. *You'd hate the upkeep.* You walk back in flat-footed, a man with nothing to report.", party: "Ya whoops, then scowls. \"Scholar. You never said you could do that.\" \"I couldn't, until just now.\" Mei Lin is watching the gap under your boots. \"Sect masters fly,\" she says quietly. \"Golden Core. Slowly, with attendants.\" \"I'll skip the attendants,\" you say, and drift down to them.", mei: "Mei Lin watches you the whole way down. \"Only Golden Core flies,\" she says, quite evenly. \"Old men. They burn incense beforehand.\" \"I didn't have any,\" you say. She laughs, against her better judgement, then checks the sky in case it heard." } };
+Yuki steps off your shoulder onto nothing and stays level with your face, tail steering. *Finally,* she says. *All this time, carried about by a pedestrian. Keep up.* She takes the faster current. Naturally.`, close: { alone: "You descend because you choose to, which is the whole difference. Yuki lands on your shoulder and washes one paw. *Adequate,* she says. *You held your arms out. Don't.* You had not noticed the arms.", village: "You sink back toward the street, where nobody has moved and several have forgotten to breathe. \"The Sect Master leaves the ground,\" Old Wen says, to the street and not to you. \"At Golden Core, slowly, with drums and a full court. I felt nothing rise.\" \"It was only a short one,\" you say. *Don't explain,* Yuki says. *It makes it worse.* Your boots find the dust, and Ashfall goes on standing round you, very carefully.", party: "Ya whoops, then scowls. \"Scholar. You never said you could do that.\" \"I couldn't, until just now.\" Mei Lin is watching the gap under your boots. \"Sect masters fly,\" she says quietly. \"Golden Core. Slowly, with attendants.\" \"I'll skip the attendants,\" you say, and drift down to them.", mei: "Mei Lin watches you the whole way down. \"Only Golden Core flies,\" she says, quite evenly. \"Old men. They burn incense beforehand.\" \"I didn't have any,\" you say. She laughs, against her better judgement, then checks the sky in case it heard." } };
 export const ffPlace = (g) => (VILLAGE_SCENES.includes(g.flags.bt_return) || BT_ASHFALL_A1.includes(g.flags.bt_return) ? 'village' : ({ P: 'party', T: 'party', M: 'mei' }[btWho(g)] || 'alone'));
 export const firstFlightNow = (g) => g.james.realm === 1 && g.seen?.breakthrough === (g.coil?.n || 1) && g.seen?.first_flight == null;
 SCENES.breakthrough = {
@@ -1245,6 +1250,7 @@ SCENES.breakthrough = {
 };
 SCENES.first_flight = {
     id: 'first_flight', title: "Off the Ground", art: 'tribulation', place: (g) => g.location,
+    enter: (g) => { if (ffPlace(g) === 'village') g.flags.sky_flew = true; return []; }, // v0.11.282 (P50-A, FC-w2): the village watched it; a world flag (reset each Coil, carried into Act 1)
     text: (g) => `${FF.open[ffPlace(g)]}\n\n${FF.body}\n\n${FF.close[ffPlace(g)]}`,
     choices: [{ text: "Carry on.", to: (g) => g.flags.yuki_return || 'stream' }],
 };

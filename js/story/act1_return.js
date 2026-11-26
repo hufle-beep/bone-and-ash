@@ -3,6 +3,7 @@
  * the night the romance resolves (a throuple, one lover, or none), and Outer Elder Shen Qiu at the gate on Day 21.
  * Entry 'rt_start' (Day 19 ~06:00). Ends at 'a1_end'.
  */
+import { FW2 } from './flight_texts.js'; // v0.11.282 (owner picks P50-A, D1): the village saw the first flight
 import { FR_TEXT } from './romance_texts.js'; // v0.11.250 (P20-A, FR)
 import { daysWord, sinceDepart, dayTitle } from '../core/calendar.js'; // v0.11.224 (owner pick TX2, TS6: DN14): the days since the start for the tree
 import { addItem, hasItem, eat, condense, advance, clockParts, jamesQiMax, dayHour, yukiForm, partyCarry } from '../core/game.js';
@@ -384,7 +385,7 @@ ${byForm(g, 'Their eyes go to Ya and stay there.', "Their eyes go to Yuki first:
 
 "She is with us," Mei Lin tells the whole street, loud and clear. No woman of Ashfall says such a thing. The street makes a note.
 
-${g.flags.sky_witness || g.flags.a1_sky_seen ? 'And you they regard as they did once the sky had come for you and left again: as weather.' : 'And you, the stranger who walked into the forest and walked back out, they regard like a sum that has stopped adding up.'}`, // v0.11.130 (YB1, RA; Fable's MAIN): the street sees the great root-kin
+${g.flags.sky_flew ? FW2.street /* v0.11.282 (P50-A, A1) */ : g.flags.sky_witness || g.flags.a1_sky_seen ? 'And you they regard as they did once the sky had come for you and left again: as weather.' : 'And you, the stranger who walked into the forest and walked back out, they regard like a sum that has stopped adding up.'}`, // v0.11.130 (YB1, RA; Fable's MAIN): the street sees the great root-kin
         choices: [
             { text: 'Go to Old Wen first. Formally.', time: 30, to: 'rt_wen' },
             { text: 'Mei Lin\'s mother is in the doorway. Face her.', time: 30, to: 'rt_mother' },
@@ -400,7 +401,7 @@ When you are done he sits unmoving, long enough for the tea to go cold.
 
 He puts his cup down with great care.
 
-"At dusk the hunters saw Sect colours on the switchbacks: a column on foot, a dozen and more. Only an Outer Elder walks with so many." His good eye settles on you. "Shen Qiu. Tomorrow he will be at our gate. He will have heard of ${g.flags.sky_witness || g.flags.a1_sky_seen ? 'the tribulation that refused to fall' : 'the stranger no envoy of theirs could sense'}${luBeaten(g) ? ', and of the disciples you sent home bleeding' : ''}. He will want to see with his own eyes what you are."
+"At dusk the hunters saw Sect colours on the switchbacks: a column on foot, a dozen and more. Only an Outer Elder walks with so many." His good eye settles on you. "Shen Qiu. Tomorrow he will be at our gate. He will have heard of ${g.flags.sky_flew ? FW2.wen /* v0.11.282 (P50-A, A1) */ : g.flags.sky_witness || g.flags.a1_sky_seen ? 'the tribulation that refused to fall' : 'the stranger no envoy of theirs could sense'}${luBeaten(g) ? ', and of the disciples you sent home bleeding' : ''}. He will want to see with his own eyes what you are."
 
 "And then?"
 
@@ -672,7 +673,7 @@ Outer Elder Shen Qiu is old as mountains are old. His white hair is bound up und
 
 At the tribute post he stops. He considers Ashfall: ${g.flags.a1_palisade ? 'the white palisade, ' : ''}${g.flags.a1_militia ? 'the hunters in their line with their spears grounded, ' : ''}the people who have not knelt. Then his face turns, slowly, toward the grove, and at last something moves in it.
 
-"So," he says. The voice is soft, courteous, and has no warmth in it anywhere. "It is true. Someone has planted a song in my mountains." His eyes arrive at you. "${g.flags.sky_witness || g.flags.a1_sky_seen ? 'And the sky came for you, and went away ashamed. I have lived three hundred years, and I did not expect to see that.' : 'And you are the one. Every report that crossed my table said there was nothing in you to report. I have lived three hundred years, and I have never before had to look at a man to know that he was there.'}" His head inclines, by exactly one degree.
+"So," he says. The voice is soft, courteous, and has no warmth in it anywhere. "It is true. Someone has planted a song in my mountains." His eyes arrive at you. "${g.flags.sky_flew ? FW2.shen /* v0.11.282 (P50-A, A1) */ : g.flags.sky_witness || g.flags.a1_sky_seen ? 'And the sky came for you, and went away ashamed. I have lived three hundred years, and I did not expect to see that.' : 'And you are the one. Every report that crossed my table said there was nothing in you to report. I have lived three hundred years, and I have never before had to look at a man to know that he was there.'}" His head inclines, by exactly one degree.
 
 Then he does what all of them do, and reaches for you with his Qi-sense. This one is an Outer Elder's: it arrives like weather, like the pressure ahead of a storm, and goes over you, through you, into every corner you own.
 

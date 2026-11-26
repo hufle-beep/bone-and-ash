@@ -2,18 +2,18 @@
 
 New in v0.11.280 (owner pick RM-A, 2026-11-26 11:58; `claude/p48-options.md`). One list of every open item, in the order of `roadmap.md`'s Order line, with its bundle, its size and a pointer to the line that holds its words. **This file holds no item's words:** the lines stay where they are (`roadmap.md`, `roadmap-2.md`, `roadmap-act2.md`, `roadmap-e.md`, `roadmap-retune.md`); a push that finishes an item moves its line as before and updates this list. Each push still gets its own options and pick; the estimates are pushes, at 5–8 pushes a day (the pace since 2026-11-17: 76 pushes in 9 days; text and game pushes 3–5 a day).
 
-**Totals (v0.11.281):** about **57–98 pushes, 8–20 working days**; Act 2 starts after about **17–28 pushes (3–6 days)**. *(v0.11.280's estimate: 58–99, Act 2 after 18–29; v0.11.270's: 55–95, Act 2 after 19–33.)*
+**Totals (v0.11.282):** about **55–95 pushes, 8–19 working days**; Act 2 starts after about **15–25 pushes (2–5 days)**. *(v0.11.281's estimate: 57–98, Act 2 after 17–28; v0.11.280's: 58–99, Act 2 after 18–29; v0.11.270's: 55–95, Act 2 after 19–33.)*
 
 ## Step 5. The retune: done
 
 - ~~**TU, the "tuned up to" note**~~ (done in v0.11.281, P49-A: What's new): `roadmap-retune.md`'s status notes.
 
-## Step 5b. The polish pass: 3 pushes done, 2–3 left
+## Step 5b. The polish pass: done (4 pushes)
 
 - ~~**SF, the one-paragraph fold**~~ (closed as accepted in v0.11.281, P49-A: 0 of 600 games): its line in `roadmap-done-7.md`.
 - ~~**The talks' place words in the Drowned Wood**~~ (closed as accepted in v0.11.281: 0 of 600; beats 11–14 come in the Ashen Hills): `roadmap-e.md`'s PN line.
 - ~~**HS (b) and (c), the slopes**~~ ((b) done in v0.11.281, HS-b2, Fable's run A; (c) closed as accepted, 0 of 600): `roadmap-e.md`'s PN line.
-- **FC-w2, the village sees the first flight** (2–3: the read of the later Ashfall texts first, its size in `project/research/p49-measure.md`; then a canon call; then Fable's texts): `roadmap-e.md`'s flight line; listed in `roadmap.md` section 2b.
+- ~~**FC-w2, the village sees the first flight**~~ (done in v0.11.282, P50-A: the read, the canon call and Fable's texts in one push; `project/research/p50-measure.md`): `roadmap-e.md`'s flight line; `roadmap.md` section 2b.
 
 ## Step 6. Systems (`roadmap-2.md` section 4): 15–25 pushes, by bundle
 

@@ -1231,7 +1231,7 @@ for (const form of ['cat', 'human']) {
             if (!/\s/.test(c)) out += c; i++; } return out; }; return code(false); };
       const hash = (t) => createHash('sha256').update(t).digest('hex').slice(0, 16);
       const LABELS = Object.values(RETURN).flatMap((sc) => (sc.choices || []).map((c) => (typeof c.text === 'string' ? c.text : '(fn)')));
-      const PIN = { 'act1_return.js': '576dc7cc57abd1d6' /* v0.11.275 (P43-A, L1-s): re-pinned: rt_trio's second answer at 10 min */ /* v0.11.274 (P42-A, TL-a): re-pinned: rt_trio's first answer at 10 min */ /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (rt_dawn's title, the mother's "nine days") */ /* v0.11.251 (RV-A, HL): luBeaten (Lu Han stays away and the two bled lines once beaten, lu_won) */, labels: '58e59f4e08e64332' }; // v0.11.250 (P20-A, FR; RV-A FY): the code re-pinned (rt_taken reads final_night for Ya's line, a1_end for Yuki's when neither woman likes him; FR_TEXT imported; the labels unchanged) // v0.11.224 (TX2, DN14; RV1 L1, MC): the code re-pinned (the days since the start for the tree from the calendar, the old line kept for the old calendar, rt_dawn's title; the labels unchanged) // v0.11.198 (S1, D1, SX; RV1 L1, M3): the code re-pinned (rt_start, rt_road and rt_ambush read party_flew; the SX block; sxRide; partyCarry imported; the labels unchanged); v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
+      const PIN = { 'act1_return.js': 'a146b6b380223066' /* v0.11.282 (P50-A, A1): re-pinned: FW2's import and the three sky_flew branches */ /* was '576dc7cc57abd1d6' */ /* v0.11.275 (P43-A, L1-s): re-pinned: rt_trio's second answer at 10 min */ /* v0.11.274 (P42-A, TL-a): re-pinned: rt_trio's first answer at 10 min */ /* v0.11.260 (P28-A, OC2): re-pinned: the old calendar's branches gone (rt_dawn's title, the mother's "nine days") */ /* v0.11.251 (RV-A, HL): luBeaten (Lu Han stays away and the two bled lines once beaten, lu_won) */, labels: '58e59f4e08e64332' }; // v0.11.250 (P20-A, FR; RV-A FY): the code re-pinned (rt_taken reads final_night for Ya's line, a1_end for Yuki's when neither woman likes him; FR_TEXT imported; the labels unchanged) // v0.11.224 (TX2, DN14; RV1 L1, MC): the code re-pinned (the days since the start for the tree from the calendar, the old line kept for the old calendar, rt_dawn's title; the labels unchanged) // v0.11.198 (S1, D1, SX; RV1 L1, M3): the code re-pinned (rt_start, rt_road and rt_ambush read party_flew; the SX block; sxRide; partyCarry imported; the labels unchanged); v0.11.190 (N1, SW): the code re-pinned (the parley's +1 reads a1_sky_seen too); v0.11.179 (LB1): the labels re-pinned (the label pass); v0.11.181 (KG1): again, the mother's card label on rt_ashfall became a function (by the kitchen's stage); v0.11.188 (N1, RV1 M4): again, rt_wen's and rt_elder's sky lines by sky_witness / a1_sky_seen; v0.11.185 (BR1, RV1 M2): the code re-pinned (the street reads a1_sky_seen too)
       const got = { 'act1_return.js': hash(skel(RSRC)), labels: hash(JSON.stringify(LABELS)) };
       for (const [k, v] of Object.entries(PIN)) assert(got[k] === v, `P7A (RV1, TG1): ${k}'s code and ids as pinned in v0.11.174 (${got[k]}; update the pin only with a push that means to change them)`); }
     // TG2: the mechanical parts of the Return's result lines, exactly
@@ -8552,7 +8552,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const a = at(46200, 'stream', { mei_party: false, ya_party: false }); const go = up(a);
       assert(go === 'first_flight' && /^You get up, and the getting up does not stop/.test(tx(a, 'first_flight')) && SCENES.first_flight.choices[0].to(a) === 'stream', `${T} (FC): the forest: alone, then back where he was`);
       const v = at(46201, 'village', { mei_party: false, ya_party: false }); const vt = tx(v, 'first_flight');
-      assert(up(v) === 'first_flight' && /round the grain store and out behind the last wall/.test(vt) && /The top of the wall is as high as you went/.test(vt) && !/then somewhat further|comes for water/.test(vt) /* RV (T L1, L2) */ && !/Mei Lin|\bYa\b/.test(vt), `${T} (FC, FC-o): Ashfall: out of sight, only Yuki`);
+      assert(up(v) === 'first_flight' && /^You rise to your feet and the rising carries on, in the open street/.test(vt) && /goes on standing round you, very carefully\./.test(vt) /* v0.11.282 (P50-A, FF): re-pinned: the street watches (FC-w2 in place of FC-o) */ && !/then somewhat further|comes for water/.test(vt) /* RV (T L1, L2) */ && !/Mei Lin|\bYa\b/.test(vt), `${T} (FC, FC-o; v0.11.282 FC-w2): Ashfall: the street watches, no Mei Lin or Ya named`);
       const p = at(46202, 'rr_hub', { bl_region: 'rr' }); const pt = tx(p, 'first_flight');
       assert(/^You stand\. Mei Lin is asking/.test(pt) && /Sect masters fly/.test(pt), `${T} (FC): the party sees it`);
       const m = at(46203, 'ah_hub', { bl_region: 'ah', bl_day: 4 }); const mt = tx(m, 'first_flight');
@@ -8561,7 +8561,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const later = at(46205, 'stream', { mei_party: false, ya_party: false }, 3, 1); const old = at(46206, 'stream', { mei_party: false, ya_party: false }, 2, 0);
       const r2 = at(46207, 'stream', { mei_party: false, ya_party: false }); r2.james.realm = 2;
       assert(up(twice) === 'stream' && up(later) === 'stream' && up(old) === 'stream' && up(r2) !== 'first_flight', `${T} (FC): once a game; not in a later Coil, not for an old save's record (0), not at Core Formation`);
-      assert([vt, pt, mt].every((t) => !LEFT.test(t) && !/\b(sun|night|morning|evening|dark|stars?|dawn)\b/i.test(t)), `${T} (FC): no time-of-day word (any hour)`);
+      assert([vt, pt, mt].every((t) => !LEFT.test(t) && !/\b(sun\w*|night\w*|morning|evening|dark\w*|stars?|dawn|dusk|twilight|moon\w*|(?:day|sun|moon|star|lamp|candle|torch|fire)light)\b/i.test(t)), `${T} (FC): no time-of-day word (any hour; v0.11.282 P50-A RV TG1: the compounds, daylight among them)`);
       // RV (T L3, L4; TG-T3, TG-T4): at night, read under the breakthrough screen: no sentence of the two screens twice; the label a sentence
       for (const [back, flags] of [['village', { mei_party: false, ya_party: false }], ['rr_hub', { bl_region: 'rr' }]]) {
           const g = at(46210, back, flags); g.minutes = 14 * D + 22 * 60; const b = tx(g, 'breakthrough'); const f = tx(g, 'first_flight');
@@ -8600,7 +8600,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     { // TG-C1: the first flight in Act 1's Ashfall (village) and at the Old Tree (party); both away at the Ashen Hills: alone
       const at = (seed, back, flags = {}) => { const g = mk(seed); g.james.realm = 1; g.yuki.realm = 1; g.coil = { ...(g.coil || {}), n: 1 }; g.seen = { breakthrough: 1 }; Object.assign(g.flags, { bt_return: back }, flags); g.minutes = 14 * D + 10 * 60; return g; };
       const fo = at(46220, 'fo_ashfall'); const ht = at(46221, 'heart_hub'); const ba = at(46222, 'ah_hub', { bl_region: 'ah', bl_day: 2, trio: 2 }); ba.rel['Mei Lin'] = { f: 90, a: 90 }; ba.rel.Ya = { f: 90, a: 90 };
-      assert(P.ffPlace(fo) === 'village' && /grain store/.test(tx(fo, 'first_flight')) && P.ffPlace(ht) === 'party' && /^You stand\. Mei Lin is asking/.test(tx(ht, 'first_flight')) && BR.bothAway(ba) && P.ffPlace(ba) === 'alone', `${T} RV (C TG-C1): Act 1's Ashfall reads the village's, the Old Tree the party's, both away the forest's`); }
+      assert(P.ffPlace(fo) === 'village' && /in the open street/.test(tx(fo, 'first_flight')) /* v0.11.282 (P50-A, FF): re-pinned */ && P.ffPlace(ht) === 'party' && /^You stand\. Mei Lin is asking/.test(tx(ht, 'first_flight')) && BR.bothAway(ba) && P.ffPlace(ba) === 'alone', `${T} RV (C TG-C1): Act 1's Ashfall reads the village's, the Old Tree the party's, both away the forest's`); }
     { // TG-C2: walked: the breakthrough's "Get up." → the first flight → back to the hub; the record written; once
       const g = mk(46230); g.james.realm = 1; g.yuki.realm = 1; g.flags.bt_return = 'stream'; g.minutes = 3 * D + 10 * 60; g.seen = {};
       goTo(g, SCENES, 'breakthrough'); const i = sceneView(g, SCENES).choices.findIndex((c) => c.label === 'Get up.'); choose(g, SCENES, sceneView(g, SCENES).choices[i].index);
@@ -9977,6 +9977,67 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       assert(fm[0] !== fm[1] && /^Day forty-five\./.test(fm[0]) && /^Day forty-six\./.test(fm[1]) && P(fm[0]).length === 1, `${T} (SF-x): the Fallout morning's day count changes its text from day to day (${fm.map((x) => x.slice(0, 30)).join(' | ')})`); }
     // TU: What's new says the game is tuned through Act 1
     { const N = await import('../js/core/news.js'); const n = N.NOTES.find(([v]) => v === '0.11.281'); assert(!!n && /tuned through Act 1/.test(n[1]) && /tuned with Act 2/.test(n[1]) && /herb slopes/.test(n[1]) && /before her question/.test(n[1]) /* RV (TG1) */, `${T} (TU): What's new has 0.11.281's tuning note`); }
+}
+// v0.11.282 (owner picks P50-A, D1; `claude/p50-options.md`, `project/research/p50-measure.md`): FC-w2, the village sees the first flight:
+// `sky_flew` (set by `first_flight` in Ashfall), FF (the village paragraphs), CS, ER, HA, LH, WL, A1 (Fable's runs P and A, Claude's cuts)
+{
+    const T = 'P50-A';
+    const G0 = await import('../js/core/game.js'); const FT = await import('../js/story/flight_texts.js'); const PR = await import('../js/story/prologue.js');
+    const fs = await import('node:fs'); const src = (f) => fs.readFileSync(new URL(`../js/${f}`, import.meta.url), 'utf8');
+    const mk = (fl) => { const g = ensureBars(newGame(50001, { closed: true })); g.james.realm = 1; Object.assign(g.flags, fl); return g; };
+    const txt = (id, fl) => { const g = mk(fl); g.scene = id; return String(SCENES[id].text(g)); };
+    // FL: the flag, set on arrival only in Ashfall (the prologue's village scenes and Act 1's Ashfall), a world flag (not kept over a rewind)
+    for (const [bt, want] of [['village', true], ['ashfall', true], ['supper', true], ['fo_ashfall', true], ['rt_ashfall', true], ['stream', false], ['wilds', false], ['rr_hub', false]]) {
+        const g = mk({ bt_return: bt, ...(bt === 'rr_hub' ? { mei_party: true, ya_party: true } : {}) }); goTo(g, SCENES, 'first_flight');
+        assert(!!g.flags.sky_flew === want, `${T} (FL): a first flight from ${bt} ${want ? 'sets' : 'does not set'} sky_flew`); }
+    assert(!KEEP_FLAGS.includes('sky_flew'), `${T} (FL): sky_flew is a world flag, reset with each Coil (not in KEEP_FLAGS)`);
+    // FF: the village paragraphs: the street watches; the other places word for word as 0.11.281
+    { const t = txt('first_flight', { bt_return: 'village' });
+      assert(t.startsWith('You rise to your feet and the rising carries on, in the open street') && /Golden Core, slowly, with drums and a full court/.test(t) && /goes on standing round you, very carefully\.$/.test(t) && !/grain store|top course of stones|nothing to report/.test(t) && /Clear air opens under your soles\./.test(t) && !/daylight|trying you/.test(t) /* RV (M1, L2) */, `${T} (FF): the village's first flight: in the open street, Old Wen names Golden Core, the old hidden flight gone`);
+      assert(G0.fnv1a(txt('first_flight', { bt_return: 'stream' })) === '7e2f7292' && G0.fnv1a(txt('first_flight', { bt_return: 'rr_hub', mei_party: true, ya_party: true })) === 'c0a70eca', `${T} (FF): alone and with the party: word for word as 0.11.281`); }
+    // the eight lines: with the flag the new words, the old gone; without it word for word as 0.11.281 (fnv taken on 0.11.281's code, the same states)
+    const CASES = [['elder', { sky_witness: 1 }, 'er', 'c0bc47af', FT.FW.elderRung], ['heal_again', { sky_witness: 1 }, 'ha', '60693779', FT.FW.healAgain], ['tribute', { sky_witness: 1 }, 'lh', '0ae3c17d', FT.FW.luHanSky],
+        ['collectors_sent', { sky_witness: 1, lu_won: 1 }, 'cs', 'b1733222', PR.SENT_MORTAL], ['wen_lesson', { sky_witness: 1 }, 'wl', 'f849221f', 'Mortal Vessel. Foundation. Core Formation.'],
+        ['fo_elder_named', { sky_witness: 1 }, 'tea', '72b1bc95', 'A man who refuses tribulation and sings'], ['rt_arrive', { sky_witness: 1 }, 'street', '53adaa5c', 'as weather.'],
+        ['rt_wen', { sky_witness: 1 }, 'wen', '947500de', 'the tribulation that refused to fall'], ['rt_elder', { sky_witness: 1 }, 'shen', 'bd8c4c47', 'went away ashamed']];
+    for (const [id, fl, k, h, old] of CASES) {
+        const a = txt(id, fl), b = txt(id, { ...fl, sky_flew: true });
+        assert(G0.fnv1a(a) === h, `${T}: ${id} without sky_flew word for word as 0.11.281 (fnv ${G0.fnv1a(a)})`);
+        assert(b.includes(FT.FW2[k]) && !b.includes(old) && a.includes(old), `${T} (${k}): ${id} with sky_flew shows FW2.${k} in place of the old words`);
+        assert(!/\$\{|undefined/.test(b) && b.split('\n\n\n').length === a.split('\n\n\n').length && b.split('  ').length === a.split('  ').length, `${T} (${k}): ${id}'s new text: no template left, no break or double space the old one lacked`); }
+    // the joins: the tea's sentence runs on into "bone out of the air"; rt_wen reads with and without the disciples' clause; Shen Qiu's sense still finds a mortal
+    assert(txt('fo_elder_named', { sky_witness: 1, sky_flew: true }).includes(`${FT.FW2.tea} bone out of the air, and to a cultivator's senses he is an empty chair.`), `${T} (A1): the tea's words run on into "bone out of the air"`);
+    assert(txt('rt_wen', { sky_witness: 1, sky_flew: true }).includes(`He will have heard of ${FT.FW2.wen}. He will want`) && txt('rt_wen', { sky_witness: 1, sky_flew: true, lu_won: 1 }).includes(`${FT.FW2.wen}, and of the disciples you sent home bleeding.`), `${T} (A1): rt_wen with and without the disciples`);
+    assert(/a mortal in a strange coat/.test(txt('rt_elder', { sky_witness: 1, sky_flew: true })) && /Villages exaggerate\./.test(txt('tribute', { sky_witness: 1, sky_flew: true })), `${T} (A1, LH): Shen Qiu's and Lu Han's senses still find a mortal`);
+    // an Act 1 flight (a1_sky_seen, no prologue sky): the Return reads the flight too
+    assert(txt('rt_arrive', { a1_sky_seen: true, sky_flew: true }).includes(FT.FW2.street) && txt('rt_elder', { a1_sky_seen: true, sky_flew: true }).includes(FT.FW2.shen), `${T} (A1): an Act 1 flight reads the same lines`);
+    // CS: only SENT[1] carried the mortal line; the other two speeches word for word with the flag
+    for (const w of [2, 3]) assert(txt('collectors_sent', { sky_witness: 1, lu_won: w, sky_flew: true }) === txt('collectors_sent', { sky_witness: 1, lu_won: w }), `${T} (CS): SENT[${w}] unchanged by the flag`);
+    // the old FC-o village words are gone from the code; the lint's pool reads FW2
+    assert(!/round the grain store and out behind the last wall/.test(src('story/prologue.js')) && /sky_flew: Object\.values\(FWX\.FW2\)/.test(fs.readFileSync(new URL('../tools/textlint.mjs', import.meta.url), 'utf8')), `${T}: the hidden village flight gone; the text lint reads FW2 (pool sky_flew)`);
+    // RV (TG1): the village's flight at 22:00 and at midnight (the breakthrough card is open at night): no time word under "The stars go out"
+    for (const h of [22, 24]) { const g = mk({ bt_return: 'village' }); g.minutes = 14 * 1440 + h * 60; g.scene = 'first_flight'; const t = String(SCENES.first_flight.text(g));
+        assert(!/\b(sun\w*|night\w*|morning|evening|dark\w*|stars?|dawn|dusk|twilight|moon\w*|(?:day|sun|moon|star|lamp|candle|torch|fire)light)\b/i.test(t), `${T} RV (TG1): the village flight at ${h}:00 has no time-of-day word`); }
+    // RV (TG2): each line's own words pinned (not FW2 against itself), and no join leaves ".." or ".,"
+    { const W = { er: /Foundation, higher than this village has ever sent a child, and he walks; .*only Golden Core rises\.$/, ha: /^You come down in the street outside the coughing house, carrying two shelves of pale green fungus\./, lh: /as the Sect Master rises\. The village's runners were questioned with some care\." Down the length of the post, heads go lower\./,
+          cs: /^Then, slowly, they turn to look at you: the man who flies, whom nobody can sense/, wl: /Above those, Golden Core, where a man is at last permitted to leave the ground\. He names that rung into his tea and not to you/, tea: /^A man Heaven declined to punish, who rises as only a Golden Core may, and sings$/,
+          street: /^And you, whom the sky would not strike and the ground cannot keep, .*no thought of appeal\.$/, wen: /^the tribulation that turned away from you and the flight you took from our street after it$/, shen: /left the ground before a whole village\. I have seen that done by my master, with ceremony, and by no one else\. I have lived three hundred years\. I believe what I have looked at\.$/ };
+      for (const [k, re] of Object.entries(W)) assert(re.test(FT.FW2[k]), `${T} RV (TG2): FW2.${k} in its built words`);
+      for (const [id, fl] of CASES.map(([id, fl]) => [id, fl]).concat([['rt_wen', { sky_witness: 1, lu_won: 1 }]])) { const b = txt(id, { ...fl, sky_flew: true }); assert(!/\.\.(?!\.)|\.,|,\.|\s[.,]/.test(b.replace(/…/g, '')), `${T} RV (TG2): ${id} with sky_flew: no ".." or ".," at a join`); } }
+    // RV (TG3): the real path in Act 1 (coil.act 1, Fallout's Ashfall): the breakthrough's "Get up." to the flight sets the flag; an Act 1 rewind keeps
+    // a prologue flight and drops an Act 1 one; a whole-game rewind drops it
+    { const C = await import('../js/core/coil.js');
+      const a1 = () => { const g = ensureBars(newGame(50101, { closed: true })); g.coil = { ...(g.coil || {}), act: 1 }; g.james.realm = 1; g.seen = { ...(g.seen || {}), breakthrough: g.coil.n || 1 }; delete g.seen.first_flight; Object.assign(g.flags, { bt_return: 'fo_ashfall' }); return g; };
+      const g = a1(); g.scene = 'breakthrough'; const ix = sceneView(g, SCENES).choices.findIndex((c) => c.label === 'Get up.'); choose(g, SCENES, ix);
+      assert(g.scene === 'first_flight' && g.flags.sky_flew === true, `${T} RV (TG3): Act 1's Ashfall: "Get up." to the flight sets sky_flew`);
+      const mk2 = () => ensureBars(newGame(50111, { closed: true }));
+      const a = mk2(); a.flags.sky_flew = true; startActCoil(a, 1); C.rewind(a); const b = mk2(); startActCoil(b, 1); b.flags.sky_flew = true; C.rewind(b);
+      const w = mk2(); w.flags.sky_flew = true; startActCoil(w, 1); C.rewind(w, { to: 'game' }); const p0 = mk2(); p0.flags.sky_flew = true; C.rewind(p0);
+      assert(a.flags.sky_flew === true && b.flags.sky_flew === undefined && w.flags.sky_flew === undefined && p0.flags.sky_flew === undefined, `${T} RV (TG3): rewinds: Act 1's keeps a prologue flight, drops an Act 1 one; the whole game and the prologue drop it`); }
+    // RV (TG4): an Act 1-only flight (a1_sky_seen, no prologue sky): the tea and rt_wen read the flight too
+    assert(txt('fo_elder_named', { a1_sky_seen: true, sky_flew: true }).includes(`${FT.FW2.tea} bone out of the air`) && txt('rt_wen', { a1_sky_seen: true, sky_flew: true }).includes(`He will have heard of ${FT.FW2.wen}`), `${T} RV (TG4): an Act 1 flight: the tea and rt_wen`);
+    // What's new
+    { const N = await import('../js/core/news.js'); const n = N.NOTES.find(([v]) => v === '0.11.282'); assert(!!n && /whole street now watches/.test(n[1]) && /Golden Core/.test(n[1]) && /Shen Qiu/.test(n[1]), `${T}: What's new names the watched flight`); }
 }
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);

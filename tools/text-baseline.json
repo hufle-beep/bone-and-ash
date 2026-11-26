@@ -3,7 +3,7 @@
  "totals": {
   "scenes": 333,
   "words": 37899,
-  "variantWords": 159192,
+  "variantWords": 159183,
   "labels": 858,
   "labelWords": 5823,
   "sharedChunks": 769,
@@ -19,7 +19,7 @@
   "prologue+shared": {
    "scenes": 81,
    "words": 11149,
-   "variantWords": 39834,
+   "variantWords": 39825,
    "labels": 170,
    "labelWords": 1249,
    "sharedScenes": 32,
@@ -297,6 +297,15 @@
    "words": 139,
    "dupes": 0,
    "sceneShared": 2,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  },
+  "sky_flew": {
+   "lines": 9,
+   "words": 364,
+   "dupes": 0,
+   "sceneShared": 4,
    "tics": 0,
    "broken": 0,
    "spacing": 0
