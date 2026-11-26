@@ -1,0 +1,107 @@
+[
+ {
+  "id": "F1",
+  "file": "js/story/act1_fallout.js",
+  "find": "export const ymPair = (g) => YM_PAIRS[dayIndex(g, 's:fo_supper:9') % YM_PAIRS.length];",
+  "replace": "export const ymPair = (g) => YM_PAIRS[0];",
+  "note": "YM-3 off: the old pair every evening"
+ },
+ {
+  "id": "F2",
+  "file": "js/story/act1_fallout.js",
+  "find": "return [ymPair(g).r1]; }",
+  "replace": "return [ymPair(g).r0]; }",
+  "note": "the laugh choice gives the manners reply"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/week.js",
+  "find": "|Give up and laugh\\.|",
+  "replace": "|",
+  "note": "YM-f misses pair 2's laugh label"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/lines.js",
+  "find": "return (g) => { noteDay(g, k); return byDayLast(g, list, k); };",
+  "replace": "return (g) => { noteDay(g, k); return byDay(g, list, k); };",
+  "note": "lastReply cycles back to the old reply"
+ },
+ {
+  "id": "F5",
+  "file": "js/main.js",
+  "find": "postureCount(g) > 1 ? SAY_TEXT.holdNowMany",
+  "replace": "postureCount(g) > 2 ? SAY_TEXT.holdNowMany",
+  "note": "the two-speaker line only from three"
+ },
+ {
+  "id": "F6",
+  "file": "js/core/game.js",
+  "find": "export const postureCount = (g) => (g.combat ? g.combat.enemies.filter((e) => posturing(g, e)).length : 0);",
+  "replace": "export const postureCount = (g) => (g.combat ? g.combat.enemies.filter((e) => e.postures).length : 0);",
+  "note": "postureCount ignores staggered foes and the round"
+ },
+ {
+  "id": "F7",
+  "file": "js/story/act1_blackroot.js",
+  "find": "(g.flags.trio_kiss_seen ? YA_KISSED.red :",
+  "replace": "(!g.flags.trio_kiss_seen ? YA_KISSED.red :",
+  "note": "the post-spring blush line before the spring"
+ },
+ {
+  "id": "F8",
+  "file": "js/story/act1_fallout.js",
+  "find": "Mei Lin, sweetly, asks what the bees had to say.",
+  "replace": "Mei Lin, sweetly, asks what the bees had to say, and gets a look from her mother.",
+  "note": "the honeycomb's look back"
+ },
+ {
+  "id": "C1",
+  "file": "js/story/act1_fallout.js",
+  "find": "export const ymPair = (g) => YM_PAIRS[dayIndex(g, 's:fo_supper:9') % YM_PAIRS.length];",
+  "replace": "export const ymPair = (g) => YM_PAIRS[(dayIndex(g, 's:fo_supper:9') + 1) % YM_PAIRS.length];",
+  "note": "YM-3 off by one: evening 1 shows pair 1, the old pair never first. Expected caught (P47-B YM-3 labels by k % 3)."
+ },
+ {
+  "id": "C2",
+  "file": "js/story/act1_fallout.js",
+  "find": "return [ymPair(g).r0]; }",
+  "replace": "return [YM_PAIRS[0].r0]; }",
+  "note": "label and reply out of step: choice 0 always gives the old pair's reply. Expected caught (P47-B YM-3 reply includes YM_PAIRS[k].r0)."
+ },
+ {
+  "id": "C3",
+  "file": "js/story/act1_blackroot.js",
+  "find": "How far under it, I asked.",
+  "replace": "I want to see where it starts.",
+  "note": "Ya's after-the-spring line falls back to the old beat. Expected caught (PN-f b: /where it ends/, !/where it starts/). (adapted by Claude after RV-A: the line was rewritten by run D, the fault kept: the old words back after the spring)"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/act1_blackroot.js",
+  "find": "and then tells the open air, firmly,",
+  "replace": "and then tells the trail, firmly,",
+  "note": "a place word back in a talk read in the Drowned Wood. Expected MISSED (TG1; measured: story test passed with it planted)."
+ },
+ {
+  "id": "C5",
+  "file": "js/story/act1_fallout.js",
+  "find": "(You\\'d know.)",
+  "replace": "(You\\'ve been told it often enough.)",
+  "note": "Claude's cut on ym2:0:label reverted to Fable's draft. Expected MISSED (TG2; measured)."
+ },
+ {
+  "id": "C6",
+  "file": "js/core/game.js",
+  "find": "const posturing = (g, e) => postureDue(g.combat, e) && !e.staggered && !e.atBay && !(e.flustered > 0);",
+  "replace": "const posturing = (g, e) => postureDue(g.combat, e) && !e.staggered && !e.atBay;",
+  "note": "the hint counts a foe already silenced by a remark (holdNow / holdNowMany over a flustered speaker; the remark itself still skips it). Expected MISSED (TG4; measured)."
+ },
+ {
+  "id": "C7",
+  "file": "js/story/ashfall.js",
+  "find": "a spore print in two colours",
+  "replace": "a white spore print",
+  "note": "the fungus gets an Earth-plain trait back. Expected caught by the TG-C1 hash only (the PN-f f regex pins 'pores that shut at a touch' alone); not measured."
+ }
+]

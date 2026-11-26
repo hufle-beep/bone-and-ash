@@ -370,8 +370,9 @@ for (let run = 0; run < 6; run++) {
     const P5K = ['bl_camp:0', 'bl_train:1', 'bl_train:2']; // v0.11.172 (P5A, CW + SW): their own test (P5A's block)
     const P9K = ['wild_train:0:f', 'wild_train:1:f', 'wild_train:3:f']; // v0.11.177 (P9A, P2): the Wilds drills' failures, their own test (P9A's block)
     const D1K = ['bl_train:1:f', 'bl_train:2:f']; // D1 (the merged text push, b1): the Blackroot drills' failures, their own test (D1's block)
+    const P47K = ['herb_slopes:honest']; // v0.11.279 (P47-B, PN-f k): the slopes' honest answer, a lastReply, its own test (P47-B's block)
     const D1_FIRST = { 'rr_hunt:1': 'Your Convergence sings the snares out of nothing along the hare-runs, loops of white bone no thicker than a grass stem, and by the time Ya has finished looking down on the method they have closed on root-hares.' }; // D1 (a9): the sung snare, in front of the first day's old reply
-    const keys = Object.keys(DAY_REPLIES).filter((k) => !k.startsWith('away:') /* v0.11.231 (P4-2, AT): their own test */ && !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k) && !P5K.includes(k) && !P9K.includes(k) && !D1K.includes(k));
+    const keys = Object.keys(DAY_REPLIES).filter((k) => !k.startsWith('away:') /* v0.11.231 (P4-2, AT): their own test */ && !ST6K.includes(k) && !SWK.includes(k) && !SRK.includes(k) && !SR4K.includes(k) && !P5K.includes(k) && !P9K.includes(k) && !D1K.includes(k) && !P47K.includes(k));
     const first = (k) => COIL_SETS[k]?.[0] ?? DAY_REPLIES[k]; // v0.11.166 (RW1): a Coil's set for the lists by Coil
     assert(keys.length === 38 && keys.reduce((s, k) => s + first(k).length - 1, 0) === 68 /* v0.11.247 RV-A (C L2): the slopes' third result line */, `NC1 (v0.11.177, P9A FF: the Fallout's four failure lists' third texts): 38 reply lists with 52 new texts; v0.11.152 (RP1): 11 more (${keys.length}, ${keys.reduce((s, k) => s + first(k).length - 1, 0)})`);
     assert(JSON.stringify([...keys].sort()) === JSON.stringify(NC.map(([k]) => k).sort()), 'NC1: a list for every reply the bots saw on two days, and no other');
@@ -7676,7 +7677,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // with Ya there, or outside the away state (day 3, the Root Road, the Drowned Wood, the evening), she bows to a rock (RV1 TG-T2, TG-C5)
     { const away = talk('talk_mei', 9, { region: 'ah', day: 4 });
       const here = [talk('talk_mei', 9, { region: 'ah', day: 4, flags: { ya_off_done: true } }), talk('talk_mei', 9, { region: 'ah', day: 3 }), talk('talk_mei', 9, { region: 'rr', day: 4 }), talk('talk_mei', 9, { region: 'dw', day: 4 })];
-      assert(!/\bYa\b|huntress|spear|wolf|wild girl|barefoot/i.test(away) && /She looks at the haze, where somebody is no doubt bowing to nothing at all and doing it badly, and says the lesson goes better with a worse pupil in it\.$/m.test(away.split('\n\n')[0]) && here.every((t) => /Ya, who has been listening, bows to a rock at all three depths and then kicks it\./.test(t)), `${T} (TK, RV1 L3): the fourth settled text's Ya-away version only while Ya is away (${away.split('\n\n')[0].slice(-90)})`); }
+      assert(!/\bYa\b|huntress|spear|wolf|wild girl|barefoot/i.test(away) && /She looks at the haze, where somebody is no doubt bowing to nothing at all and doing it badly, and says the lesson goes better with a worse pupil in it\.$/m.test(away.split('\n\n')[0]) && here.every((t) => /Ya, who has been listening, holds her spear upright at arm's length and bows to it at all three depths\./.test(t) /* v0.11.279 (P47-B RV-A, M2): no rock */), `${T} (TK, RV1 L3): the fourth settled text's Ya-away version only while Ya is away (${away.split('\n\n')[0].slice(-90)})`); }
     // place-neutral and no day words: the new texts stand on the Root Road, in the Drowned Wood and the Ashen Hills on any day and hour (RV1 TG-T3)
     { const bad = [];
       for (const id of ['talk_mei', 'talk_ya']) for (let n = 8; n < 11; n++) for (const [m, y] of [[0, 0], [80, 80]]) {
@@ -7982,7 +7983,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const talk = (id, n, { m = 0, y = 0, region = 'rr', day = 2, h = 10, flags = {} } = {}) => { const g = mk(99990 + n, { bl_day: day, bl_region: region, mei_talks: n, ya_talks: n, ...flags }); g.rel['Mei Lin'] = { f: 20, a: m }; g.rel.Ya = { f: 20, a: y }; g.minutes = 70 * D + h * 60; return { g, t: (() => { g.scene = id; return SCENES[id].text(g); })() }; };
     const meiCold = talk('talk_mei', 5).t, meiWarm = talk('talk_mei', 5, { m: 80 }).t, yaCold = talk('talk_ya', 5).t, yaBoth = talk('talk_ya', 5, { m: 80, y: 80 }).t;
     assert(/a millet cake/.test(meiCold) && !/seed cake/.test(meiCold + meiWarm) && /laughing with her mouth full\.$/.test(meiCold.trim()) && !/witness|over her shoulder/.test(meiCold), `${T} (T M3; D1 MC): Mei Lin's quiet walk: a millet cake; the cold branch ends on the laugh`);
-    assert(/"Wrong stone,"/.test(yaCold) && !/punch/i.test(yaCold) && /tells the road ahead/.test(yaBoth) && /She sounds delighted\./.test(yaBoth) && !/every tooth|says, lower/i.test(yaBoth), `${T} (T L4; D1 TT): Ya's quiet walk: no punch, the both-line's own tag, no teeth`);
+    assert(/"Wrong stone,"/.test(yaCold) && !/punch/i.test(yaCold) && /she says, to anywhere but you\./.test(yaBoth) /* v0.11.279 (P47-B RV-A, M2) */ && /She sounds delighted\./.test(yaBoth) && !/every tooth|says, lower/i.test(yaBoth), `${T} (T L4; D1 TT): Ya's quiet walk: no punch, the both-line's own tag, no teeth`);
     // TG-C2: Mei Lin's quiet walk with Ya away, cold and warm
     for (const m of [0, 80]) { const { g, t } = talk('talk_mei', 5, { m, region: 'ah', day: 4, flags: { ya_off_done: false } });
       assert(BR.awayNow(g) === 'ya' && /^Mei Lin has not spoken/.test(t) && !/\bYa\b/.test(t), `${T} (TG-C2): Mei Lin's quiet walk with Ya away names no Ya (${m ? 'warm' : 'cold'})`); }
@@ -8052,7 +8053,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     const all = Object.fromEntries([2, 3].flatMap((v) => Object.keys(FORMS).map((f) => [`${v}:${f}`, week(99960 + v, v, f)])));
     // TG-C1: the 18 passages word for word (p10-drafts-rv2.txt as built)
     { const h = createHash('sha256').update(Object.keys(all).sort().map((k) => all[k].join('\n')).join('\n\n')).digest('hex');
-      assert(h === '7d5e58d6be196689b72a6eb38f8ed70b1875318bedeb60602a7462ff45f5c9a1', `${T} (TG-C1): the six new texts in three forms word for word (sha256 ${h.slice(0, 16)}…)`); }
+      assert(h === 'b4391633d3a6234fa4969c4d04c7c78a7c270ee817b414a82ec2071a4b48ce43', `${T} (TG-C1): the six new texts in three forms word for word (sha256 ${h.slice(0, 16)}…; v0.11.279 P47-B, PN-f f: re-pinned for the fungus clause)`); }
     // TG-T2, TG-T3, TG-C2: one word per passage, in its own form only
     { const W = { 2: [['a mouse in her storeroom', 'the largest thing under her roof', 'carried her water twice'], ['kneading the blanket', 'and rolls over', 'takes the pillow'], ['the dry half of your blanket', 'shakes herself once', 'wringing her hair']],
                   3: [['from behind your knees', 'across the head of the ladder', 'turned to the wall'], ['washing a whisker', 'regards the cup from above', 'not opening her eyes'], ['I can hear moths', 'onto her forelegs', 'longer than the dog']] };
@@ -9857,6 +9858,88 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       g.coil.n = (g.coil.n || 1) + 1; const v2 = sceneView(g, SCENES); // read on an earlier Coil, the text the same
       assert(v2.text === v.text && !W.foldEarlier(g, v) && !W.foldEarlier(g, v2), `${T} (NF-g): a scene outside FOLD_SCENES never folds by the earlier-day rule, read on an earlier Coil too`); }
     { const N = await import('../js/core/news.js'); assert(/0\.11\.278/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.278`); }
+}
+// v0.11.279 (owner picks P47-B, D1; `claude/p47-options.md`, `project/research/p47-measure.md`): 5b's texts: YM-3, L3, PN-f (Fable's runs A–C)
+{
+    const T = 'P47-B';
+    const FO = await import('../js/story/act1_fallout.js'), W = await import('../js/core/week.js'), G = await import('../js/core/game.js'), L = await import('../js/core/lines.js');
+    const fs = await import('node:fs'); const src = (f) => fs.readFileSync(new URL(`../js/${f}`, import.meta.url), 'utf8');
+    const D = 1440;
+    // YM-3: story day 9's evenings (Days 51–57) take the three pairs in turn by the supper text's day index; the same gains
+    { const g = ensureBars(newGame(47001, { closed: true })); Object.assign(g.flags, { ya_met: true, fo_plan: true }); g.yuki.realm = 9;
+      const seen = [];
+      for (let k = 0; k < 7; k++) { g.minutes = (50 + k) * D + 21 * 60; g.scene = 'fo_supper'; const v = sceneView(g, SCENES);
+        const p = FO.YM_PAIRS[k % 3]; seen.push(v.choices.slice(0, 2).map((c) => c.label).join(' / '));
+        assert(v.choices[0].label === p.l0 && v.choices[1].label === p.l1, `${T} (YM-3): evening ${k + 1} shows pair ${k % 3} (${seen[k]})`); }
+      const labels = FO.YM_PAIRS.flatMap((p) => [p.l0, p.l1]);
+      assert(labels.every((l) => W.AGAIN_EVE.fo_supper.test(l)) && new Set(labels.map((l) => l.split(/\s/)[0])).size === 6, `${T} (YM-3): every label is YM-f's (AGAIN_EVE) and each starts its own way`);
+      for (let k = 0; k < 3; k++) for (const i of [0, 1]) {
+        const h = ensureBars(newGame(47002, { closed: true })); Object.assign(h.flags, { ya_met: true, fo_plan: true }); h.yuki.realm = 9;
+        for (let j = 0; j <= k; j++) { h.minutes = (50 + j) * D + 21 * 60; h.scene = 'fo_supper'; sceneView(h, SCENES); }
+        const ya = { ...rel(h, 'Ya') }, mo = { ...rel(h, 'Mother') }, me = { ...rel(h, 'Mei Lin') };
+        const r = choose(h, SCENES, i), d = (a, b) => [rel(h, b).f - a.f, rel(h, b).a - a.a].join(',');
+        const want = i === 0 ? d(ya, 'Ya') === '-2,2' && d(mo, 'Mother') === '3,0' : d(ya, 'Ya') === '3,3' && d(me, 'Mei Lin') === '2,0' && h.flags.laughed_with_ya;
+        assert(want && r.lines.join(' ').includes(FO.YM_PAIRS[k][i ? 'r1' : 'r0']), `${T} (YM-3): pair ${k} choice ${i}: its reply, the old gains (${r.lines.join(' ').slice(0, 50)})`); } }
+    // PN-f j: the honeycomb's second paragraph: no gift-and-thanks rule, no look from the mother, ends on Mei Lin's question before Ya's answer
+    { const t = FO.FS7.d9.t, ps = t.split('\n\n');
+      assert(ps.length === 3 && !/thanks the guest|gift is received|cure a ham|gets a look/.test(t) && /what the bees had to say\.$/.test(ps[1]) && /^"They said no,"/.test(ps[2]), `${T} (PN-f j): FS7.d9's second paragraph`); }
+    // PN-f k: the slopes' honest answer: the old reply the first day picked this Coil, the new one every later day; a new Coil starts again
+    { const g = ensureBars(newGame(47003, { closed: true })); const c = SCENES.herb_slopes.choices[1];
+      const pick = (day) => { g.minutes = day * D + 10 * 60; return c.do(g).join(' '); };
+      const a = pick(12), b = pick(13), b2 = pick(15), b3 = pick(15);
+      g.coil.n = (g.coil.n || 1) + 1; const n = pick(20);
+      assert(/Because you're here/.test(a) && /The reason hasn't changed/.test(b) && b2 === b && b3 === b && n === a && L.DAY_REPLIES['herb_slopes:honest']?.length === 2, `${T} (PN-f k): old, then the new reply and it stays; a new Coil the old (${[a, b, b2, n].map((x) => x.slice(0, 18)).join(' | ')})`); }
+    // PN-f f: the fungus is no Earth species
+    { const s = src('story/ashfall.js'); assert(!/violet beneath/.test(s) && /Grey on top, with pores that shut at a touch/.test(s), `${T} (PN-f f): the bracket fungus`); }
+    // L3: two or more foes posturing: postureCount, and main.js draws holdNowMany for them
+    { const g = ensureBars(newGame(47004, { closed: true })); const e = (p) => ({ postures: p, hp: 5 });
+      g.combat = { round: G.TELL_EVERY, enemies: [e(true), e(true), e(false)] }; const two = G.postureCount(g);
+      g.combat.enemies[1].staggered = true; const one = G.postureCount(g); g.combat.round = G.TELL_EVERY + 1; const none = G.postureCount(g); g.combat = null;
+      assert(two === 2 && one === 1 && none === 0 && G.postureCount(g) === 0 && G.postureNow({ combat: { round: G.TELL_EVERY, enemies: [e(true)] } }), `${T} (L3): postureCount ${two}/${one}/${none}`);
+      assert(/postureCount\(g\) > 1 \? SAY_TEXT\.holdNowMany : SAY_TEXT\.holdNow/.test(src('main.js')) && /one only/.test(G.SAY_TEXT.holdNowMany) && !/\{foe\}/.test(G.SAY_TEXT.holdNowMany), `${T} (L3): main.js draws holdNowMany for two or more`); }
+    // PN-f a, c, e: the journey talks: no path, no coat at Mei Lin's beat 7, no limp in Ya's sulks, the basket in fewer of Mei Lin's texts
+    { const s = src('story/act1_blackroot.js');
+      const gone = ['Where the path narrows', 'looks at the path', 'tells the path', 'studies the path ahead', 'path next bends', 'drags you off the path', 'ground turns rough', 'consults the basket', 'not to let it go grey', 'She limps. Nothing is wrong'].filter((w) => s.includes(w));
+      assert(gone.length === 0, `${T} (PN-f a, c, e): the old words gone from the talks (${gone.join(', ')})`); }
+    // PN-f b: Ya's beats 8 and 9, both close: the spring's lines after it, the old before
+    { const both = (beat, kissed) => { const g = ensureBars(newGame(47005, { closed: true })); Object.assign(g.flags, { romance: true, ya_romance: true, ya_talks: beat, trio_kiss_seen: kissed });
+        goTo(g, SCENES, 'talk_ya'); return String(sceneView(g, SCENES).text || ''); };
+      const m0 = both(8, false), m1 = both(8, true), r0 = both(9, false), r1 = both(9, true);
+      assert(/Do not tell her/.test(m0) && /She has a knife for thread/.test(m1) && !/Do not tell her/.test(m1) && /where it starts/.test(r0) && /How far under it, I asked/.test(r1) && !/where it starts/.test(r1) /* RV-A L3 */,
+          `${T} (PN-f b): before / after the spring (${[m0, m1, r0, r1].map((x) => x.slice(-30)).join(' | ')})`); }
+    // RV-A (the cold review's TG2): the labels and Claude's cuts word for word (not against YM_PAIRS itself)
+    { const want = ['"Ya. Manners." (You\'re aware of the irony.)', 'Laugh. Out loud. Somebody at this table has to.', '"Not at the table." (You\'d know.)', 'Give up and laugh. This table has straight faces to spare.',
+          'Quote the house rules at her. (You\'ve broken most of them.)', 'Lose your composure, audibly. It was only ever on loan.'];
+      const got = FO.YM_PAIRS.flatMap((p) => [p.l0, p.l1]); const bl = src('story/act1_blackroot.js');
+      const cuts = [/The mother lowers her chin to you, a finger's width\./.test(FO.YM_PAIRS[2].r0), /^More than one speech is coming this round\./.test(G.SAY_TEXT.holdNowMany),
+          bl.includes('At home, she says, the tail of a line') && bl.includes('It is not on offer, she says;'), bl.includes('before she has finished the dried meat she is chewing'),
+          !/I checked/.test(L.DAY_REPLIES['herb_slopes:honest'][1]) /* RV-A L2 */, !bl.includes('quietly, into the basket') /* RV-A L4 */];
+      assert(JSON.stringify(got) === JSON.stringify(want) && cuts.every(Boolean), `${T} RV-A (TG2): the six labels and the cuts (${cuts.map((c) => (c ? 1 : 0)).join('')})`); }
+    // RV-A (TG4, L6): a foe already silenced (flustered) counts for neither the hint nor the remark; the arson's real foes posture together
+    { const g = ensureBars(newGame(47006, { closed: true })); const e = (fl) => ({ postures: true, hp: 5, flustered: fl });
+      g.combat = { round: G.TELL_EVERY, enemies: [e(0), e(2), e(0)] }; const n = G.postureCount(g); g.combat = null;
+      const t = ensureBars(newGame(47007, { closed: true })); const ac = Object.values(SCENES).flatMap((x) => x.choices || []).find((c) => c.combat?.name === 'arson');
+      startCombat(t, ac.combat(t)); t.combat.round = G.TELL_EVERY; const live = t.combat.enemies.filter((x) => x.postures).length, real = G.postureCount(t);
+      assert(n === 2 && real === live && real >= 2 && /posturing\(g, e\)\); \/\/ v0\.11\.279/.test(src('core/game.js')), `${T} RV-A (TG4, L6): a flustered foe left out (${n}); the arson's speakers on a posture round ${real} of ${live}`); }
+    // RV-A (TG5): the slopes' honest answer through choose (its time added before the reply)
+    { const g = ensureBars(newGame(47008, { closed: true })); const out = [];
+      for (const d of [12, 13, 14]) { g.minutes = d * D + 9 * 60; goTo(g, SCENES, 'herb_slopes'); g.minutes = d * D + 9 * 60; out.push(choose(g, SCENES, 1).lines.join(' ')); }
+      assert(/Because you're here/.test(out[0]) && /The reason hasn't changed/.test(out[1]) && /The reason hasn't changed/.test(out[2]), `${T} RV-A (TG5): through choose, the old reply then the new (${out.map((x) => x.slice(0, 20)).join(' | ')})`); }
+    // RV-A (TG1): the talks rendered in the Drowned Wood (beats 0–20; cold, warm, both; before and after the spring): no path, ground, road,
+    // trail or rock but the listed ones (two similes; the rest found in v0.11.279, open, options later on roadmap-e.md's PN line)
+    { const RE = /\b(path|paths|ground|road|trail|uphill|rock|rocks)\b/gi;
+      const KEEP = ['teaching a rock', 'watches a trail', 'good stretch of path', 'asks the path ahead', 'beside the path', 'the ground surprises you', 'the ground has surprised', 'kneeling in the path', 'off the path with the flat'];
+      const bad = new Set();
+      for (const id of ['talk_mei', 'talk_ya']) for (let n = 0; n <= 20; n++) for (const fl of [{}, { romance: true }, { ya_romance: true }, { romance: true, ya_romance: true }]) for (const kiss of [false, true]) {
+          const g = ensureBars(newGame(47100 + n, { closed: true })); Object.assign(g.flags, fl, { mei_talks: n, ya_talks: n, trio_kiss_seen: kiss, bl_region: 'dw', mei_party: true, ya_party: true });
+          goTo(g, SCENES, id); const v = sceneView(g, SCENES); const t = [v.text, ...v.choices.map((c) => c.label)].join('\n');
+          for (const m of t.matchAll(RE)) { const ctx = t.slice(Math.max(0, m.index - 40), m.index + 30); if (!KEEP.some((k) => ctx.includes(k))) bad.add(`${id}@${n}: ${ctx.replace(/\n/g, ' ')}`); } }
+      assert(!bad.size, `${T} RV-A (TG1): no new place words in the Drowned Wood's talks (${[...bad].slice(0, 3).join(' | ')})`); }
+    // RV-A (TG6, M1): the screen after "drags you aside" opens without the path
+    { const g = ensureBars(newGame(47009, { closed: true })); Object.assign(g.flags, { ya_romance: true, bl_region: 'dw', mei_party: true, ya_party: true, yr_day: true }); goTo(g, SCENES, 'ya_romance');
+      const t = String(sceneView(g, SCENES).text || ''), lab = SCENES.talk_ya.choices.map((c) => (typeof c.text === 'string' ? c.text : '')).join('|');
+      assert(/^Your wrist stays in her grip until something large enough stands between you two/.test(t) && !/\bpath\b/.test(t.split('\n\n')[0]) && /drags you aside, go\./.test(lab), `${T} RV-A (TG6, M1): ya_romance's opening (${t.slice(0, 50)})`); }
+    { const N = await import('../js/core/news.js'); assert(/0\.11\.279/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.279`); }
 }
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);

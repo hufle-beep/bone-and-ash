@@ -138,6 +138,14 @@ export function dayReply(key, list) {
     return (g) => { noteDay(g, k); return byDay(g, list, k); };
 }
 
+/** v0.11.279 (owner picks P47-B, D1; PN-f k, the slopes' honest answer): as `dayReply`, but past the last text it stays on the last one
+ *  (byDayLast's way): the first entry is the old reply (the first day it is picked this Coil), the last fits any later day. */
+export function lastReply(key, list) {
+    DAY_REPLIES[key] = list;
+    const k = `r:${key}`;
+    return (g) => { noteDay(g, k); return byDayLast(g, list, k); };
+}
+
 /**
  * v0.11.166 (owner picks RW1, FT1; Fable's texts): replies by day and by Coil. The Act 1 flirts showed the same five replies again in
  * every Coil (one a day, from the first again each Coil). `coilReply(key, sets)` keeps one set of day texts per Coil: the act's first

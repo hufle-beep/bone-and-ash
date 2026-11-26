@@ -1,12 +1,12 @@
 {
- "saved": "2026-11-25",
+ "saved": "2026-11-26",
  "totals": {
   "scenes": 333,
   "words": 37899,
-  "variantWords": 159100,
+  "variantWords": 159176,
   "labels": 858,
-  "labelWords": 5825,
-  "sharedChunks": 771,
+  "labelWords": 5823,
+  "sharedChunks": 769,
   "sharedScenes": 135,
   "reused": 49,
   "favourites": 46,
@@ -47,7 +47,7 @@
   "ashfall": {
    "scenes": 18,
    "words": 1129,
-   "variantWords": 19766,
+   "variantWords": 19799,
    "labels": 65,
    "labelWords": 476,
    "sharedScenes": 6,
@@ -61,7 +61,7 @@
   "fallout": {
    "scenes": 41,
    "words": 4932,
-   "variantWords": 30468,
+   "variantWords": 30477,
    "labels": 95,
    "labelWords": 695,
    "sharedScenes": 20,
@@ -75,9 +75,9 @@
   "blackroot": {
    "scenes": 60,
    "words": 6642,
-   "variantWords": 29373,
+   "variantWords": 29407,
    "labels": 185,
-   "labelWords": 1068,
+   "labelWords": 1066,
    "sharedScenes": 20,
    "reused": 36,
    "favScenes": 15,
@@ -158,8 +158,8 @@
    "spacing": 0
   },
   "replies": {
-   "lines": 367,
-   "words": 13530,
+   "lines": 369,
+   "words": 13627,
    "dupes": 0,
    "sceneShared": 55,
    "tics": 0,
@@ -348,8 +348,8 @@
    "cardTics": 0
   },
   "fight": {
-   "lines": 47,
-   "words": 763,
+   "lines": 49,
+   "words": 790,
    "dupes": 0,
    "sceneShared": 1,
    "tics": 0,
@@ -361,6 +361,15 @@
    "words": 4080,
    "dupes": 0,
    "sceneShared": 2,
+   "tics": 0,
+   "broken": 0,
+   "spacing": 0
+  },
+  "ym": {
+   "lines": 8,
+   "words": 272,
+   "dupes": 0,
+   "sceneShared": 0,
    "tics": 0,
    "broken": 0,
    "spacing": 0

@@ -2,6 +2,27 @@
 
 Started 2026-11-26 (v0.11.278), when `history-55.md` would have passed 20 KB with this move (owner pick U1, MD: history parts start at 20 KB, so a push uploads less). Older parts: `history-55.md` … `history.md`.
 
+## Moved from the handover in v0.11.279 (word for word)
+
+*(the version line as it stood)*
+
+**Saved:** 2026-11-26 (Europe/Budapest). **Version:** 0.11.278 (`sw.js` VERSION `bone-ash-0.11.278`): **5b's first push (P46-A, the owner 2026-11-26 00:26: "P46-a go"; RV-A, 02:02: "RV-a go", the build's stop after the cold review):** **NF-g** (`week.js` `foldEarlier`): the night fold (after every story tap and under the plan) walks any fold scene (the village and Fallout nights and mornings, the forest's morning, the Old Tree's night and morning) whose text was shown on an earlier day of this Coil or read on an earlier Coil, as the village morning's since v0.11.248, but never a romance beat on screen (RV-A H1) and only on to a fold scene or a hub (RV-A M1: not into Ya's arrival or the wolf); stops a game, measured before RV-A, Careful −26.8, the Sociable −27.1, Random −11.2, the Rusher −10.9, the Completionist −4.9, the Cultivator −2.7, after it about −24.7 / −25.0 / −11.0 / −10.9 / −4.9 / −2.7 (taps only); **PK** (`tools/packet.mjs --state <words>`: the forest night's packet 96 KB → one night's 6.6–9.7 KB); **LT** (`tools/lib/formlint.mjs`: `--check`'s `form` kind, the text lint's LT line; 0 hits in the game); **TC kept** (the owner's five calls on the texts as they stand; Gao Feng as Lu Han's cousin and Yuki's weights written into `lore.md` and the canon card); **PN-c** (11 polish notes closed, 11 text notes left in `roadmap-e.md`). Measured: `project/research/p46-measure.md`. **Found while building (open, options later):** SF, one-paragraph nights and mornings fold only by the earlier-Coil rule (`shownEarlierDay` reads the paragraph key, a one-paragraph text's later-day record is the split fold's exact key). **Next push:** open, options later (5b's texts: YM-3, FC-w, L3, PN's text notes).
+
+*(the open item as it stood)*
+
+- **NEXT PUSH: open, options later.** 5b's first push (v0.11.278: NF-g, PK, LT, TC kept, PN-c); DF, the death farm, closed as accepted (v0.11.277); `roadmap-retune.md`'s older notes settled (v0.11.276). Open, options later (on the roadmap: `roadmap.md`'s Order line): **5b's texts** (section 2b: YM-3, FC-w, L3, PN's 11 text notes in `roadmap-e.md`; Fable), SF (found in v0.11.278: one-paragraph fold texts and `shownEarlierDay`), then systems, Act 2, art, later; the "tuned up to" note (TU, `roadmap-retune.md`) after the retune. *(The entry as it stood, word for word, in `history-56.md`.)*
+
+*(from Decided in chat)*
+
+- **v0.11.276: P44-A (the owner 2026-11-25 16:37: "P44-a go").** The options as laid out in chat (`claude/p44-options.md`, the project doc): **P44-A 🟢 (picked, recommended)** CL (35 closed) + PL (4 placed) + S2 (section 2's two settled lines), TH closed as accepted, DF and TU kept (39 of 41 settled); P44-B 🟡 the same with TH built (+5.7 hungry screens a game for Careful and the Sociable); P44-C 🟠 status notes only, nothing moved; P44-D 🔴 hold. Found while measuring: DF (the death farm), open, options later.
+
+## v0.11.276 — `roadmap-retune.md`'s older notes settled (P44-A)
+
+- **Files:** docs: `project/roadmap-retune.md` (DF and TU left, DF's status note), `roadmap-done-6.md` (the v0.11.276 move: 35 entries with their closing notes, section 2's two settled lines, v0.11.275's done line), `roadmap-act2.md` and `roadmap-2.md` (the 4 placed lines), `roadmap.md` (section 2's done line, the Order line, section 0's note), this file, `history-55.md`, `changelog.md`, `restore-points.md`, `project/research/p44-measure.md` (repo only); tests: `tests/tools.test.mjs` (the P44-A block; the docs pins re-pinned to the lines' new places, the v0.11.178 block's hash rebuilt from them), `tests/README.md`; `sw.js`.
+- **What:** see the version line. No What's new line: nothing a player sees changed.
+- **Checks:** docs and tests only (rule 2): the tools test (680 passed; before it 24 docs pins of the old places, re-pinned to the lines' new places (PG, the established pattern), the v0.11.178 block rebuilt from them hashing as pinned, and 9 of the oldest-kept handover and range pins) and `bash tools/check.sh quick`: **exit 0, 921.8 s**. **How it touches the rest:** no game, tool or bot file changed, so no number can move; the measuring ran on scratch copies only (`p44-measure.md`).
+- **Opus:** none (rule 9: no game logic, balance or story text). **Fable:** none.
+
 ## Moved from the handover in v0.11.278 (word for word)
 
 *(the version line as it stood)*

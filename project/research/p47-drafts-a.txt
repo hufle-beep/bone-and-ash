@@ -1,0 +1,15 @@
+ym2:0:label | "Not at the table." (You've been told it often enough.)
+ym2:0:reply | Ya's chin comes up. She weighs whether the table is yours to forbid, decides it is funnier if it is, and sits back with her arms folded, grinning at you; the mother pours your tea herself.
+ym2:1:label | Give up and laugh. This table has straight faces to spare.
+ym2:1:reply | Ya slaps the table and laughs louder than you, to win. Mei Lin goes under behind her sleeve, and her mother starts stacking bowls that nobody has finished with.
+ym3:0:label | Quote the house rules at her. (You've broken most of them.)
+ym3:0:reply | Ya hears the rules out with her lip curled, asks which one you made up, and obeys that one only, loudly, for your sake. The mother inclines her head to you, a finger's width.
+ym3:1:label | Lose your composure, audibly. It was only ever on loan.
+ym3:1:reply | Ya crows, delighted to have got a noise out of the scholar, and thumps your back until you cough. Mei Lin is laughing into her elbow; her mother begins, quietly, to apologise to the ancestors.
+d9:p2 | Mei Lin's mother looks at the parcel, and at the honey already finding the grain of her table. She rises, takes down the blue dish that leaves its shelf for festivals and for nothing else, and lifts the comb across with two spoons, dock leaves, wax and all. Then she turns the dish a quarter, so its painted side faces the guest. Mei Lin, sweetly, asks what the bees had to say.
+# notes
+- ym2:0:label, "You've been told it often enough": about James's own past, not a count of these suppers; cut the bracket to `(You'd know.)` if it reads as a count.
+- ym2:0:reply and ym3:0:reply show the mother's approval by an act (pouring his tea herself; a slight nod). Assumed tea is on the table every evening (the packet has it on several).
+- ym3:1:reply: the mother apologising to the ancestors is near evening 3's grace in subject, though not in wording or moment. Swap for "her mother sets her chopsticks down, squared, and waits for the house to be hers again" if too close.
+- d9:p2: assumed the blue dish has a painted side and lives on a shelf; "dock leaves" is from the paragraph before it. Mei Lin's question is reworded ("what the bees had to say") to avoid a five-word run from the old paragraph; Ya's "They said no" still answers it.
+- ym2:1:label contains "laugh" but does not start with it; ym3:1:label avoids the word.

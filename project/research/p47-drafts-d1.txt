@@ -1,0 +1,24 @@
+fo_supper:0 | "Not at the table." (You'd know.)
+fo_supper:0 | Ya's chin comes up. She weighs whether the table is yours to forbid, decides it is funnier if it is, and sits back with her arms folded, grinning at you; the mother pours your tea herself.
+fo_supper:1 | Give up and laugh. This table has straight faces to spare.
+fo_supper:1 | Ya slaps the table and laughs louder than you, to win. Mei Lin goes under behind her sleeve, and her mother starts stacking bowls that nobody has finished with.
+fo_supper:0 | Quote the house rules at her. (You've broken most of them.)
+fo_supper:0 | Ya hears the rules out with her lip curled, asks which one you made up, and obeys that one only, loudly, for your sake. The mother lowers her chin to you, a finger's width.
+fo_supper:1 | Lose your composure, audibly. It was only ever on loan.
+fo_supper:1 | Ya crows, delighted to have got a noise out of the scholar, and thumps your back until you cough. Mei Lin is laughing into her elbow; her mother begins, quietly, to apologise to the ancestors.
+fo_supper | Mei Lin's mother looks at the parcel, and at the honey already finding the grain of her table. She rises, takes down the blue dish that leaves its shelf for festivals and for nothing else, and lifts the comb across with two spoons, dock leaves, wax and all. Then she turns the dish a quarter, so its painted side faces the guest. Mei Lin, sweetly, asks what the bees had to say.
+herb_slopes:1 | "The reason hasn't changed," you say. "I checked." She keeps her eyes on her work and grins anyway. "Then say it properly," she says, "so I can tell you what's wrong with it." You say it properly. She tells you. None of it is an objection.
+village_night | Grey on top, with pores that shut at a touch and a spore print in two colours, growing on a branch burnt to charcoal
+gao | More than one speech is coming this round. A remark ends one only; the other speakers still swing, and your guard is down.
+talk_mei | At home, she says, the tail of a line belongs to whoever matters least, and she would like it settled which of you that is. You offer to take the post. It is not on offer, she says; it is assessed, by household and usefulness. You ask how the assessing is going. "Slowly," says Mei Lin. "You have no household, and I am still looking for the other."
+talk_ya:3 | She turns her back on you and keeps it turned. Wherever you step, the back has got there before you. It is an eloquent back, and it has nothing good to say.
+talk_ya | "The herb girl sews it up," she adds. "I tore mine on purpose and brought it to her. She knew. She stitched it with me still inside, and bit the thread off at my hip." Every tooth shows. "She has a knife for thread."
+talk_ya | "The herb girl I do not bet on," she says, pleased. "I look at her and it starts, here." A flat hand, at the collarbone. "I know where the red begins. What I am hunting is where it ends. She will not say."
+talk_mei | Where there is room for one she walks close enough for two, and her sleeve keeps brushing yours. Then there is room for two. Nobody seems to have told her sleeve.
+talk_mei | She puts them on, looks at where she was about to step, and stops walking, because it has moved.
+talk_mei | and then tells the open air, firmly, that this is the depth for an elder.
+talk_mei | Where the going turns awkward she takes your arm, on behalf of the foot,
+talk_mei | She goes through the village in her head, house by house. "Neither," she says. "I checked."
+talk_mei | Then she finds a crumb on her own sleeve that needs her whole attention.
+talk_ya | Ya has bet herself that she can make you blush before she has finished the dried meat she is chewing, and has told you so.
+talk_ya:2 | When she grabs your wrist and drags you aside, go.

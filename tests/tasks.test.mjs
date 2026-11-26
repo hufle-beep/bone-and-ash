@@ -991,7 +991,7 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
       const b = mk('rt_brawl', [man('Bao')], { act1: true, style: 'unarmed' }); b.stats.unarmed = 5; combatYield(b); assert(b.stats.unarmed === 5, 'PB1, T: a yield adds no round');
       const { readFileSync } = await import('node:fs'); const main = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
       assert(/Date\.now\(\) - yieldArmed > 4000\) \{ yieldArmed = Date\.now\(\); note\(SPAR_TEXT\.yieldConfirm\)/.test(main) && SPAR_TEXT.yieldConfirm === 'Tap Yield again to concede the fight.', 'PB1, YC: Yield asks for a second tap');
-      assert(/a\.unarmed \? unarmedMastery\(g\) : a\.guard/.test(main) && /a\.remark \? `\$\{SAY_TEXT\.tag\}\$\{postureNow\(g\) \? ` · \$\{SAY_TEXT\.tagNow\}`/.test(main), 'PB1, CV: the brawl cards count mastery; the remark tag says when the speech is now'); }
+      assert(/a\.unarmed \? unarmedMastery\(g\) : a\.guard/.test(main) && /a\.remark \? `\$\{SAY_TEXT\.tag\}\$\{postureNow\(g\) \? ` · \$\{postureCount\(g\) > 1 \? SAY_TEXT\.tagNowMany : SAY_TEXT\.tagNow\}`/ /* v0.11.279 (P47-B RV-A, L5) */.test(main), 'PB1, CV: the brawl cards count mastery; the remark tag says when the speech is now'); }
     // unarmed mastery reaches the check; a spar's guard stays 2; no line at the cap; the whole game again keeps it; none on a new game
     { const val = (u) => { const g = mk('rt_brawl', [man('Bao', { dc: 50 })], { act1: true, style: 'unarmed' }); g.stats.unarmed = u; const l = cStep(g, 'strike').lines.find((x) => x.startsWith('Step in and hit:')); return Number(/GU ([\d.]+) \//.exec(l)[1]); };
       assert(Math.round((val(20) - val(0)) * 10) / 10 === 1, `PB1, T: +1 at 20 rounds reaches the strike's check (${val(0)} → ${val(20)})`);

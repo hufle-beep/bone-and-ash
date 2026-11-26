@@ -2,6 +2,24 @@
 
 Started in v0.11.278, when `roadmap-done-6.md` would have passed about 45 KB with this move. Newer than `roadmap-done-6.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.279 (word for word; owner picks P47-B, D1, RV-A, E1, 2026-11-26: 5b's texts, YM-3, L3, PN-f, PN-x, FC-w closed; each line's closing note under it)
+
+### From `roadmap.md` section 2b, v0.11.278's done line and the four lines of 5b's texts
+
+- *(v0.11.278, owner pick P46-A (`claude/p46-options.md`; `project/research/p46-measure.md`))* **Done: 5b's first push:** **NF-g** (`week.js` `foldEarlier`: a fold scene shown on an earlier day of the Coil, or read on an earlier Coil, folds, as the village morning's since v0.11.248; RV-A, the cold review's H1 and M1: never over a romance beat, only on to a fold scene or a hub (`foldOnTo`); stops a game about Careful −24.7, the Sociable −25.0, Random −11.0, the Rusher −10.9, the Completionist −4.9, the Cultivator −2.7; taps only); **PK** (`tools/packet.mjs --state <words>`: the forest night 96 KB → one night's 6.6–9.7 KB; the Fallout supper's story day 9 11.4 KB); **LT** (`tools/lib/formlint.mjs`: `--check`'s `form` kind on `:y:<form>` drafts, the text lint's LT line; 0 hits in the game's 298 written-out form calls); **TC kept** (the owner's five calls as they stand; the cousin and Yuki's weights into `lore.md` and the canon card); **PN-c** (11 polish notes closed as their reviews marked them, the 11 text notes left in `roadmap-e.md`). The four lines moved word for word to `roadmap-done-7.md`. **Found while building (open, options later):** SF, a one-paragraph text's later-day record is the split fold's exact key, which `shownEarlierDay` does not read: one-paragraph nights and mornings (the village night's quiet text, the Fallout mornings) fold only by the earlier-Coil rule.
+
+- **YM-3, Ya's manners:** two more choice pairs for the Fallout supper's story-day-9 week (Fable, about 200 words; about half a text push; `roadmap-e.md`'s repeats line).
+  - *(v0.11.279, owner picks P47-B, D1)* Done: `act1_fallout.js` `YM_PAIRS` (Fable's run A, Claude's cuts): three pairs in turn by the supper text's day index; `week.js` `AGAIN_EVE` knows every label.
+
+- **FC-w, Ashfall sees the first flight:** a story text (not measured; `roadmap-e.md`'s flight line).
+  - *(v0.11.279, owner pick P47-B)* Closed as accepted: FC-o kept; FC-w2 (the whole village sees it) on `roadmap-e.md`'s flight line, open, options later.
+
+- *(v0.11.269, owner pick P37-A; `claude/p37-options.md`)* **L3, the read round's hold line** (the P35 review's L3, noted in v0.11.267): on a read round both foes posture; Say something stops Lu Han's big blow only (one speaker a Say something, the existing rule) and Gao or the disciple attacks James unguarded (GU 0.5 against 2.5 guarding; measured into the 20.5 / 19.5%); the hold line "A speech is coming this round: say something and it never finishes" reads as one speaker: its wording for two (one line, Fable).
+  - *(v0.11.279, owner picks P47-B, D1, RV-A, E1)* Done: `game.js` `postureCount`, `SAY_TEXT.holdNowMany` (Fable's run B, Claude's cut) and `tagNowMany` (run D), drawn by `main.js` for two or more speakers; the remark's own rule shared (`posturing`, RV-A L6).
+
+- **PN, the polish notes (log only):** the review notes of v0.11.233–v0.11.246 in `roadmap-e.md` (three lines), read and fixed or closed with the push. *(v0.11.278, P46-A PN-c: 11 closed; the 11 text notes left, one line in `roadmap-e.md`.)*
+  - *(v0.11.279, owner picks P47-B, D1, RV-A, E1)* All 11 text notes settled (7 fixed, 4 closed as accepted; `roadmap-e.md`'s PN line); the v0.11.279 finds there, open, options later.
+
 ## Moved in v0.11.278 (word for word; owner pick P46-A, 2026-11-26: 5b's first push, NF-g, PK, LT, TC kept, PN-c; each line's closing note under it)
 
 ### From `roadmap.md` section 2, one done line

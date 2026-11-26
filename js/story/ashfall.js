@@ -5,7 +5,7 @@
 import { addItem, hasItem, eat, bumpRel, condense, sleepUntil, advance, d6, awardYukiFightXp, jamesHpMax, nightRest, nightTo, canFly } from '../core/game.js';
 import { FW } from './flight_texts.js'; // v0.11.195 (owner picks F1, D1)
 import { set, day, hour, daily, markDaily, forestScale, villageScale, grow, eatBest, pantry, foodCount, byForm, byDay, dayReply, seqText } from './common.js';
-import { dayIndex } from '../core/lines.js'; // v0.11.232 (P5-B, V3b): the roof's lines by the text's index
+import { dayIndex, lastReply } from '../core/lines.js'; // v0.11.279 (P47-B, PN-f k): lastReply // v0.11.232 (P5-B, V3b): the roof's lines by the text's index
 import { storyNight, weekMorning, tributeLeft, daysWord, DaysWord } from '../core/calendar.js'; // v0.11.224 (TX2, TS6): the counts // v0.11.203 (owner pick T1, TS1): the long calendar's weeks
 import { potLine } from './kitchen.js'; // v0.11.181 (SP1, PS)
 
@@ -416,7 +416,7 @@ const QUIET_WEEK = {
             "*She left me out,* Yuki sends from the crook of your knees. *I caught a mouse in her storeroom. That is labour, and it should be in the record.*",
             "*She left me out,* Yuki sends, with her chin across both your ankles. *I am the largest thing under her roof. An honest record would have mentioned it.*",
             "\"She left me out,\" Yuki says into the blanket. \"I carried her water twice and was polite about it. That is labour, and it belongs in the record.\""),
-        quietY("You are classifying a bracket fungus from the forest edge and getting nowhere. Grey on top, violet beneath, growing on wood that should have killed it; nothing you were taught has a name for it, and your mind keeps offering names regardless. Two houses up the lane a man snores in long, considered sentences. {yuki} The fungus stays unnamed, and you sleep anyway.",
+        quietY("You are classifying a bracket fungus from the forest edge and getting nowhere. Grey on top, with pores that shut at a touch and a spore print in two colours, growing on a branch burnt to charcoal; nothing you were taught has a name for it, and your mind keeps offering names regardless. Two houses up the lane a man snores in long, considered sentences. {yuki} The fungus stays unnamed, and you sleep anyway.",
             "*Call it the grey one,* Yuki sends, kneading the blanket flat beside your ribs. *You can be wrong about it in daylight, when I am awake to enjoy that.*",
             "*Call it the grey one,* Yuki sends, and rolls over, which moves the blanket, the bedding and you. *Be wrong about it after breakfast, when I am awake to watch.*",
             "\"Call it the grey one,\" Yuki says, and takes the pillow from under your head for her own use. \"Be wrong about it after breakfast, when I am awake to watch.\""),
@@ -505,6 +505,12 @@ const slopesW2a = (g) => `Mei Lin works the slope as a general works a map: this
 
 ${g.flags.mei_bruised ? 'Her split lip has scabbed over. She catches you looking at it, and stares back until you look somewhere else.' : ''}`;
 const slopesW2b = (g) => `${SLOPES_W2.t}${g.flags.mei_bruised ? `\n\n${SLOPES_W2.bruised}` : ''}`;
+/** v0.11.279 (owner picks P47-B, D1; PN-f k, the v0.11.243 review's T L7 (a); Fable's run B): "Answer her question. Honestly." on the
+ *  slopes: the old reply the first time this Coil, then the second on every later pick (lines.js lastReply). */
+const HS_HONEST = lastReply('herb_slopes:honest', [
+    '"Because you\'re here," you say. You hear it, are appalled, and add: "The grass is also fascinating." She laughs until her legs give up and she sits down in it. One terrace over, an old herb-woman unbends and fixes her with a stare until the laughing stops. The stare is needed for a while.',
+    '"The reason hasn\'t changed," you say. She keeps her eyes on her work and grins anyway. "Then say it properly," she says, "so I can tell you what\'s wrong with it." You say it properly. She tells you. None of it is an objection.',
+]);
 const SLOPES_W2 = { t: "On the upper terrace Mei Lin has you on your knees, working a pale root out of the earth with your fingers, because a blade nicks it and a nicked root rots in the jar. She corrects your grip twice. The second time she is plainly enjoying herself.\n\n\"You don't need to sell them and you don't swallow them,\" she says, tamping the hole shut with her heel. \"So it isn't money and it isn't medicine. I've run out of sensible reasons. Give me a foolish one.\"", bruised: "The split in her lip has closed to a thin pale line, which pulls when she grins, and she grins regardless." };
 // v0.11.241 (owner picks P13-A with WK-d, D1; SPw3): the village supper's week 3 its own six on the long calendar (`seqText` 'supper:6'; week 2
 // keeps 'supper:5'): Fable's runs V1, V2 and W4 (the fourth redrafted, D1's WC), Claude's cuts (D1: RN, SN). Yuki by form in `{yuki}` where used.
@@ -766,7 +772,7 @@ ${[pantry(g), g.james.satiety < 30 ? 'You are hungry.' : '', g.james.hp < jamesH
 Her father comes up again, briefly. He would walk her up here and get the name of every plant wrong, on purpose, so that she had to put him right.`),
         choices: [
             { text: 'Learn properly. Ask questions, take samples, run the omnitool on everything.', check: { skill: 'GU', dc: 3 }, time: 150, do: (g) => { addItem(g, 'spirit_grass', 2); bumpRel(g, 'Mei Lin', 4, 2); return [`+2 Ninefold spirit grass (trade goods). ${DR_SLOPES(g)}`]; }, failDo: (g) => { addItem(g, 'spirit_grass', 1); bumpRel(g, 'Mei Lin', 2, 1); return ['You cut one stand wrong. She sighs at you as teachers sigh. +1 Ninefold spirit grass.']; }, to: 'ashfall' },
-            { text: 'Answer her question. Honestly.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 5); return ['"Because you\'re here," you say. You hear it, are appalled, and add: "The grass is also fascinating." She laughs until her legs give up and she sits down in it. One terrace over, an old herb-woman unbends and fixes her with a stare until the laughing stops. The stare is needed for a while.']; }, time: 150, to: 'ashfall' },
+            { text: 'Answer her question. Honestly.', do: (g) => { bumpRel(g, 'Mei Lin', 3, 5); return [HS_HONEST(g)]; }, time: 150, to: 'ashfall' },
         ],
     },
 

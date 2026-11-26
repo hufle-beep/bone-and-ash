@@ -1,0 +1,9 @@
+talk_mei | Mei Lin minds her footing as she walks, one hand deep in the basket, sorting by touch.
+talk_mei | Ahead, Ya, who has been listening, holds her spear upright at arm's length and bows to it at all three depths.
+talk_ya | She knocks the spear shaft against her own shin as she goes, once for each of you.
+talk_ya | Ya is hungry, which makes everything in reach of her either food or in her way, and she has not yet said which you are.
+talk_ya | she says, to anywhere but you.
+ya_romance | Your wrist stays in her grip until something large enough stands between you two and everybody else. Then she turns round, close enough for you to count the teeth on her necklace, and looks you over, and waits for nothing.
+talk_ya:3 | She looks at everything except you, and with great care: the sky, her own knuckles, the end of her spear. When you speak she peers past your shoulder to find out who said it.
+talk_ya | "On the herb girl I place no bet," she says, content. "The red runs down to here." The edge of her hand, laid across her collarbone. "Then cloth. How far under it, I asked. She threw a root at me, which is no answer."
+gao | the speeches are now

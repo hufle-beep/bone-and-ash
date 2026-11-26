@@ -1,0 +1,20 @@
+mei7:p1 | In Ashfall, she tells you, the tail of a line belongs to whoever matters least, and she would like it settled which of you that is. You offer to take the post. She says it is not offered; it is assessed, by household and usefulness. You ask how the assessing is going. "Slowly," says Mei Lin. "You have no household, and I am still looking for the other."
+yaoff:2:4 | She turns her back on you and keeps it turned. Wherever you step, the back has got there before you. It is an eloquent back, and it has nothing good to say.
+ya8:both:kiss | "The herb girl sews it up," she adds. "I tore mine on purpose and brought it to her. She knew. She stitched it with me still inside, and bit the thread off at my hip." Every tooth shows. "She has a knife for thread."
+ya9:both:kiss | "The herb girl I do not bet on," she says, pleased. "I look at her and it starts, here." A flat hand, at the collarbone. "I know where the red begins. What I am hunting is where it ends. She will not say."
+mei6:warm | Where there is room for one she walks close enough for two, and her sleeve keeps brushing yours. Then there is room for two. Nobody seems to have told her sleeve.
+mei8:glasses | She puts them on, looks at where she was about to step, and stops walking, because it has moved.
+mei9:warm:end | and then tells the open air, firmly, that this is the depth for an elder.
+mei10:warm:start | Where the going turns awkward she takes your arm, on behalf of the foot,
+meiq:basket | She goes through the village in her head, house by house. "Neither," she says. "I checked."
+meiq:warm:end | Then she finds a crumb on her own sleeve that needs her whole attention.
+ya9:open | Ya has bet herself that she can make you blush before she has finished the strip of dried meat she is chewing, and has told you so.
+ya:label2 | When she grabs your wrist and drags you aside, go.
+# notes
+- mei7:p1: 68 words. "tail of a line" avoids repeating "the back" from the opening sentence. The cold line that follows still ends "into the basket"; left alone as briefed.
+- yaoff:2:4: 32 words. Assumes the sulk can play while walking or standing; no place words in it.
+- ya8:both:kiss: 43 words. "it" is still James's coat, as in the old line; assumes Ya wears something that can be torn and stitched (hide). I dropped "while you sleep" to avoid a time-of-day reading and to stay clear of the old line's wording; put it back if the paragraph before needs it.
+- ya9:both:kiss: 43 words. Picks up the bet of ya9:open ("I do not bet on"); the collarbone is from the spring scene as the brief gives it.
+- mei6:warm / mei10:warm:start / mei9:warm:end keep the old sentences' other words on purpose (the fix was scoped to the path words), so they share runs with the lines they replace.
+- ya9:open: assumes Ya carries dried meat on the walk. If not, "before she has finished sharpening the spear" would clash with beat 14, so I avoided it.
+- ya:label2: 51 characters. The scene it leads to (ya_romance) still opens "She hauls you off the path"; not in my keys.

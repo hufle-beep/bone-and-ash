@@ -280,6 +280,10 @@ POOLS.results = resultLines;
       const w = STOMP[id]?.win?.[d]; const t = typeof w === 'function' ? w(g) : w; if (typeof t === 'string' && !st.includes(t)) st.push(t);
   }
   POOLS.stomp = st; }
+// v0.11.279 (owner pick P47-B RV-A, the cold review's TG3): Ya's manners at story day 9's supper (act1_fallout.js YM_PAIRS: every pair's two
+// replies, the old pair too) and Ya's post-spring lines (act1_blackroot.js YA_KISSED), as the pool `ym`: no sample state forces those replies or flags
+{ const FO = await import(js('story/act1_fallout.js')); const BR = await import(js('story/act1_blackroot.js'));
+  POOLS.ym = [...FO.YM_PAIRS.flatMap((p) => [p.r0, p.r1]), ...Object.values(BR.YA_KISSED)]; }
 // v0.11.239 (owner pick P12-A, RC; p12's measure CR1–CR3): every text, label and pool line the lint reads, as JSON ({ id, t, label }), for the
 // draft check's runs (tools/packet.mjs lintCorpus): a result line by its scene, a pool line as `pool:<name>`; nothing counted or printed
 if (CORPUS) {

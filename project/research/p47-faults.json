@@ -1,0 +1,10 @@
+[
+ { "id": "F1", "file": "js/story/act1_fallout.js", "find": "export const ymPair = (g) => YM_PAIRS[dayIndex(g, 's:fo_supper:9') % YM_PAIRS.length];", "replace": "export const ymPair = (g) => YM_PAIRS[0];", "note": "YM-3 off: the old pair every evening" },
+ { "id": "F2", "file": "js/story/act1_fallout.js", "find": "return [ymPair(g).r1]; }", "replace": "return [ymPair(g).r0]; }", "note": "the laugh choice gives the manners reply" },
+ { "id": "F3", "file": "js/core/week.js", "find": "|Give up and laugh\\.|", "replace": "|", "note": "YM-f misses pair 2's laugh label" },
+ { "id": "F4", "file": "js/core/lines.js", "find": "return (g) => { noteDay(g, k); return byDayLast(g, list, k); };", "replace": "return (g) => { noteDay(g, k); return byDay(g, list, k); };", "note": "lastReply cycles back to the old reply" },
+ { "id": "F5", "file": "js/main.js", "find": "postureCount(g) > 1 ? SAY_TEXT.holdNowMany", "replace": "postureCount(g) > 2 ? SAY_TEXT.holdNowMany", "note": "the two-speaker line only from three" },
+ { "id": "F6", "file": "js/core/game.js", "find": "export const postureCount = (g) => (g.combat ? g.combat.enemies.filter((e) => posturing(g, e)).length : 0);", "replace": "export const postureCount = (g) => (g.combat ? g.combat.enemies.filter((e) => e.postures).length : 0);", "note": "postureCount ignores staggered foes and the round" },
+ { "id": "F7", "file": "js/story/act1_blackroot.js", "find": "(g.flags.trio_kiss_seen ? YA_KISSED.red :", "replace": "(!g.flags.trio_kiss_seen ? YA_KISSED.red :", "note": "the post-spring blush line before the spring" },
+ { "id": "F8", "file": "js/story/act1_fallout.js", "find": "Mei Lin, sweetly, asks what the bees had to say.", "replace": "Mei Lin, sweetly, asks what the bees had to say, and gets a look from her mother.", "note": "the honeycomb's look back" }
+]

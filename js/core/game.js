@@ -1280,9 +1280,10 @@ export const SAY_TEXT = {
         '"Could we skip to the conclusions?" you say, across the preamble. {foe} halts with the form half open; neither blow comes, now or next round, while he finds his heading.'], // v0.11.267 (P35-A RV-A, Pay-F; Fable's): a read stance's replies, paired with TELL_TEXT.bigRead by index
     unheard: 'You say something dry. Nobody had stopped to make a speech, so it lands as a man talking with his hands down.',
     stunned: '{foe} is still looking for the place in the speech.',
-    tag: 'cuts a speech short · no guard', tagNow: 'the speech is now',
+    tag: 'cuts a speech short · no guard', tagNow: 'the speech is now', tagNowMany: 'the speeches are now', // v0.11.279 (P47-B RV-A, L5; Fable's run D): two or more speakers (main.js)
     hold: 'A dry word. Said into a speech, it costs the speaker this round\'s attack and the next; said at any other time it does nothing, and you are not guarding while you say it.',
     holdNow: 'A speech is coming this round: say something and it never finishes.',
+    holdNowMany: 'More than one speech is coming this round. A remark ends one only; the other speakers still swing, and your guard is down.', // v0.11.279 (owner picks P47-B, D1; L3; Fable's run B, Claude's cut): two or more foes posturing (main.js)
 };
 /** v0.11.114 (owner pick PA2; texts Fable's): spar rules (#136), Yield, unarmed mastery (#63). */
 export const SPAR_TEXT = {
@@ -1308,7 +1309,10 @@ export const memoryLine = (n, b, d = 0) => (d > 0 ? MEMORY_TEXT.metDef.replace('
 /** The familiarity line when a move's bonus rises (the Qi blast has its own wording). */
 export const weaponLine = (label, id, n, b) => (id === 'blast' ? MEMORY_TEXT.upQi : MEMORY_TEXT.up).replace('{move}', label).replace('{n}', n).replace('{b}', b);
 /** v0.11.114 (PA2): a foe postures this round (for the Say something card). */
-export const postureNow = (g) => !!g.combat && g.combat.enemies.some((e) => postureDue(g.combat, e) && !e.staggered && !e.atBay && !(e.flustered > 0));
+const posturing = (g, e) => postureDue(g.combat, e) && !e.staggered && !e.atBay && !(e.flustered > 0);
+export const postureNow = (g) => !!g.combat && g.combat.enemies.some((e) => posturing(g, e));
+/** v0.11.279 (owner picks P47-B, D1; L3, the P35 review's L3): how many foes are winding up a speech this round (the hold line for two or more). */
+export const postureCount = (g) => (g.combat ? g.combat.enemies.filter((e) => posturing(g, e)).length : 0);
 /** v0.11.114 (PA2, SF): in a spar or a brawl a foe worn down to half its HP is out. */
 const sparOut = (c, e, lines) => { if (c.style && e.hp > 0 && e.hp <= e.hpMax / 2) { e.hp = 0; lines.push(foeFill(SPAR_TEXT.out, e.name)); } };
 /** For the Guard card (this round): a big blow due from a foe guard would meet; a lunge at Yuki due. */
@@ -1350,7 +1354,7 @@ function stepNoDice(g, actionId, targetIdx) {
             guard = true;
             lines.push('You give ground, watching for the opening.');
         } else if (act.remark) { // v0.11.114 (PA2, SS): the target if it postures, else the first foe that does
-            const pe = [target, ...living].find((e) => e && postureDue(c, e) && !e.staggered && !e.atBay && !(e.flustered > 0));
+            const pe = [target, ...living].find((e) => e && posturing(g, e)); // v0.11.279 (P47-B RV-A, the review's L6): the hint's rule (postureNow, postureCount)
             if (pe) { pe.flustered = SAY_ROUNDS; const pool = pe.heavy ? SAY_TEXT.landedRead : SAY_TEXT.landed; lines.push(foeFill(pool[Math.floor(c.round / TELL_EVERY) % pool.length], pe.name)); } else lines.push(SAY_TEXT.unheard); // v0.11.267 (RV-A, Pay-F): a read stance gets its own reply
         } else if (act.qshield) {
             c.qshieldHp = qiShield(g); lines.push(QI_SHIELD_TEXT.raise); // v0.11.95 (Q1): this round only

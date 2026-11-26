@@ -1,0 +1,18 @@
+mei6:open | Mei Lin minds her footing as she walks, one hand deep in the basket, sorting by touch.
+mei9:ya | Ahead, Ya, who has been listening, holds her spear upright at arm's length, bows to it at all three depths and then kicks it.
+ya4:spear | She knocks the spear shaft against her own shin as she goes, once for each of you.
+ya10:open | Ya is hungry, which makes everything within a spear's length of her either food or in her way, and she has not yet said which you are.
+yaq:both:end | she says, to anywhere but you.
+yr:open | She keeps hold of your wrist until something large enough stands between the pair of you and everybody else. Then she turns round, close enough for you to count the teeth on her necklace, and looks at you, and waits for nothing.
+yaoff:2:4 | She looks at everything except you, and with great care: the sky, her own knuckles, the herb girl's basket. When you speak she peers past your shoulder to find out who said it.
+ya9:both:kiss | "On the herb girl I place no bet," she says, content. "The red runs down to here." The edge of her hand, laid across her collarbone. "Then cloth. How far under it, I asked. She threw a root at me, which is no answer."
+say:tagNowMany | the speeches are now
+# notes
+- mei6:open: keeps "in the basket, sorting by touch" from the old sentence on purpose (the brief asks to keep both); "minds her footing" holds on a root, a trunk, in water and on ash.
+- mei9:ya: the spear stands in for the rock (she has it in all three places). She is barefoot, so the kick is at a shaft she is holding, not at anything hard on the ground. If three spear lines across the talks are too many, this is the one to keep.
+- ya4:spear: "once for each of you" picks up her count in the sentence before (scholar, herb girl, cat) without a number. "as she goes" instead of "as she walks", since she may be wading.
+- yaq:both:end: no place word at all; the sentence after ("Smaller. Rounder.") follows unchanged.
+- yr:open: no "path", no "drags you aside", no "hauls"; "something large enough" is a trunk, a root or a slab of glass as the region has it. Kept the old ending "and waits for nothing".
+- yaoff:2:4: 33 words. Assumes Mei Lin and her basket are in sight when the sulk plays; if the sulk can show with Mei Lin away, swap "the herb girl's basket" for "the teeth on her necklace" (then yr:open would share that image, so change one).
+- ya9:both:kiss: 44 words. Uses neither "starts/begins" nor "ends": the red "runs down to" the collarbone, as at the spring, and the open question is "how far under" the cloth. Assumes Mei Lin has a root to hand (her basket).
+- say:tagNowMany: 4 words, parallel to "the speech is now". A shorter spare: "speeches, now".

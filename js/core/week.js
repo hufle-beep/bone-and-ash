@@ -156,7 +156,7 @@ export const QUIET_WAY = {
 /** v0.11.250 (the owner's pick YM-A, 23:05: YM-f): an evening with no quiet way whose choices come back every evening of its week (Ya's
  *  manners at the Fallout's supper, story day 9): from the week's second such evening the plan answers as the player did on its first,
  *  said "As before: …" (as a talk's), when the walk after it is safe (`quietSafe`); the first stays the player's. */
-export const AGAIN_EVE = { fo_supper: /^("Ya\. Manners\."|Laugh\. Out loud\.)/ };
+export const AGAIN_EVE = { fo_supper: /^("Ya\. Manners\."|Laugh\. Out loud\.|"Not at the table\."|Give up and laugh\.|Quote the house rules|Lose your composure)/ }; // v0.11.279 (P47-B, YM-3): the two new pairs (act1_fallout.js YM_PAIRS)
 /** YM-f: the answer to repeat here (the player's on this story-week's first such evening, `g.tasks.evc` / `evd`), or null. */
 export function weekEveAgain(g, scenes, p, ways) {
     if (!WEEK_EVE.on || !isRec(p) || !STAY_DAYS.has(storyDay(g))) return null;

@@ -1,0 +1,7 @@
+hs:honest:2 | "The reason hasn't changed," you say. "I checked." She keeps her eyes on her work and grins anyway. "Then say it properly," she says, "so I can tell you what's wrong with it." You say it properly. She tells you. None of it is an objection.
+w2:2:clause | Grey on top, with pores that shut at a touch and a spore print in two colours, growing on a branch burnt to charcoal
+say:holdNowMany | Several speeches are due this round. A remark ends one only; the other speakers still swing, and your guard is down.
+# notes
+- hs:honest:2 (47 words): names no tool and no plant, so it can follow the knife text, the root text and the tribute-eve text alike. It never restates the answer; "say it properly" leaves the words to the first reply.
+- w2:2:clause (24 words): assumes he could have taken a spore print and prodded the pores before lying down with the problem. The two impossible marks are the touch-closing pores and the two-coloured print; the charcoal branch replaces "wood that should have killed it" (that run is the old text's, so I did not reuse it). If the wood must stay unburnt, "growing on a branch long dead" also fits.
+- say:holdNowMany (21 words): "one" is used as "one only", not as a gain or count; "your guard is down" stands in for hold's "you are not guarding" to avoid sharing a five-word run with it.
