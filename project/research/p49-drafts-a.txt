@@ -1,0 +1,10 @@
+hs:lip:1 | Her lip wears a dark scab where it split. She catches you studying it, points the knife at the grass until your eyes go where the knife does, and goes back to cutting.
+hs:lip:1:alt | The scab on her lip has gone dark and tidy. She catches you examining it as you would a specimen, clicks her tongue, and turns her face back to the stand she is cutting.
+hs:lip:2 | Her lip has healed into a thin pale line. The grin tugs at it, she winces, and the wince does nothing whatever to the grin.
+hs:lip:2:alt | Where her lip was split there is only a thin pale line. It pulls tight when she grins at your hands, and she pays it no attention at all.
+# notes
+- hs:lip:1 and its alt assume she has a knife in hand and is cutting Ninefold grass while she shows it (the paragraph before says she shows how to cut it). Both end with her eyes on the grass, so "without looking at you" follows.
+- Neither lip:1 draft mentions an apology or the ridge, so they hold whether or not James went to apologise.
+- hs:lip:2 has a wince; if she should show no discomfort at all by this visit, take the alt.
+- hs:lip:2:alt "grins at your hands" leans on the grip correction just before it.
+- Word counts: 33, 34, 25, 29.

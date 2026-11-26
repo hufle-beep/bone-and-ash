@@ -1,0 +1,44 @@
+[
+ {
+  "id": "C1",
+  "file": "js/story/ashfall.js",
+  "find": "${g.flags.mei_bruised ? `${SLOPES_W2.bruisedA}\\n\\n` : ''}\"You don't need any of this,\" she says, without looking at you. \"Why are you here?\"\n\n`;",
+  "replace": "\"You don't need any of this,\" she says, without looking at you. \"Why are you here?\"\n\n${g.flags.mei_bruised ? SLOPES_W2.bruisedA : ''}`;",
+  "note": "HS-b2 reverted in text 1: the scab line back after her question, so the screen ends on it again (expected caught: P49-A text 1, HS round)"
+ },
+ {
+  "id": "C2",
+  "file": "js/story/ashfall.js",
+  "find": "SLOPES_W2.t.replace('\\n\\n', `\\n\\n${SLOPES_W2.bruised}\\n\\n`)",
+  "replace": "`${SLOPES_W2.t}\\n\\n${SLOPES_W2.bruised}`",
+  "note": "HS-b2 reverted in text 2: the pale-line paragraph last again (expected caught: P49-A text 2, RV1 TG-T4 re-pin)"
+ },
+ {
+  "id": "C3",
+  "file": "js/story/ashfall.js",
+  "find": "${g.flags.mei_bruised ? `${SLOPES_W2.bruisedA}\\n\\n`",
+  "replace": "${g.flags.mei_bruised ? `${SLOPES_W2.bruised}\\n\\n`",
+  "note": "the healed line shown on the first visit (scab and pale line swapped in time) (expected caught: P49-A text 1, HS round /dark scab/)"
+ },
+ {
+  "id": "C4",
+  "file": "js/story/ashfall.js",
+  "find": "until your eyes go where the knife does, and carries on cutting.\"",
+  "replace": "until your eyes go where the knife does, and goes back to cutting.\"",
+  "note": "Claude's cut undone (Fable's 'goes back to cutting') (expected caught: P49-A text 1 /and carries on cutting\\.$/)"
+ },
+ {
+  "id": "C5",
+  "file": "js/story/ashfall.js",
+  "find": "const slopesW2b = (g) => (g.flags.mei_bruised ?",
+  "replace": "const slopesW2b = (g) => (g.flags.mei_bruised || g.flags.long ?",
+  "note": "the lip line on the unbruised second text too (expected caught: P49-A not bruised, HS round)"
+ },
+ {
+  "id": "C6",
+  "file": "js/core/news.js",
+  "find": " Text: on the herb slopes in the second week, a line about Mei Lin\\'s healing lip now comes before her question, so the screen ends on what she asks you.'",
+  "replace": "'",
+  "note": "What's new loses the slopes sentence (expected MISSED: TU pins the tuning words only; TG2)"
+ }
+]

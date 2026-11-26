@@ -1,0 +1,9 @@
+[
+ { "id": "F1", "file": "js/story/ashfall.js", "find": "${g.flags.mei_bruised ? `${SLOPES_W2.bruisedA}\\n\\n` : ''}", "replace": "", "note": "text 1 loses its lip line" },
+ { "id": "F2", "file": "js/story/ashfall.js", "find": "SLOPES_W2.t.replace('\\n\\n', `\\n\\n${SLOPES_W2.bruised}\\n\\n`)", "replace": "`${SLOPES_W2.t}\\n\\n${SLOPES_W2.bruised}`", "note": "text 2's lip line back after the question" },
+ { "id": "F3", "file": "js/story/ashfall.js", "find": "(g.flags.mei_bruised ? SLOPES_W2.t.replace", "replace": "(true ? SLOPES_W2.t.replace", "note": "text 2's lip line without the bruise" },
+ { "id": "F4", "file": "js/story/ashfall.js", "find": "Her lip has healed into a thin pale line. The grin tugs at it, she winces, and the wince does nothing whatever to the grin.", "replace": "The split in her lip has closed to a thin pale line, which pulls when she grins, and she grins regardless.", "note": "the old words back" },
+ { "id": "F5", "file": "js/core/news.js", "find": "the game is now tuned through Act 1", "replace": "the game is now tuned", "note": "TU's line loses its scope" },
+ { "id": "F6", "file": "js/story/ashfall.js", "find": "[slopesW2a, slopesW2b]", "replace": "[slopesW2b, slopesW2a]", "note": "the healed line read before the scab" },
+ { "id": "F7", "file": "js/story/again.js", "find": "const d = L.vd[`${id}|${lineKey(", "replace": "const d = L.vd[`${id}|=${lineKey(", "note": "SF-x: the earlier-day read moved off the numbers-aside key" }
+]

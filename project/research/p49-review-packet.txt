@@ -1,0 +1,33 @@
+## herb_slopes — story screen: its text is drawn
+when (C2): not seen in the bot run
+led in by (C6): ashfall[4] "Gather herbs with Mei Lin on the slopes."
+[text · all forms]
+¶1 It is the last day on the slopes before the tribute. She cuts double what she needs and offers no reason. You ask for none. It needs no saying: should tomorrow go wrong, she will have no next season to cut in. Halfway along the terrace, with her back to you and the knife still working, she asks again what a man who needs none of this is doing up here.
+¶2 Her father comes up again, briefly. He would walk her up here and get the name of every plant wrong, on purpose, so that she had to put him right.
+[text · state: the long calendar's village week 2, day 1 of its cycles; the long calendar's village week 2, day 3 of its cycles; the long calendar's village week 2, day 5 of its cycles; the long calendar's village week 2, day 7 of its cycles: as the first, without ¶1, ¶2, and with:]
++ Mei Lin works the slope as a general works a map: this patch, then that one, and never the same root twice in a season. She shows you Ninefold grass: how to cut it so that it grows back, and how to tell a good stand from one that has *gone wrong*, the leaves too red, too eager, the Qi in them curdled like old milk.
++ "You don't need any of this," she says, without looking at you. "Why are you here?"
+[text · state: the long calendar's village week 2, day 2 of its cycles; the long calendar's village week 2, day 4 of its cycles; the long calendar's village week 2, day 6 of its cycles: as the first, without ¶1, ¶2, and with:]
++ On the upper terrace Mei Lin has you on your knees, working a pale root out of the earth with your fingers, because a blade nicks it and a nicked root rots in the jar. She corrects your grip twice. The second time she is plainly enjoying herself.
++ "You don't need to sell them and you don't swallow them," she says, tamping the hole shut with her heel. "So it isn't money and it isn't medicine. I've run out of sensible reasons. Give me a foolish one."
+[text · state: the long calendar's village week 2, slopes visit 1, her lip split: as the first, without ¶1, ¶2, and with:]
++ Mei Lin works the slope as a general works a map: this patch, then that one, and never the same root twice in a season. She shows you Ninefold grass: how to cut it so that it grows back, and how to tell a good stand from one that has *gone wrong*, the leaves too red, too eager, the Qi in them curdled like old milk.
++ Her lip wears a dark scab where it split. She catches you studying it, points the knife at the grass until your eyes go where the knife does, and carries on cutting.
++ "You don't need any of this," she says, without looking at you. "Why are you here?"
+[text · state: the long calendar's village week 2, slopes visit 2, her lip split: as the first, without ¶1, ¶2, and with:]
++ On the upper terrace Mei Lin has you on your knees, working a pale root out of the earth with your fingers, because a blade nicks it and a nicked root rots in the jar. She corrects your grip twice. The second time she is plainly enjoying herself.
++ Her lip has healed into a thin pale line. The grin tugs at it, she winces, and the wince does nothing whatever to the grin.
++ "You don't need to sell them and you don't swallow them," she says, tamping the hole shut with her heel. "So it isn't money and it isn't medicine. I've run out of sensible reasons. Give me a foolish one."
+
+> [0] Learn properly. Ask questions, take samples, run the omnitool on everything. {all forms}
+  drawn (C3): a story choice
+  when (C2): check: GU · not seen in the bot run
+  result (C1, success, all forms): (no line)
+  result (C1, failure, all forms): You cut one stand wrong. She sighs at you as teachers sigh. +1 Ninefold spirit grass.
+  then (C1): ashfall: "Morning. Ashfall is up, and already at work. The tribute is one day off. The hammerspace holds no food. Infinite space, …" [its labels: Visit Old Wen. / Go to the coughing house. A child is sick. / Hunt the ironhide boar past the oak hollow. / Bone workshop: make things the village needs. / Drill the village hunters. They'll be standing nex… / Hunt beyond the oak hollow. / Eat at the communal pot. / Cultivate behind the shrine: one sit, 10 Qi. / and 5 more]
+
+> [1] Answer her question. Honestly. {all forms}
+  drawn (C3): a story choice
+  when (C2): not seen in the bot run
+  result (C1, taken, all forms): "Because you're here," you say. You hear it, are appalled, and add: "The grass is also fascinating." She laughs until her legs give up and she sits down in it. One terrace over, an old herb-woman unbends and fixes her with a stare until the laughing stops. The stare is needed for a while.
+  then (C1): as [0]

@@ -3,7 +3,7 @@
  "totals": {
   "scenes": 333,
   "words": 37899,
-  "variantWords": 159176,
+  "variantWords": 159192,
   "labels": 858,
   "labelWords": 5823,
   "sharedChunks": 769,
@@ -47,7 +47,7 @@
   "ashfall": {
    "scenes": 18,
    "words": 1129,
-   "variantWords": 19799,
+   "variantWords": 19815,
    "labels": 65,
    "labelWords": 476,
    "sharedScenes": 6,

@@ -46,4 +46,4 @@ None yet. A section is frozen only on the owner's word, with one key number (`to
 `project/research/p21-*` … `p45-measure.md` (one per push's measuring), `claude/pNN-options.md` in the claude.ai project, `project/history-*.md` (the decisions), `tools/models-baseline.json` and `tools/baseline*.json` (the numbers the check compares with).
 
 ## Afterwards
-A "tuned up to" note for players when the retune ends (roadmap-retune.md, TU).
+A "tuned up to" note for players when the retune ends (roadmap-retune.md, TU). *(Done in v0.11.281, P49-A: What's new, "the game is now tuned through Act 1. The parts after it will be tuned with Act 2.")*

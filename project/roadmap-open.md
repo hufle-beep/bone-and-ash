@@ -2,18 +2,18 @@
 
 New in v0.11.280 (owner pick RM-A, 2026-11-26 11:58; `claude/p48-options.md`). One list of every open item, in the order of `roadmap.md`'s Order line, with its bundle, its size and a pointer to the line that holds its words. **This file holds no item's words:** the lines stay where they are (`roadmap.md`, `roadmap-2.md`, `roadmap-act2.md`, `roadmap-e.md`, `roadmap-retune.md`); a push that finishes an item moves its line as before and updates this list. Each push still gets its own options and pick; the estimates are pushes, at 5–8 pushes a day (the pace since 2026-11-17: 76 pushes in 9 days; text and game pushes 3–5 a day).
 
-**Totals (v0.11.280):** about **58–99 pushes, 8–20 working days**; Act 2 starts after about **18–29 pushes (3–6 days)**. *(v0.11.270's estimate: 55–95, Act 2 after 19–33.)*
+**Totals (v0.11.281):** about **57–98 pushes, 8–20 working days**; Act 2 starts after about **17–28 pushes (3–6 days)**. *(v0.11.280's estimate: 58–99, Act 2 after 18–29; v0.11.270's: 55–95, Act 2 after 19–33.)*
 
-## Step 5. The retune: done but one note (0–1 push)
+## Step 5. The retune: done
 
-- **TU, the "tuned up to" note** (docs only; with step 5b's last push or on its own): `roadmap-retune.md`'s status notes.
+- ~~**TU, the "tuned up to" note**~~ (done in v0.11.281, P49-A: What's new): `roadmap-retune.md`'s status notes.
 
-## Step 5b. The polish pass: 2 pushes done, 2–3 left
+## Step 5b. The polish pass: 3 pushes done, 2–3 left
 
-- **SF, the one-paragraph fold** (game logic, measured first): `roadmap.md` section 2b.
-- **The talks' place words in the Drowned Wood** (7 lines; Fable): `roadmap-e.md`'s PN line ("Found in v0.11.279"); listed in `roadmap.md` section 2b.
-- **HS (b) and (c), the slopes** (the bruised text's order, a third week-2 visit; Fable): `roadmap-e.md`'s PN line; listed in section 2b.
-- **FC-w2, the village sees the first flight** (a read of the later Ashfall texts first, then a canon call): `roadmap-e.md`'s flight line; listed in section 2b.
+- ~~**SF, the one-paragraph fold**~~ (closed as accepted in v0.11.281, P49-A: 0 of 600 games): its line in `roadmap-done-7.md`.
+- ~~**The talks' place words in the Drowned Wood**~~ (closed as accepted in v0.11.281: 0 of 600; beats 11–14 come in the Ashen Hills): `roadmap-e.md`'s PN line.
+- ~~**HS (b) and (c), the slopes**~~ ((b) done in v0.11.281, HS-b2, Fable's run A; (c) closed as accepted, 0 of 600): `roadmap-e.md`'s PN line.
+- **FC-w2, the village sees the first flight** (2–3: the read of the later Ashfall texts first, its size in `project/research/p49-measure.md`; then a canon call; then Fable's texts): `roadmap-e.md`'s flight line; listed in `roadmap.md` section 2b.
 
 ## Step 6. Systems (`roadmap-2.md` section 4): 15–25 pushes, by bundle
 

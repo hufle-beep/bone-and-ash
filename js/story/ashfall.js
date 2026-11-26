@@ -501,17 +501,20 @@ export const SN7 = {
 /** v0.11.243 (owner picks P15-B, D1; SF: HS): the herb slopes' week 2 a sequence of two on the long calendar (`seqText` 'herb_slopes:2'): Fable's run SF. */
 const slopesW2a = (g) => `Mei Lin works the slope as a general works a map: this patch, then that one, and never the same root twice in a season. She shows you Ninefold grass: how to cut it so that it grows back, and how to tell a good stand from one that has *gone wrong*, the leaves too red, too eager, the Qi in them curdled like old milk.
 
-"You don't need any of this," she says, without looking at you. "Why are you here?"
+${g.flags.mei_bruised ? `${SLOPES_W2.bruisedA}\n\n` : ''}"You don't need any of this," she says, without looking at you. "Why are you here?"
 
-${g.flags.mei_bruised ? 'Her split lip has scabbed over. She catches you looking at it, and stares back until you look somewhere else.' : ''}`;
-const slopesW2b = (g) => `${SLOPES_W2.t}${g.flags.mei_bruised ? `\n\n${SLOPES_W2.bruised}` : ''}`;
+`;
+/** v0.11.281 (owner picks P49-A, D1; HS-b2, the v0.11.243 review's T L7 (b); Fable's run A, Claude's cut): the lip line before her question, so the
+ *  screen ends on the question that "Answer her question. Honestly." answers (it ended on the lip line). */
+const slopesW2b = (g) => (g.flags.mei_bruised ? SLOPES_W2.t.replace('\n\n', `\n\n${SLOPES_W2.bruised}\n\n`) : SLOPES_W2.t);
 /** v0.11.279 (owner picks P47-B, D1; PN-f k, the v0.11.243 review's T L7 (a); Fable's run B): "Answer her question. Honestly." on the
  *  slopes: the old reply the first time this Coil, then the second on every later pick (lines.js lastReply). */
 const HS_HONEST = lastReply('herb_slopes:honest', [
     '"Because you\'re here," you say. You hear it, are appalled, and add: "The grass is also fascinating." She laughs until her legs give up and she sits down in it. One terrace over, an old herb-woman unbends and fixes her with a stare until the laughing stops. The stare is needed for a while.',
     '"The reason hasn\'t changed," you say. She keeps her eyes on her work and grins anyway. "Then say it properly," she says, "so I can tell you what\'s wrong with it." You say it properly. She tells you. None of it is an objection.',
 ]);
-const SLOPES_W2 = { t: "On the upper terrace Mei Lin has you on your knees, working a pale root out of the earth with your fingers, because a blade nicks it and a nicked root rots in the jar. She corrects your grip twice. The second time she is plainly enjoying herself.\n\n\"You don't need to sell them and you don't swallow them,\" she says, tamping the hole shut with her heel. \"So it isn't money and it isn't medicine. I've run out of sensible reasons. Give me a foolish one.\"", bruised: "The split in her lip has closed to a thin pale line, which pulls when she grins, and she grins regardless." };
+const SLOPES_W2 = { t: "On the upper terrace Mei Lin has you on your knees, working a pale root out of the earth with your fingers, because a blade nicks it and a nicked root rots in the jar. She corrects your grip twice. The second time she is plainly enjoying herself.\n\n\"You don't need to sell them and you don't swallow them,\" she says, tamping the hole shut with her heel. \"So it isn't money and it isn't medicine. I've run out of sensible reasons. Give me a foolish one.\"", bruised: "Her lip has healed into a thin pale line. The grin tugs at it, she winces, and the wince does nothing whatever to the grin.", // v0.11.281 (P49-A, D1; HS-b2): Fable's run A
+    bruisedA: "Her lip wears a dark scab where it split. She catches you studying it, points her knife at the grass until your eyes go where the knife does, and carries on cutting." }; // v0.11.281 (P49-A, D1; HS-b2): Fable's run A, Claude's cut ("carries on"); RV-A (the cold review's L1, its wording): "her knife"
 // v0.11.241 (owner picks P13-A with WK-d, D1; SPw3): the village supper's week 3 its own six on the long calendar (`seqText` 'supper:6'; week 2
 // keeps 'supper:5'): Fable's runs V1, V2 and W4 (the fourth redrafted, D1's WC), Claude's cuts (D1: RN, SN). Yuki by form in `{yuki}` where used.
 export const SW3 = [

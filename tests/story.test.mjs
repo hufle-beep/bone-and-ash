@@ -8452,7 +8452,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // HS: herb_slopes week 2 two texts on the long calendar, the bruise line on each; the old calendar's one
     for (const bruised of [true, false]) {
         const s = run(mk(43370 + (bruised ? 1 : 0)), 'herb_slopes', 29, 3, 9, { long: true, vday: 2, ...(bruised ? { mei_bruised: true } : {}) });
-        assert(/^Mei Lin works the slope as a general/.test(s[0]) && /^On the upper terrace Mei Lin has you on your knees/.test(s[1]) && s[2] === s[0] && /Give me a foolish one\./.test(s[1]) && (bruised ? /thin pale line/.test(s[1]) && /scabbed over/.test(s[0]) : !/thin pale line|scabbed/.test(s.join(' '))), `${T} (HS): week 2's slopes, ${bruised ? 'bruised' : 'not bruised'}: the old text, the new, round (${s.map((t) => t.slice(0, 20)).join(' | ')})`);
+        assert(/^Mei Lin works the slope as a general/.test(s[0]) && /^On the upper terrace Mei Lin has you on your knees/.test(s[1]) && s[2] === s[0] && /Give me a foolish one\./.test(s[1]) && (bruised ? /thin pale line/.test(s[1]) && /dark scab/.test(s[0]) /* v0.11.281 (P49-A, HS-b2): re-pinned to the new words */ : !/thin pale line|scab/.test(s.join(' '))), `${T} (HS): week 2's slopes, ${bruised ? 'bruised' : 'not bruised'}: the old text, the new, round (${s.map((t) => t.slice(0, 20)).join(' | ')})`);
     }
     // RT: forest 11 and 14, 3:5 reworded; their old phrases out
     { const forest = (f, fire, k) => { const g = mk(43380 + FORMS[f] + (fire ? 50 : 0), f); g.flags.forest_day = 3; if (fire) g.flags.fire = true; for (let d = 0; d <= k; d++) { g.minutes = (4 + d - 1) * D + 21 * 60; noteDay(g, 'night'); } return SCENES.night.text(g); };
@@ -8485,7 +8485,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
     // TG-T4, TG-C3: the slopes' week-2 text ends on her question; the bruise line a paragraph of its own; TG-C5: walked through the door, two visits a Coil
     { const H = (bruised) => run(mk(43410 + (bruised ? 1 : 0)), 'herb_slopes', 29, 2, 9, { long: true, vday: 2, ...(bruised ? { mei_bruised: true } : {}) })[1];
       const pn = paras(H(false)), pb = paras(H(true));
-      assert(/Give me a foolish one\."$/.test(pn.at(-1)) && pb.length === pn.length + 1 && /^The split in her lip/.test(pb.at(-1)) && /Give me a foolish one\."$/.test(pb.at(-2)) && !DAYS.test(H(true)), `${T} RV1 (TG-T4, TG-C3): the second slopes text ends on her question, the bruise line its own last paragraph, no day word`);
+      assert(/Give me a foolish one\."$/.test(pn.at(-1)) && pb.length === pn.length + 1 && /^Her lip has healed/.test(pb.at(-2)) && /Give me a foolish one\."$/.test(pb.at(-1)) && !DAYS.test(H(true)), `${T} RV1 (TG-T4, TG-C3): the second slopes text ends on her question, the bruise line its own paragraph before it (v0.11.281 P49-A, HS-b2: re-pinned; was its last), no day word`);
       const g = mk(43412); Object.assign(g.flags, { long: true, vday: 2 }); const seenT = [], open = [];
       for (const d of [28, 31, 34]) { g.minutes = (d - 1) * D + 9 * 60; goTo(g, SCENES, 'ashfall'); const v = sceneView(g, SCENES); const c = v.choices.find((x) => /^Gather herbs with Mei Lin on the slopes/.test(x.label) && !x.disabled); open.push(!!c); if (c) { choose(g, SCENES, c.index); seenT.push(g.scene === 'herb_slopes' ? SCENES.herb_slopes.text(g) : g.scene); } }
       assert(open.join() === 'true,true,false' && /^Mei Lin works the slope as a general/.test(seenT[0]) && /^On the upper terrace/.test(seenT[1]), `${T} RV1 (TG-C5): the slopes walked through the door in week 2: the old text, the new, then no third visit this Coil (${open} | ${seenT.map((t) => String(t).slice(0, 16)).join(' | ')})`); }
@@ -9940,6 +9940,43 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const t = String(sceneView(g, SCENES).text || ''), lab = SCENES.talk_ya.choices.map((c) => (typeof c.text === 'string' ? c.text : '')).join('|');
       assert(/^Your wrist stays in her grip until something large enough stands between you two/.test(t) && !/\bpath\b/.test(t.split('\n\n')[0]) && /drags you aside, go\./.test(lab), `${T} RV-A (TG6, M1): ya_romance's opening (${t.slice(0, 50)})`); }
     { const N = await import('../js/core/news.js'); assert(/0\.11\.279/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.279`); }
+}
+// v0.11.281 (owner picks P49-A, D1; `claude/p49-options.md`, `project/research/p49-measure.md`): 5b's measured items: HS-b2 (Fable's run A), TU;
+// SF-x, PW-x, HS-c-x closed as accepted (0 of 600 games each)
+{
+    const T = 'P49-A';
+    const fs = await import('node:fs'); const src = (f) => fs.readFileSync(new URL(`../js/${f}`, import.meta.url), 'utf8');
+    const D = 1440, P = (t) => String(t).split(/\n\n+/).map((x) => x.trim()).filter(Boolean);
+    const G0 = await import('../js/core/game.js'); // RV (TG3): fnv1a, the unbruised renders' hashes taken on 0.11.280's code
+    // HS-b2: week 2's two slopes texts, bruised: the lip line second, the question last; not bruised: as before (two paragraphs, no lip)
+    const slopes = (bruised, k) => { const g = ensureBars(newGame(49001 + (bruised ? 10 : 0), { closed: true })); Object.assign(g.flags, { long: true, vday: 2, ...(bruised ? { mei_bruised: true } : {}) });
+        let t = ''; for (let i = 0; i <= k; i++) { g.minutes = (28 + i) * D + 9 * 60; g.scene = 'herb_slopes'; t = SCENES.herb_slopes.text(g); /* the cold review's L5: no stray noteDay (seqText notes s:herb_slopes:2 itself) */ } return t; };
+    { const a = P(slopes(true, 0)), b = P(slopes(true, 1)), a0 = P(slopes(false, 0)), b0 = P(slopes(false, 1));
+      assert(a.length === 3 && /^Her lip wears a dark scab where it split\. She catches you studying it, points her knife at the grass.*and carries on cutting\.$/.test(a[1]) && /Why are you here\?"$/.test(a[2]), `${T} (HS-b2): text 1 bruised: the scab second, the question last (${a.map((x) => x.slice(-24)).join(' | ')})`);
+      assert(b.length === 3 && /^Her lip has healed into a thin pale line\..*does nothing whatever to the grin\.$/.test(b[1]) && /Give me a foolish one\."$/.test(b[2]), `${T} (HS-b2): text 2 bruised: the pale line second, the question last (${b.map((x) => x.slice(-24)).join(' | ')})`);
+      assert(G0.fnv1a(slopes(false, 0)) === '7215d19c' && G0.fnv1a(slopes(false, 1)) === '65164e0c', `${T} RV (TG3): the unbruised texts word for word as 0.11.280 (fnv ${G0.fnv1a(slopes(false, 0))} ${G0.fnv1a(slopes(false, 1))})`);
+      assert(a0.length === 2 && b0.length === 2 && !/\blip\b|scab/.test([...a0, ...b0].join(' ')) && /Why are you here\?"$/.test(a0[1]) && /Give me a foolish one\."$/.test(b0[1]), `${T} (HS-b2): not bruised: two paragraphs each, no lip, the question last`);
+      assert(!/scabbed over|stares back until you look|she grins regardless/.test(src('story/ashfall.js')), `${T} (HS-b2): the old lip lines are gone`);
+      const g = ensureBars(newGame(49021, { closed: true })); Object.assign(g.flags, { long: true, vday: 2, mei_bruised: true }); g.minutes = 28 * D + 9 * 60; goTo(g, SCENES, 'herb_slopes');
+      const v = sceneView(g, SCENES); assert(/Why are you here\?"\s*$/.test(P(v.text).slice(-1)[0] || '') && v.choices.some((c) => /^Answer her question\. Honestly\.$/.test(c.label)), `${T} (HS-b2): in play the screen ends on her question, "Answer her question. Honestly." under it`); }
+    // RV (TG4): the prologue's ignored path sets the bruise in play, and week 2's first slopes visit then shows the scab before her question
+    { const g = ensureBars(newGame(49031, { closed: true })); Object.assign(g.flags, { long: true }); goTo(g, SCENES, 'ridge_alone'); goTo(g, SCENES, 'village');
+      Object.assign(g.flags, { vday: 2 }); g.minutes = 28 * D + 9 * 60; g.scene = 'herb_slopes'; const p = P(SCENES.herb_slopes.text(g));
+      assert(g.flags.ignored && g.flags.mei_bruised && /^Her lip wears a dark scab/.test(p[1] || '') && /Why are you here\?"$/.test(p.at(-1)), `${T} RV (TG4): the ridge ignored, the village entered: bruised, the scab before the question (${p.map((x) => x.slice(0, 16)).join(' | ')})`); }
+    // PW-x: the seven place words sit in talk beats 11-14 only; beats 0-10 (all the Drowned Wood reaches: its talks run 1-8 in 600 games) carry none
+    { const K = ['good stretch of path', 'asks the path ahead', 'beside the path', 'the ground surprises you', 'the ground has surprised', 'kneeling in the path', 'off the path with the flat'], hit = [];
+      for (const id of ['talk_mei', 'talk_ya']) for (let n = 0; n <= 10; n++) for (const fl of [{}, { romance: true }, { ya_romance: true }, { romance: true, ya_romance: true }]) for (const kiss of [false, true]) {
+          const g = ensureBars(newGame(49100 + n, { closed: true })); Object.assign(g.flags, fl, { mei_talks: n, ya_talks: n, trio_kiss_seen: kiss, bl_region: 'dw', mei_party: true, ya_party: true });
+          goTo(g, SCENES, id); const v = sceneView(g, SCENES); const t = [v.text, ...v.choices.map((c) => c.label)].join('\n'); for (const k of K) if (t.includes(k)) hit.push(`${id}@${n}: ${k}`); }
+      const ctl = (id, n) => { const g = ensureBars(newGame(49150 + n, { closed: true })); Object.assign(g.flags, { mei_talks: n, ya_talks: n, bl_region: 'dw', mei_party: true, ya_party: true }); goTo(g, SCENES, id); const v = sceneView(g, SCENES); return [v.text, ...v.choices.map((c) => c.label)].join('\n'); };
+      assert(ctl('talk_mei', 11).includes(K[0]) && ctl('talk_ya', 13).includes(K[3]), `${T} RV (TG2): the same harness finds them at beats 11 and 13 (a positive control)`);
+      assert(!hit.length, `${T} (PW-x): no listed place word in talk beats 0-10 (${hit.slice(0, 3).join(' | ')})`); }
+    // SF-x: the plan's earlier-day read stays on the numbers-aside key; the Fallout morning's one-paragraph text changes by day (its count in words), so its exact key never repeats
+    { assert(/const d = L\.vd\[`\$\{id\}\|\$\{lineKey\(/.test(src('story/again.js')), `${T} (SF-x): shownEarlierDay reads the numbers-aside key only (closed as accepted)`);
+      const g = ensureBars(newGame(49201, { closed: true })); Object.assign(g.flags, { long: true }); const fm = []; for (const d of [45, 46]) { g.minutes = (d - 1) * D + 6 * 60; g.scene = 'fo_morning'; fm.push(String(sceneView(g, SCENES).text || '')); }
+      assert(fm[0] !== fm[1] && /^Day forty-five\./.test(fm[0]) && /^Day forty-six\./.test(fm[1]) && P(fm[0]).length === 1, `${T} (SF-x): the Fallout morning's day count changes its text from day to day (${fm.map((x) => x.slice(0, 30)).join(' | ')})`); }
+    // TU: What's new says the game is tuned through Act 1
+    { const N = await import('../js/core/news.js'); const n = N.NOTES.find(([v]) => v === '0.11.281'); assert(!!n && /tuned through Act 1/.test(n[1]) && /tuned with Act 2/.test(n[1]) && /herb slopes/.test(n[1]) && /before her question/.test(n[1]) /* RV (TG1) */, `${T} (TU): What's new has 0.11.281's tuning note`); }
 }
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);

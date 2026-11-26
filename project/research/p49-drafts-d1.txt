@@ -1,0 +1,3 @@
+# the texts as built (D1 with Claude's cut "carries on cutting" and the cold review's L1 "her knife"): lip:1 then lip:2
+herb_slopes | Her lip wears a dark scab where it split. She catches you studying it, points her knife at the grass until your eyes go where the knife does, and carries on cutting.
+herb_slopes | Her lip has healed into a thin pale line. The grin tugs at it, she winces, and the wince does nothing whatever to the grin.
