@@ -20,11 +20,13 @@
 // and a later day, as tools/packet.mjs's), as the pool `results`; and the canon card's tic list over them (a log line, CT).
 // v0.11.272 (owner pick P40-A, TG6; the P35 review's TG6): and the fight texts (game.js TELL_TEXT, SAY_TEXT, FOE_TRAITS; the traits' tags,
 // short labels, left out) as the pool `fight`.
+// v0.11.278 (owner pick P46-A, LT): and the story files' byForm branches, a "those / these" noun only in another form (tools/lib/formlint.mjs; LT, log only).
 // Not read yet: the task cards' texts (open, options later).
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lintCounts, snapshotDiff, poolCounts } from './lib/textlint.mjs';
+import { formHits } from './lib/formlint.mjs'; // v0.11.278 (owner pick P46-A, LT)
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SNAP = path.join(ROOT, 'tools/text-baseline.json');
@@ -303,6 +305,11 @@ console.log(`  TC tics (2–3 words 3+ times in one text): ${T.tics}: ${now.list
 console.log(`  BD broken text: ${T.broken}${T.broken ? `: ${now.lists.broken.slice(0, 5).map((x) => `${x.id} (${x.kind}) ${x.what}`).join(', ')}` : ''}; spacing the screen drops: ${T.spacing}`);
 console.log(`  LR line pools: ${Object.entries(pools).map(([p, v]) => `${p} ${v.lines} lines / ${v.words} words (twice ${v.dupes}, shared with a scene ${v.sceneShared}, tics ${v.tics}, broken ${v.broken}, spacing ${v.spacing})`).join('; ')}`);
 console.log(`  CT the canon card's tics in the result lines: ${cardTicHits.length}${cardTicHits.length ? `: ${cardTicHits.join(', ')}` : ''}`);
+{ // v0.11.278 (owner pick P46-A, LT; the v0.11.246 review's TG-T5): a "those / these" noun only in another of Yuki's form branches (log only)
+    const fdir = path.join(ROOT, 'js/story');
+    const LT = formHits(readdirSync(fdir).filter((f) => f.endsWith('.js')).sort().map((f) => ({ file: f, text: readFileSync(path.join(fdir, f), 'utf8') })));
+    console.log(`  LT form branches: ${LT.read} of ${LT.calls} byForm calls read, ${LT.demonstratives} "those / these", ${LT.hits.length} pointing into another form${LT.hits.length ? `: ${LT.hits.map((h) => `${h.file}:${h.line} [${h.form}] "${h.phrase}" (in ${h.where.join(' / ')})`).join(', ')}` : ''}`);
+}
 console.log(`  RD texts rendered on none of the sample states: ${T.unrendered}${T.unrendered ? `: ${now.lists.unrendered.map((x) => `${x.id} (${x.kind})`).join(', ')}` : ''}`);
 
 if (LIST) {

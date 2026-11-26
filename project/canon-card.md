@@ -21,8 +21,8 @@
 ## Yuki
 - His **root-kin**, bonded from birth, born the same day. Same realm as James. She and James alone remember every Coil.
 - **Three forms** (texts switch with `byForm(cat, great, human)` or `stompForm`):
-  - **the cat**: small, white, on his shoulder; speaks **through the bond** (italics);
-  - **the great root-kin**: tiger-sized, from Core Formation (realm 2); still a great white cat; speaks through the bond;
+  - **the cat**: small, white, eleven pounds, on his shoulder; speaks **through the bond** (italics);
+  - **the great root-kin**: tiger-sized (about four hundred pounds; the phrase itself is on the tic list), from Core Formation (realm 2); still a great white cat; speaks through the bond;
   - **human**, from Nascent Soul (realm 7): very long white hair, white cat ears and tail, gold slit eyes, a black high-collared qipao with red piping; a head shorter than James; **speaks aloud**.
 - A verb straight after her name must suit all three forms; locals mostly think she's a cat.
 
@@ -36,7 +36,7 @@
 
 ## People and places
 - **Ashfall**: Old Wen (elder, 90, one milky eye); Mei Lin (26, herb-gatherer, sharp tongue, ivory hairpin with a red tassel; no spirit root, tested at seven; her father had one); her mother (60, stern); the hunters. **Pock-Face** is not a villager: Gao Feng's lackey, who torches Mei Lin's herb loft on night 5 (met only when Gao is neither broken nor spared; v0.11.185, RV1 M1).
-- **Crimson Lotus**: Gao Feng (outer disciple, about 20, haughty; can be killed or spared); Lu Han (inner disciple, about 30, still face, long sword); Outer Elder **Shen Qiu** (Core Formation, about three hundred years lived; Ashfall, Day 21).
+- **Crimson Lotus**: Gao Feng (outer disciple, about 20, haughty; Lu Han's cousin; can be killed or spared); Lu Han (inner disciple, about 30, still face, long sword); Outer Elder **Shen Qiu** (Core Formation, about three hundred years lived; Ashfall, Day 21).
 - **Realms as locals see them**: Mortal Vessel nearly everyone; Foundation the disciples ("Disciple", "young master"); Core Formation the outer elders ("Elder", "Senior"); Golden Core sect masters, the first who fly.
 - **The wilds** (prologue Days 1–3): black bark, grey moss, a bruise-coloured sky; the bone field, the mire, the hollow.
 - **The Blackroot** (Act 1): the root road, the drowned wood, the ashen hills, the Heart. **Ya**: 27, feral huntress, tall and rangy, barefoot, a necklace of teeth, a bone-tipped spear, a red scar under one eye; the second romance (a throuple can form). She can't read letters (v0.11.182, R1); James is "scholar" to her.

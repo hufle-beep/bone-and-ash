@@ -9800,6 +9800,64 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       const r = [hub(0), pick(0, /^Sing/), hub(1), pick(1, /^Teach/), hub(2), hub(9), hub(20)];
       assert(r.join('|') === 'fo_palisade:0,fo_palisade:1|1|fo_palisade:1|2|||', `${T} (TG-PC): the palisade's two cards once a Coil, the count at 2 (${r.join('|')})`); }
 }
+// v0.11.278 (owner pick P46-A; `claude/p46-options.md`, `project/research/p46-measure.md`): NF-g, the night fold's earlier-day rule
+// (NS1 + NS-b, the village morning's since v0.11.248) for every fold scene (week.js foldEarlier)
+{
+    const T = 'P46-A';
+    const W = await import('../js/core/week.js'); const AG = await import('../js/story/again.js'); const Tk = await import('../js/core/tasks.js');
+    const D = 1440;
+    // (the village night's quiet text, and the Fallout mornings', are one paragraph: its later-day record is the split fold's exact key, which shownEarlierDay does not read, as for the village morning since NS1)
+    const CASES = [['fo_night', { palisade: true } /* RV-A M1: with no palisade the night's way is the wolf, a story scene */, 43, 23 * 60], ['morning', { forest_day: 3 }, 15, 6 * 60 + 30]];
+    assert(['village_night', 'village_morning', 'fo_night', 'fo_morning', 'morning', 'heart_night', 'heart_morning'].every((id) => W.FOLD_SCENES.has(id)) && W.FOLD_SCENES.size === 7, `${T} (NF-g): the seven fold scenes`);
+    for (const [id, fl, day0, hr] of CASES) {
+        const g = ensureBars(newGame(48090, { closed: true })); goTo(g, SCENES, id);
+        const at = (k) => { Object.assign(g.flags, fl); g.minutes = (day0 + k) * D + hr; g.scene = id; SCENES[id].enter?.(g); };
+        const show = () => { if (g.lines) g.lines.at = 'x'; const vv = sceneView(g, SCENES); AG.againView(g, vv); noteRead(g, vv.text); };
+        // never shown: the plan stops, and foldEarlier says no
+        at(0); const v0 = sceneView(g, SCENES);
+        assert(!W.foldEarlier(g, v0) && W.foldNight(g, SCENES).steps === 0, `${T} (NF-g): ${id}'s first night stops (a text never shown)`);
+        show();
+        // shown in full on an earlier day, another text last (the fold's hash differs): the old rule stopped here outside the village morning
+        at(1); Tk.taskState(g).nf[id] = 'another text';
+        assert(W.foldEarlier(g, sceneView(g, SCENES)) && W.foldNight(g, SCENES).steps >= 1, `${T} (NF-g): ${id} shown on an earlier day folds though another text came between`);
+        // read on an earlier Coil (NS-b): a new Coil, the fold's record cleared
+        g.coil.n = (g.coil.n || 1) + 1; Tk.taskState(g).nf = {}; at(0);
+        assert(W.foldEarlier(g, sceneView(g, SCENES)) && W.foldNight(g, SCENES).steps >= 1, `${T} (NF-g): ${id} read on an earlier Coil folds on the next`);
+    }
+    // RV (the cold review's planted faults C1, C2, C3, C8): every fold scene by the rule, on a set text (two paragraphs, no numbers),
+    // read on an earlier Coil with the scene seen there; read but the scene never seen (NS-b's guard); shown earlier the same day (not earlier)
+    { const TXT = (id) => `A quiet paragraph for the ${id} screen.\n\nAnother quiet paragraph, the same every night.`;
+      const on = [...W.FOLD_SCENES].map((id) => { const g = ensureBars(newGame(48092, { closed: true })); g.scene = id; const v = { id, text: TXT(id) };
+        noteRead(g, v.text); g.seen = { ...(g.seen || {}), [id]: 1 }; g.coil.n = 2; return W.foldEarlier(g, v) ? id : null; }).filter(Boolean);
+      assert(on.length === 7, `${T} (NF-g, RV C3, C8): all seven fold scenes fold a text read on an earlier Coil (${on.join(', ')})`);
+      const g = ensureBars(newGame(48093, { closed: true })); g.scene = 'fo_night'; const v = { id: 'fo_night', text: TXT('fo_night') }; noteRead(g, v.text); g.coil.n = 2;
+      assert(!W.foldEarlier(g, v), `${T} (NF-g, RV C1): read on an earlier Coil but the scene never seen there: no fold (NS-b's seenBefore guard)`);
+      const h = ensureBars(newGame(48094, { closed: true })); h.scene = 'heart_morning'; h.minutes = 30 * D + 7 * 60; const hv = { id: 'heart_morning', text: TXT('heart_morning') };
+      const key = `heart_morning|${AG.lineKey(hv.text)}`, L = linesOf(h); L.vd = { [key]: textDay(h) };
+      const same = W.foldEarlier(h, hv); L.vd[key] = textDay(h) - 1; const earlier = W.foldEarlier(h, hv);
+      assert(!same && earlier, `${T} (NF-g, RV C2): shown earlier the same day is no earlier day (${same}); the day before folds (${earlier})`); }
+    // RV-A (the cold review's H1, TG1): Ya's tier beat on the Fallout night, read on Coil 1, is shown on Coil 2, never walked
+    { const g = ensureBars(newGame(48095, { closed: true })); goTo(g, SCENES, 'fo_night'); Object.assign(g.flags, { ya_met: true, palisade: true }); g.rel.Ya = { f: 50, a: 50 };
+      const at = () => { g.minutes = 43 * D + 23 * 60; g.scene = 'fo_night'; SCENES.fo_night.enter?.(g); };
+      at(); const v1 = sceneView(g, SCENES); const beat1 = g.flags.tb_ya45; noteRead(g, v1.text);
+      g.coil.n = 2; for (const k of W.ROMANCE_MARKS) delete g.flags[k]; Tk.taskState(g).nf = {}; at(); const v2 = sceneView(g, SCENES);
+      const fe = W.foldEarlier(g, v2), f = W.foldNight(g, SCENES);
+      assert(beat1 > 0 && g.flags.tb_ya45 > 0 && v2.text.includes('a hunter who now knows where the deer beds') && !fe && f.steps === 0 && g.scene === 'fo_night', `${T} (RV-A H1, TG1): the tier beat on a later Coil stops the fold (${fe}, ${f.steps}, ${g.scene})`); }
+    // RV-A (M1, TG2): a fold screen whose one way leads into a story scene is shown (Ya's arrival, the wolf); the same night with the palisade folds
+    { const walk = (id, day, hr, fl) => { const g = ensureBars(newGame(48096, { closed: true })); goTo(g, SCENES, id); Object.assign(g.flags, fl);
+        const at = () => { g.minutes = day * D + hr; g.scene = id; SCENES[id].enter?.(g); };
+        at(); noteRead(g, sceneView(g, SCENES).text); g.coil.n = 2; Tk.taskState(g).nf = {}; at();
+        const c = SCENES[id].choices[sceneView(g, SCENES).choices.find((x) => !x.disabled && x.index < 1000)?.index];
+        const f = W.foldNight(g, SCENES); return { steps: f.steps, now: g.scene, on: W.foldOnTo(g, c) }; };
+      const ya = walk('fo_morning', 50, 6 * 60 + 30, {}), wolf = walk('fo_night', 43, 23 * 60, {}), pal = walk('fo_night', 43, 23 * 60, { palisade: true });
+      assert(ya.steps === 0 && ya.now === 'fo_morning' && wolf.steps === 0 && wolf.now === 'fo_night' && pal.steps >= 1 && pal.now !== 'fo_night', `${T} (RV-A M1, TG2): into ya_arrives and fo_wolf no fold; on to the morning a fold (${JSON.stringify({ ya, wolf, pal })})`);
+      assert(!W.foldOnTo({}, null) && !W.foldOnTo({}, { to: () => { throw new Error('x'); } }) && W.foldOnTo({}, { to: 'fo_morning' }) && W.foldOnTo({}, { to: 'fo_ashfall' }) && !W.foldOnTo({}, { to: 'ya_arrives' }), `${T} (RV-A M1): foldOnTo by the target (a fold scene or a hub)`); }
+    // not a fold scene: foldEarlier is false even for a text read before (the supper keeps its own way, WE)
+    { const g = ensureBars(newGame(48091, { closed: true })); goTo(g, SCENES, 'supper'); const v = sceneView(g, SCENES); noteRead(g, v.text);
+      g.coil.n = (g.coil.n || 1) + 1; const v2 = sceneView(g, SCENES); // read on an earlier Coil, the text the same
+      assert(v2.text === v.text && !W.foldEarlier(g, v) && !W.foldEarlier(g, v2), `${T} (NF-g): a scene outside FOLD_SCENES never folds by the earlier-day rule, read on an earlier Coil too`); }
+    { const N = await import('../js/core/news.js'); assert(/0\.11\.278/.test(JSON.stringify(N.NOTES)), `${T}: What's new has 0.11.278`); }
+}
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

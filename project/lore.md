@@ -64,8 +64,8 @@
 - **Bond:** born the same day as James, in the same grove, and bonded from birth (fixed in v0.11.40). Her path stays open: familial, or something closer once she is human (engine canon: familial until her human form, then play decides).
 - **Voice:** deadpan, through the bond. Same realm as James; shares XP through the bond.
 - **Forms in the game (`js/core/game.js` `YUKI_FORMS`):**
-  - the cat, always;
-  - the **great root-kin**, the size of a Bengal tiger, from Core Formation (realm 2);
+  - the cat, always: eleven pounds of white cat (eight lines say so; v0.11.278, owner pick P46-A, TC);
+  - the **great root-kin**, the size of a Bengal tiger, about four hundred pounds (`wilds.js`; the phrase is on the canon card's tic list, once is enough; v0.11.278, TC), from Core Formation (realm 2);
   - **human**, from Nascent Soul (realm 7).
 
   *`design.md` J still lists the engine's eight-step ladder (lynx, panther, tiger, dire, spirit, apex); the game has these three. Noted for the forks register (roadmap, group h's findings).*
@@ -155,7 +155,7 @@
   - The hunters.
   - Not a villager: **Pock-Face**, Gao Feng's lackey, who leads the arson on Mei Lin's herb loft on night 5 (`ashfall.js`; met only when Gao is neither broken nor spared; v0.11.185, RV1 M1: the canon card had listed him as a local).
 - **The Crimson Lotus Sect:**
-  - Gao Feng: an outer disciple, about twenty, haughty. He can be killed or spared.
+  - Gao Feng: an outer disciple, about twenty, haughty. He can be killed or spared. Lu Han's cousin (`ashfall.js`, the swamp line; the owner's call kept in v0.11.278, owner pick P46-A, TC).
   - Lu Han: an inner disciple, about thirty, with a still face and a long sword.
   - Outer Elder Shen Qiu: Act 1's climax, at Ashfall on Day 21.
   - The tribute.

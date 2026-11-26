@@ -16,12 +16,14 @@
 //      v0.11.200 (owner pick D1): and a result's split (`splitLine`: a stat in the reply, a short reply beside a gain), five-word
 //      runs shared by two drafts of different scenes, "still" as stillness ("goes still", "a still place") no time word, and a
 //      reference's phrase or a `{slot}` breaking a run (two texts that name one song share its phrase on purpose)
+//      v0.11.278 (owner pick P46-A, LT): `form`, a `:y:<form>` draft's "those / these" noun only in another form's draft (tools/lib/formlint.mjs)
 // Whole-game reads (`--tags`) get the lean form (each scene's last 220 characters, by form where they differ) and one tag line
 // per label (C2, C3, C4, the next screen), then full packets for the lines they flag.
 //
 //   node tools/packet.mjs rt_evening rr_scout:0          full packets (C1–C6); `scene:index` marks the lines being changed
 //   node tools/packet.mjs --tags [--area blackroot]      every scene, lean + tags (the areas as tools/textlint.mjs's)
 //   node tools/packet.mjs --check drafts.txt             C7 on drafts: one per line, `scene_id[:index] | text`
+//   node tools/packet.mjs night --state "night 5"         v0.11.278 (P46-A, PK): only the states that name it (as --week)
 //   --games N   the bot run's games (default 200; 0 = none); --out file   write there instead of stdout
 // Changes nothing in the game. The bot run is wall time only (no model reads it).
 import { readFileSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
@@ -29,6 +31,7 @@ import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { draftFormHits } from './lib/formlint.mjs'; // v0.11.278 (owner pick P46-A, LT)
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const js = (f) => path.join(ROOT, 'js', f);
@@ -307,7 +310,14 @@ const fmtSeen = (e) => (e ? `seen in ${e.games} games: day ${span(...e.days)}, h
 
 /* ---------------- the packet ---------------- */
 /** Full packets (C1–C6) for the named scenes; `marks` = the `scene:index` lines being changed (their results in full). */
-export function packet(ids, { marks = new Set(), seen = {}, week = null } = {}) { // v0.11.238 (P11-A, PKf): `week` keeps only that village week's states
+/** v0.11.278 (owner pick P46-A, PK): `--state <words>`: a state named by these words, case aside, not followed by more of a word or
+ *  number ("night 1" is not "night 12"; "story day 9" is not "story day 10"). */
+export function stateMatch(base, words) {
+    const w = String(words || '').trim();
+    if (!w) return false;
+    return new RegExp(`(^|[^\\w])${w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+')}(?![\\w])`, 'i').test(String(base || ''));
+}
+export function packet(ids, { marks = new Set(), seen = {}, week = null, state = null } = {}) { // v0.11.238 (P11-A, PKf): `week` keeps only that village week's states; v0.11.278 (P46-A, PK): `state` only the states it names (stateMatch)
     const out = [];
     for (const id of ids) {
         const s = SCENES[id];
@@ -323,8 +333,9 @@ export function packet(ids, { marks = new Set(), seen = {}, week = null } = {}) 
         const variants = byForms(s.text).map((r) => ({ tag: formTag(r.forms, r.later), t: r.t }));
         for (const t of seen[id]?.texts || []) variants.push({ tag: 'as seen in play', t });
         { const byText = new Map(); // v0.11.235 (P8-A, TG): the states' texts, each once, named by every state that draws it
-          for (const st of STATES) { if (!st.on(id) || (week && st.week && st.week !== week)) continue; st.g.scene = id; const t = asStr(s.text, st.g); if (t) byText.set(t, [...(byText.get(t) || []), st]); }
-          for (const [t, sts] of byText) variants.push({ tag: `state: ${stateNames(sts).join('; ')}`, t }); }
+          for (const st of STATES) { if (!st.on(id) || (week && st.week && st.week !== week) || (state && !stateMatch(st.base, state))) continue; st.g.scene = id; const t = asStr(s.text, st.g); if (t) byText.set(t, [...(byText.get(t) || []), st]); }
+          for (const [t, sts] of byText) variants.push({ tag: `state: ${stateNames(sts).join('; ')}`, t });
+          if (state && !STATES.some((st) => st.on(id) && stateMatch(st.base, state))) out.push(`(--state "${state}": no sample state of ${id} is named so; the packet has none of its states)`); } // RV-A (L4)
         const done = new Set();
         let first = null;
         for (const v of variants) {
@@ -494,6 +505,8 @@ export function checkDrafts(drafts, opts = {}) {
         const sn = splitNote(d.text);
         if (sn) out.push({ key: d.key, kind: 'split', what: sn });
     }
+    // v0.11.278 (owner pick P46-A, LT): a `:y:<form>` draft's "those / these" noun only in another form's draft
+    for (const h of draftFormHits(drafts)) out.push({ key: h.key, kind: 'form', what: h.what });
     // v0.11.200 (D1, S2): the drafts against each other (a run in two drafts; one note, on the later draft; v0.11.239 RC: of one scene too)
     const draftRun = new Map();
     for (const d of drafts) {
@@ -518,17 +531,20 @@ if (isMain) {
     const opt = (k, d) => { const i = argv.indexOf(`--${k}`); return i >= 0 ? argv[i + 1] : d; };
     const games = Number(opt('games', 200));
     const outFile = opt('out', null);
-    const vals = new Set(['--games', '--out', '--area', '--check', '--week'].flatMap((k) => { const i = argv.indexOf(k); return i >= 0 ? [argv[i + 1]] : []; }));
-    const args = argv.filter((a) => !a.startsWith('--') && !vals.has(a));
+    // RV-A (the cold review's L4): a flag's value is skipped by its place, not by its text (`night --state night` kept the scene out)
+    const VALUED = new Set(['--games', '--out', '--area', '--check', '--week', '--state']);
+    const args = argv.filter((a, i) => !a.startsWith('--') && !(i > 0 && VALUED.has(argv[i - 1])));
     let text;
     // v0.11.238 RV2 (the cold review's C L1): --week works on scene packets only; with --check or --tags, or with no value, it is refused, not ignored
     if (argv.includes('--week') && (argv.includes('--check') || argv.includes('--tags') || ![1, 2, 3].includes(Number(opt('week'))))) { console.log('--week takes 1, 2 or 3, and only with scene packets (not --check or --tags)'); process.exit(2); }
+    // v0.11.278 (owner pick P46-A, PK): --state as --week: scene packets only, and never empty
+    if (argv.includes('--state') && (argv.includes('--check') || argv.includes('--tags') || !String(opt('state', '') || '').trim() || String(opt('state')).startsWith('--'))) { console.log('--state takes the words of a state\'s name ("night 5", "story day 9"), and only with scene packets (not --check or --tags)'); process.exit(2); }
     if (argv.includes('--check')) {
         const lines = readFileSync(opt('check'), 'utf8').split('\n').map((l) => l.trim()).filter((l) => l && !l.startsWith('#'));
         const drafts = lines.map((l) => { const k = l.indexOf('|'); return { key: l.slice(0, k).trim(), text: l.slice(k + 1).trim() }; });
         const seen = games ? seenAt(games) : {};
         const r = checkDrafts(drafts, { seen });
-        text = `${r.map((x) => `${x.kind.toUpperCase()} · ${x.key} · ${x.what}`).join('\n')}\n\nC7: ${drafts.length} drafts, ${r.length} notes (${['tic', 'pair', 'run', 'scene', 'self', 'time', 'split'].map((k) => `${k} ${r.filter((x) => x.kind === k).length}`).join(', ')})\n`;
+        text = `${r.map((x) => `${x.kind.toUpperCase()} · ${x.key} · ${x.what}`).join('\n')}\n\nC7: ${drafts.length} drafts, ${r.length} notes (${['tic', 'pair', 'run', 'scene', 'self', 'time', 'split', 'form'].map((k) => `${k} ${r.filter((x) => x.kind === k).length}`).join(', ')})\n`;
     } else if (argv.includes('--tags')) {
         let ids = Object.keys(SCENES);
         const area = opt('area', null);
@@ -540,12 +556,13 @@ if (isMain) {
         }
         text = `${tags(ids, games ? seenAt(games) : {})}\n`;
     } else {
-        if (!args.length) { console.log('usage: node tools/packet.mjs <scene[:index]> … [--week 1|2|3] | --tags [--area x] | --check drafts.txt  [--games N] [--out file]'); process.exit(2); }
+        if (!args.length) { console.log('usage: node tools/packet.mjs <scene[:index]> … [--week 1|2|3] [--state words] | --tags [--area x] | --check drafts.txt  [--games N] [--out file]'); process.exit(2); }
         const marks = new Set(args.filter((a) => a.includes(':')));
         const ids = [...new Set(args.map((a) => a.split(':')[0]))];
         const seen = games ? seenAt(games, new Set(ids)) : {};
         const week = argv.includes('--week') ? Number(opt('week')) : null; // v0.11.238 (P11-A, PKf): one village week's states (`village_night` about 24 KB whole with --games 0, a week's about 12.5)
-        text = packet(ids, { marks, seen, week });
+        const state = argv.includes('--state') ? opt('state') : null; // v0.11.278 (P46-A, PK): the forest night 96 KB whole, one night's 6–12 KB
+        text = packet(ids, { marks, seen, week, state });
     }
     if (outFile) { writeFileSync(outFile, text); console.log(`packet: ${outFile}, ${Math.round(text.length / 102.4) / 10} KB`); } else process.stdout.write(text);
 }

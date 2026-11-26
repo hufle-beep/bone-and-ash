@@ -254,6 +254,19 @@ const plainChoice = (c) => !!c && !c.check && !c.combat && !c.fail && !c.qi;
 const walkChoice = (c) => plainChoice(c) || (!!c && !!c.check && !c.combat);
 const isRec = (o) => !!o && typeof o === 'object' && !Array.isArray(o);
 
+/** v0.11.248 (P18-A, NS1 + NS-b): a village morning shown in full on an earlier day of this Coil, or read on an earlier Coil, folds;
+ *  v0.11.278 (owner pick P46-A, NF-g; `p46-measure.md`): every fold scene's (FOLD_SCENES: the village and Fallout nights and mornings,
+ *  the forest's morning, the Old Tree's night and morning), not the village morning's alone. */
+export const foldEarlier = (g, v) => FOLD_SCENES.has(g.scene) && !romanceNow(g) /* RV-A (the cold review's H1): a romance beat on screen is shown, never walked */ && (shownEarlierDay(g, g.scene, v) || (seenBefore(g, g.scene) && readBefore(g, v.text)));
+/** v0.11.278 RV-A (the cold review's M1): the earlier-day / earlier-Coil fold walks a screen only when its one way leads to another fold
+ *  scene or a hub, never into a story scene (the Fallout morning into Ya's arrival, the night with no palisade into the wolf); the way's
+ *  target read on a copy (a `to` that is a function may set flags). */
+export function foldOnTo(g, c) {
+    if (!c) return false;
+    let to;
+    try { to = typeof c.to === 'function' ? c.to(probeClone(g)) : c.to; } catch { return false; }
+    return FOLD_SCENES.has(to) || !!TASK_HUBS[to];
+}
 /** R3: walk the quiet night's screens shown before. Returns { steps, lines }. */
 export function foldNight(g, scenes, max = 12) {
     const lines = [];
@@ -266,7 +279,7 @@ export function foldNight(g, scenes, max = 12) {
         if (v.end) break;
         const open = v.choices.filter((c) => !c.disabled && !META.test(String(c.label)));
         const h = hash(v.text);
-        const ok = open.length === 1 && open[0].index < 1000 && plainChoice(scenes[g.scene].choices[open[0].index]) && (t.nf[g.scene] === h || (g.scene === 'village_morning' && (shownEarlierDay(g, g.scene, v) || (seenBefore(g, g.scene) && readBefore(g, v.text))))); // v0.11.248 (P18-A, NS1): a village morning read on an earlier day of this Coil (its sequence came round again); NS-b (the owner's pick after PL's NS2): or read on an earlier Coil
+        const ok = open.length === 1 && open[0].index < 1000 && plainChoice(scenes[g.scene].choices[open[0].index]) && (t.nf[g.scene] === h || (foldEarlier(g, v) && foldOnTo(g, scenes[g.scene].choices[open[0].index]))); // v0.11.248 (P18-A, NS1): a village morning read on an earlier day of this Coil (its sequence came round again); NS-b (the owner's pick after PL's NS2): or read on an earlier Coil; v0.11.278 (P46-A, NF-g): every fold scene (foldEarlier); RV-A M1: only on to a fold scene or a hub (foldOnTo)
         if (!ok) { t.nf[g.scene] = h; break; }
         const from = g.scene;
         const r = choose(g, scenes, open[0].index);
