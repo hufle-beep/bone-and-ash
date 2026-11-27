@@ -736,10 +736,94 @@ def lp2(pg, url):
     open_saves(pg)
     ld = pg.query_selector('button[data-load="1"]')
     if not ld: fails.append('RQ1 (TG): no Load button for slot 1'); return
-    ld.click(); on_tab(pg, 'story')
+    ld.click(); until(pg, "/Tap Load again/.test(document.getElementById('saveNote')?.textContent || '')", 3000)  # v0.11.285 (G3-A, OS-a): a load asks first
+    pg.click('button[data-load="1"]'); on_tab(pg, 'story')
     title = pg.query_selector('.head .title'); title = title.inner_text() if title else ''
     if title != 'The Bone Field' or pg.query_selector('.prose.again'): fails.append(f'RQ1 (TG): a slot loaded on the same scene should show it in full ({title!r}, folded: {bool(pg.query_selector(".prose.again"))})')
     else: notes.append('RQ1: a loaded slot shows the scene in full')
+
+def g3_ui(b, url):
+    """v0.11.285 (owner pick G3-A): PF-g the speed at a phone's CPU (4x slower: the median tab switch under 300 ms, a card tap's main-thread
+    work under 400 ms); SB-h a held bar tells its parts; OS-a Save here on a full slot and a slot's or a file's load ask first; HK-t the keys;
+    CH-t the Journal's Coils after a tap; CR-p the credits in Settings."""
+    save = (ROOT / 'saves/v0.11.214-long-fallout-day64.json').read_text()
+    pg = b.new_page(viewport={'width': 390, 'height': 844})
+    try:
+        cdp = pg.context.new_cdp_session(pg); cdp.send('Emulation.setCPUThrottlingRate', {'rate': 4})
+        fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", save)
+        pg.evaluate("() => { window.__lt = []; new PerformanceObserver((l) => l.getEntries().forEach((e) => window.__lt.push(e.duration))).observe({ type: 'longtask' }); }")
+        sw = "async (t) => { const s = performance.now(); document.querySelector(`[data-tab=\"${t}\"]`).click(); await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); return performance.now() - s; }"
+        ts = sorted(pg.evaluate(sw, t) for _ in range(3) for t in ('sheet', 'story'))
+        med = (ts[2] + ts[3]) / 2
+        taps = []
+        for _ in range(3):
+            pg.evaluate("window.__lt = []")
+            c = next((e for e in pg.query_selector_all('button.card[data-run]:not([disabled]):not(.door)') if e.is_visible()), None)
+            if not c: break
+            c.click(); pg.wait_for_timeout(1200); taps.append(sum(pg.evaluate("window.__lt")))
+            if len(taps) == 1:  # RV (M1, TG4): the first tap after the page opened is counted on the time strip
+                h = pg.evaluate("(() => { try { return JSON.parse(JSON.parse(localStorage.getItem('boneash.auto')).data).stats.hist || null; } catch { return null; } })()")
+                if not h or not sum(h.get('tl') or [0]): fails.append(f'TL-t (M1): the first tap after a load was not counted ({h})')
+        tm = sorted(taps)[len(taps) // 2] if taps else 0
+        if med > 300 or tm > 400: fails.append(f'PF-g: at 4x CPU the median tab switch {med:.0f} ms (under 300), a card tap {tm:.0f} ms (under 400)')
+        else: notes.append(f'PF-g: at 4x CPU a tab switch {med:.0f} ms, a card tap {tm:.0f} ms')
+        cdp.send('Emulation.setCPUThrottlingRate', {'rate': 1})
+        # SB-h: a held bar
+        pg.click('[data-tab="story"]'); on_tab(pg, 'story')
+        bar = pg.query_selector('.status .bar[data-bar="hp"]')
+        if not bar: fails.append('SB-h: no HP bar with its parts')
+        else:
+            bx = bar.bounding_box(); pg.mouse.move(bx['x'] + 5, bx['y'] + 5); pg.mouse.down(); pg.wait_for_timeout(700); pg.mouse.up()
+            tip = pg.evaluate("(() => { const t = document.getElementById('tip'); return t && !t.hidden ? t.textContent : ''; })()")
+            if not re.search(r'Most HP: \d+\.', tip) or 'from the body' not in tip: fails.append(f'SB-h: the held HP bar did not tell its parts ({tip[:80]!r})')
+            elif 'Most Convergence' not in (pg.get_attribute('.status .bar[data-bar="qi"]', 'title') or ''): fails.append('SB-h: the Convergence bar has no title with its parts')
+            else: notes.append('SB-h: a held bar tells its parts')
+            pg.evaluate("document.getElementById('tip').hidden = true")
+        # HK-t: c opens James, s the story, 1 the first card
+        pg.keyboard.press('c'); on_tab(pg, 'sheet', 3000); ok_c = pg.evaluate("document.querySelector('#tabs [data-tab=\"sheet\"]').getAttribute('aria-current') === 'page'")
+        pg.keyboard.press('s'); on_tab(pg, 'story', 3000)
+        m0 = pg.evaluate("(() => { try { return JSON.parse(JSON.parse(localStorage.getItem('boneash.auto')).data).minutes; } catch { return -1; } })()")
+        pg.wait_for_timeout(450); pg.keyboard.press('1'); pg.wait_for_timeout(800)
+        m1 = pg.evaluate("(() => { try { return JSON.parse(JSON.parse(localStorage.getItem('boneash.auto')).data).minutes; } catch { return -1; } })()")
+        # RV-A (H1-r): a held key's repeats run nothing
+        mr0 = pg.evaluate("(() => { try { return JSON.parse(JSON.parse(localStorage.getItem('boneash.auto')).data).minutes; } catch { return -1; } })()")
+        pg.wait_for_timeout(450); pg.evaluate("document.dispatchEvent(new KeyboardEvent('keydown', { key: '1', repeat: true, bubbles: true }))"); pg.wait_for_timeout(500)
+        mr1 = pg.evaluate("(() => { try { return JSON.parse(JSON.parse(localStorage.getItem('boneash.auto')).data).minutes; } catch { return -1; } })()")
+        if mr1 != mr0: fails.append('H1-r: a held key\'s repeat ran a card')
+        if not ok_c: fails.append('HK-t: C did not open the James tab')
+        elif m1 == m0: fails.append('HK-t: 1 did not run the first card')
+        else: notes.append('HK-t: C, S and 1 work')
+        # CH-t: the Journal's Coils after the taps
+        pg.click('[data-tab="journal"]'); on_tab(pg, 'journal')
+        if not pg.query_selector('details.coils tbody tr'): fails.append('CH-t: no Coils table in the Journal after a tap')
+        else: notes.append('CH-t: the Journal lists the Coil')
+        check_text(pg, 'G3-A, the Journal', strict=True)
+        # OS-a: Save here on a full slot asks first; then it saves
+        pg.evaluate("localStorage.setItem('boneash.slot2', localStorage.getItem('boneash.auto'))")
+        open_saves(pg)
+        pg.click('button[data-save="2"]'); until(pg, "/Tap Save here again/.test(document.getElementById('saveNote')?.textContent || '')", 3000)
+        asked = 'Tap Save here again' in (pg.inner_text('#saveNote') or '')
+        pg.click('button[data-save="2"]'); until(pg, "/^Saved/.test(document.getElementById('saveNote')?.textContent || '')", 3000)
+        if not asked: fails.append('OS-a: Save here on a full slot did not ask first')
+        elif 'Saved' not in (pg.inner_text('#saveNote') or ''): fails.append('OS-a: the second tap did not save')
+        else: notes.append('OS-a: Save here on a full slot asks, the second tap saves')
+        # OS-a: a save file asks before it loads
+        f = ROOT / 'saves/v0.8.5-day1-stream.json'
+        pg.set_input_files('label:has-text("Load save file") input[data-import]', str(f)); until(pg, 'button[data-loadfile="1"]', 5000, 'visible')
+        if not pg.query_selector('button[data-loadfile="1"]'): fails.append('OS-a: a loaded file did not ask first')
+        else:
+            check_text(pg, 'OS-a, the file\'s line')
+            pg.click('button[data-loadfile="1"]'); on_tab(pg, 'story')
+            if not pg.evaluate("localStorage.getItem('boneash.bak.before')"): fails.append('OS-a: no "before" backup after loading the file')
+            else: notes.append('OS-a: a file shows its line, then loads')
+        # CR-p and the keys in Settings
+        pg.click('[data-tab="menu"]'); until(pg, '.main-menu button[data-menu="settings"]', 5000, 'visible')
+        pg.click('button[data-menu="settings"]'); until(pg, 'details.credits', 5000, 'attached')
+        st = pg.inner_text('body')
+        if not pg.query_selector('details.credits') or 'Keys (on a PC)' not in st: fails.append('CR-p, HK-t: no credits or keys in Settings')
+        else: notes.append('CR-p: the credits and the keys in Settings')
+    finally:
+        pg.close()
 
 def hv1(pg, url):
     """v0.11.137 (owner pick HV1): the James tab lists the people with friendship and affection, the Village last with friendship
@@ -1332,6 +1416,7 @@ def main(part=0):
                 pr2_ui(b, url)  # v0.11.211 (PR2 + PK1)
                 vq1_ui(b, url)  # v0.11.213 (VQ1 + FQ1)
                 rd1_ui(b, url)  # v0.11.214 (RD1 + RN1)
+                g3_ui(b, url)  # v0.11.285 (G3-A: PF-g, SB-h, HK-t, CH-t, OS-a, CR-p)
                 # 12. the FAQ (v0.11.83)
                 faq(pg, url)
             if three:

@@ -2,7 +2,7 @@
 
 New in v0.11.280 (owner pick RM-A, 2026-11-26 11:58; `claude/p48-options.md`). One list of every open item, in the order of `roadmap.md`'s Order line, with its bundle, its size and a pointer to the line that holds its words. **This file holds no item's words:** the lines stay where they are (`roadmap.md`, `roadmap-2.md`, `roadmap-act2.md`, `roadmap-e.md`, `roadmap-retune.md`); a push that finishes an item moves its line as before and updates this list. Each push still gets its own options and pick; the estimates are pushes, at 5–8 pushes a day (the pace since 2026-11-17: 76 pushes in 9 days; text and game pushes 3–5 a day).
 
-**Totals (v0.11.284):** about **53–90 pushes, 8–18 working days**; Act 2 starts after about **13–20 pushes (2–4 days)**. *(v0.11.283's estimate: 54–92, Act 2 after 14–22; v0.11.282's estimate: 55–95, Act 2 after 15–25; v0.11.281's estimate: 57–98, Act 2 after 17–28; v0.11.280's: 58–99, Act 2 after 18–29; v0.11.270's: 55–95, Act 2 after 19–33.)*
+**Totals (v0.11.285):** about **51–87 pushes, 8–17 working days**; Act 2 starts after about **11–17 pushes (2–3 days)**. *(v0.11.284's estimate: 53–90, Act 2 after 13–20; v0.11.283's estimate: 54–92, Act 2 after 14–22; v0.11.282's estimate: 55–95, Act 2 after 15–25; v0.11.281's estimate: 57–98, Act 2 after 17–28; v0.11.280's: 58–99, Act 2 after 18–29; v0.11.270's: 55–95, Act 2 after 19–33.)*
 
 ## Step 5. The retune: done
 
@@ -15,13 +15,13 @@ New in v0.11.280 (owner pick RM-A, 2026-11-26 11:58; `claude/p48-options.md`). O
 - ~~**HS (b) and (c), the slopes**~~ ((b) done in v0.11.281, HS-b2, Fable's run A; (c) closed as accepted, 0 of 600): `roadmap-e.md`'s PN line.
 - ~~**FC-w2, the village sees the first flight**~~ (done in v0.11.282, P50-A: the read, the canon call and Fable's texts in one push; `project/research/p50-measure.md`): `roadmap-e.md`'s flight line; `roadmap.md` section 2b.
 
-## Step 6. Systems (`roadmap-2.md` section 4): 13–20 pushes left, by bundle
+## Step 6. Systems (`roadmap-2.md` section 4): 11–17 pushes left, by bundle
 
 - ~~**G1 Android and small fixes**~~ (done in v0.11.283, one push, P51-A + RV-A + TG-a: (a), (b), (d), (e), (i), L7 done; (c), (g), (h), L4 closed as accepted; `claude/p51-options.md`, `project/research/p51-measure.md`): the two lines in `roadmap-done-7.md` (Moved in v0.11.283).
 - ~~**G2 The plan**~~ (done in v0.11.284, one push, P52-A: KR-k, BP-d; `claude/p52-options.md`, `project/research/p52-measure.md`): its line in `roadmap-done-7.md` (Moved in v0.11.284).
-- **G3 Game UI (2–3):** "Game UI and systems from group h"; the P52 review's L4 (KR's − then + adds a run this week; new in v0.11.284).
-- **G4 The threads' new design (3–5; a design talk first; balance and save):** "Threads need a new design", "The threads' new design, from the games", "From the cultivation games" (its threads rules).
-- **G5 Crafting, the Archive and the fight ideas (4–6; balance and save):** "Crafting, the Archive and the game UI, from the games"; "Fight ideas that wait for Insights and crafting".
+- ~~**G3 Game UI**~~ (done in v0.11.285, one push, G3-A + RV-A: SB-h, FE-t, FS-s, OS-a, HK-t, CR-p, PF-g, CH-t, TL-t, L4-r; ST-m moved the three step-4 items to G5; `claude/p53-options.md`, `project/research/p53-measure.md`): its two lines in `roadmap-done-7.md` (Moved in v0.11.285).
+- **G4 The threads' new design (3–5; a design talk first; balance and save):** with it, the P53 review's L4 and L5 (a week card's two times; Restore a backup on one tap; new in v0.11.285); "Threads need a new design", "The threads' new design, from the games", "From the cultivation games" (its threads rules).
+- **G5 Crafting, the Archive and the fight ideas (4–6; balance and save):** "Crafting, the Archive and the game UI, from the games" (with group h's three step-4 items and Insights' own design since v0.11.285); "Fight ideas that wait for Insights and crafting".
 - **G6 Knowledge pages (2–3):** "Knowledge pages from the visual novels and dating sims".
 - **G7 Text and relationship systems (2–3; a status read first, parts done):** "Group e's design lines": relationship and text systems, realm flavour and text systems, text systems from the games, whose relationships to track (partly done, v0.11.137–v0.11.139), the repeating replies, relationship cards and texts in sequence, story beats, cooking and music (largely done, CM v0.11.181–v0.11.183), the story pass's realm flavour.
 - **G8 The player-facing retune knobs (1–2):** the two lines placed in v0.11.276 ("Retune tools and knobs from the games", "Retune knobs and tools from the cultivation games"; their tools with Act 2's tuning).

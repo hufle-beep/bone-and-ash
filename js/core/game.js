@@ -10,7 +10,7 @@ import { actionOpen, actionLabel, fragileKnife, knifeSwings, lineState, FORM_LIN
 const formStep = (g, line) => { const n = lineState(g, line).now; return n ? FORM_LINES[line].forms.findIndex((f) => f.id === n.id) : -1; };
 import {
     checkFromTierLevel, skillXpCost, maxHp, qiPoolMax, qiRegenPercent, cycleTimeMinutes,
-    realmBonus, realmStepLabel, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
+    realmBonus, realmStepLabel, bodyHpTerm, CONDENSE_SIT_COST, FAIL_XP_FRACTION, realmDr, realmShockHpBonus, dampenMultiplier,
 } from './formulas.js';
 import { calMinutes, calStart, calEnd, LONG_CAL, BL_SPAN, storyDay, storyDayOf, pinnedStoryDay, DAY_FROM } from './calendar.js'; // v0.11.222 (J2, SV): BL_SPAN, storyDay (blFill) // v0.11.203 (owner pick T1, TS1): the long calendar (test switch)
 
@@ -91,6 +91,7 @@ export function coilSnap(g) {
     const s = JSON.parse(JSON.stringify({ ...g, coil: undefined }));
     delete s.coil;
     s.log = []; s.combat = null; s.lastWin = null;
+    if (s.stats?.hist) delete s.stats.hist; // v0.11.285 (G3-A, CH-t): a rewind takes the history from the game, not the snapshot
     if (s.tasks) s.tasks.queue = [];
     delete s.read; // v0.11.133 (RF1, L1): a rewind takes the record from the game itself (coil.js), never from the snapshot
     delete s.readStops; // v0.11.228 (RE1, SC): so do the plan's read stops
@@ -1788,4 +1789,29 @@ export function deserialize(text, { force = false } = {}) {
     if (bad.length && !force) throw new SaveError('badNumbers', `The save has broken numbers at ${bad.slice(0, 3).join(', ')}.`);
     if (bad.length) for (const p of bad) { const keys = p.split('.').slice(1); let o = g; for (const k of keys.slice(0, -1)) o = o[k]; o[keys.at(-1)] = 0; }
     return ensureBars(g);
+}
+
+/* ---------- v0.11.285 (owner pick G3-A, SB-h, 2026-11-27 02:04): what the status bar's numbers are made of ----------
+ * Holding a bar (or the mouse over it on a PC) shows its parts: HP's max (the base, the body by the GU check, the realm), Convergence's
+ * max (the base, Convergence Use, the primaries open, the realm, ×CONVERGENCE_MULTIPLIER) and how long Fed lasts. Display only. */
+/** RV-A (L3-w): a card's extra Fed an hour (tasks.js FED_EXTRA_PER_HOUR; the story test checks they match). */
+export const BAR_WORK_EXTRA = 1;
+export function barParts(g) {
+    const gu = skillCheck(g.james.gu), body = Math.floor(bodyHpTerm(gu)), hpMax = jamesHpMax(g); // the max is floored, so is its body part
+    const cu = skillCheck(g.james.skills['Convergence Use']), prim = g.james.primaries || 0, rb = realmBonus(g.james.realm);
+    const fed = Math.max(0, g.james.satiety || 0);
+    return {
+        hp: { max: hpMax, base: 20, body, realm: Math.max(0, hpMax - 20 - body), gu: g.james.gu },
+        qi: { max: jamesQiMax(g), base: 20, cu, prim, realm: rb, raw: 20 + cu + prim + rb, mult: CONVERGENCE_MULTIPLIER, skill: g.james.skills['Convergence Use'] },
+        fed: { now: fed, perHour: SATIETY_PER_HOUR, hours: Math.floor(fed / SATIETY_PER_HOUR), work: Math.floor(fed / (SATIETY_PER_HOUR + BAR_WORK_EXTRA)) },
+    };
+}
+const tlOf = (n) => `T${n.tier} L${n.level}`;
+/** The lines a held bar shows (`which`: 'hp' | 'qi' | 'fed'). */
+export function barLines(g, which) {
+    const p = barParts(g), rn = realmName(g.james.realm);
+    if (which === 'hp') return [`Most HP: ${p.hp.max}.`, `${p.hp.base} to start, +${p.hp.body} from the body (GU ${tlOf(p.hp.gu)}), +${p.hp.realm} from the realm (${rn}).`];
+    if (which === 'qi') return [`Most Convergence: ${p.qi.max}.`, `${p.qi.base} to start, +${p.qi.cu} from Convergence Use (${tlOf(p.qi.skill)}), +${p.qi.prim} for the primaries open, +${p.qi.realm} from the realm (${rn}): ${p.qi.raw}, ×${p.qi.mult} for Convergence.`];
+    if (which === 'fed') return [`Fed falls ${p.fed.perHour} an hour awake (${p.fed.perHour + BAR_WORK_EXTRA} working), half that asleep.`, p.fed.now <= 0 ? 'Empty: every hour now costs HP.' : p.fed.hours < 1 ? 'Under an hour awake until it runs out.' : `About ${p.fed.hours} h awake resting, ${p.fed.work} h working.`]; // RV-A (L3-w)
+    return [];
 }

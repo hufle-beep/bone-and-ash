@@ -328,3 +328,21 @@ button.card, button.choice { -webkit-touch-callout: none; -webkit-user-select: n
   #tip { right: auto; width: min(28rem, calc(100% - 1rem)); } /* v0.11.210 (owner pick N1, TT): not the whole width on a PC (was 1,350 px at 1366) */
   #tip.beside { bottom: auto; } /* v0.11.283 (owner pick P51-A, L7-f): beside the held card (main.js placeTip sets left and top) */
 }
+
+/* v0.11.285 (owner pick G3-A): a held status bar (SB-h); the Journal's Coils with their time strip (CH-t, TL-t); the credits (CR-p) */
+.status .bar[data-bar] { cursor: help; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+details.coils { margin: 0.6rem 0 1rem; }
+details.coils summary, details.credits summary { cursor: pointer; color: var(--ink-dim); }
+details.coils table { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-top: 0.4rem; }
+details.coils th, details.coils td { text-align: left; padding: 0.25rem 0.35rem 0.25rem 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
+details.coils th { font-weight: 600; color: var(--ink-dim); }
+.tl { display: flex; width: 6rem; height: 0.6rem; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+.tl i, .tl-key i { display: block; height: 100%; }
+.tl-key { font-size: 0.78rem; color: var(--ink-dim); display: flex; flex-wrap: wrap; gap: 0.3rem 0.9rem; }
+.tl-key span { display: inline-flex; align-items: center; gap: 0.3rem; }
+.tl-key i { width: 0.8rem; height: 0.6rem; display: inline-block; }
+.tl-cards { background: var(--ink); }
+.tl-story { background: var(--red); }
+.tl-fights { background: repeating-linear-gradient(45deg, var(--red) 0 2px, var(--paper) 2px 4px); }
+.tl-nights { background: var(--ink-dim); opacity: 0.45; }
+details.credits h3 { font-size: 0.92rem; margin: 0.7rem 0 0.2rem; }

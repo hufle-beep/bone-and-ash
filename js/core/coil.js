@@ -205,6 +205,7 @@ export function rewind(g, { to = 'act', xpOut = null } = {}) { // xpOut: v0.11.2
     base.rel = rel;
     base.tasks = { queue: [], fam: clone(g.tasks.fam || {}), use: clone(g.tasks.use || {}), adapt: clone(g.tasks.adapt || {}), yuki: { on: !!g.tasks.yuki?.on, progress: 0 }, ...(g.tasks.prio && typeof g.tasks.prio === 'object' ? { prio: clone(g.tasks.prio) } : {}), ...(g.tasks.keep && typeof g.tasks.keep === 'object' ? { keep: clone(g.tasks.keep) } : {}) }; // v0.11.219 (owner pick KC1, KG): the plan's counts kept for good too // v0.11.211 (owner pick PK1): the plan's places kept for good
     base.stats = clone(g.stats);
+    histClose(g, base); // v0.11.285 (G3-A, CH-t): the ending Coil on the history's list, when the game has one
     if (c.why === 'clear') { base.stats.clears = (base.stats.clears || 0) + 1; base.stats.keptTop = Math.max(base.stats.keptTop || 0, g.james.realm || 0); } // v0.11.227 (KA1): a won clear
     if (whole) { base.stats.pass = c.n + 1; delete base.stats.passUnknown; } // v0.11.72 (T1): the whole game again starts a new pass
     if (g.picked) base.picked = clone(g.picked); // v0.11.32 (P2-a): picked choices are remembered across every rewind
@@ -236,3 +237,65 @@ export function rewind(g, { to = 'act', xpOut = null } = {}) { // xpOut: v0.11.2
     return n;
 }
 
+
+/* ---------- v0.11.285 (owner pick G3-A, CH-t + TL-t, 2026-11-27 02:04): a history of past Coils, with a time strip ----------
+ * `g.stats.hist` (optional; every rewind keeps `stats`): { k0: the kill count at this Coil's start, or null; tl: this Coil's minutes
+ * by kind [cards, story, fights, nights]; m0: the game minute this Coil began (RV-A, L2-s: a Coil that crosses into Act 1 gets a new
+ * snapshot, so its days count from here, not from Act 1's start), or null; part: 1 when the history began partway through this Coil (its kills and time unknown);
+ * list: the past Coils, newest last, the last HIST_MAX kept: { n, act, why, d: days, r: realm, k: kills or null, tl: [4] or null } }.
+ * Only the screen fills it (main.js, after each tap: `tlNote`), so a game played by the bots never has it; a rewind with it adds the
+ * ending Coil to the list (`histClose`). An old save starts it at its next tap, partway (`part`). Display only (the Journal). */
+export const HIST_MAX = 30;
+export const TL_KINDS = ['cards', 'story', 'fights', 'nights'];
+export const TL_NAMES = { cards: 'work and cultivation', story: 'story', fights: 'fights', nights: 'nights' };
+export const WHY_SHORT = { collapse: 'collapsed', beast: 'fell to a beast', tribute: 'the tribute lost', shen: 'Shen Qiu', clear: 'Act 1 won', choice: 'bit the tail' };
+const NIGHT_FROM = 21 * 60, NIGHT_TO = 6 * 60;
+/** Minutes of [m0, m1) between 21:00 and 06:00. */
+export function nightMinutes(m0, m1) {
+    let n = 0;
+    for (let d = Math.floor(m0 / 1440) - 1; d * 1440 < m1; d++) {
+        const a = d * 1440 + NIGHT_FROM, b = (d + 1) * 1440 + NIGHT_TO; // this day's 21:00 to the next 06:00
+        n += Math.max(0, Math.min(m1, b) - Math.max(m0, a));
+    }
+    return n;
+}
+const snapMin = (g) => Number(g.coil?.snap?.minutes) || 0;
+/** The history, made at its first use; `m0`: the time it starts counting (past this Coil's start: `part`). */
+export function histEnsure(g, m0 = g.minutes) {
+    if (!g.stats) return null;
+    const h = g.stats.hist;
+    if (h && typeof h === 'object' && Array.isArray(h.list) && Array.isArray(h.tl)) return h;
+    const part = m0 > snapMin(g);
+    g.stats.hist = { k0: part ? null : (g.stats.kills || 0), m0: snapMin(g), tl: [0, 0, 0, 0], list: [], ...(part ? { part: 1 } : {}) };
+    return g.stats.hist;
+}
+/** A tap's minutes, by its kind ('cards' | 'story' | 'fights'); the hours between 21:00 and 06:00 count as nights, except in a fight. */
+export function tlNote(g, kind, m0, m1) {
+    if (!g?.coil || !(m1 > m0)) return;
+    const h = histEnsure(g, m0);
+    if (!h) return;
+    const i = Math.max(0, TL_KINDS.indexOf(kind) < 0 ? 1 : TL_KINDS.indexOf(kind));
+    const night = i === 2 ? 0 : nightMinutes(m0, m1);
+    h.tl[i] += m1 - m0 - night; h.tl[3] += night;
+}
+/** The row of the Coil now (ending or going on). */
+export function histNow(g) {
+    const h = g.stats?.hist;
+    if (!h) return null;
+    const part = !!h.part, kills = g.stats.kills || 0;
+    return { n: g.coil?.n || 1, act: g.coil?.act || 0, why: g.coil?.why || null, d: Math.round(Math.max(0, g.minutes - (Number.isFinite(h.m0) ? h.m0 : snapMin(g))) / 144) / 10, r: g.james?.realm || 0, k: part || h.k0 == null ? null : Math.max(0, kills - h.k0), tl: part ? null : h.tl.slice() };
+}
+/** A rewind: the ending Coil goes on the list; the next Coil starts its own count (`base`: the state the rewind builds). */
+export function histClose(g, base) {
+    const row = histNow(g);
+    if (!row || !base.stats) return;
+    const list = [...g.stats.hist.list, row].slice(-HIST_MAX);
+    base.stats.hist = { k0: base.stats.kills || 0, m0: Number(base.minutes) || 0, tl: [0, 0, 0, 0], list };
+}
+/** The Journal's rows: the past Coils, newest first, then (first) the one going on. */
+export function histRows(g) {
+    const h = g.stats?.hist;
+    if (!h) return [];
+    const now = histNow(g);
+    return [{ ...now, now: true }, ...h.list.slice().reverse()];
+}

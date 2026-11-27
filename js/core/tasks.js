@@ -76,6 +76,16 @@ export const famOf = (g, id) => { const f = Number(g.tasks?.fam?.[id]) || 0; ret
 /** v0.11.155 (FD1, NX): a work or door card's familiarity line names the next step ("Practised · 5/8 to Skilled"); "Mastered" at the top.
  * RV1 (NB): non-breaking spaces keep "5/8 to Skilled" whole, so a narrow card wraps only after a "·" (a 390 px phone: 4 of 4 mid-phrase breaks → 0). */
 export const famLine = (card) => (card.next != null ? `${FAM[card.tier].name}\u00a0· ${card.fam}/${card.next}\u00a0to\u00a0${FAM[card.tier + 1].name}` : FAM[card.tier].name);
+/** v0.11.285 (owner pick G3-A, FE-t): a work card's next step and one run's time then ({ name, at, speed, now, then } in minutes), or
+ *  null (not a work card, at the top, or no time). One run as `resolveWork` times it: (the menu's + the card's time) × NEW_LENGTH ÷ speed;
+ *  the long calendar's ×7 is not in it. The hold tooltip says it (main.js tipFor); the card's face keeps famLine. */
+export function famNext(card) {
+    if (!card || card.kind !== 'work' || card.next == null) return null;
+    const base = (card.minutes || 0) * NEW_LENGTH;
+    if (!base) return null;
+    const speed = cardSpeed(card.next);
+    return { name: FAM[card.tier + 1].name, at: card.next, speed, now: Math.round(base / cardSpeed(card.fam || 0)), then: Math.round(base / speed) };
+}
 
 /** v0.11.177 (owner picks P9A, RV1 C2; Fable's review C): a save resting inside a work menu whose never-drawn text P9A emptied would
  *  draw an empty screen (no live route leaves the player there; only an old save can). On load it is moved to that menu's hub, without

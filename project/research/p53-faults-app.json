@@ -1,0 +1,23 @@
+[
+ {
+  "id": "F11",
+  "file": "js/core/app.js",
+  "find": "const v = /^\\d+(\\.\\d+)+$/.test(String(ver || '')) ? `-${ver}` : '';",
+  "replace": "const v = '';",
+  "note": "FS-s: no build in the name"
+ },
+ {
+  "id": "F12",
+  "file": "js/core/app.js",
+  "find": "    if (k === 'Escape') return { esc: true };\n",
+  "replace": "",
+  "note": "HK-t: Esc does nothing"
+ },
+ {
+  "id": "F13",
+  "file": "js/core/app.js",
+  "find": "if (!ev || typing || ev.ctrlKey",
+  "replace": "if (!ev || ev.ctrlKey",
+  "note": "HK-t: keys typed into a field act"
+ }
+]

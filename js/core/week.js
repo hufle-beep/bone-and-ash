@@ -135,7 +135,7 @@ export function noteReadTap(g, scenes, id, r = null) {
     const d = workDay(g), grp = keyGroup(k);
     if (!isRec(p.done) || p.done.d !== d) p.done = { d, sit: 0, mer: 0, qi: 0, pres: 0, rest: 0, doors: {} };
     if (!isRec(p.done.doors)) p.done.doors = {};
-    if (grp === 'card') { if (p.items?.[k] > 0) { p.items[k] -= 1; if (p.items[k] <= 0) delete p.items[k]; } return; }
+    if (grp === 'card') { if (p.items?.[k] > 0) { noteRan(g, p, k, 1); p.items[k] -= 1; if (p.items[k] <= 0) delete p.items[k]; } return; } // G3-A (L4-r): a run counted
     if (grp === 'door') { const s = k.slice(5); p.done.doors[s] = (p.done.doors[s] || 0) + 1; if (!doorRepeats(s)) { if (isRec(p.doors)) p.doors[s] = 0; keepTaken(g, p.hub, s); } return; }
     p.done[grp] = (p.done[grp] || 0) + 1; // sit, mer, qi, pres, rest
 }
@@ -318,7 +318,7 @@ export function planHere(g) {
     if (!isRec(p)) return null;
     if (!planHub(g) || p.hub !== g.scene || p.coil !== coilKey(g) || !!p.day !== campHub(g) || (!p.day && workDay(g) > p.lastDay)) return null;
     if (p.day && p.dayOf !== workDay(g)) { // P52-A (BP-d): a camp's new day starts from the amounts kept, its last day's stop forgotten
-        const d = workDay(g); p.items = planStart(g, p.hub).items; p.dayOf = d; p.lastDay = d; p.stop = '';
+        const d = workDay(g); p.items = planStart(g, p.hub).items; p.dayOf = d; p.lastDay = d; p.stop = ''; delete p.ran; // G3-A (L4-r): a new day's runs
     }
     return p;
 }
@@ -388,6 +388,7 @@ export function planSet(g, key, n) {
         if (!was && v) delete kp[key];
         if (kv) kp[key] = kv; else delete kp[key];
         if (v) p.items[key] = v; else delete p.items[key];
+        if (isRec(p.ran)) delete p.ran[key]; // G3-A (L4-r): a count set as a number: what is left read from it again (kept − left)
     }
     p.stop = '';
     return p;
@@ -397,13 +398,25 @@ export function planClear(g) {
     const p = planEnsure(g); if (!p) return null; // KC1: a week not started yet shows the kept counts, so Clear makes its plan
     const t = taskState(g); if (!isRec(t.keep)) t.keep = {};
     t.keep[p.hub] = Object.fromEntries(Object.keys(DOOR_START).map((s) => [`door:${s}`, 0])); // KC1 (KA): Clear is kept (Yuki's row too)
-    p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; p.doors = {}; p.stop = ''; p.running = false; return p; }
+    p.items = {}; p.med = { sit: 0, mer: 0, qi: 0, pres: 0, rest: 0 }; p.doors = {}; p.stop = ''; p.running = false; delete p.ran; return p; }
 /** v0.11.210 (DC-a): a plan row's count now (a card, a Meditate row, a door; with no plan the new plan's start). */
 export function planCount(g, key) {
     const p = planView(g); // KC1: with no plan yet this week, the kept amounts
     if (/^med:/.test(key)) return p?.med?.[key.slice(4)] || 0;
     if (/^door:/.test(key)) { const s = key.slice(5); return p ? (isRec(p.doors) ? p.doors[s] || 0 : 0) : DOOR_START[s] || 0; }
     return p?.items?.[key] || 0;
+}
+/* ---------- v0.11.285 (owner pick G3-A, L4-r, 2026-11-27 02:04; the P52 review's L4): the runs made this week per row ----------
+ * `p.ran` (inside the plan: row key → the card's runs this week, today at a camp) counts each run the plan or a read stop takes; − and +
+ * then set what is left as the amount kept less the runs made (before: kept 2, none left, − then + left 1: a run added this week). A
+ * row with no count yet (an old plan, or one set as a number by planSet) reads it as kept − left, while that is 0 or more; else as
+ * before. A new week's plan, a camp's new day and Clear start it again. */
+const ranOf = (p, key, k0, w0) => (Number.isFinite(p.ran?.[key]) ? p.ran[key] : k0 > 0 && k0 >= w0 ? k0 - w0 : null);
+function noteRan(g, p, k, d) {
+    const k0 = clampN(keepHere(g, p.hub)?.[k], 9), was = ranOf(p, k, k0, p.items?.[k] || 0);
+    if (was == null) return; // RV (L1): an old plan with more left than kept keeps the old rule (no count begun)
+    if (!isRec(p.ran)) p.ran = {};
+    p.ran[k] = Math.max(0, was + d);
 }
 /* ---------- v0.11.284 (owner pick P52-A, KR-k, 2026-11-26 23:40): a card row shows the amount kept ----------
  * A card row's number is the amount kept (what each new week, or a camp's each new day, starts with); what is left this week (today
@@ -422,7 +435,9 @@ export function planStep(g, key, d) {
     const p = planEnsure(g);
     if (!p) return null;
     const kp = keepHere(g, p.hub, p), k0 = clampN(kp[key], 9), w0 = p.items[key] || 0;
-    const kv = clampN(k0 + d, 9), wv = clampN(w0 + (k0 || d > 0 ? kv - k0 : d), 9); // RV (L4): left moves by the kept amount's own step (none at 9); with nothing kept, − still lowers what is left
+    const kv = clampN(k0 + d, 9), ran = (!k0 && d < 0) || kv === k0 ? null : ranOf(p, key, k0, w0); // at 9 (or 0), + (or −) changes nothing
+    const wv = ran != null ? clampN(kv - ran, 9) : clampN(w0 + (k0 || d > 0 ? kv - k0 : d), 9); // RV (L4): left moves by the kept amount's own step (none at 9); with nothing kept, − still lowers what is left
+    if (ran != null) { if (!isRec(p.ran)) p.ran = {}; p.ran[key] = ran; } // G3-A (L4-r): what is left is the amount kept less the runs made, so − then + adds none
     if (!k0 && kv) delete kp[key]; // (LO) a row set again from 0 goes to the end of the kept order, as planSet
     if (kv) kp[key] = kv; else delete kp[key];
     if (wv) p.items[key] = wv; else delete p.items[key];
@@ -708,9 +723,9 @@ function runPlanSteps(g, scenes, { max = 600, onStep = null, probe = true, rel =
                 }
                 if (!(p.items[k] > 0) || !taskOpen(g, scenes, k)) return null;
                 const dz = deadly(k); if (dz) return dz === 'hunger' ? 'hungry' : 'hurt';
-                p.items[k] -= 1; if (p.items[k] <= 0) delete p.items[k];
+                noteRan(g, p, k, 1); p.items[k] -= 1; if (p.items[k] <= 0) delete p.items[k]; // G3-A (L4-r): a run counted
                 const r = run(k);
-                if (r.skipped) p.items[k] = (p.items[k] || 0) + 1; // the day's routine went first; the card is still owed
+                if (r.skipped) { p.items[k] = (p.items[k] || 0) + 1; noteRan(g, p, k, -1); } // the day's routine went first; the card is still owed
                 if (r.stopped || g.scene !== hub) return 'story';
                 return 'next';
             }

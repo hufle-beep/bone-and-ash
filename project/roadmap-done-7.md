@@ -2,6 +2,15 @@
 
 Started in v0.11.278, when `roadmap-done-6.md` would have passed about 45 KB with this move. Newer than `roadmap-done-6.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.285 (word for word; owner picks G3-A, RV-A, 2026-11-27: G3, game UI; each line's closing note under it)
+
+### From `roadmap-2.md` section 4, step 6's bundle G3
+
+- *(new in v0.11.73, from group h; `research.md` #6, #17, #18, #20–#25, #28, #39, #40)* **Game UI and systems from group h (each its own pick; display only unless marked):** what the status bar's numbers are made of, on hold (Selene's `drainParts`); a card's next familiarity step and the time it saves (`etaLines`, `famSaved`); export names with the real date, the Coil and the build (`fileStamp`); a summary before loading or overwriting a save; keyboard shortcuts from one table (`HOTKEYS`); a credits panel in Settings (from `CREDITS.md`); phone performance measured (CPU 4× slower); a history table of past Coils and a timeline strip (each an optional save field); with step 4: a test that every recipe fits what its section can reach, faction standing rows (the Sect; a save field), perk shapes and the "a perk only when the story pays for it" rule.
+  - *(v0.11.285, owner picks G3-A + RV-A)* **Done:** the status bar's parts on hold (SB-h, `game.js` `barParts`), a card's next step and its time saved (FE-t, `tasks.js` `famNext`), export names with the date, the Coil and the build (FS-s, `app.js` `fileStamp`), a second tap naming both games before Save here on a full slot or a load (OS-a), keys from one table (HK-t, `HOTKEYS`), a credits panel in Settings (CR-p, `js/core/credits.js`), phone performance measured and guarded (PF-g: at 4× CPU a tab switch 35–74 ms, a card tap 101–150 ms; the browser test fails past 300 / 400 ms), the history table of past Coils and its time strip (CH-t, TL-t, `stats.hist`, an optional save field). Its three step-4 items (the recipe test, faction rows, perk shapes) moved, word for word, to "Crafting, the Archive and the game UI, from the games" (ST-m). `project/research/p53-measure.md`.
+- *(new in v0.11.284, the P52 cold review's L4; with bundle G3)* **Open, options later:** KR's − then + on a card row run down this week adds a run this week (kept 2, left 0: − gives 1 / 0, + gives 2 / 1); the step clamps what is left at 0.
+  - *(v0.11.285, owner pick G3-A, L4-r)* **Done:** the plan counts each card's runs this week (`week.js` `p.ran`); − and + set what is left as kept less the runs made (− then + adds none).
+
 ## Moved in v0.11.284 (word for word; owner pick P52-A, 2026-11-26 23:40: G2, the plan; its closing note under it)
 
 ### From `roadmap-2.md` section 4, step 6's bundle G2

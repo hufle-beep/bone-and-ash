@@ -109,3 +109,49 @@ export function tipBox(r, w, h, vw, vh, gap = 8) {
     const top = below + h <= vh - gap ? below : above >= gap ? above : Math.max(gap, vh - h - gap);
     return { left: Math.round(left), top: Math.round(top) };
 }
+
+/* ---------- v0.11.285 (owner pick G3-A, 2026-11-27 02:04): file names, the second tap before a load or an overwrite, keys ---------- */
+/** FS-s: a save file's name, from the real date and time, the Coil and the build (`bone-and-ash-2026-11-27-0158-coil8-0.11.285.json`).
+ *  Before: the game clock only (two downloads at the same game minute had one name). `ver` unknown ('' or '?'): left out. */
+export function fileStamp(d, coil, ver) {
+    const p = (n) => String(n).padStart(2, '0');
+    const when = `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
+    const v = /^\d+(\.\d+)+$/.test(String(ver || '')) ? `-${ver}` : '';
+    return `bone-and-ash-${when}${Number(coil) > 0 ? `-coil${Number(coil)}` : ''}${v}.json`;
+}
+/** OS-a: a load or an overwrite asks for a second tap, naming both games (`there`: the slot's or file's line, `here`: this game's).
+ *  ASK_MS: the second tap counts within this time (as New game). Save here on an empty slot, and Load into no game, ask nothing. */
+export const ASK_MS = 4000;
+/** The second tap's decision (RV TG2): { go: true } on the second tap of the same `k` within ASK_MS, else { go: false } and armed for `k`.
+ *  `armed`: { k, at } from the last call. Pure, so the tests run it. */
+export function askStep(armed, k, now) {
+    if (armed && armed.k === k && now - armed.at < ASK_MS) return { go: true, armed: { k: '', at: 0 } };
+    return { go: false, armed: { k, at: now } };
+}
+export const ASK_TEXT = {
+    save: (n, there, here) => `Slot ${n} holds ${there}. Tap Save here again to put this game there instead (${here}); the game in the slot is lost.`,
+    load: (n, there, here) => `Tap Load again: slot ${n} (${there}) takes the place of this game (${here}), which is kept as the "before" backup.`,
+    file: (there, here) => `This file holds a game at ${there}. Loading it takes the place of this game (${here}), which is kept as the "before" backup.`,
+    fileBtn: 'Load it', cancel: 'Cancel',
+};
+/** HK-t: the keys, one table (a PC; the phone has none). `key` as KeyboardEvent.key; the Settings list reads `show` and `does`. */
+export const HOTKEYS = [
+    { key: '1-9', show: '1–9', does: 'the open cards or choices on the screen, in order' },
+    { key: 'Escape', show: 'Esc', does: 'close the card details; on a menu page, back to the menu' },
+    { key: 's', show: 'S', does: 'Story', tab: 'story' },
+    { key: 'c', show: 'C', does: 'James', tab: 'sheet' },
+    { key: 'h', show: 'H', does: 'Hammerspace', tab: 'bag' },
+    { key: 'j', show: 'J', does: 'Journal', tab: 'journal' },
+    { key: 'f', show: 'F', does: 'FAQ', tab: 'faq' },
+    { key: 'm', show: 'M', does: 'the menu', tab: 'menu' },
+];
+/** What a key press does: { card: index from 0 } | { esc: true } | { tab } | null. Keys with Ctrl, Alt or Meta, a held key's repeats,
+ *  and keys typed into a field, do nothing (`typing`: the focus is in an input, a select or a text area). */
+export function hotkeyOf(ev, typing = false) {
+    if (!ev || typing || ev.repeat || ev.ctrlKey || ev.altKey || ev.metaKey) return null; // RV-A (H1-r): a held key's repeats do nothing (they passed the 400 ms tap guard and confirmed a second-tap warning)
+    const k = String(ev.key || '');
+    if (/^[1-9]$/.test(k)) return { card: Number(k) - 1 };
+    if (k === 'Escape') return { esc: true };
+    const h = HOTKEYS.find((x) => x.tab && x.key === k.toLowerCase());
+    return h ? { tab: h.tab } : null;
+}

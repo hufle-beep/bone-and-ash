@@ -5861,7 +5861,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const idOf = (id) => (Tk.CF1.on ? id : String(id).replace(/^week:carry:.*/, 'week:carry'));
         const canon = (v) => (Array.isArray(v) ? `[${v.map(canon).join(',')}]` : v && typeof v === 'object' ? `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canon(v[k])}`).join(',')}}` : JSON.stringify(v)); // switched off: keys sorted (a record's place among a save's keys is no rule)
         const ser = (o) => (Tk.CF1.on ? JSON.stringify(o) : canon(o));
-      const noKeep = (g) => { if (!g.tasks?.keep && !('calBl' in g)) return g; const c = JSON.parse(JSON.stringify(g)); if (c.tasks) delete c.tasks.keep; delete c.calBl; if (c.coil?.snap) delete c.coil.snap.calBl; return c; }; // v0.11.219 (KC1): the kept counts are the save's only change in these runs; v0.11.222 (J2, SV): and the Blackroot's days (`calBl`, the save's and its Coil snapshot's)
+      const noKeep = (g) => { if (!g.tasks?.keep && !('calBl' in g) && !g.tasks?.plan?.ran) return g; const c = JSON.parse(JSON.stringify(g)); if (c.tasks) delete c.tasks.keep; if (c.tasks?.plan) delete c.tasks.plan.ran; /* v0.11.285 (G3-A, L4-r): the plan's run count, the save's only other change (measured: with it left out, every pin as before) */ delete c.calBl; if (c.coil?.snap) delete c.coil.snap.calBl; return c; }; // v0.11.219 (KC1): the kept counts are the save's only change in these runs; v0.11.222 (J2, SV): and the Blackroot's days (`calBl`, the save's and its Coil snapshot's)
       const pin = (g) => { const ids = [], lines = []; const onStep = (cg, l) => { if (l) ids.push(`${cg.minutes}:${idOf(l.id)}${l.r.skipped ? '~' : ''}`); };
         const go = () => { const r = Wk.runWeek(g, SCENES, { onStep }); for (const d of r.days) lines.push(...d.lines); return r; };
         let r = go(); const stops = [r.stop];
@@ -6054,7 +6054,7 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
         const idOf = (id) => (Tk.CF1.on ? id : String(id).replace(/^week:carry:.*/, 'week:carry'));
         const canon = (v) => (Array.isArray(v) ? `[${v.map(canon).join(',')}]` : v && typeof v === 'object' ? `{${Object.keys(v).sort().map((k) => `${JSON.stringify(k)}:${canon(v[k])}`).join(',')}}` : JSON.stringify(v)); // switched off: keys sorted (a record's place among a save's keys is no rule)
         const ser = (o) => (Tk.CF1.on ? JSON.stringify(o) : canon(o));
-      const strip = (g) => { const c = v214(JSON.parse(JSON.stringify(g))); if (c.tasks) delete c.tasks.keep; /* v0.11.219 (KC1) */ delete c.calBl; if (c.coil?.snap) delete c.coil.snap.calBl; /* v0.11.222 (J2, SV) */ const q = c.tasks?.plan; if (q) { delete q.med.rest; if (q.done) delete q.done.rest; } return c; };
+      const strip = (g) => { const c = v214(JSON.parse(JSON.stringify(g))); if (c.tasks) delete c.tasks.keep; /* v0.11.219 (KC1) */ if (c.tasks?.plan) delete c.tasks.plan.ran; /* v0.11.285 (G3-A, L4-r): the plan's run count left out (measured: every pin as before) */ delete c.calBl; if (c.coil?.snap) delete c.coil.snap.calBl; /* v0.11.222 (J2, SV) */ const q = c.tasks?.plan; if (q) { delete q.med.rest; if (q.done) delete q.done.rest; } return c; };
       const pin = (g) => { const ids = [], lines = []; const onStep = (cg, l) => { if (l) ids.push(`${cg.minutes}:${idOf(l.id)}${l.r.skipped ? '~' : ''}`); };
         const go = () => { const r = Wk.runWeek(g, SCENES, { onStep }); for (const d of r.days) lines.push(...d.lines); return r; };
         let r = go(); const stops = [r.stop];
@@ -10155,7 +10155,7 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       Wk.planStep(g, 'wild_train:1', -1); assert(g.tasks.keep.wilds['wild_train:1'] === 1 && !('wild_train:1' in g.tasks.plan.items), `${T} (KR-k): − back to 1 kept, none left`);
       Wk.planStep(g, 'wild_train:1', -1); assert(!('wild_train:1' in g.tasks.keep.wilds) && !('wild_train:1' in g.tasks.plan.items), `${T} (KR-k): − to 0 kept, nothing below 0 left`);
       g.tasks.plan.items['wild_forage:0'] = 2; Wk.planStep(g, 'wild_forage:0', -1); assert(!('wild_forage:0' in g.tasks.keep.wilds) && g.tasks.plan.items['wild_forage:0'] === 1, `${T} (KR-k): 0 kept and 2 left: − leaves 1, kept stays 0`);
-      for (let i = 0; i < 12; i++) Wk.planStep(g, 'wild_train:1', 1); assert(g.tasks.keep.wilds['wild_train:1'] === 9 && g.tasks.plan.items['wild_train:1'] === 9, `${T} (KR-k): at most 9 each`);
+      for (let i = 0; i < 12; i++) Wk.planStep(g, 'wild_train:1', 1); assert(g.tasks.keep.wilds['wild_train:1'] === 9 && g.tasks.plan.items['wild_train:1'] === 8 /* v0.11.285 (G3-A, L4-r): the one run made this week (above, the count run down) stays counted: 9 kept, 8 left (was 9) */, `${T} (KR-k): at most 9 each`);
       { const kc = g.tasks.keep.wilds['wild_train:1']; g.tasks.plan.items['wild_train:1'] = 3; Wk.planStep(g, 'wild_train:1', 1); assert(kc === 9 && g.tasks.keep.wilds['wild_train:1'] === 9 && g.tasks.plan.items['wild_train:1'] === 3, `${T} RV (L4): + at 9 kept changes nothing (what is left stays 3)`); }
       Wk.planStep(g, 'med:sit', 1); Wk.planStep(g, 'med:sit', 1); Wk.planStep(g, 'door:yk_time', -1);
       assert(g.tasks.plan.med.sit === 2 && g.tasks.keep.wilds['med:sit'] === 2 && Wk.planCount(g, 'door:yk_time') === 0 && g.tasks.keep.wilds['door:yk_time'] === 0, `${T} (KR-k): a Meditate row and a door step as planSet`);
@@ -10246,6 +10246,101 @@ console.log(`  ${GAMES} games in ${WORKERS} worker${WORKERS > 1 ? 's' : ''}${FUL
       assert(M.includes("groupHtml('Plan the day'") && M.includes("'Run the day'") && M.includes('planStep(g, b.dataset.plan,') && M.includes('hub && planHub(g) ? weekHtml()') && M.includes("${day ? 'today' : 'this week'}"), `${T}: main.js draws the camp's plan, the rows' kept amounts and steps them`); }
     // What's new
     { const N = await import('../js/core/news.js'); const n = N.NOTES.find(([v]) => v === '0.11.284'); assert(!!n && /camp/i.test(n[1]) && /Plan the day/.test(n[1]) && /left this week/.test(n[1]), `${T}: What's new says both`); }
+}
+// v0.11.285 (owner pick G3-A, 2026-11-27 02:04; `claude/p53-options.md`, `project/research/p53-measure.md`): G3, game UI. SB-h: what the
+// status bar's numbers are made of (game.js barParts, barLines). FE-t: a work card's next step and one run's time then (tasks.js famNext).
+// L4-r: the plan counts the runs made this week per row (week.js p.ran), so − then + adds no run. CH-t + TL-t: a history of past Coils
+// with a time strip (coil.js stats.hist, tlNote, histClose, histRows), filled by the screen only. The screen's parts: main.js pins.
+{
+    const T = 'G3-A';
+    const Wk = await import('../js/core/week.js'); const Tk = await import('../js/core/tasks.js'); const Gm = await import('../js/core/game.js'); const Co = await import('../js/core/coil.js'); const C0 = await import('../js/core/calendar.js');
+    const stay = () => { const g = deserialize(readFileSync(new URL('../saves/v0.11.204-long-wilds-day2.json', import.meta.url), 'utf8'), { force: true }); g.james.satiety = 100; Gm.addItem(g, 'smoked_meat', 30); delete g.tasks.plan; delete g.tasks.keep; return g; };
+    // SB-h: the parts add up to what the bar shows
+    for (const seed of [1, 7, 53]) {
+      const g = ensureBars(newGame(seed)); g.james.realm = seed % 4; g.james.gu = { tier: 1 + (seed % 3), level: 1 + (seed % 9), xp: 0 }; g.james.primaries = seed % 13; g.james.satiety = 37;
+      const p = Gm.barParts(g);
+      assert(p.hp.max === jamesHpMax(g) && p.hp.base + p.hp.body + p.hp.realm === p.hp.max && p.hp.realm >= 0, `${T} (SB-h): HP's parts add up (seed ${seed}: ${JSON.stringify(p.hp)})`);
+      assert(p.qi.max === jamesQiMax(g) && Math.abs(Math.round(p.qi.raw * p.qi.mult * 2) / 2 - p.qi.max) < 1e-9 && p.qi.raw === p.qi.base + p.qi.cu + p.qi.prim + p.qi.realm, `${T} (SB-h): Convergence's parts make its max (seed ${seed})`);
+      assert(p.fed.hours === 12 && p.fed.work === 9 && Gm.barLines(g, 'fed')[1] === 'About 12 h awake resting, 9 h working.' && Gm.BAR_WORK_EXTRA === Tk.FED_EXTRA_PER_HOUR, `${T} (SB-h, RV-A L3-w): Fed 37 lasts about 12 h resting, 9 h working (4 an hour)`);
+      assert(['hp', 'qi'].every((k) => Gm.barLines(g, k).length === 2 && Gm.barLines(g, k).every((l) => !/NaN|undefined/.test(l))) && Gm.barLines(g, 'x').length === 0, `${T} (SB-h): two lines a bar, no broken numbers`);
+    }
+    { const g = ensureBars(newGame(2)); g.james.satiety = 0; assert(Gm.barLines(g, 'fed')[1] === 'Empty: every hour now costs HP.', `${T} (SB-h): an empty Fed says so`);
+      g.james.satiety = 2.5; assert(Gm.barLines(g, 'fed')[1] === 'Under an hour awake until it runs out.', `${T} RV-A (L3-w): Fed 2.5 is not empty`); }
+    // FE-t: the next step's speed and one run's time then
+    { const card = { kind: 'work', minutes: 60, fam: 5, tier: 1, next: 8 };
+      const f = Tk.famNext(card); assert(f && f.name === 'Skilled' && f.at === 8 && f.speed === 5 && f.now === Math.round(120 / Tk.cardSpeed(5)) && f.then === 24, `${T} (FE-t): a Practised card at 5 of 8 (${JSON.stringify(f)})`);
+      assert(Tk.famNext({ ...card, fam: 0, tier: 0, next: 2 }).now === 120 && Tk.famNext({ ...card, fam: 0, tier: 0, next: 2 }).then === 60, `${T} (FE-t): a new card, 2 h now, 1 h at Practised`);
+      assert(Tk.famNext({ ...card, next: null, tier: 3 }) === null && Tk.famNext({ ...card, kind: 'door' }) === null && Tk.famNext({ ...card, minutes: 0 }) === null, `${T} (FE-t): none at the top, on a door, or with no time`);
+      const g = stay(); const w = taskCards(g, SCENES).find((c) => c.kind === 'work' && c.next != null && c.minutes > 0);
+      assert(!!w && Tk.famNext(w).now === Math.round(w.minutes * Tk.NEW_LENGTH / Tk.cardSpeed(w.fam)), `${T} (FE-t): a real card's run time, as resolveWork's one run`); }
+    // L4-r: − then + adds no run this week; the runs are counted
+    { const g = stay(); Wk.planStep(g, 'wild_train:1', 1); Wk.planStep(g, 'wild_train:1', 1);
+      const p = g.tasks.plan; assert(p.items['wild_train:1'] === 2 && g.tasks.keep.wilds['wild_train:1'] === 2, `${T} (L4-r): 2 kept, 2 left`);
+      p.items['wild_train:1'] = 0; delete p.items['wild_train:1']; p.ran = { 'wild_train:1': 2 }; // two runs made, as the run counts them
+      Wk.planStep(g, 'wild_train:1', -1); Wk.planStep(g, 'wild_train:1', 1);
+      assert(g.tasks.keep.wilds['wild_train:1'] === 2 && !('wild_train:1' in p.items), `${T} (L4-r): − then + leaves 2 kept and none left (left ${p.items['wild_train:1'] || 0})`);
+      Wk.planStep(g, 'wild_train:1', 1); assert(g.tasks.keep.wilds['wild_train:1'] === 3 && p.items['wild_train:1'] === 1, `${T} (L4-r): + again: 3 kept, 1 left (3 less the 2 run)`);
+      for (let i = 0; i < 9; i++) Wk.planStep(g, 'wild_train:1', 1); assert(g.tasks.keep.wilds['wild_train:1'] === 9 && p.items['wild_train:1'] === 7, `${T} (L4-r): at 9 kept, 7 left`); }
+    { const g = stay(); Wk.planStep(g, 'wild_train:1', 1); Wk.planStep(g, 'wild_train:1', 1); const p = g.tasks.plan; delete p.ran; p.items['wild_train:1'] = 1; // an old plan, mid-week: one run made, no count
+      Wk.planStep(g, 'wild_train:1', -1); assert(p.ran['wild_train:1'] === 1 && !('wild_train:1' in p.items) && g.tasks.keep.wilds['wild_train:1'] === 1, `${T} (L4-r): an old plan reads its runs as kept − left`);
+      Wk.planStep(g, 'wild_train:1', -1); Wk.planStep(g, 'wild_train:1', 1); assert(g.tasks.keep.wilds['wild_train:1'] === 1 && !('wild_train:1' in p.items), `${T} (L4-r): then − to 0 and + back: none left`);
+      Wk.planSet(g, 'wild_train:1', 2); assert(!('wild_train:1' in (p.ran || {})) && p.items['wild_train:1'] === 2, `${T} (L4-r): a count set as a number forgets the row's runs`);
+      p.items['wild_forage:0'] = 2; Wk.planStep(g, 'wild_forage:0', -1); assert(p.items['wild_forage:0'] === 1 && !('wild_forage:0' in g.tasks.keep.wilds), `${T} (L4-r): nothing kept: − still lowers what is left`);
+      Wk.planClear(g); assert(!('ran' in g.tasks.plan), `${T} (L4-r): Clear starts the count again`); }
+    { const g = stay(); Wk.planStep(g, 'wild_train:1', 1); Wk.planStep(g, 'wild_train:1', 1); const r = Wk.runWeek(g, SCENES); const p = g.tasks.plan;
+      const ran = p?.ran?.['wild_train:1'] || 0, left = p?.items?.['wild_train:1'] || 0;
+      assert(r && ran + left === 2 && ran >= 1, `${T} (L4-r): the week's run counts its runs (ran ${ran}, left ${left}, of 2 kept)`); }
+    // RV (TG3): the read stop's count, a skipped card's −1, a camp's new day, an old plan with more left than kept (L1)
+    { const g = stay(); Wk.planStep(g, 'wild_train:1', 1); Wk.planStep(g, 'wild_train:1', 1); const p = g.tasks.plan; p.read = 'wild_train:1'; p.readKey = 'wild_train:1';
+      Wk.noteReadTap(g, SCENES, 'wild_train:1', { lines: [] }); assert(p.ran['wild_train:1'] === 1 && p.items['wild_train:1'] === 1, `${T} RV (TG3): a read stop tapped by hand counts its run (ran ${p.ran?.['wild_train:1']})`);
+      Wk.planStep(g, 'wild_train:1', -1); Wk.planStep(g, 'wild_train:1', 1); assert(p.items['wild_train:1'] === 1 && g.tasks.keep.wilds['wild_train:1'] === 2, `${T} RV (TG3): then − and +: still 1 left`); }
+    { const g = stay(); Wk.planSet(g, 'wild_train:1', 1); const p = g.tasks.plan; p.items['wild_train:1'] = 3; delete p.ran; // an old plan: 1 kept, 3 left
+      p.read = 'wild_train:1'; p.readKey = 'wild_train:1'; Wk.noteReadTap(g, SCENES, 'wild_train:1', { lines: [] });
+      assert(!(p.ran && 'wild_train:1' in p.ran) && p.items['wild_train:1'] === 2, `${T} RV (L1): no count begun where more is left than kept`);
+      Wk.planStep(g, 'wild_train:1', 1); assert(g.tasks.keep.wilds['wild_train:1'] === 2 && p.items['wild_train:1'] === 3, `${T} RV (L1): then + by the old rule (kept 2, left 3)`); }
+    { const W = readFileSync(new URL('../js/core/week.js', import.meta.url), 'utf8');
+      assert(W.includes("if (r.skipped) { p.items[k] = (p.items[k] || 0) + 1; noteRan(g, p, k, -1); }") && W.includes("p.lastDay = d; p.stop = ''; delete p.ran;"), `${T} RV (TG3): a skipped card's run taken back; a camp's new day starts the count again`); }
+    { const g = ensureBars(newGame(53010, { closed: true })); g.minutes = C0.calMinutes(g, 11, 7); g.flags.bl_region = 'rr'; goTo(g, SCENES, 'rr_hub'); g.flags.ya_mocked = true; g.james.satiety = 100;
+      const id = Wk.planCards(g, SCENES).map((c) => c.id).find((x) => x.startsWith('rr_forage')); Wk.planStep(g, id, 1);
+      const p = g.tasks.plan; p.ran = { [id]: 1 }; p.dayOf -= 1; // yesterday's count
+      const q = Wk.planHere(g); assert(q && !('ran' in q) && q.items[id] === 1, `${T} RV (TG3): a camp's new day starts its count again`); }
+    // CH-t + TL-t: the history, the night split, a rewind closes the Coil
+    assert(Co.nightMinutes(20 * 60, 30 * 60) === 540 && Co.nightMinutes(0, 2 * 1440) === 1080 && Co.nightMinutes(7 * 60, 20 * 60) === 0 && Co.nightMinutes(23 * 60, 23 * 60) === 0, `${T} (TL-t): the hours from 21:00 to 06:00`);
+    { const g = ensureBars(newGame(53001)); const m0 = g.minutes;
+      assert(!g.stats.hist && Co.histRows(g).length === 0, `${T} (CH-t): a new game has no history until the screen counts a tap`);
+      Co.tlNote(g, 'cards', m0, m0 + 90); assert(g.stats.hist && !g.stats.hist.part && g.stats.hist.k0 === (g.stats.kills || 0) && g.stats.hist.tl.join() === '90,0,0,0', `${T} (TL-t): a card's 90 minutes (${JSON.stringify(g.stats.hist)})`);
+      const d = Math.floor(m0 / 1440) * 1440; Co.tlNote(g, 'story', d + 20 * 60, d + 30 * 60); Co.tlNote(g, 'fights', d + 22 * 60, d + 23 * 60); Co.tlNote(g, 'bogus', 5, 4);
+      assert(g.stats.hist.tl.join() === '90,60,60,540', `${T} (TL-t): story with its night split off, a fight at night stays a fight (${g.stats.hist.tl.join()})`);
+      g.stats.kills = (g.stats.kills || 0) + 3; g.minutes += 2 * 1440;
+      const now = Co.histNow(g); assert(now.n === 1 && now.k === 3 && now.d >= 2 && now.tl.join() === '90,60,60,540' && now.why === null, `${T} (CH-t): the Coil now (${JSON.stringify(now)})`);
+      endCoil(g, 'collapse'); rewind(g);
+      const h = g.stats.hist; assert(h.list.length === 1 && h.list[0].n === 1 && h.list[0].why === 'collapse' && h.list[0].k === 3 && h.list[0].tl.join() === '90,60,60,540' && h.tl.join() === '0,0,0,0' && h.k0 === g.stats.kills && !h.part, `${T} (CH-t): a rewind puts the Coil on the list, the next one counts from 0 (${JSON.stringify(h)})`);
+      const rows = Co.histRows(g); assert(rows.length === 2 && rows[0].now && rows[0].n === 2 && rows[1].n === 1, `${T} (CH-t): the Journal's rows, the Coil now first`);
+      assert(!g.coil.snap?.stats?.hist, `${T} (CH-t): the act's snapshot carries no history`);
+      for (let i = 0; i < 35; i++) { Co.tlNote(g, 'cards', g.minutes, g.minutes + 10); endCoil(g, 'choice'); rewind(g); }
+      assert(g.stats.hist.list.length === Co.HIST_MAX && g.stats.hist.list.at(-1).n === g.coil.n - 1 && JSON.stringify(g.stats.hist).length < 3200, `${T} (CH-t): the last ${Co.HIST_MAX} kept, about 3 KB at most (${JSON.stringify(g.stats.hist).length} bytes)`);
+      const back = deserialize(serialize(g)); assert(JSON.stringify(back.stats.hist) === JSON.stringify(g.stats.hist), `${T} (CH-t): the history round-trips a save`); }
+    { const g = ensureBars(newGame(53002)); g.minutes += 600; Co.tlNote(g, 'cards', g.minutes, g.minutes + 30);
+      assert(g.stats.hist.part === 1 && g.stats.hist.k0 === null && Co.histNow(g).tl === null && Co.histNow(g).k === null, `${T} (CH-t): begun partway through a Coil: its time and kills unknown`);
+      endCoil(g, 'beast'); rewind(g); assert(g.stats.hist.list[0].tl === null && !g.stats.hist.part && g.stats.hist.tl.join() === '0,0,0,0', `${T} (CH-t): the next Coil counts in full`); }
+    { const g = ensureBars(newGame(53005)); const m0 = g.minutes; Co.tlNote(g, 'cards', m0, m0 + 60); g.minutes = m0 + 6 * 1440; Gm.startActCoil(g); g.minutes += 2 * 1440; // RV-A (L2-s): a Coil that crosses into Act 1
+      assert(!g.coil.snap?.stats?.hist && !!g.stats.hist, `${T} (CH-t, F9): Act 1's new snapshot, taken with a history on, carries none`);
+      assert(g.stats.hist.m0 === m0 && Co.histNow(g).d === 8, `${T} RV-A (L2-s): its days count from the Coil's start, not Act 1's (${Co.histNow(g).d})`);
+      endCoil(g, 'choice'); rewind(g); assert(g.stats.hist.list[0].d === 8 && g.stats.hist.m0 === g.minutes, `${T} RV-A (L2-s): the row keeps them; the next Coil starts at its own start`); }
+    { const g = ensureBars(newGame(53003)); endCoil(g, 'choice'); rewind(g); assert(!g.stats.hist, `${T} (CH-t): a game with no history (the bots') gets none from a rewind`); }
+    { const g = ensureBars(newGame(53004)); Gm.startActCoil(g); Co.tlNote(g, 'cards', g.minutes, g.minutes + 60); endCoil(g, 'choice'); rewind(g, { to: 'game' }); // RV (TG5): a whole-game rewind
+      const h = g.stats.hist; assert(h && h.list.length === 1 && h.list[0].act === 1 && h.list[0].tl[0] === 60 && (g.coil.act || 0) === 0 && h.tl.join() === '0,0,0,0', `${T} RV (TG5): a whole-game rewind lists the Act 1 Coil and starts the next at 0 (${JSON.stringify(h)})`); }
+    // the screen (main.js)
+    { const M = readFileSync(new URL('../js/main.js', import.meta.url), 'utf8');
+      assert(['data-bar="hp"', 'data-bar="qi"', 'data-bar="fed"'].every((x) => M.includes(x)) && M.includes("closest('button.card, button.choice, .status .bar[data-bar]')") && M.includes('barLines(g, b.dataset.bar)'), `${T} (SB-h): the bars carry their parts, on hold and as a title`);
+      assert(M.includes('const fn = famNext(card)'), `${T} (FE-t): the held card's next step`);
+      assert(M.includes("if (there && !askTwice(`save${n}`") && M.includes("if (g && !askTwice(`load${b.dataset.load}`") && M.includes('pendingFile = { next, there: descOf(serialize(next)) }') && M.includes('data-loadfile="1"'), `${T} (OS-a): a full slot, a slot's load and a file's load ask first`);
+      assert(M.includes('const saveFileName = () => fileStamp(new Date(), g?.coil?.n, knownVersion)') && M.includes('knownVersion = v;'), `${T} (FS-s): the file's name by the date, the Coil and the build`);
+      assert(M.includes("document.addEventListener('keydown'") && M.includes('hotkeyOf(ev, typing)') && M.includes('HOTKEYS.map((h)') && M.includes('CREDITS.map((c)'), `${T} (HK-t, CR-p): the keys and the credits`);
+      assert(M.includes('try { tlCount(); }') && M.includes('${coilsHtml()}') && M.includes("tlNote(g, tlKind || 'story', tlMark.m, g.minutes)"), `${T} (CH-t, TL-t): each tap counted at the save, the Journal's table`);
+      assert(M.includes("if (g) tlMark = { g, n: g.coil?.n, m: g.minutes };") && M.includes("g = freshGame(); prevScene = g.scene; tlMark = {") && M.includes("try { tlCount(); tlKind = 'cards'; }"), `${T} RV (M1, M2): the first tap after a load counted; a plan's run counted as cards`);
+      assert(M.includes("if (g) { pendingFile = { next, there:") && M.includes("if (page !== 'saves') pendingFile = null;") && M.includes('const r = askStep(askArmed, k, Date.now())'), `${T} RV (TG2): a file asks only with a game on; leaving Saves forgets it; the second tap by askStep`); }
+    { const N = await import('../js/core/news.js'); const n = N.NOTES.find(([v]) => v === '0.11.285'); assert(!!n && /status bar/.test(n[1]) && /second tap/.test(n[1]) && /Coils/.test(n[1]) && /− then \+/.test(n[1]), `${T}: What's new says it`); }
 }
 if (!SHARD) console.log(`  the walks: the longest to its goal under a raised cap ${walkLongest} steps (caps ${JSON.stringify(WALK)})`); // the P23 review's TG5
 console.log(`\n${pass} passed, ${fail} failed`);

@@ -2,23 +2,24 @@
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
 import { runWeek, planCards, planHere, planEnsure, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, planView, doorCards, planRanks, planPrio, doorNote, cardNote, noteCardTap, noteCardDone, noteReadTap, planEmptyShown, planDoorsShown, spacedClosed, withSpaced, planHub, campHub, planShown, planStep } from './core/week.js'; // v0.11.284 (P52-A): planHub, campHub (BP-d), planShown, planStep (KR-k); // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
-import { flipFill, coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
+import { flipFill, coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN, barLines } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
     newGame, ensureBars, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, skillCheck, checkValue, xpToNext, clockLabel, clockLabelG, realmName, yukiForm, yukiHeldNote,
     startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, postureCount, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi, threatOf } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
-import { carriesHere, weekHub, cardSpeed, NEW_LENGTH, WEEK_MULT, deadMenuHub, showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, famLine, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
+import { carriesHere, weekHub, cardSpeed, NEW_LENGTH, WEEK_MULT, deadMenuHub, showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, famLine, famNext, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts, landReply, noteSaid } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1); v0.11.134 (LP2, QR; RQ1): landReply, noteSaid
 import { againView, skipPlan, skipRun, noteRead, noFold, noteLines } from './story/again.js'; // v0.11.35 (P1-a); v0.11.133 (FP2): noteRead, noFold
-import { coilActive, endCoil, targetsText, tabWhy, keptTabText } from './core/coil.js';
+import { coilActive, endCoil, targetsText, tabWhy, keptTabText, tlNote, histRows, TL_KINDS, TL_NAMES, WHY_SHORT } from './core/coil.js';
+import { CREDITS } from './core/credits.js'; // v0.11.285 (G3-A, CR-p)
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMeditate } from './core/meditate.js';
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
 import { meridianRow } from './story/meridians.js';
 import { APK_URL, UPDATE_KEY, CHECK_DELAY, UPDATE_TEXT, updPrefs, inApp, makeUpdater, goLabel, offerBrowser } from './core/update.js'; // v0.11.147 (UP1; RV1: makeUpdater; v0.11.187 U1: goLabel, offerBrowser)
-import { exportRoute, canSaveToFile, wantsServiceWorker, savedName, resultPlace, FILE_TEXT, tipBox, TIP_WIDE, saveParts, SAVE_PART_MAX, partName, PART_TEXT, WELCOME_KEY, welcomePrefs, welcomeDue, welcomeView, awayText, WELCOME_TEXT } from './core/app.js'; // v0.11.148 (EX1; RX1: savedName, resultPlace); v0.11.283 (P51-A: SV-p, WB-y)
+import { exportRoute, canSaveToFile, wantsServiceWorker, savedName, resultPlace, FILE_TEXT, tipBox, TIP_WIDE, saveParts, SAVE_PART_MAX, partName, PART_TEXT, WELCOME_KEY, welcomePrefs, welcomeDue, welcomeView, awayText, WELCOME_TEXT, fileStamp, ASK_TEXT, askStep, HOTKEYS, hotkeyOf } from './core/app.js'; // v0.11.148 (EX1; RX1: savedName, resultPlace); v0.11.283 (P51-A: SV-p, WB-y)
 import { SEEN_KEY, NOTES, newsSince, versionLabel, statusPlace, takeoverNotice, recheckDue, READY_TEXT } from './core/news.js'; // v0.11.150 (BL1)
 import { realmShockHpBonus } from './core/formulas.js';
 import { EDITIONS, EDITION_KEY, getEdition, setEdition } from './core/edition.js'; // v0.11.182 (CB1, DF1: ES)
@@ -237,6 +238,7 @@ function weekAfter() {
 function runPlan() {
     drawnKey = ''; // v0.11.210 (RV1, M1): a run is a new page of the week: the cards column starts at the top
     const day = !!planHere(g)?.day; // P52-A (BP-d): a camp's plan by the day
+    try { tlCount(); tlKind = 'cards'; } catch { /* the strip never stops a run */ } // RV (M2): the tap's own time first, then the plan's run as cards (also when it resumes after a story choice)
     const r = runWeek(g, SCENES);
     for (const d of r.days) addResult(`Day ${d.day}: ${day ? 'the day\'s plan' : 'the week\'s plan'}`, d.lines, false, { quiet: true });
     lastReply = [];
@@ -463,8 +465,17 @@ function backupBefore(label) {
     const m = bakMeta(); m.when.before = Date.now(); m.label = label; store.set(BAK_META, JSON.stringify(m));
 }
 
+/** v0.11.285 (owner pick G3-A, TL-t): each tap's minutes go to this Coil's time strip (coil.js tlNote), by the kind of the tap that moved
+ *  the clock (`tlKind`, set by the click: fights, cards (the plan's runs too), else story); counted at the save after it, in the same
+ *  game and Coil only (a load or a rewind starts again). */
+let tlMark = null, tlKind = null;
+function tlCount() {
+    if (tlMark && tlMark.g === g && tlMark.n === g.coil?.n && g.minutes > tlMark.m) tlNote(g, tlKind || 'story', tlMark.m, g.minutes);
+    tlMark = { g, n: g.coil?.n, m: g.minutes }; tlKind = null;
+}
 function autosave() {
     if (!g) return;
+    try { tlCount(); } catch { /* the strip never stops a save */ }
     delete g.runPart; // v0.11.64: no bars any more (game.js queueDrop empties an old save's)
     let s;
     try { s = serialize(g); } catch (err) { showError(err.message); return; } // never write a broken state
@@ -480,8 +491,9 @@ function load() {
     const raw = store.get(AUTO);
     lastWritten = raw;
     hadSave = !!raw;
-    if (!raw) { g = freshGame(); prevScene = g.scene; return; }
+    if (!raw) { g = freshGame(); prevScene = g.scene; tlMark = { g, n: g.coil?.n, m: g.minutes }; return; } // RV (M1): a new player's first tap counted, Coil 1 in full
     try { g = checkScene(deserialize(raw)); prevScene = g.scene; } catch (err) { g = null; recovery = { raw, err }; }
+    if (g) tlMark = { g, n: g.coil?.n, m: g.minutes }; // RV (M1): the first tap after a page load counts too (boot and Continue save nothing)
 }
 
 function download(text, name) {
@@ -505,7 +517,8 @@ function shareText(name, text) {
     if (exportRoute(AB, false) !== 'share') return false;
     AB.shareFile(name, text); return true;
 }
-const saveFileName = () => `bone-and-ash-${clockLabel(g.minutes).replace(/[^\w]+/g, '-')}.json`;
+let knownVersion = ''; // v0.11.285 (G3-A, FS-s): the build this page runs, once read (runningVersion), for the file names
+const saveFileName = () => fileStamp(new Date(), g?.coil?.n, knownVersion); // FS-s: the real date and time, the Coil and the build (was the game clock only)
 const stamp = () => new Date().toISOString().slice(0, 16).replace(/[^\d]/g, '');
 
 function backupList() {
@@ -590,6 +603,15 @@ function allSaves() {
 }
 function exportAll(toFile = false) { autosave(); expMark(); return exportText(`bone-and-ash-all-saves-${stamp()}.json`, JSON.stringify(allSaves()), toFile); }
 let pendingAll = null; // an all-saves file waiting for its confirm tap
+let pendingFile = null; // v0.11.285 (G3-A, OS-a): a save file waiting for its confirm tap ({ next, there })
+let askArmed = { k: '', at: 0 }; // OS-a: the second tap before an overwrite or a load (as New game's)
+/** OS-a: true on the second tap of the same button within ASK_MS; the first tap shows `msg` and returns false. */
+function askTwice(k, msg) {
+    const r = askStep(askArmed, k, Date.now()); askArmed = r.armed; // RV (TG2): the decision in app.js, tested there
+    if (!r.go) note(msg);
+    return r.go;
+}
+const hereDesc = () => { try { return g ? descOf(serialize(g)) : ''; } catch { return 'this game'; } };
 function readAll(text) {
     let o; try { o = JSON.parse(text); } catch { return null; }
     if (!o || o.boneashAllSaves !== 1 || typeof o.auto !== 'string') return null;
@@ -747,9 +769,9 @@ function welcomeHtml() {
 }
 function statusHtml() {
     return `<div class="status">
-<div class="bar hp"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP${pbar(g.james.hp, jamesHpMax(g), 'HP')}</div>
-<div class="bar qi"><b>${n1(g.james.qi)} / ${n1(jamesQiMax(g))}</b>Convergence${pbar(g.james.qi, jamesQiMax(g), 'Convergence')}</div>
-<div class="bar food"><b>${Math.round(g.james.satiety)}</b>Fed${pbar(g.james.satiety, 100, 'Fed')}</div>
+<div class="bar hp" data-bar="hp" title="${esc(barLines(g, 'hp').join(' '))}"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP${pbar(g.james.hp, jamesHpMax(g), 'HP')}</div>
+<div class="bar qi" data-bar="qi" title="${esc(barLines(g, 'qi').join(' '))}"><b>${n1(g.james.qi)} / ${n1(jamesQiMax(g))}</b>Convergence${pbar(g.james.qi, jamesQiMax(g), 'Convergence')}</div>
+<div class="bar food" data-bar="fed" title="${esc(barLines(g, 'fed').join(' '))}"><b>${Math.round(g.james.satiety)}</b>Fed${pbar(g.james.satiety, 100, 'Fed')}</div>
 <div class="clock"><span class="clk">${clockLabelG(g)}</span></div></div>`;
 }
 
@@ -809,9 +831,26 @@ function renderBag() {
 ${items.map(([id, n]) => `<div class="row"><span>${esc(ITEMS[id]?.name || id)}</span><span>× ${n}${n >= itemCap(id) ? ' · full' : ''}</span><span class="sub">${esc(ITEMS[id]?.note || '')}</span></div>`).join('') || '<p class="note">Go and find something. Preferably edible.</p>'}
 </section>`;
 }
+/** v0.11.285 (owner pick G3-A, CH-t + TL-t): the Coils so far, newest first: how each ended, its days, realm and kills, and a strip of
+ *  its hours by kind (coil.js histRows). Nothing until the history has begun (the first tap after this version). */
+const hrs1 = (m) => `${Math.round(m / 6) / 10} h`;
+function tlStrip(tl) {
+    if (!tl) return '<span class="note">from before the history</span>';
+    const all = tl.reduce((a, b) => a + b, 0);
+    if (!all) return '';
+    const said = TL_KINDS.map((k, i) => `${TL_NAMES[k]} ${hrs1(tl[i])}`).join(', ');
+    return `<span class="tl" role="img" aria-label="${esc(said)}" title="${esc(said)}">${TL_KINDS.map((k, i) => (tl[i] ? `<i class="tl-${k}" style="width:${(100 * tl[i]) / all}%"></i>` : '')).join('')}</span>`;
+}
+function coilsHtml() {
+    const rows = histRows(g);
+    if (!rows.length) return '';
+    const row = (r) => `<tr><td>${r.act === 1 ? 'Act 1, ' : ''}Coil ${r.n}${r.now ? ' (now)' : ''}</td><td>${esc(r.now ? (r.why ? WHY_SHORT[r.why] || '' : 'going on') : WHY_SHORT[r.why] || '')}</td><td>${r.d}</td><td>${esc(realmName(r.r))}</td><td>${r.k == null ? '—' : r.k}</td><td>${tlStrip(r.tl)}</td></tr>`;
+    const key = TL_KINDS.map((k) => `<span><i class="tl-${k}"></i>${esc(TL_NAMES[k])}</span>`).join('');
+    return `<details class="coils"><summary>The Coils (${rows.length})</summary><table><thead><tr><th>Coil</th><th>Ended</th><th>Days</th><th>Realm</th><th>Kills</th><th>Time</th></tr></thead><tbody>${rows.map(row).join('')}</tbody></table><p class="tl-key">${key}</p></details>`;
+}
 function renderJournal() {
     const entries = g.log.slice().reverse().slice(0, 60).map((e) => `<div class="entry"><time>${clockLabel(e.at)}</time>${esc(sceneTitle(e.scene))}${shownLines(e.lines).length ? `<div class="note">${shownLines(e.lines).map((l) => dieHtml(l)).join('<br>')}</div>` : ''}</div>`).join('');
-    view.innerHTML = `<section class="page"><h1>Journal</h1><p class="lede">${showChecks ? `${g.stats.checks} checks made, ${g.stats.wins} passed · ` : ''}${g.stats.kills} things that wanted to eat you, didn't · ${g.stats.meals} meals.</p>${entries || '<p class="note">Nothing yet. Give it a minute.</p>'}</section>`;
+    view.innerHTML = `<section class="page"><h1>Journal</h1><p class="lede">${showChecks ? `${g.stats.checks} checks made, ${g.stats.wins} passed · ` : ''}${g.stats.kills} things that wanted to eat you, didn't · ${g.stats.meals} meals.</p>${coilsHtml()}${entries || '<p class="note">Nothing yet. Give it a minute.</p>'}</section>`;
 }
 function renderSaves() {
     const bak = backupList();
@@ -828,6 +867,7 @@ ${slot(1)}${slot(2)}${slot(3)}
 ${bak.length ? bak.map((b) => `<div class="row"><span>${esc(b.name)}</span><span class="note">${esc(descOf(b.raw))}${b.when ? ` · saved ${esc(new Date(b.when).toLocaleString())}` : ''}</span><div class="btns sub"><button class="btn" data-bak="${b.k}">Restore</button></div></div>`).join('') : '<p class="note">No backups yet.</p>'}
 <h2>Move a save to another device</h2>
 <div class="btns"><button class="btn" data-export="1">Download save file</button>${canSaveToFile(window.AndroidBridge) ? '<button class="btn" data-exportfile="1">Save to a file</button>' : ''}<label class="btn">Load save file<input type="file" accept="application/json,.json,text/plain,.txt" data-import="1" hidden></label></div>
+${pendingFile ? `<p class="note">${esc(ASK_TEXT.file(pendingFile.there, hereDesc()))}</p><div class="btns"><button class="btn primary" data-loadfile="1">${esc(ASK_TEXT.fileBtn)}</button><button class="btn" data-loadfile="">${esc(ASK_TEXT.cancel)}</button></div>` : ''}
 <div class="btns"><button class="btn" data-share="1">${esc(shareLabelText())}</button><button class="btn" data-status="1">Copy status as text</button></div>
 <p class="note">Share to GitHub opens GitHub's page for a new file in the game's saves folder with this save filled in; sign in and tap "Commit changes". ${PART_TEXT.note} Copy status is for bug reports.</p>
 <h2>All saves</h2>
@@ -855,6 +895,10 @@ function renderSettings() {
 <h2>Saving</h2>
 <div class="btns"><button class="btn${expState().off ? '' : ' primary'}" data-expremind="1">Remind me to download: ${expState().off ? 'off' : 'on'}</button></div>
 ${updatePanel()}
+<h2>Keys (on a PC)</h2>
+<p class="note">${HOTKEYS.map((h) => `<b>${esc(h.show)}</b> ${esc(h.does)}`).join(' · ')}.</p>
+<h2>Credits</h2>
+<details class="credits"><summary>Who and what the game is made with</summary>${CREDITS.map((c) => `<h3>${esc(c.head)}</h3>${c.lines.map((l) => `<p class="note">${md(l)}</p>`).join('')}`).join('')}</details>
 <h2>What's new</h2>
 <details class="wnew-all" data-wnew="1"${wnewOpen ? ' open' : ''}><summary>Every change a player sees, newest first (${NOTES.length})</summary>${notesHtml([...NOTES].reverse())}</details>
 <div class="btns"><button class="btn" data-menu="main">Back</button></div>
@@ -878,7 +922,7 @@ ${newsBox()}<div class="mbtns">${cont}${hadSave && !recovery ? '<button class="b
 }
 function openMenu(page = 'main') {
     if (!menu && g && !recovery) autosave();
-    menu = page; pendingAll = page === 'saves' ? pendingAll : null;
+    menu = page; pendingAll = page === 'saves' ? pendingAll : null; if (page !== 'saves') pendingFile = null; // G3-A (OS-a)
     render(); window.scrollTo({ top: 0 });
 }
 
@@ -910,6 +954,7 @@ const plain = (t) => String(t || '').replace(/\*\*?/g, '');
 const itemNames = (c) => [...new Set(gives(c).map((id) => ITEMS[id]?.name || id))];
 /** What a held card tells: what it can give, time, Qi, familiarity, why it's shut. No checks unless Show checks is on. */
 function tipFor(b) {
+    if (b.dataset.bar) { const t = { hp: 'HP', qi: 'Convergence', fed: 'Fed' }[b.dataset.bar]; return `<div class="tiphead"><b>${esc(t)}</b><button class="btn" data-tip="close" aria-label="Close">✕</button></div>${barLines(g, b.dataset.bar).map((l) => `<p>${esc(l)}</p>`).join('')}`; } // G3-A (SB-h)
     const lines = [];
     const lb = b.cloneNode(true); lb.querySelectorAll('.tag, .len, .n, .dies').forEach((e) => e.remove()); // v0.11.64: not "Starves here" in the title
     const label = plain(lb.textContent).trim();
@@ -961,6 +1006,7 @@ function tipFor(b) {
     if (mins) lines.push(`Takes ${durLabel(mins)}, at once.`); // v0.11.64: every card at once
     { const id0 = b.dataset.run || b.dataset.med || ''; const k = medActivity(id0) || (/^(.+):(\d+)$/.test(id0) && isSitChoice(SCENES[id0.split(':')[0]]?.choices?.[Number(id0.split(':')[1])], id0.split(':')[0]) ? 'sit' : null); if (k) lines.push(useLine(g, k)); } // v0.11.15: speed by use
     if (card && (card.kind === 'work' || card.kind === 'door')) lines.push(`Familiarity: ${FAM[card.tier].name}${card.next != null ? `, ${card.fam} of ${card.next} to ${FAM[card.tier + 1].name}` : ' (the top)'}.${card.kind === 'work' ? ' Familiar work goes faster.' : ''}`); // v0.11.140 (RV1, DS): a door card too (its walk speeds up), no new words
+    { const fn = famNext(card); if (fn) lines.push(`At ${fn.name} (${fn.at}): ×${Math.round(fn.speed * 10) / 10} speed; one run ${durLabel(fn.now)} → ${durLabel(fn.then)}.`); } // G3-A (FE-t): a work card's next step
     if (card && card.status === 'late') lines.push('It would end past midnight, when the day is over. Sleep.');
     else if (card && card.status !== 'open') { const sp = card.status === 'tomorrow' && weekHub(g) ? spacedClosed(g, SCENES).find((x) => x.id === card.id) : null; lines.push(sp ? `Not now: ${sp.note}.` : 'Done for today. Back tomorrow.'); } // v0.11.225 (RV1, L1): a spaced card says its day, as its tag
     if (b.disabled && !card) { const tag = b.querySelector('.tag')?.textContent; lines.push(tag ? `Not now: ${tag}.` : 'Not now.'); }
@@ -972,7 +1018,7 @@ let holdTimer = null, holdStart = null, swallowUntil = 0, swallowBtn = null;
 const HOLD_MS = 500;
 function cancelHold() { if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; } }
 view.addEventListener('pointerdown', (ev) => {
-    const b = ev.target.closest('button.card, button.choice');
+    const b = ev.target.closest('button.card, button.choice, .status .bar[data-bar]'); // G3-A (SB-h): a status bar too
     if (!b || menu || !g) return;
     cancelHold();
     holdStart = { x: ev.clientX, y: ev.clientY };
@@ -983,10 +1029,22 @@ view.addEventListener('pointerdown', (ev) => {
 });
 view.addEventListener('pointermove', (ev) => { if (holdStart && Math.hypot(ev.clientX - holdStart.x, ev.clientY - holdStart.y) > 10) cancelHold(); });
 ['pointerup', 'pointercancel', 'pointerleave'].forEach((t) => view.addEventListener(t, cancelHold));
-view.addEventListener('contextmenu', (ev) => { if (ev.target.closest('button.card, button.choice')) ev.preventDefault(); });
+view.addEventListener('contextmenu', (ev) => { if (ev.target.closest('button.card, button.choice, .status .bar[data-bar]')) ev.preventDefault(); });
 // the tap that ends a hold must not run the card
 document.addEventListener('click', (ev) => { if (Date.now() < swallowUntil && swallowBtn && ev.target.closest('button') === swallowBtn) { swallowUntil = 0; swallowBtn = null; ev.stopPropagation(); ev.preventDefault(); } }, true);
 tipEl.addEventListener('click', (ev) => { if (ev.target.closest('[data-tip]')) tipEl.hidden = true; });
+// v0.11.285 (owner pick G3-A, HK-t): the keys, from one table (app.js HOTKEYS): 1–9 the open cards or choices in order, Esc, the tabs
+document.addEventListener('keydown', (ev) => {
+    const typing = !!ev.target?.closest?.('input, select, textarea, [contenteditable="true"]');
+    const k = hotkeyOf(ev, typing);
+    if (!k) return;
+    if (k.esc) { if (!tipEl.hidden) tipEl.hidden = true; else if (menu && menu !== 'main') openMenu('main'); else return; ev.preventDefault(); return; }
+    if (menu || !g || recovery) return; // in the game only
+    if (k.tab) { ev.preventDefault(); setTab(k.tab); return; }
+    const open = [...view.querySelectorAll('button.card:not([disabled]), button.choice:not([disabled])')].filter((b) => b.offsetParent !== null && !b.closest('.tag'));
+    const b = open[k.card];
+    if (b) { ev.preventDefault(); b.click(); }
+});
 view.addEventListener('toggle', (ev) => {
     const d = ev.target;
     if (d.matches?.('[data-wnew]') && d.isConnected) wnewOpen = d.open; // v0.11.150 (RW1, KO)
@@ -1095,6 +1153,7 @@ view.addEventListener('click', (ev) => {
     const b = ev.target.closest('button');
     if (!b) return;
     if (recovery && !menu) { onRecovery(b); return; }
+    if (g && !menu) tlKind = b.dataset.act || b.dataset.flee || b.dataset.yield ? 'fights' : b.dataset.run || b.dataset.med || b.dataset.week ? 'cards' : b.dataset.story != null ? 'story' : tlKind; // G3-A (TL-t)
     if (b.dataset.act || b.dataset.flee || b.dataset.yield || b.dataset.run || b.dataset.med || b.dataset.week) { // v0.11.64: cards act at once, so they get the double-tap guard too
         const now = Date.now();
         if (now - lastPress < 400) return; // double-tap guard: a fast second tap must not take the next scene's choice
@@ -1131,6 +1190,13 @@ view.addEventListener('click', (ev) => {
             return;
         }
         if (b.dataset.exportall || b.dataset.exportallfile) { const how = exportAll(!!b.dataset.exportallfile); note(how === 'download' ? FILE_TEXT.allDownloaded : how === 'share' ? FILE_TEXT.share : ''); return; } // EX1: the file picker answers through onAndroidExport
+        if (b.dataset.loadfile != null) { // G3-A (OS-a): the file's line seen, then Load it or Cancel
+            const p = pendingFile; pendingFile = null;
+            if (!b.dataset.loadfile || !p) { render(); return; }
+            backupBefore('loading a save file');
+            g = p.next; autosave(); lastResult = null; lastReply = []; combatLog = null; setTab('story');
+            return;
+        }
         if (b.dataset.restoreall != null) {
             const p = pendingAll; pendingAll = null;
             if (!b.dataset.restoreall || !p) { render(); return; }
@@ -1211,10 +1277,13 @@ view.addEventListener('click', (ev) => {
         } else if (b.dataset.tabGo) {
             setTab(b.dataset.tabGo);
         } else if (b.dataset.save) {
-            writeKey(SLOT(b.dataset.save), serialize(g)); render(); note('Saved.');
+            const n = b.dataset.save, there = store.get(SLOT(n)); // G3-A (OS-a): a full slot asks for a second tap, naming both games
+            if (there && !askTwice(`save${n}`, ASK_TEXT.save(n, descOf(there), hereDesc()))) return;
+            writeKey(SLOT(n), serialize(g)); render(); note('Saved.');
         } else if (b.dataset.load) {
             let next;
             try { next = checkScene(deserialize(store.get(SLOT(b.dataset.load)))); } catch (err) { note(`Slot ${b.dataset.load} can't be loaded: ${err.message}`); return; }
+            if (g && !askTwice(`load${b.dataset.load}`, ASK_TEXT.load(b.dataset.load, descOf(store.get(SLOT(b.dataset.load))), hereDesc()))) return; // G3-A (OS-a)
             backupBefore(`loading slot ${b.dataset.load}`);
             g = next; lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.export || b.dataset.exportfile) {
@@ -1244,6 +1313,7 @@ view.addEventListener('change', async (ev) => {
         const all = readAll(text); // v0.11.9: an all-saves file asks first
         if (all) { pendingAll = all; render(); return; }
         next = checkScene(deserialize(text));
+        if (g) { pendingFile = { next, there: descOf(serialize(next)) }; render(); return; } // G3-A (OS-a): with a game on, the file's line first
     } catch (err) { inp.value = ''; note(`That file can't be loaded: ${err.message}`); return; }
     backupBefore('loading a save file');
     g = next; autosave(); lastResult = null; lastReply = []; setTab('story');
@@ -1320,6 +1390,7 @@ render();
 // v0.11.150 (BL1, WN): What's new since the version this phone last opened; kept as seen at once (Selene's), shown until ✕
 const hadSaveAtLoad = hadSave; // RW1 (HS): Begin sets hadSave; a new player stays a new player
 runningVersion().then((v) => {
+    knownVersion = v; // G3-A (FS-s)
     const r = newsSince(store.get(SEEN_KEY), v, hadSaveAtLoad);
     if (r.record) store.set(SEEN_KEY, r.record);
     news = r.list;

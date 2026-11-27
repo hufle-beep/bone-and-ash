@@ -67,6 +67,25 @@ function suite(A) {
         t(JSON.stringify(A.tipBox({ left: 100, top: 100, bottom: 800 }, 300, 400, 1600, 900)) === '{"left":100,"top":492}', 'A (L7-f): no room above or under: at the window\'s bottom');
         t(A.tipBox({ left: 100, top: 590, bottom: 590 }, 300, 300, 1600, 900).top === 282, 'A (L7-f): under the card only with its gap to the window\'s edge kept');
     } else t(false, 'A (L7-f): tipBox is there');
+    // v0.11.285 (owner pick G3-A): FS-s the file names, OS-a the second tap's lines, HK-t the keys
+    if (typeof A.fileStamp === 'function') {
+        const d = new Date(2026, 10, 27, 1, 58);
+        t(A.fileStamp(d, 8, '0.11.285') === 'bone-and-ash-2026-11-27-0158-coil8-0.11.285.json', 'A (FS-s): the date and time, the Coil, the build');
+        t(A.fileStamp(new Date(2026, 0, 5, 9, 7), 0, '?') === 'bone-and-ash-2026-01-05-0907.json' && A.fileStamp(d, undefined, '') === 'bone-and-ash-2026-11-27-0158.json' && A.fileStamp(d, 3, 'x/y') === 'bone-and-ash-2026-11-27-0158-coil3.json', 'A (FS-s): an unknown Coil or build left out');
+    } else t(false, 'A (FS-s): fileStamp is there');
+    if (A.ASK_TEXT) {
+        t(A.ASK_MS === 4000 && /^Slot 2 holds A\. Tap Save here again .*\(B\); the game in the slot is lost\.$/.test(A.ASK_TEXT.save(2, 'A', 'B')), 'A (OS-a): the overwrite names both games and the loss');
+        t(/^Tap Load again: slot 1 \(A\) takes the place of this game \(B\), which is kept as the "before" backup\.$/.test(A.ASK_TEXT.load(1, 'A', 'B')) && /^This file holds a game at A\. Loading it takes the place of this game \(B\)/.test(A.ASK_TEXT.file('A', 'B')), 'A (OS-a): a load names both games and the backup');
+        const a1 = A.askStep(null, 'save2', 1000), a2 = A.askStep(a1.armed, 'save2', 4999), a3 = A.askStep(a1.armed, 'save2', 5000), a4 = A.askStep(a1.armed, 'load2', 2000);
+        t(!a1.go && a2.go && !a3.go && !a4.go && a2.armed.k === '' && a4.armed.k === 'load2' && a3.armed.at === 5000, 'A (OS-a, RV TG2): the second tap of the same button within 4 s goes; another button or later arms again');
+    } else t(false, 'A (OS-a): ASK_TEXT is there');
+    if (typeof A.hotkeyOf === 'function') {
+        const k = (key, o = {}) => A.hotkeyOf({ key, ...o });
+        t(JSON.stringify(k('1')) === '{"card":0}' && JSON.stringify(k('9')) === '{"card":8}' && k('0') === null, 'A (HK-t): 1–9 the cards in order, 0 nothing');
+        t(k('Escape').esc === true && k('s').tab === 'story' && k('C').tab === 'sheet' && k('h').tab === 'bag' && k('j').tab === 'journal' && k('f').tab === 'faq' && k('m').tab === 'menu' && k('x') === null, 'A (HK-t): Esc and the tabs');
+        t(k('1', { ctrlKey: true }) === null && k('s', { metaKey: true }) === null && k('2', { altKey: true }) === null && A.hotkeyOf({ key: '1' }, true) === null && A.hotkeyOf(null) === null && k('1', { repeat: true }) === null && k('Escape', { repeat: true }) === null, 'A (HK-t, RV-A H1-r): nothing with a modifier, in a field, or from a held key\'s repeats');
+        t(A.HOTKEYS.length === 8 && A.HOTKEYS.every((h) => h.show && h.does) && new Set(A.HOTKEYS.map((h) => h.key)).size === 8, 'A (HK-t): one table, each key once, each with its words');
+    } else t(false, 'A (HK-t): hotkeyOf is there');
     return bad;
 }
 {
@@ -178,6 +197,14 @@ assert(/'js\/core\/app\.js'/.test(read('sw.js')), 'D: sw.js lists js/core/app.js
         ['SV-p: no split at all', 'if (s.length <= max) return [s];', 'return [s];'], // v0.11.283 (P51-A)
         ['SV-p: parts overlap', 'out.push(s.slice(i, i + max));', 'out.push(s.slice(i, i + max + 1));'],
         ['WB-y: due an hour early', 'now - p.seen >= WELCOME_AFTER', 'now - p.seen >= WELCOME_AFTER - 3600e3'],
+        ['FS-s: no Coil in the name', "${Number(coil) > 0 ? `-coil${Number(coil)}` : ''}", ''], // v0.11.285 (G3-A)
+        ['FS-s: the month from 0', 'p(d.getMonth() + 1)', 'p(d.getMonth())'],
+        ['OS-a: the second tap any time', 'export const ASK_MS = 4000;', 'export const ASK_MS = 4e9;'],
+        ['OS-a: any button confirms', 'if (armed && armed.k === k && now - armed.at < ASK_MS)', 'if (armed && now - armed.at < ASK_MS)'], // RV (TG2)
+        ['OS-a: the first tap goes', "return { go: false, armed: { k, at: now } };", "return { go: true, armed: { k, at: now } };"],
+        ['HK-t: keys with Ctrl too', ' || ev.ctrlKey || ev.altKey || ev.metaKey', ''],
+        ['H1-r: a held key repeats', ' || ev.repeat', ''], // RV-A
+        ['HK-t: 1 is the second card', "return { card: Number(k) - 1 };", "return { card: Number(k) };"],
         ['WB-y: the switch ignored', 'export const welcomeDue = (p, now) => !!p?.on && ', 'export const welcomeDue = (p, now) => '],
         ['WB-y: the first entry, not the last', 'g.log[g.log.length - 1]', 'g.log[0]'],
         ['L7-f: never above the card', 'below + h <= vh - gap ? below : above >= gap ? above :', 'below + h <= vh - gap ? below :'],

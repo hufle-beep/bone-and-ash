@@ -1,0 +1,86 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/game.js",
+  "find": "realm: Math.max(0, hpMax - 20 - body)",
+  "replace": "realm: Math.max(0, hpMax - 20)",
+  "note": "SB-h: HP's realm part counts the body twice"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/game.js",
+  "find": "raw: 20 + cu + prim + rb",
+  "replace": "raw: 20 + cu + rb",
+  "note": "SB-h: Convergence's sum leaves out the primaries"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/tasks.js",
+  "find": "then: Math.round(base / speed) };",
+  "replace": "then: Math.round(base / cardSpeed(card.fam || 0)) };",
+  "note": "FE-t: the run at the next step timed at today's speed"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/week.js",
+  "find": "const wv = ran != null ? clampN(kv - ran, 9) :",
+  "replace": "const wv = false ? clampN(kv - ran, 9) :",
+  "note": "L4-r: the runs made ignored (the P52 L4 back)"
+ },
+ {
+  "id": "F5",
+  "file": "js/core/week.js",
+  "find": "                noteRan(g, p, k, 1); p.items[k] -= 1;",
+  "replace": "                p.items[k] -= 1;",
+  "note": "L4-r: the plan's runs not counted"
+ },
+ {
+  "id": "F6",
+  "file": "js/core/coil.js",
+  "find": "const night = i === 2 ? 0 : nightMinutes(m0, m1);",
+  "replace": "const night = 0;",
+  "note": "TL-t: no nights"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/coil.js",
+  "find": "    histClose(g, base); // v0.11.285",
+  "replace": "    // v0.11.285",
+  "note": "CH-t: a rewind loses the ending Coil"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/coil.js",
+  "find": "const list = [...g.stats.hist.list, row].slice(-HIST_MAX);",
+  "replace": "const list = [...g.stats.hist.list, row];",
+  "note": "CH-t: the list grows without a cap"
+ },
+ {
+  "id": "F9",
+  "file": "js/core/game.js",
+  "find": "    if (s.stats?.hist) delete s.stats.hist;",
+  "replace": "",
+  "note": "CH-t: the act's snapshot carries the history"
+ },
+ {
+  "id": "F10",
+  "file": "js/main.js",
+  "find": "if (there && !askTwice(`save${n}`",
+  "replace": "if (false && !askTwice(`save${n}`",
+  "note": "OS-a: Save here overwrites a full slot at once"
+ },
+ {
+  "id": "F14",
+  "file": "js/core/coil.js",
+  "find": "(Number.isFinite(h.m0) ? h.m0 : snapMin(g))",
+  "replace": "snapMin(g)",
+  "note": "L2-s: a Coil's days from the act's snapshot again"
+ },
+ {
+  "id": "F15",
+  "file": "js/core/game.js",
+  "find": "p.fed.hours < 1 ?",
+  "replace": "p.fed.hours < 0 ?",
+  "note": "L3-w: Fed under 3 reads about 0 h"
+ }
+]
