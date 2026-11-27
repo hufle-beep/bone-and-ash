@@ -17,7 +17,7 @@
 import { storyDay, storyDayOf, calEnd, weekNights, LONG_CAL, STAY_DAYS, NUM_WORDS, clockDay } from './calendar.js'; // v0.11.264 (P32-A, L3c): clockDay // v0.11.224 (RV1, VK): NUM_WORDS
 import { sceneView, choose, seenBefore } from './story.js'; // v0.11.248 (P18-A, NS-b): seenBefore
 import { advance, jamesHpMax, canBreakThrough, clockParts, clockLabel, fnv1a, takeSpoilNotes, wakeDay, NIGHT_TO } from './game.js';
-import { famOf, taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, carryHere, carriesHere, carriesRead, carryTaskId, isCarryTask, weekHub, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
+import { famOf, taskCards, taskOpen, runTask, taskState, taskOutcome, isTaskChoice, sitTaskId, QI_TASK, carryHere, carriesHere, carriesRead, carryTaskId, isCarryTask, weekHub, CAMP_HUBS, CAMP_RUN, workDay, workRoom, dayMeal, cardSpeed, NEW_LENGTH, WEEK_MULT } from './tasks.js';
 import { farewellNow } from '../story/act1_fallout.js'; // RV1 (L4)
 import { foodCount, preservable, unspaced, spacedNext, SPACE_DAYS, cardSpaced, cardKey } from '../story/common.js'; // v0.11.213 (FQ1, S3): the spacing
 import { EVENING_HOUR } from '../story/oneoff.js';
@@ -47,9 +47,14 @@ export const DOOR_START = { yk_time: 1 };
  *  ST the one-off doors (the village's, the Fallout's, the Heart's), the two talks last (RV1, M2). `REPEAT` the ones that come back
  *  (every SPACE_DAYS-th day on a stay, common.js S3), the rest once (a row taken is set back to 0). Each with the daily key its card
  *  is spaced by (`spacedNext`); `heart_spring` by the calendar day. */
-export const PLAN_DOORS = [...DAILY_DOORS.slice(0, 3), 'wen_lesson', 'far_hunt', 'herb_slopes', 'heal', 'village_hunt', 'scout', 'pot_cook', 'fo_mother', 'fo_spy', 'fo_pot_cook', 'hall_listen', 'ring_chambers', 'heart_spring', ...DAILY_DOORS.slice(3)]; // the owner 16:42: the communal pot's cooking too (once a Coil; every 3rd day since v0.11.218, CK1)
+export const PLAN_DOORS = [...DAILY_DOORS.slice(0, 3), 'wen_lesson', 'far_hunt', 'herb_slopes', 'heal', 'village_hunt', 'scout', 'pot_cook', 'fo_mother', 'fo_spy', 'fo_pot_cook', 'hall_listen', 'ring_chambers', 'heart_spring', ...DAILY_DOORS.slice(3), 'rr_hunt', 'dw_hunt', 'ah_hunt', 'talk_mei', 'talk_ya']; // the owner 16:42: the communal pot's cooking too (once a Coil; every 3rd day since v0.11.218, CK1)
 export const DOOR_KEY = { yk_time: 'yk_time', wen_time: 'wen_time', mother_time: 'mother_time', wen_lesson: 'wen', far_hunt: 'far', herb_slopes: 'slopes', heart_spring: 'spring', fo_mei: 'a1_mei', fo_ya_time: 'a1_ya', pot_cook: 'cook', fo_pot_cook: 'a1_cook' }; // v0.11.218 (owner pick CK1, RF3): the cook with the women repeats
 export const doorRepeats = (s) => s in DOOR_KEY;
+/** v0.11.284 (owner pick P52-A, BP-d): the camps' doors on their day's plan, once a day each (the hunts, the two talks); never set back
+ *  to 0 when taken (a camp's plan is by the day), never spaced. */
+export const CAMP_DOORS = ['rr_hunt', 'dw_hunt', 'ah_hunt', 'talk_mei', 'talk_ya'];
+/** A door whose row stays set when taken: a repeating one, or a camp's. */
+export const doorDaily = (s) => doorRepeats(s) || CAMP_DOORS.includes(s);
 COOK_PLAN.row = (g, s) => { const p = planHere(g); /* v0.11.219 (RV1, HB): only a plan made this week holds the pot (v0.11.218's HA), never the kept row */ return !!p && isRec(p.doors) && (Number(p.doors[s]) || 0) > 0; }; // v0.11.218 (RV1, HA)
 /** v0.11.213 (VQ1, RS): "Rest an hour" on each stay hub, by the day (a count, as the sits). */
 export const REST_LABEL = /^Rest\b/;
@@ -293,9 +298,14 @@ export function foldNight(g, scenes, max = 12) {
 
 /** The cards the planner can count here: the week's cards (tasks.js S1) open, busy or over for today. */
 export function planCards(g, scenes) {
+    if (campHub(g)) return taskCards(g, scenes).filter((c) => c.day); // P52-A (BP-d): a camp's work cards, by the day
     if (!weekHub(g)) return [];
     return taskCards(g, scenes).filter((c) => c.week);
 }
+/** v0.11.284 (owner pick P52-A, BP-d, 2026-11-26 23:40): one of the Blackroot's three camps (tasks.js CAMP_HUBS): a plan by the day. */
+export const campHub = (g, hubId = g.scene) => CAMP_HUBS.has(hubId);
+/** A hub with a plan: a stay's week (weekHub) or a camp's day (campHub). */
+export const planHub = (g, hubId = g.scene) => weekHub(g, hubId) || campHub(g, hubId);
 /** The calendar's last waking day of this story day's week (a counter stay: 7 nights from its start). */
 export function weekLastDay(g) {
     const wd = workDay(g); // RV1 (L7): the waking day throughout (a plan made between 00:00 and 03:59 belongs to the evening before)
@@ -306,7 +316,10 @@ export function weekLastDay(g) {
 export function planHere(g) {
     const p = g.tasks?.plan;
     if (!isRec(p)) return null;
-    if (!weekHub(g) || p.hub !== g.scene || p.coil !== coilKey(g) || workDay(g) > p.lastDay) return null;
+    if (!planHub(g) || p.hub !== g.scene || p.coil !== coilKey(g) || !!p.day !== campHub(g) || (!p.day && workDay(g) > p.lastDay)) return null;
+    if (p.day && p.dayOf !== workDay(g)) { // P52-A (BP-d): a camp's new day starts from the amounts kept, its last day's stop forgotten
+        const d = workDay(g); p.items = planStart(g, p.hub).items; p.dayOf = d; p.lastDay = d; p.stop = '';
+    }
     return p;
 }
 /* ---------- v0.11.219 (owner pick KC1 = KA + KG, 2026-11-17 20:14): the plan's amounts kept per stay for good ----------
@@ -345,18 +358,18 @@ function planStart(g, hub) {
 }
 /** A one-off door taken (by the plan or by hand): its kept row back to 0, as the week's. */
 function keepTaken(g, hub, s) { const k = keepHere(g, hub); if (k && (Number(k[`door:${s}`]) || 0) > 0) k[`door:${s}`] = 0; }
-const newPlan = (g) => ({ hub: g.scene, coil: coilKey(g), lastDay: weekLastDay(g), ...planStart(g, g.scene), done: { d: -1, sit: 0, mer: 0, qi: 0, pres: 0, rest: 0, doors: {} }, running: false, stop: '', bt: -1 });
+const newPlan = (g) => ({ hub: g.scene, coil: coilKey(g), lastDay: campHub(g) ? workDay(g) : weekLastDay(g), ...(campHub(g) ? { day: true, dayOf: workDay(g) } : {}), ...planStart(g, g.scene), done: { d: -1, sit: 0, mer: 0, qi: 0, pres: 0, rest: 0, doors: {} }, running: false, stop: '', bt: -1 });
 /** The plan here, made (from the kept amounts) if there is none. */
 export function planEnsure(g) {
     const p = planHere(g);
     if (p) return p;
-    if (!weekHub(g)) return null;
+    if (!planHub(g)) return null;
     const t = taskState(g);
     t.plan = newPlan(g);
     return t.plan;
 }
 /** KC1: the plan here, or the one a new week would start with (not saved), for the screen and the forecast's notes; null off a stay. */
-export function planView(g) { const p = planHere(g); return p || (weekHub(g) ? newPlan(g) : null); }
+export function planView(g) { const p = planHere(g); return p || (planHub(g) ? newPlan(g) : null); }
 export const MED_MAX = { sit: 12, mer: 6, qi: 8, pres: 1, rest: 12 }; // v0.11.213 (VQ1, RS): hours of rest a day, as the sits // v0.11.209 (owner pick TF1, K): "Smoke the catch." by the day (0 or 1)
 /** Change a count (`key`: a card id, 'med:sit' / 'med:mer' / 'med:qi' / 'med:pres', or 'door:<scene>' of DAILY_DOORS), from 0 up to
  *  9 cards, MED_MAX a day, or 0 / 1 a day for a door. */
@@ -391,6 +404,30 @@ export function planCount(g, key) {
     if (/^med:/.test(key)) return p?.med?.[key.slice(4)] || 0;
     if (/^door:/.test(key)) { const s = key.slice(5); return p ? (isRec(p.doors) ? p.doors[s] || 0 : 0) : DOOR_START[s] || 0; }
     return p?.items?.[key] || 0;
+}
+/* ---------- v0.11.284 (owner pick P52-A, KR-k, 2026-11-26 23:40): a card row shows the amount kept ----------
+ * A card row's number is the amount kept (what each new week, or a camp's each new day, starts with); what is left this week (today
+ * at a camp) is its note where the two differ. The screen's − and + change the amount kept, and what is left by the same step, each
+ * from 0 to 9 (before: the number was what was left, and + on a row run down to 0 kept one more for every later week). */
+/** A card row as the screen shows it: { n: the amount kept, left: what is left this week (today at a camp) }. */
+export function planShown(g, id) {
+    const p = planView(g), left = p?.items?.[id] || 0;
+    const k = p ? keepHere(g, p.hub) : null;
+    return { n: k ? clampN(k[id], 9) : left, left };
+}
+/** The screen's − / + on a row (`d`: −1 or +1): a card's amount kept and what is left by the same step; a Meditate row or a door as
+ *  planSet (their numbers are the day's, kept as set). */
+export function planStep(g, key, d) {
+    if (/^(med|door):/.test(key)) return planSet(g, key, planCount(g, key) + d);
+    const p = planEnsure(g);
+    if (!p) return null;
+    const kp = keepHere(g, p.hub, p), k0 = clampN(kp[key], 9), w0 = p.items[key] || 0;
+    const kv = clampN(k0 + d, 9), wv = clampN(w0 + (k0 || d > 0 ? kv - k0 : d), 9); // RV (L4): left moves by the kept amount's own step (none at 9); with nothing kept, − still lowers what is left
+    if (!k0 && kv) delete kp[key]; // (LO) a row set again from 0 goes to the end of the kept order, as planSet
+    if (kv) kp[key] = kv; else delete kp[key];
+    if (wv) p.items[key] = wv; else delete p.items[key];
+    p.stop = '';
+    return p;
 }
 /* ---------- v0.11.211 (owner pick PR2 + PK1, 2026-11-17 13:38 and 13:43): the plan's priorities ----------
  * Every row of Plan the week (a card, a Meditate row, Smoke the catch, a door or talk) has a place, 1 first, set with a drop-down by
@@ -447,7 +484,7 @@ export function planRanks(g, scenes) {
 /** Move a row to place `n` (1 first) among the screen's rows; the rows on the screen and the rows hidden now that have a place are then
  *  numbered 1… on this hub in that order (RV1, L1: a hidden row keeps its place among the others), kept for good. */
 export function planPrio(g, scenes, key, n) {
-    if (!weekHub(g)) return null;
+    if (!planHub(g)) return null;
     const p = planHere(g), pr0 = prioHere(g);
     const cards = planCards(g, scenes).map((c) => c.id), doors = doorCards(g, scenes).map((d) => d.scene);
     const { keys, shown } = planOrder(g, p || planView(g), { cards, doors, extra: Object.keys(pr0) }); // KC1: the order as the screen shows it
@@ -467,6 +504,7 @@ export function planPrio(g, scenes, key, n) {
 export function weekResume(g) {
     if (g.combat) return false;
     const p = g.tasks?.plan;
+    if (isRec(p) && p.day && p.stop === 'evening' && p.dayOf === workDay(g)) return false; // P52-A RV (L3): a camp's day stopped at its evening goes on the next morning, not again today
     return isRec(p) && !!p.running && p.hub === g.scene && p.coil === coilKey(g);
 }
 export const planEmpty = (p) => !p || (!Object.values(p.items || {}).some((n) => n > 0) && !Object.values(p.med || {}).some((n) => n > 0));
@@ -493,12 +531,12 @@ function hubStops(g, scenes) {
  *  there): a person not met yet, or not here yet (Ya), has no row. v0.11.213 (VQ1): every door of PLAN_DOORS; a repeating door
  *  closed only by its spacing (S3) keeps its row, `next` the calendar day it opens again; one row a scene (the spring's two ways in). */
 export function doorCards(g, scenes) {
-    if (!weekHub(g) || !scenes[g.scene]) return [];
+    if (!planHub(g) || !scenes[g.scene]) return [];
     const p = planView(g), open = new Map(taskCards(g, scenes).filter((c) => c.kind === 'door').map((c) => [c.id, c]));
     const by = new Map();
     scenes[g.scene].choices.forEach((c, i) => {
         if (typeof c.to !== 'string' || !PLAN_DOORS.includes(c.to)) return;
-        const id = `${g.scene}:${i}`, card = open.get(id), rep = doorRepeats(c.to);
+        const id = `${g.scene}:${i}`, card = open.get(id), rep = doorRepeats(c.to) && !campHub(g); // P52-A RV (L1): no spacing at a camp (common.js: the stays only)
         let spaced = false;
         if (!card && rep && c.to !== 'yk_time') { try { spaced = !!unspaced(() => !c.show || c.show(g)); } catch { spaced = false; } }
         const keep = !!card || spaced || c.to === 'yk_time' || (p?.doors?.[c.to] || 0) > 0 || (p?.done?.d === workDay(g) && (p.done.doors?.[c.to] || 0) > 0);
@@ -509,7 +547,7 @@ export function doorCards(g, scenes) {
         if (!label) { try { label = typeof c.text === 'function' ? c.text(g) : c.text; } catch { label = ''; } }
         const k = DOOR_KEY[c.to], cal = k === 'spring' ? clockDay(g) : null; // v0.11.264 (P32-A, L3c): the spring's key by the one clock, as act1_heart.js writes it
         const nx = rep && !card ? (cal != null ? spacedNext(g, k, cal) : spacedNext(g, k, wakeDay(g)) - wakeDay(g) + wakeCal(g)) : null;
-        by.set(c.to, { id, scene: c.to, label: String(label || ''), status: card?.status === 'open' ? 'open' : 'closed', repeat: rep, next: nx != null && nx > (cal != null ? cal : wakeCal(g)) ? nx : null, rank });
+        by.set(c.to, { id, scene: c.to, label: String(label || ''), status: card?.status === 'open' ? 'open' : 'closed', repeat: rep, next: nx != null && nx > (cal != null ? cal : wakeCal(g)) ? nx : null, rank, ...(campHub(g) ? { daily: true } : {}) }); // P52-A (BP-d): a camp's door, once a day (RV, L1: Yuki's too)
     });
     return [...by.values()].map(({ rank, ...d }) => d).sort((a, b) => PLAN_DOORS.indexOf(a.scene) - PLAN_DOORS.indexOf(b.scene)); // RV1 (M2): the talks last
 }
@@ -520,7 +558,7 @@ export function noteCardTap(g, scenes, id) {
     if (typeof id !== 'string' || !scenes[g.scene]) return;
     const m = /^([\w]+):(\d+)$/.exec(id);
     const c = m && m[1] === g.scene ? scenes[g.scene].choices[Number(m[2])] : null;
-    if (!c || typeof c.to !== 'string' || !PLAN_DOORS.includes(c.to) || doorRepeats(c.to)) return;
+    if (!c || typeof c.to !== 'string' || !PLAN_DOORS.includes(c.to) || doorDaily(c.to)) return; // P52-A (BP-d): a camp's door stays set
     if (p && isRec(p.doors) && p.doors[c.to] > 0) p.doors[c.to] = 0;
     return { hub: g.scene, s: c.to }; // RV1 (LS): for noteCardDone, after the tap ran; v0.11.225 (LO2, OL): on any hub (the prologue's village too)
 }
@@ -555,7 +593,7 @@ export function noteCardDone(g, tap, r) { if (tap && !r?.skipped) keepTakenAll(g
  *  stay (the coughing house and the boar hunt taken in the prologue's village left a closed "1 · once" row in Ashfall). */
 function keepTakenAll(g, s) { const k = g.tasks?.keep; if (isRec(k)) for (const hub of Object.keys(k)) keepTaken(g, hub, s); }
 /** v0.11.213 (VQ1 + FQ1): a door row's note: a repeating door's spacing (and the day it opens again, closed now), a one-off's "once". */
-export const doorNote = (d) => (d.repeat ? `every ${SPACE_DAYS === 3 ? '3rd' : `${SPACE_DAYS}th`} day${d.next ? `, opens Day ${d.next}` : ''}` : 'once');
+export const doorNote = (d) => (d.repeat ? `every ${SPACE_DAYS === 3 ? '3rd' : `${SPACE_DAYS}th`} day${d.next ? `, opens Day ${d.next}` : ''}` : d.daily ? 'once a day' : 'once'); // P52-A (BP-d): a camp's door
 /** v0.11.221 (owner pick WB, CN): a wilds card spaced now (Skilled or up, common.js SK): its plan row's note, as a repeating door's; else ''. */
 export const cardNote = (g, id) => {
     if (!cardSpaced(g, id)) return '';
@@ -581,7 +619,12 @@ export const RS1 = { on: true };
  * Every card is run with runTask and every story choice with choose, exactly as a tap would take them.
  * v0.11.225 (LO2, RS): `rel` (default true): each step's relationship changes said with its day's lines (false: the read probe).
  */
-export function runWeek(g, scenes, { max = 600, onStep = null, probe = true, rel = true } = {}) {
+export function runWeek(g, scenes, opts = {}) {
+    if (!planHere(g)?.day) return runPlanSteps(g, scenes, opts);
+    const was = CAMP_RUN.on; CAMP_RUN.on = true; // P52-A (BP-d): a camp's plan runs with the day's routine (tasks.js)
+    try { return runPlanSteps(g, scenes, opts); } finally { CAMP_RUN.on = was; }
+}
+function runPlanSteps(g, scenes, { max = 600, onStep = null, probe = true, rel = true } = {}) {
     const days = [];
     let cur = null;
     const say = (ls) => { if (!ls || !ls.length) return; const d = calDay(g); if (!cur || cur.day !== d) { cur = { day: d, lines: [] }; days.push(cur); } cur.lines.push(...ls); };
@@ -686,7 +729,7 @@ export function runWeek(g, scenes, { max = 600, onStep = null, probe = true, rel
                 p.done.doors[s] = (p.done.doors[s] || 0) + 1;
                 const r = run(dw.id);
                 if (r.skipped) { p.done.doors[s] -= 1; return 'next'; } // the day's routine went first; the door is still owed today
-                if (!doorRepeats(s)) { p.doors[s] = 0; keepTaken(g, hub, s); } // v0.11.213 (VQ1, ST): a one-off door, taken: its row back to 0 (KC1: kept)
+                if (!doorDaily(s)) { p.doors[s] = 0; keepTaken(g, hub, s); } // v0.11.213 (VQ1, ST): a one-off door, taken: its row back to 0 (KC1: kept); P52-A: a camp's stays
                 if (g.scene === hub) return 'next'; // nothing opened (a guard): counted as done today
                 for (let k2 = 0; k2 < 6 && g.scene !== hub && !g.combat; k2++) {
                     const v = sceneView(g, scenes);
@@ -734,6 +777,7 @@ export function runWeek(g, scenes, { max = 600, onStep = null, probe = true, rel
             }
         }
         say(dayMeal(g, hub, scenes)); say(takeSpoilNotes(g)); // the evening's meal before the evening (RV1, M1: and what turned)
+        if (p.day) return end('evening'); // P52-A (BP-d): a camp's evening is the player's (making camp, or the day's beat); the plan goes on the next morning here
         const stops = hubStops(g, scenes);
         if (stops.length > 1) { // v0.11.250 (P20-A, WE): an ordinary evening past the week's first: the hub's quiet way
             const qi = weekEveQuiet(g, scenes, p, stops);
@@ -850,7 +894,7 @@ const ofDay = (g, d) => g.minutes - d * 1440;
  * `max`: a guard on the evenings walked; `json`: the save as JSON, when the caller has it already.
  */
 export function planForecast(g, scenes, { max = 60, json = null } = {}) {
-    if (!weekHub(g)) return null;
+    if (!planHub(g)) return null;
     try {
         const c = JSON.parse(json || JSON.stringify(g));
         const p = planEnsure(c);
@@ -874,7 +918,7 @@ export function planForecast(g, scenes, { max = 60, json = null } = {}) {
         for (let k = 0; k < max; k++) {
             stop = runWeek(c, scenes, { onStep }).stop;
             if (stop === 'story' && fightHere(c, scenes)) stop = 'fight';
-            if (stop !== 'evening') break; // v0.11.210 (RV1, L2): a talk the plan can't answer ('door') is the player's: the forecast stops there
+            if (stop !== 'evening' || p.day) break; // v0.11.210 (RV1, L2): a talk the plan can't answer ('door') is the player's: the forecast stops there; P52-A (BP-d): a camp's day ends at its evening
             let on = false;
             for (let j = 0; j < 12 && !on; j++) { // the evening's screens, a tap each, until the plan goes on by itself
                 if (workDay(c) > p.lastDay) { stop = 'week'; break; } // RV1 (M1): past the plan's last day the week is over
@@ -896,12 +940,13 @@ export function planForecast(g, scenes, { max = 60, json = null } = {}) {
 }
 /** E1: minutes of work in the plan (each card's ×7 time; the carried work's rest) and minutes left to the evenings this week. */
 export function planHours(g, scenes, p = planHere(g), fc = null) {
-    if (!weekHub(g)) return null;
+    if (!planHub(g)) return null;
+    const mult = campHub(g) ? 1 : WEEK_MULT; // P52-A (BP-d): a camp's cards take their own time, today only
     const hub = g.scene, ev = (EVENING_HOUR[hub] ?? 16) * 60;
     let work = carriesHere(g, hub).reduce((a, cy) => a + cy.left, 0); // v0.11.215 (CF1, UB): every card's work carried
     const cards = planCards(g, scenes);
-    const last = p ? p.lastDay : weekLastDay(g), today = workDay(g);
-    for (const [id, n] of Object.entries(p?.items || {})) { const c = cards.find((x) => x.id === id); const cap = cardRunsLeft(g, id, last); if (c && n > 0) work += (cap == null ? n : Math.min(n, cap)) * cardWeekMinutes(c); } // RV2 (NC): a spaced card, the runs its open days allow
+    const last = campHub(g) ? workDay(g) : p ? p.lastDay : weekLastDay(g), today = workDay(g);
+    for (const [id, n] of Object.entries(p?.items || {})) { const c = cards.find((x) => x.id === id); const cap = cardRunsLeft(g, id, last); if (c && n > 0) work += (cap == null ? n : Math.min(n, cap)) * (cardWeekMinutes(c) / WEEK_MULT) * mult; } // RV2 (NC): a spaced card, the runs its open days allow
     let left = workRoom(g, hub), morn = MORNING_HOUR * 60;
     for (let d = today + 1; d <= last; d++) { if (fc?.mornings?.[d] != null) morn = fc.mornings[d]; left += Math.max(0, ev - morn); }
     return { work, left };
@@ -922,17 +967,18 @@ const whenText = (m) => clockLabel(m).replace(',', '');
  */
 export function planNotes(g, scenes) {
     const p = planView(g), fc = forecastNow(g, scenes), items = p?.items || {}, med = p?.med || {}; // KC1: the kept counts before the week's plan
-    const rows = {}, mt = {};
+    const rows = {}, mt = {}, day = campHub(g); // P52-A (BP-d): a camp's plan speaks of today
+    const notNow = day ? ' · not today' : ' · not this week';
     if (fc) {
-        for (const id of Object.keys(items)) if (items[id] > 0) rows[id] = cardSpaced(g, id) && fc.runs ? ` · ${fc.runs[id] || 0} run${fc.runs[id] === 1 ? '' : 's'} this week` : fc.rows[id] != null ? ` · done ${whenText(fc.rows[id])}` : ' · not this week'; // RV2 (NV): a spaced card's runs, as a door's visits
-        for (const k of Object.keys(med)) if (med[k] > 0) mt[k] = `${fc.med[k] || 0} of ${fc.days} day${fc.days > 1 ? 's' : ''}`;
+        for (const id of Object.keys(items)) if (items[id] > 0) rows[id] = cardSpaced(g, id) && fc.runs ? ` · ${fc.runs[id] || 0} run${fc.runs[id] === 1 ? '' : 's'} this week` : fc.rows[id] != null ? ` · done ${whenText(fc.rows[id])}` : notNow; // RV2 (NV): a spaced card's runs, as a door's visits
+        for (const k of Object.keys(med)) if (med[k] > 0) mt[k] = day ? (fc.med[k] ? 'today' : 'not today') : `${fc.med[k] || 0} of ${fc.days} day${fc.days > 1 ? 's' : ''}`;
         // v0.11.210 (DC-a); v0.11.213 (FQ1, S3): the visits this week (a repeating door opens every SPACE_DAYS-th day), a one-off's if or not
-        for (const [s, n] of Object.entries(fc.doors || {})) mt[`door:${s}`] = doorRepeats(s) ? `${n} visit${n === 1 ? '' : 's'} this week` : n ? 'this week' : 'not this week';
+        for (const [s, n] of Object.entries(fc.doors || {})) mt[`door:${s}`] = day ? (n ? 'today' : 'not today') : doorRepeats(s) ? `${n} visit${n === 1 ? '' : 's'} this week` : n ? 'this week' : 'not this week';
     }
     const h = planEmptyShown(g, scenes, p) ? null : planHours(g, scenes, p, fc); // RV1 (LE): no "Cards 0 m" for a hidden kept card
-    const total = h ? `Cards ${durText(h.work)}; ${durText(h.left)} left to the evenings this week.` : '';
+    const total = h ? `Cards ${durText(h.work)}; ${durText(h.left)} left to the evening${day ? ' today' : 's this week'}.` : '';
     const then = fc ? ` Fed ${fc.fed}, HP ${fc.hp}/${fc.hpMax} then.` : '';
-    const outlook = !fc ? '' : fc.stop === 'week' ? `Forecast: it runs to the week's end (${whenText(fc.minutes)}).${then}` : `Forecast: it stops ${whenText(fc.minutes)}: ${FORECAST_TEXT[fc.stop] || fc.stop}.${then}`;
+    const outlook = !fc ? '' : fc.stop === 'week' ? `Forecast: it runs to the week's end (${whenText(fc.minutes)}).${then}` : day && fc.stop === 'evening' ? `Forecast: it runs to the evening (${whenText(fc.minutes)}).${then}` : `Forecast: it stops ${whenText(fc.minutes)}: ${FORECAST_TEXT[fc.stop] || fc.stop}.${then}`;
     // v0.11.250 (P20-A, WE): the plan's evening rule, on a stay hub whose evenings have a quiet way (the long calendar's)
     const eve = WEEK_EVE.on && weekHub(g) ? 'Evenings: it stops for the week\'s first, and for any evening where something happens; the others take the quiet way (home, the loft early, the watch, sleep).' : '';
     return { rows, med: mt, total, outlook, eve };

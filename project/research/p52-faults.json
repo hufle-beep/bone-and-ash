@@ -1,0 +1,14 @@
+[
+ { "id": "F1", "file": "js/core/week.js", "find": "    if (p.day && p.dayOf !== workDay(g)) {", "replace": "    if (false && p.day && p.dayOf !== workDay(g)) {", "note": "a camp's new day keeps yesterday's counts" },
+ { "id": "F2", "file": "js/core/week.js", "find": "    const was = CAMP_RUN.on; CAMP_RUN.on = true;", "replace": "    const was = CAMP_RUN.on; CAMP_RUN.on = false;", "note": "the camp plan runs without the day's routine" },
+ { "id": "F3", "file": "js/core/tasks.js", "find": "weekHub(g, hubId) || (CAMP_RUN.on && CAMP_HUBS.has(hubId));", "replace": "weekHub(g, hubId) || CAMP_HUBS.has(hubId);", "note": "the routine on hand taps at a camp" },
+ { "id": "F4", "file": "js/core/week.js", "find": "        if (p.day) return end('evening');", "replace": "", "note": "the camp's evening taken by the plan" },
+ { "id": "F5", "file": "js/core/week.js", "find": "wv = clampN(w0 + (k0 || d > 0 ? kv - k0 : d), 9);", "replace": "wv = w0;", "note": "a step leaves this week's count alone" },
+ { "id": "F6", "file": "js/core/week.js", "find": "    return { n: k ? clampN(k[id], 9) : left, left };", "replace": "    return { n: left, left };", "note": "the row shows what is left again" },
+ { "id": "F7", "file": "js/core/week.js", "find": "export const doorDaily = (s) => doorRepeats(s) || CAMP_DOORS.includes(s);", "replace": "export const doorDaily = (s) => doorRepeats(s);", "note": "a camp's door taken goes back to 0" },
+ { "id": "F8", "file": "js/core/week.js", "find": "    const mult = campHub(g) ? 1 : WEEK_MULT;", "replace": "    const mult = WEEK_MULT;", "note": "a camp's card counted ×7" },
+ { "id": "F9", "file": "js/core/week.js", "find": "            if (stop !== 'evening' || p.day) break;", "replace": "            if (stop !== 'evening') break;", "note": "the camp's forecast walks into the night" },
+ { "id": "F10", "file": "js/core/week.js", "find": "    if (campHub(g)) return taskCards(g, scenes).filter((c) => c.day);", "replace": "    if (campHub(g)) return taskCards(g, scenes).filter((c) => c.week);", "note": "no card rows at a camp" },
+ { "id": "F11", "file": "js/core/tasks.js", "find": "!CAMP_HUBS.has(hubId) }); // P52-A", "replace": "true }); // P52-A", "note": "the camp's routine meal cooks on a fire" },
+ { "id": "F12", "file": "js/main.js", "find": "    if (day) return groupHtml('Plan the day',", "replace": "    if (day) return groupHtml('Plan the week',", "note": "the camp's panel called the week" }
+]

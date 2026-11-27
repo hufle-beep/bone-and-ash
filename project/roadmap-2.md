@@ -39,9 +39,10 @@ Split out of `roadmap.md` in v0.11.88 (owner pick A, 2026-11-09 02:37, S1): sect
 6. **F, the copy-over push 5 (the Coil)**, then **G** (engine systems, crafting and threads, Android; steps 4, 6, 7 below).
 
 - *(v0.11.283, owner picks P51-A, RV-A, TG-a (`claude/p51-options.md`): **G1 done**: "Systems from the open items" (a)–(i) and "New in v0.11.210" (L4, L7) moved word for word, each with its closing note, to `roadmap-done-7.md` (Moved in v0.11.283).)*
+- *(v0.11.284, owner pick P52-A (`claude/p52-options.md`): **G2 done**: "Measured, not picked" (KR, BP) moved word for word, with its closing note, to `roadmap-done-7.md` (Moved in v0.11.284).)*
+- *(new in v0.11.284, the P52 cold review's L4; with bundle G3)* **Open, options later:** KR's − then + on a card row run down this week adds a run this week (kept 2, left 0: − gives 1 / 0, + gives 2 / 1); the step clamps what is left at 0.
 - *(new in v0.11.65)* **Threads need a new design:** they were planned to work queued tasks; since v0.11.64 there is no queue, so what a thread does (and when it wakes) is an open question for the owner before step 4 is built.
 
-- *(moved in v0.11.244 from `roadmap-time.md`'s flip line, word for word; owner pick RO2, 2026-11-21 11:08; KR with bundle G)* **Measured, not picked (open, options later):** KR, the row showing the kept amount, "N left this week" as a note; BP, a plan for the Blackroot's camps (15 camp days a game, 130 / 160 / 189 / 375 card taps there; an estimate of 90–275 taps saved, not measured).
 
 ### Group e's design lines (moved here word for word in v0.11.245 from `roadmap-e.md`; owner pick SP1, 2026-11-21 11:40, EC; each its own pick, options first)
 

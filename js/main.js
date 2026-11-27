@@ -1,6 +1,6 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
-import { runWeek, planCards, planHere, planEnsure, planSet, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, planView, doorCards, planRanks, planPrio, doorNote, cardNote, noteCardTap, noteCardDone, noteReadTap, planEmptyShown, planDoorsShown, spacedClosed, withSpaced } from './core/week.js'; // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
+import { runWeek, planCards, planHere, planEnsure, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, planView, doorCards, planRanks, planPrio, doorNote, cardNote, noteCardTap, noteCardDone, noteReadTap, planEmptyShown, planDoorsShown, spacedClosed, withSpaced, planHub, campHub, planShown, planStep } from './core/week.js'; // v0.11.284 (P52-A): planHub, campHub (BP-d), planShown, planStep (KR-k); // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
 import { flipFill, coilMult, coilMultNext, wakeDay, fmtMult, clockParts, REL_HIDDEN } from './core/game.js'; // v0.11.137 (HV1): REL_HIDDEN
 import {
@@ -236,10 +236,11 @@ function weekAfter() {
 }
 function runPlan() {
     drawnKey = ''; // v0.11.210 (RV1, M1): a run is a new page of the week: the cards column starts at the top
+    const day = !!planHere(g)?.day; // P52-A (BP-d): a camp's plan by the day
     const r = runWeek(g, SCENES);
-    for (const d of r.days) addResult(`Day ${d.day}: the week's plan`, d.lines, false, { quiet: true });
+    for (const d of r.days) addResult(`Day ${d.day}: ${day ? 'the day\'s plan' : 'the week\'s plan'}`, d.lines, false, { quiet: true });
     lastReply = [];
-    lastResult = { lines: [r.stop === 'week' ? 'The week is over.' : `The week stops here: ${stopText(r.stop)}.${r.stop === 'evening' || r.stop === 'door' ? ' The plan goes on after it.' : r.stop === 'read' ? ' Tap it yourself, then run the week again.' : ''}`], fail: r.stop === 'hurt' || r.stop === 'hungry' };
+    lastResult = { lines: [r.stop === 'week' ? 'The week is over.' : day ? `The day's plan stops here: ${stopText(r.stop)}.${r.stop === 'evening' ? ' It goes on the next morning you spend here.' : r.stop === 'door' ? ' The plan goes on after it.' : r.stop === 'read' ? ' Tap it yourself, then run the day again.' : ''}` : `The week stops here: ${stopText(r.stop)}.${r.stop === 'evening' || r.stop === 'door' ? ' The plan goes on after it.' : r.stop === 'read' ? ' Tap it yourself, then run the week again.' : ''}`], fail: r.stop === 'hurt' || r.stop === 'hungry' };
     announce(lastResult.lines[0]);
 }
 /** v0.11.214 (owner pick RD1, RB): a stop's words; a card with text not read yet named by its label. */
@@ -250,7 +251,7 @@ function stopText(stop) {
 }
 /** v0.11.211 (owner pick PR2 + PK1): a row's place, a drop-down of 1 to the rows' count by its label. */
 const prioBox = (key, label, rk) => (rk?.rank?.[key] ? `<select class="prio" data-prio="${esc(key)}" aria-label="Place in the order: ${esc(plain(label))}">${Array.from({ length: rk.n }, (_, i) => `<option value="${i + 1}"${i + 1 === rk.rank[key] ? ' selected' : ''}>${i + 1}</option>`).join('')}</select>` : '');
-const planRow = (key, label, n, note, rk = null) => `<div class="prow"><span class="pl">${md(label)}${prioBox(key, label, rk)}${note ? `<span class="note">${esc(note)}</span>` : ''}</span><button class="btn step" data-plan="${esc(key)}" data-d="-1" aria-label="One fewer: ${esc(plain(label))}"${n > 0 ? '' : ' disabled'}>−</button><b class="pn">${n}</b><button class="btn step" data-plan="${esc(key)}" data-d="1" aria-label="One more: ${esc(plain(label))}">+</button></div>`;
+const planRow = (key, label, n, note, rk = null, down = n > 0) => `<div class="prow"><span class="pl">${md(label)}${prioBox(key, label, rk)}${note ? `<span class="note">${esc(note)}</span>` : ''}</span><button class="btn step" data-plan="${esc(key)}" data-d="-1" aria-label="One fewer: ${esc(plain(label))}"${down ? '' : ' disabled'}>−</button><b class="pn">${n}</b><button class="btn step" data-plan="${esc(key)}" data-d="1" aria-label="One more: ${esc(plain(label))}">+</button></div>`;
 /** P1: the week's plan on a stay hub (long calendar). */
 function weekHtml() {
     const p = planHere(g), pv = planView(g) || p; // v0.11.219 (KC1): with no plan yet this week, the kept counts
@@ -259,7 +260,10 @@ function weekHtml() {
     const rk = planRanks(g, SCENES), cardIds = planCards(g, SCENES).map((c) => c.id); // v0.11.211 (PR2 + PK1): the rows' places
     const carried = new Set(carriesHere(g, g.scene).map((cy) => cy.id)), cr = cardIds.filter((id) => (items[id] || 0) > 0 || carried.has(id)).map((id) => rk.rank[id]).filter(Boolean), lo = Math.min(...cr), hi = Math.max(...cr); // RV1 (L2): the planned cards (and the work carried) only
     const when = (key) => (!cr.length || rk.rank[key] > hi ? 'after the day\'s work' : rk.rank[key] < lo ? 'before the day\'s work' : ''); // the rows' notes follow the order
-    const rows = planCards(g, SCENES).map((c) => planRow(c.id, c.label, items[c.id] || 0, `${durLabel(Math.round((c.minutes * NEW_LENGTH) / cardSpeed(c.fam || 0)) * WEEK_MULT)} a card${cardNote(g, c.id) ? ` · ${cardNote(g, c.id)}` : ''}${fc.rows[c.id] || ''}`, rk)); // v0.11.221 (owner pick WB, CN): a spaced wilds card's "every 3rd day"
+    const day = campHub(g), mult = day ? 1 : WEEK_MULT; // P52-A (BP-d): a camp's plan by the day, its cards at their own time
+    // P52-A (KR-k): a card row's number is the amount kept; what is left this week (today at a camp) is its note where they differ
+    const leftNote = (s) => (s.left === s.n ? '' : ` · ${s.left ? `${s.left} left` : 'none left'} ${day ? 'today' : 'this week'}`);
+    const rows = planCards(g, SCENES).map((c) => { const sh = planShown(g, c.id); return planRow(c.id, c.label, sh.n, `${durLabel(Math.round((c.minutes * NEW_LENGTH) / cardSpeed(c.fam || 0)) * mult)} a card${cardNote(g, c.id) ? ` · ${cardNote(g, c.id)}` : ''}${leftNote(sh)}${fc.rows[c.id] || ''}`, rk, sh.n > 0 || sh.left > 0); }); // v0.11.221 (owner pick WB, CN): a spaced wilds card's "every 3rd day"
     rows.push(planRow('med:sit', 'Sits a day', med.sit || 0, fc.med.sit || '', rk), planRow('med:mer', 'Meridian sessions a day', med.mer || 0, fc.med.mer || '', rk), planRow('med:qi', 'Gather Qi a day', med.qi || 0, ['hours', fc.med.qi].filter(Boolean).join(' · '), rk));
     rows.push(planRow('med:pres', 'Smoke the catch, once a day', med.pres || 0, [[when('med:pres'), '15 m a piece'].filter(Boolean).join(', '), fc.med.pres].filter(Boolean).join(' · '), rk)); // v0.11.209 (owner pick TF1, K)
     // v0.11.210 (owner pick N1, DC-a): the hub's daily doors, once a day each (Yuki's starts at 1 on a new plan)
@@ -270,7 +274,8 @@ function weekHtml() {
     const total = fc.total ? `<p class="note fc">${esc(fc.total)}</p>` : '', outlook = fc.outlook ? `<p class="note fc">${esc(fc.outlook)}</p>` : '';
     const stop = p?.stop ? `<p class="note">${esc(p.stop === 'week' ? 'The week is over.' : `Stopped: ${stopText(p.stop)}.`)}</p>` : '';
     const empty = planEmptyShown(g, SCENES, pv) && !planDoorsShown(g, SCENES, pv); // v0.11.219 (RV1, LE): the rows on the screen only; v0.11.225 (LO2, PE): a door or talk row set runs too
-    const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${empty ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}</button>${empty ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;
+    const btn = `<div class="pbtns"><button class="btn primary" data-week="run">${day ? (empty ? 'Rest to the evening' : 'Run the day') : `${empty ? 'Rest out the week' : 'Run the week'} · to Day ${planEndDay(g, p)}`}</button>${empty ? '' : '<button class="btn" data-week="clear">Clear</button>'}</div>`;
+    if (day) return groupHtml('Plan the day', [`<p class="note">Cards, Meditate and talks by the day, kept here for good; each morning here starts from them. While it runs, meals and the day's sit run themselves; it stops for anything that needs you and at the evening, and goes on the next morning here. The box by each row is its place in the order, 1 first.</p>`, ...rows, total, outlook, stop, btn], true); // P52-A (BP-d)
     return groupHtml('Plan the week', [`<p class="note">Cards by the week, Meditate by the day. Meals and the day's sit run themselves; it stops for anything that needs you. The box by each row is its place in the order, 1 first, kept here for good.</p>`, ...rows, total, outlook, eve, stop, btn], true);
 }
 
@@ -372,7 +377,7 @@ function renderCardScreen() {
         const ns = store.get(NONEXT_KEY) === '1' ? '' : nextStep(g, SCENES); // v0.11.72 (N1): Selene's next-step line, ✕ hides it for good
         hubTop = `${ns ? `<div class="nstep"><b>Next step</b> <span>${esc(ns)}</span><button class="nstep-x" data-nonext="1" aria-label="Hide the next-step line">✕</button></div>` : ''}${yHtml}`;
         const work = workGroups(g.scene);
-        hubHtml = (hub && weekHub(g) ? weekHtml() : '') + groups.map((gr) => groupHtml(gr.name, gr.cards.map(cardHtml), !work.has(gr.name), gr.note)).join(''); // v0.11.67 (D2); v0.11.204 (W1, P1): the week's plan first
+        hubHtml = (hub && planHub(g) ? weekHtml() : '') + groups.map((gr) => groupHtml(gr.name, gr.cards.map(cardHtml), !work.has(gr.name), gr.note)).join(''); // v0.11.67 (D2); v0.11.204 (W1, P1): the week's plan first
     }
     const sk = v.end || hub ? { steps: 0 } : skipPlan(g, SCENES); // v0.11.35 (P1-a): a stretch read before, 2 steps or more
     const skipHtml = sk.steps >= 2 ? `<button class="card story skip" data-skip="1">Skip to the next choice.<span class="tag">${sk.steps} scenes you know</span><span class="len">${esc(durLabel(sk.minutes))} · at once</span></button>` : '';
@@ -1099,8 +1104,7 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.run) { doTask(b.dataset.run); return; } // v0.11.64: at once (was: run now, ahead of the queue)
         if (b.dataset.plan) { // v0.11.204 (W1, P1): a count on the week's plan
             const p = planEnsure(g); if (!p) { render(); return; }
-            const k = b.dataset.plan, cur = planCount(g, k); // v0.11.210 (N1, DC-a): a card, a Meditate row or a door
-            planSet(g, k, cur + Number(b.dataset.d || 0)); autosave(); render(); return;
+            planStep(g, b.dataset.plan, Number(b.dataset.d || 0)); autosave(); render(); return; // P52-A (KR-k): a card's amount kept and what is left by one; v0.11.210 (N1, DC-a): a Meditate row or a door as before
         }
         if (b.dataset.week === 'run') { const p = planEnsure(g); if (p) runPlan(); autosave(); render(); window.scrollTo({ top: 0, behavior: smoothScroll() }); const bl = document.querySelector('#view .below'); if (bl) bl.scrollTop = 0; return; } // v0.11.210 (SC): a run is a new page of the week
         if (b.dataset.week === 'clear') { planClear(g); autosave(); render(); return; } // RV1 (TG11): week.js planClear

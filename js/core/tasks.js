@@ -526,7 +526,7 @@ export function runTask(g, scenes, id) {
         if (pre.length && g.scene === hubId && (card.kind === 'carry' ? workRoom(g, hubId) <= 0 : !taskOpen(g, scenes, id))) { lines.push(SKIP_LINE, ...takeSpoilNotes(g)); return { lines, fail: false, stopped: false, skipped: true }; }
         if (pre.length && g.scene !== hubId) { lines.push(...takeSpoilNotes(g)); return { lines, fail: false, stopped: true, skipped: true }; }
     }
-    const slot0 = weekHub(g, hubId) && mealCard(scenes, hubId, id) ? mealSlot(g) : null; // RV1 (L1, L2)
+    const slot0 = routineHub(g, hubId) && mealCard(scenes, hubId, id) ? mealSlot(g) : null; // RV1 (L1, L2); P52-A (BP-d): a camp's plan too
     const mY = g.minutes; // RV1 (M1): Yuki's lane counts from here; the day's sit ticked her for its own minutes
     if (card.kind === 'carry') {
         const found = carryHere(g, hubId, id);
@@ -766,6 +766,13 @@ const hrs = (m) => { m = Math.round(m); return m >= 60 ? `${Math.floor(m / 60)} 
 const coilKey = (g) => `${g.coil?.n || 1}|${g.coil?.act || 0}`;
 /** Is this hub a stay of the long calendar right now? */
 export const weekHub = (g, hubId = g.scene) => WEEK_HUBS.has(hubId) && STAY_DAYS.has(storyDay(g));
+/* v0.11.284 (owner pick P52-A, BP-d, 2026-11-26 23:40): the Blackroot's three camps get a plan by the day (week.js). Their cards are
+ * not week's cards (no ×7, no carry); the day's routine (R1 meals, R2 the sit) runs there only while that plan runs (`CAMP_RUN.on`,
+ * set by week.js runWeek), so a card tapped by hand at a camp plays exactly as before. */
+export const CAMP_HUBS = new Set(['rr_hub', 'dw_hub', 'ah_hub']);
+export const CAMP_RUN = { on: false };
+/** Does the day's routine run on this hub now: a stay, or a camp while its plan runs. */
+const routineHub = (g, hubId) => weekHub(g, hubId) || (CAMP_RUN.on && CAMP_HUBS.has(hubId));
 /** Is this card a week's card here (S1)? */
 export const weekCard = (g, hubId, card) => !!card && card.kind === 'work' && !!card.menu && !!TASK_HUBS[hubId]?.menus?.[card.menu] && weekHub(g, hubId);
 /** The waking day (the night to 05:00 belongs to the day before; 04:00 until v0.11.263, P31-A K2). */
@@ -821,6 +828,10 @@ export function carryHere(g, hubId = g.scene, id = null) {
 }
 /** taskCards' part: a week's card with its own work going on (busy), the cards over for the day, and a "Go on" card for each work. */
 function weekCards(g, scenes, hubId, cards) {
+    if (CAMP_HUBS.has(hubId)) { // P52-A (BP-d): a camp's own menus' work cards are its plan's card rows (`day`), by the day
+        for (const c of cards) { if (c.kind !== 'work') continue; const card = cardOf(scenes, hubId, c.id); if (card?.menu && TASK_HUBS[hubId]?.menus?.[card.menu]) c.day = true; }
+        return;
+    }
     if (!weekHub(g, hubId)) return;
     const here = carriesHere(g, hubId), room = workRoom(g, hubId), mine = new Map(here.map((cy) => [cy.id, cy]));
     let left = null; // RV1 (SG): the stay's work minutes left, once
@@ -885,7 +896,8 @@ function openAfterPot(g, scenes, hubId, pot, id) {
     return taskOpen(c, scenes, id);
 }
 export function dayMeal(g, hubId = g.scene, scenes = null, mark = false, id = '', at = null) {
-    if (!weekHub(g, hubId) || g.combat) return [];
+    if (!routineHub(g, hubId) || g.combat) return []; // P52-A (BP-d): a camp's plan too
+    if (hubId === 'rr_hub' && !g.flags?.ya_mocked) return []; // P52-A RV (the cold review's M1): the Root Road eats first at "Eat with the others." (act1_blackroot.js: its "Eat something." waits for it)
     const t = st(g), d = workDay(g);
     if (!t.routine || typeof t.routine !== 'object' || t.routine.d !== d) t.routine = { d, meals: '', sit: false };
     const slot = at || mealSlot(g);
@@ -905,12 +917,12 @@ export function dayMeal(g, hubId = g.scene, scenes = null, mark = false, id = ''
     }
     if (foodCount(g) <= 0) return [];
     t.routine.meals = `${t.routine.meals || ''}${slot}`;
-    const e = eatBest(g, { fire: hubId === 'wilds' ? !!g.flags.fire : true });
+    const e = eatBest(g, { fire: hubId === 'wilds' ? !!g.flags.fire : !CAMP_HUBS.has(hubId) }); // P52-A (BP-d): at a camp as its "Eat something." (no fire)
     return e.length ? [`${MEAL[slot]}: ${String(e[0]).replace(/^You eat: /, '')}`] : [];
 }
 /** R1 + R2: the day's meals and sit before a card (lines), on a stay of the long calendar. */
 export function dayRoutine(g, scenes, hubId = g.scene, kind = '', id = '') {
-    if (!weekHub(g, hubId) || g.combat) return [];
+    if (!routineHub(g, hubId) || g.combat) return []; // P52-A (BP-d): a camp's plan too
     const t = st(g), d = workDay(g), out = [];
     if (!t.routine || typeof t.routine !== 'object' || t.routine.d !== d) t.routine = { d, meals: '', sit: false };
     if (!(PT1.on && mealCard(scenes, hubId, id))) out.push(...dayMeal(g, hubId, scenes, false, id)); // RV1 (L1, L2): an eat card tapped is the meal, marked when it runs

@@ -2,6 +2,13 @@
 
 Started in v0.11.278, when `roadmap-done-6.md` would have passed about 45 KB with this move. Newer than `roadmap-done-6.md` … `roadmap-done.md`. Every line here moved word for word; newest first. Each push that finishes a roadmap line moves it here; a new part past about 45 KB.
 
+## Moved in v0.11.284 (word for word; owner pick P52-A, 2026-11-26 23:40: G2, the plan; its closing note under it)
+
+### From `roadmap-2.md` section 4, step 6's bundle G2
+
+- *(moved in v0.11.244 from `roadmap-time.md`'s flip line, word for word; owner pick RO2, 2026-11-21 11:08; KR with bundle G)* **Measured, not picked (open, options later):** KR, the row showing the kept amount, "N left this week" as a note; BP, a plan for the Blackroot's camps (15 camp days a game, 130 / 160 / 189 / 375 card taps there; an estimate of 90–275 taps saved, not measured).
+  - *(v0.11.284, owner pick P52-A)* KR **done** (KR-k: a card row shows the amount kept, "N left this week" its note; − and + move both, `week.js` `planShown`, `planStep`); BP **done** (BP-d: "Plan the day" at the Blackroot's three camps, by the day, kept per camp, the day's routine while it runs, a stop at the evening and on again the next morning there; measured 263 / 335 / 190 / 377 camp card taps a game, `project/research/p52-measure.md`). The review's L4 (− then + adds a run this week) placed in `roadmap-2.md` section 4 with G3.
+
 ## Moved in v0.11.283 (word for word; owner picks P51-A, RV-A, TG-a, 2026-11-26: G1, Android and small fixes; each line's closing note under it)
 
 ### From `roadmap-2.md` section 4, step 6's bundle G1

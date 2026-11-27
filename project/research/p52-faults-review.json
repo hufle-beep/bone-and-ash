@@ -1,0 +1,7 @@
+[
+  { "id": "C1", "file": "js/core/week.js", "find": "p.dayOf = d; p.lastDay = d; p.stop = '';", "replace": "p.dayOf = d; p.lastDay = d;", "note": "a camp's new day keeps yesterday's stop ('evening' shown all next day); expected caught (the next-morning pin p.stop === '')" },
+  { "id": "C2", "file": "js/core/week.js", "find": "const was = CAMP_RUN.on;", "replace": "const was = false;", "note": "the read probe's nested runWeek turns the camp routine off for the rest of a real camp run (meals and sit stop after the first probe); expected MISSED: READ_STOP is off in the P52 block (TG2)" },
+  { "id": "C3", "file": "js/core/week.js", "find": "|| doorDaily(c.to)) return;", "replace": "|| doorRepeats(c.to)) return;", "note": "a camp door tapped by hand zeroes its plan row again (the plan's own path still keeps it); expected caught (the hand-tap pin: tap === undefined, planCount 1)" },
+  { "id": "C4", "file": "js/main.js", "find": "sh.n > 0 || sh.left > 0); });", "replace": "sh.n > 0); });", "note": "the minus button greyed on a row kept 0 with some left this week (no way to drop what is left); expected MISSED: main.js rows only source-pinned (TG3)" },
+  { "id": "C5", "file": "js/core/week.js", "find": "fc.med[k] ? 'today' : 'not today'", "replace": "fc.med[k] >= 0 ? 'today' : 'not today'", "note": "a camp's Meditate row always says 'today', even when the forecast stops before it; expected MISSED: only the 'today' case is pinned (TG4)" }
+]
