@@ -69,7 +69,7 @@ export function installCoil(SCENES) {
 
 **This Coil:** ${r.gained.length ? r.gained.join(' · ') : 'nothing you can measure. Yet.'}
 
-**James remembers:** ${r.known.length ? `${r.known.join('; ')}.` : 'the way the moss smells. Not much else worth writing down.'}
+**James remembers:** ${r.known.length ? `${r.known.join('; ')}.` : 'the way the moss smells. Not much else worth writing down.'}${r.fresh ? ` ${r.fresh === 1 ? 'One of these is' : `${r.fresh} of these are`} new this Coil: ${r.fresh === 1 ? 'its' : 'their'} power starts with the next Coil (the Archive).` : ''}
 ${r.near.length ? `
 **Closest to the next tier:** ${r.near.map((x) => `${cardName(g, x.id)} ${x.f}/${x.at} (${x.tier})`).join(' · ')}
 ` : ''}${r.yuki?.length ? `

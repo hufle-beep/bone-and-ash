@@ -12,7 +12,7 @@
  */
 import { ARCS, ARC_AT, REGION_DONE } from './threads.js';
 import { enterHook } from './story.js';
-import { MARK_COUNT, MARK_DRAIN, marksHeld } from './game.js';
+import { MARK_COUNT, MARK_DRAIN, marksHeld, INSIGHT_KIND, INSIGHT_KINDS, INSIGHT_STEP, insightsHeld, fedCut } from './game.js';
 import { REMEMBER, KNOW_TEXT } from './coil.js';
 
 /** The Insights, in the story's order: the flag and its name (design.md's names; the last three the Coil screen's own). */
@@ -85,7 +85,9 @@ export function installArchive() { enterHook.archive = archiveAt; }
 /** The Archive's content (AR-t), plain data for the tab. */
 export function archiveView(g) {
     const known = new Set([...(g.coil?.known || []), ...INSIGHTS.filter((x) => g.flags?.[x.f]).map((x) => x.f)]);
-    const insights = INSIGHTS.filter((x) => known.has(x.f)).map((x) => ({ name: x.name, line: REMEMBER[x.f] || KNOW_TEXT[x.f] || '' }));
+    const held = new Set(g.coil?.known || []); // v0.11.288 (P56-A, WH-n): what counts this Coil; a find of this Coil counts from the next
+    const insights = INSIGHTS.filter((x) => known.has(x.f)).map((x) => ({ name: x.name, line: REMEMBER[x.f] || KNOW_TEXT[x.f] || '', kind: INSIGHT_KIND[x.f], held: held.has(x.f) }));
+    const power = INSIGHT_KINDS.map((kind) => ({ kind, n: insightsHeld(g, kind), pct: Math.round(100 * INSIGHT_STEP * insightsHeld(g, kind)) })).filter((x) => x.n);
     const bits = (Number(g.stats?.marks) || 0) & 511;
     const marks = ARCS.map((name, i) => ({ name, got: !!(bits & (1 << i)) }));
     const seen = new Set(g.stats?.ends || []);
@@ -93,10 +95,11 @@ export function archiveView(g) {
     const endings = ENDINGS.filter((x) => seen.has(x.k)).map((x) => x.name);
     const wonOld = seen.has(END_WON) && !['a:victory', 'a:accord', 'a:revelation'].some((k) => seen.has(k));
     const foes = Object.entries(g.stats?.foes || {}).filter(([, n]) => n > 0).map(([id, n]) => ({ name: foeName(id), n })).sort((a, b) => a.name.localeCompare(b.name));
-    const held = marksHeld(g);
+    const marksN = marksHeld(g);
     return {
-        insights, insightsOf: INSIGHTS.length,
-        marks, held, marksOf: MARK_COUNT, slower: Math.round(100 * MARK_DRAIN * held),
+        insights, insightsOf: INSIGHTS.length, power, step: Math.round(100 * INSIGHT_STEP), fedAll: Math.round(100 * fedCut(g)),
+        fedCapped: Math.round(100 * MARK_DRAIN * marksN) + Math.round(100 * INSIGHT_STEP * insightsHeld(g, 'fed')) > Math.round(100 * fedCut(g)), // the review's L2
+        marks, held: marksN, marksOf: MARK_COUNT, slower: Math.round(100 * MARK_DRAIN * marksN),
         endings, endingsOf: ENDINGS.length, wonOld,
         foes,
     };
@@ -106,7 +109,15 @@ export const ARCHIVE_TEXT = {
     lede: 'What James keeps from every Coil, whatever the rewind takes.',
     insights: (n, of) => `Insights: ${n} of ${of}`,
     noInsights: 'Nothing yet that he would call an insight.',
-    marks: (n, of, pct) => `Coil marks: ${n} of ${of}${n ? ` · Fed drains ${pct}% slower` : ''}`,
+    // v0.11.288 (P56-A, UI-p): what each Insight gives, and what counts this Coil
+    kind: { blow: 'a foe\'s blow', sit: 'Saturation a sit', fed: 'Fed\'s drain', xp: 'skill XP (Yuki\'s share too)' }, // the review's L1: her bond share comes from the same pool
+    sign: { blow: '−', sit: '+', fed: '−', xp: '+' },
+    gives: (kind, pct) => `${ARCHIVE_TEXT.sign[kind]}${pct}% ${ARCHIVE_TEXT.kind[kind]}`,
+    next: 'counts from the next Coil',
+    // the review's L2: the total only with marks held too, the cap only when reached; one rule line, not two
+    power: (parts, fedAll, marks = 0, capped = false) => (parts.length ? `This Coil: ${parts.map((x) => ARCHIVE_TEXT.gives(x.kind, x.pct)).join(', ')}.${parts.some((x) => x.kind === 'fed') && marks ? ` With the Coil marks, Fed drains ${fedAll}% slower${capped ? ' (50% at most)' : ''}.` : ''}` : 'None counts yet: each Insight counts from the Coil after the one that found it, and those of a kind add up.'),
+    powerNote: 'Each Insight counts from the Coil after it is found; those of a kind add up.',
+    marks: (n, of, pct) => `Coil marks: ${n} of ${of}${n ? ` · −${pct}% Fed's drain` : ''}`, // the review's L2: one "Fed drains" total, in the Insights' line
     marksNote: 'One for each part of the story the first time it is finished, in any Coil.',
     got: 'finished', // PG: a word, not a check mark (the fonts test: every character in Literata or the phone's list)
     foes: (n) => `Foes met: ${n}`,

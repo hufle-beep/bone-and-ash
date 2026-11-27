@@ -5,10 +5,10 @@
  * shared camp / fireside / night scenes, a seeded night event, and the Mei Lin – Ya – James romance arc.
  * Entry 'bl_start' (Day 11). Exit 'ht_start' (Day 16, 06:00). Region in g.flags.bl_region, expedition day in g.flags.bl_day (1–5).
  */
-import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest, canFly, satDiv } from '../core/game.js'; // v0.11.207 (RV1, M1): satDiv
+import { addItem, hasItem, eat, advance, clockParts, d6, awardYukiFightXp, jamesHpMax, condense, dayHour, nightTo, nightRest, canFly, satDiv, insightPct } from '../core/game.js'; // v0.11.207 (RV1, M1): satDiv
 /** v0.11.207 (owner pick RV1, M1): the root's Saturation, +12%; ÷4 on the long calendar (+3%), ÷6 from True Core (+2%; v0.11.256, P26-A), as a sit (game.js satDiv). */
 export const ROOT_SAT = 12;
-export const rootGain = (g) => Math.round((ROOT_SAT / satDiv(g)) * 10) / 10;
+export const rootGain = (g) => Math.round(((ROOT_SAT * (100 + insightPct(g, 'sit'))) / 100 / satDiv(g)) * 10) / 10; // v0.11.288 (P56 review, M1-u): the sit Insights, as a sit
 import { hasForm } from '../core/forms.js';
 import { choiceOpen, gives } from '../core/story.js'; // v0.11.161 (PO2): `optionLeft`; RV (GV, Fable's H1): the wrapper carries the card's items
 import { daily, markDaily, eatBest, pantry, foodCount, hour, byForm, byDay, dayReply, dayKey } from './common.js';

@@ -1594,7 +1594,7 @@ for (const form of ['cat', 'human']) {
     { const strip = (f) => (typeof f === 'function' ? f.toString().replace(/`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g, 'S') : String(f ?? ''));
       const out = {}; for (const id of Object.keys(LONGFOREST)) { const s = SCENES[id]; out[id] = [strip(s.enter), (s.choices || []).map((c) => [c.qi || 0, c.check ? `${c.check.band || ''}/${c.check.xpTo || ''}/${c.check.bonus ? strip(c.check.bonus) : ''}` : '', (c.gives || []).join(','), strip(c.do), strip(c.failDo), strip(c.show)].join('|'))]; }
       const h = createHash('sha1').update(JSON.stringify(out)).digest('hex');
-      assert(h === '5ffabaa6ff1cfbdb9aa71d8ce83f31bc0906845e', `TG10: the Long Forest's code with its strings taken out, as in v0.11.213 (re-pinned: daily()'s body, the S3 spacing in common.js; no Long Forest key is spaced) (v0.11.177's P9A: the dead menus, the spar's pool, the Heartless's win; v0.11.207's RV1 L2: the seclusion's Saturation ÷satDiv) (${h}; update only with a push that means to change it)`); }
+      assert(h === '56ca4bc7b93db569170eacf96c1f22e78a6918a4', `TG10: the Long Forest's code with its strings taken out, as in v0.11.213 (re-pinned: daily()'s body, the S3 spacing in common.js; no Long Forest key is spaced) (v0.11.177's P9A: the dead menus, the spar's pool, the Heartless's win; v0.11.207's RV1 L2: the seclusion's Saturation ÷satDiv; v0.11.288's M1-u: the seclusion's sit Insights) (${h}; update only with a push that means to change it)`); }
     // TG11: the first visits on day 0 count no weeks, months or days
     for (const id of Object.keys(LONGFOREST)) for (const [form] of FORMS) { const g = L(seed++, form, 7); g.scene = id; let t = ''; try { t = txt(id, g); } catch { t = ''; } const SPENT = /\b(?:several|many|for|after) (?:weeks|months|days)\b|\bweeks of\b|\ba while ago\b/; assert(!SPENT.test(t), `TG11: ${id} as ${form} on day 0 counts no time spent here (${(t.match(/.{0,30}(?:weeks|months|days|a while ago).{0,20}/) || [''])[0]})`); } // a week's walk, this week (the prologue's), a lie's month: not time spent here
     // TG13 (C5): a drill card on the task screen shows a drill line in every band it reaches
@@ -3784,9 +3784,12 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
           // v0.11.271 (owner pick JW-A, in the P39-A build): journey.02 (Ya at a journey camp, friendship under 30) showed in 2 of the 160
           // walks (Ya 26, James at Core Formation or up); RG's collectors moved those games and it showed in none (200 walks and Ya held low
           // tried: 0 each), so it is checked directly below on a built state, not by the walks' luck
-          const DIRECT = new Set(['journey.02']);
+          // v0.11.288 (owner pick WL-d, in the P56-A build): return.02 (the mother at a return supper, friendship 30–79) showed in 4 of
+          // the walks' draws before Insights' power and in none after (the walks bite the tail, so their later Coils changed); checked
+          // directly below, as journey.02
+          const DIRECT = new Set(['journey.02', 'return.02']);
           const miss = allKeys.filter(([k, key]) => !shownKeys.has(k) && !DIRECT.has(key)).map(([, key]) => key);
-          assert(miss.length === 0, `RV1 (TG1): every music and archive line shows in the random walks (160 games, 120 from the Fallout, 30 from the return; journey.02 checked directly) (never: ${miss.join(', ') || 'none'})`);
+          assert(miss.length === 0, `RV1 (TG1): every music and archive line shows in the random walks (160 games, 120 from the Fallout, 30 from the return; journey.02 and return.02 checked directly) (never: ${miss.join(', ') || 'none'})`);
           const j02 = M.MUSIC_LINES.journey.music.find((x) => x.key === 'journey.02');
           const g = ensureBars(newGame(78055)); g.coil.act = 1; g.flags.ya_party = true; g.rel.Ya = { f: 26, a: 35 };
           const at = (f, party, place) => { g.rel.Ya.f = f; g.flags.ya_party = party; return M.lineOpen(g, j02, 'journey', place); };
@@ -3796,7 +3799,17 @@ if (!FULL) console.log(`  coverage (quick, log only): ${Object.keys(SCENES).leng
           const drawn = (f) => { const h = ensureBars(newGame(79000)); h.coil.act = 1; h.flags.ya_party = true; h.rel.Ya = { f, a: 35 }; h.scene = 'bl_camp'; let k = 0;
               for (let d = 60; d < 100; d++) { h.minutes = calMinutes(h, d, 19); if (M.musicLine(h, { id: 'bl_camp', text: '' })?.key === 'journey.music.1') k++; } return k; };
           const dn = [drawn(26), drawn(30)];
-          assert(dn[0] > 0 && dn[1] === 0, `JW-A (P39-A, TG2): journey.02 drawn on bl_camp's evenings with Ya at 26, never at 30 (${dn.join(' / ')} of 40)`); }
+          assert(dn[0] > 0 && dn[1] === 0, `JW-A (P39-A, TG2): journey.02 drawn on bl_camp's evenings with Ya at 26, never at 30 (${dn.join(' / ')} of 40)`);
+          // WL-d (v0.11.288): return.02 opens at the return's house with the mother at 30–79 only, and is drawn on rt_evening's evenings
+          const r02 = M.MUSIC_LINES.return.music.find((x) => x.key === 'return.02');
+          const rg = ensureBars(newGame(78055)); rg.coil.act = 1; rg.rel.Mother = { f: 50, a: 0 };
+          const rat = (f, place) => { rg.rel.Mother.f = f; return M.lineOpen(rg, r02, 'return', place); };
+          const rgot = [rat(50, 'house'), rat(30, 'house'), rat(29, 'house'), rat(79, 'house'), rat(80, 'house'), rat(50, 'stove')].map(Number).join('');
+          assert(r02 && r02.place === 'house' && r02.who === 'mother' && r02.step === 'mid' && rgot === '110100', `WL-d: return.02 opens at the return's house with the mother at 30–79 (50, 30, 79), shut at 29, 80 and at the stove (${rgot})`);
+          const rdrawn = (f) => { const h = ensureBars(newGame(79000)); h.coil.act = 1; h.rel.Mother = { f, a: 0 }; h.scene = 'rt_evening'; let k = 0;
+              for (let d = 60; d < 100; d++) { h.minutes = calMinutes(h, d, 19); if (M.musicLine(h, { id: 'rt_evening', text: '' })?.key === 'return.music.1') k++; } return k; };
+          const rdn = [rdrawn(50), rdrawn(29), rdrawn(80)];
+          assert(rdn[0] > 0 && rdn[1] === 0 && rdn[2] === 0, `WL-d: return.02 drawn on rt_evening's evenings with the mother at 50, never at 29 or 80 (${rdn.join(' / ')} of 40)`); }
     }
 
     // CM3 (v0.11.183, owner picks SG2, D1): the songs: PL each once in its scene, ON-S once a save (kept across the Coil), DU the day's music, ED both editions

@@ -1,0 +1,86 @@
+[
+ {
+  "id": "F1",
+  "file": "js/core/coil.js",
+  "find": "    remember(g); // v0.11.288",
+  "replace": "    // remember(g); // v0.11.288",
+  "note": "the rewind forgets to keep the Coil's finds"
+ },
+ {
+  "id": "F2",
+  "file": "js/core/coil.js",
+  "find": "    c.why = why; c.back = back;\n}",
+  "replace": "    c.why = why; c.back = back; remember(g);\n}",
+  "note": "endCoil adds the finds again: Not yet gets them this Coil"
+ },
+ {
+  "id": "F3",
+  "file": "js/core/game.js",
+  "find": "export const INSIGHT_STEP = 0.15, FED_CUT_MAX = 0.5;",
+  "replace": "export const INSIGHT_STEP = 0.1, FED_CUT_MAX = 0.5;",
+  "note": "10% not 15%"
+ },
+ {
+  "id": "F4",
+  "file": "js/core/game.js",
+  "find": "export const fedCut = (g) => Math.min(FED_CUT_MAX, ",
+  "replace": "export const fedCut = (g) => Math.min(1, ",
+  "note": "no 50% cap"
+ },
+ {
+  "id": "F5",
+  "file": "js/core/game.js",
+  "find": "let dmg = insightBlow(g, hitDamage(e.dmg,",
+  "replace": "let dmg = (hitDamage(e.dmg,",
+  "note": "the fight round ignores the blow Insights"
+ },
+ {
+  "id": "F6",
+  "file": "js/core/game.js",
+  "find": "for (const f of new Set(k)) if (INSIGHT_KIND[f] === kind) n += 1;",
+  "replace": "for (const f of k) if (INSIGHT_KIND[f] === kind) n += 1;",
+  "note": "a repeated known entry counts twice"
+ },
+ {
+  "id": "F7",
+  "file": "js/core/game.js",
+  "find": "(sits * (100 + insightPct(g, 'sit')))",
+  "replace": "(sits * (100 + insightPct(g, 'xp')))",
+  "note": "sits read the XP kind"
+ },
+ {
+  "id": "F8",
+  "file": "js/core/archive.js",
+  "find": "held: held.has(x.f) }",
+  "replace": "held: true }",
+  "note": "this Coil's finds shown as counting"
+ },
+ {
+  "id": "F9",
+  "file": "js/core/coil.js",
+  "find": "    const fresh = finds(g).filter((f) => !(c.known || []).includes(f)).length;",
+  "replace": "    const fresh = 0;",
+  "note": "the Coil screen never notes new finds"
+ },
+ {
+  "id": "F10",
+  "file": "js/core/game.js",
+  "find": "pool * ((100 + insightPct(g, 'xp')) / 100) * coilMult(g)",
+  "replace": "pool * coilMult(g)",
+  "note": "XP Insights do nothing"
+ },
+ {
+  "id": "F11",
+  "file": "js/core/game.js",
+  "find": "    g.james.hp = hpAfterBlow(g, dmg); // v0.11.288 (P56 review, L4)\n        lines.push",
+  "replace": "    g.james.hp = Math.max(0, g.james.hp - dmg);\n        lines.push",
+  "note": "HP not kept in tenths (L4)"
+ },
+ {
+  "id": "F12",
+  "file": "js/core/archive.js",
+  "find": "&& marks ? ` With the Coil marks",
+  "replace": "? ` With the Coil marks",
+  "note": "the total shown with no marks (L2)"
+ }
+]

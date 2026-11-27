@@ -4,6 +4,9 @@
 // bar's lines. B the Insights (IN-13): 13, each with its words, the Coil remembers the three new ones, the view shows found ones (kept
 // or this Coil's). C the endings (`stats.ends`) and the old save's fill (SV, game.js archiveFill). D foes met: every fight named.
 // E the tab's wiring (read as text: index.html, main.js, sw.js, the CSS, the key). F the FAQ and What's new.
+// H (v0.11.288, owner pick P56-A: MP + WH-n + LV-15 + UI-p + SV): Insights' power: the mapping, from the next Coil (the rewind, not
+// endCoil; "Not yet" keeps none), each kind's hook (a foe's blow, a sit, Fed with the marks' cap, skill XP), the Archive, the Fed bar,
+// the Coil screen, the FAQ and What's new.
 // Mutation: tools/mutate.mjs on archive.js and game.js's marks.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -12,12 +15,13 @@ import { SCENES } from '../js/story/prologue.js';
 import * as G from '../js/core/game.js';
 import * as A from '../js/core/archive.js';
 import { ARCS, ARC_AT } from '../js/core/threads.js';
-import { rewind, endCoil, REMEMBER, KNOW_TEXT, KEEP_FLAGS } from '../js/core/coil.js';
+import { rewind, endCoil, REMEMBER, KNOW_TEXT, KEEP_FLAGS, coilReport, remember } from '../js/core/coil.js';
 import { goTo, enterHook, choose, sceneView } from '../js/core/story.js';
 import { tabWhy } from '../js/core/coil.js';
 import * as T from '../js/core/tasks.js';
 import { NO_DICE_TUNE } from '../js/story/nodice_tune.js';
 import { FIGHTS as LF_FIGHTS } from '../js/story/longforest.js';
+import { rootGain, ROOT_SAT } from '../js/story/act1_blackroot.js'; // v0.11.288 (P56 review, M1-u)
 import { FAQ } from '../js/core/faq.js';
 const faqText = (q, g) => FAQ.find(([x]) => x === q)[1](g);
 import { NOTES } from '../js/core/news.js';
@@ -86,8 +90,11 @@ const game = (seed = 5) => G.newGame(seed, { closed: true });
     assert(Object.keys(REMEMBER).concat(Object.keys(KNOW_TEXT)).every((f) => A.INSIGHTS.some((x) => x.f === f)), 'B: everything the Coil remembers is an Insight');
     assert(['bl_tracker', 'told_hearth', 'grove'].every((f) => f in REMEMBER && !KEEP_FLAGS.includes(f)), 'B: the three new ones are remembered, not kept as flags');
     const g = game(); g.flags.bl_tracker = true; g.flags.grove = 'gentle'; g.flags.roots = true; endCoil(g, 'choice');
-    assert(['bl_tracker', 'grove', 'roots'].every((f) => g.coil.known.includes(f)) && !g.coil.known.includes('told_hearth'), 'B: the Coil remembers what was found');
+    const rep = coilReport(g); // v0.11.288 (P56-A, WH-n): endCoil no longer adds them; the Coil screen shows them, the rewind keeps them
+    assert(Array.isArray(rep.known) && rep.known.length === 3, `B (P56 review, TG5): the Coil screen lists the three finds (${rep.known?.length})`);
+    assert([REMEMBER.bl_tracker, REMEMBER.grove, REMEMBER.roots].every((x) => rep.known.includes(x)) && !rep.known.includes(REMEMBER.told_hearth) && rep.fresh === 3 && g.coil.known.length === 0, 'B: the Coil screen remembers what was found; the rewind keeps it');
     rewind(g);
+    assert(['bl_tracker', 'grove', 'roots'].every((f) => g.coil.known.includes(f)), 'B (P56 review, TG5): the rewind keeps all three');
     assert(!g.flags.bl_tracker && g.coil.known.includes('bl_tracker'), 'B: after the rewind: the flag gone, the Insight kept');
     g.flags.lore_realms = true;
     const v = A.archiveView(g);
@@ -154,14 +161,14 @@ const game = (seed = 5) => G.newGame(seed, { closed: true });
     assert(/'js\/core\/archive\.js'/.test(sw), 'E: the offline cache holds archive.js');
     assert(/key: 'a', show: 'A', does: 'Archive', tab: 'archive'/.test(app), 'E: key A');
     const T = A.ARCHIVE_TEXT;
-    assert(T.marks(0, 9, 0) === 'Coil marks: 0 of 9' && T.marks(3, 9, 15) === 'Coil marks: 3 of 9 · Fed drains 15% slower' && T.insights(4, 13) === 'Insights: 4 of 13', 'E: the headings');
+    assert(T.marks(0, 9, 0) === 'Coil marks: 0 of 9' && T.marks(3, 9, 15) === 'Coil marks: 3 of 9 · −15% Fed\'s drain' && T.insights(4, 13) === 'Insights: 4 of 13', 'E: the headings');
 }
 
 // F: the FAQ and What's new
 {
     const fed = faqText('HP, Convergence and Fed', game());
     assert(/Every <b>Coil mark<\/b>.*5% slower, up to 45% with all 9/.test(fed), 'F: the FAQ: the marks\' drain');
-    assert(/the Archive \(Insights, Coil marks, foes met, endings seen\)/.test(faqText('What carries over', game())), 'F: the FAQ: what carries over');
+    assert(/the Archive \(Insights, Coil marks, foes met, endings seen[;)]/.test(faqText('What carries over', game())), 'F: the FAQ: what carries over');
     const note = NOTES.find(([v]) => v === '0.11.287');
     assert(!!note && /Archive/.test(note[1]) && /5% slower, up to 45%/.test(note[1]), 'F: What\'s new');
 }
@@ -191,6 +198,149 @@ const game = (seed = 5) => G.newGame(seed, { closed: true });
     // TG4: the starving boundary inside one span: Fed 0.1, 3 marks (2.55 an hour), 15 minutes
     const b = game(); b.stats.marks = 0b111; b.james.satiety = 0.1; b.starveCarry = 0; G.advance(b, 15);
     assert(b.james.satiety === 0 && near(b.starveCarry, 15 - (0.1 * 60) / 2.55), `TG4: Fed 0.1 lasts ${(0.1 * 60 / 2.55).toFixed(3)} min at 3 marks; the rest starving (${b.starveCarry.toFixed(4)})`);
+}
+
+// H: Insights' power (v0.11.288, owner pick P56-A)
+{
+    assert(G.INSIGHT_STEP === 0.15 && G.FED_CUT_MAX === 0.5, 'H: 15% an Insight; Fed cut at most 50%');
+    const kinds = Object.values(G.INSIGHT_KIND), cnt = (k) => kinds.filter((x) => x === k).length;
+    assert(Object.keys(G.INSIGHT_KIND).sort().join() === A.INSIGHTS.map((x) => x.f).sort().join(), 'H: every Insight has a kind, and only Insights');
+    assert(cnt('blow') === 4 && cnt('sit') === 4 && cnt('fed') === 3 && cnt('xp') === 2 && G.INSIGHT_KINDS.join() === 'blow,sit,fed,xp', 'H: the mapping: 4 blow, 4 sit, 3 Fed, 2 XP');
+    assert(['lore1', 'bone_sung', 'bl_tracker', 'log_heard'].every((f) => G.INSIGHT_KIND[f] === 'blow') && ['lore_realms', 'lore_tree', 'saw_lights', 'grove'].every((f) => G.INSIGHT_KIND[f] === 'sit') && ['fungus', 'gills', 'roots'].every((f) => G.INSIGHT_KIND[f] === 'fed') && ['told_hearth', 'ship_found'].every((f) => G.INSIGHT_KIND[f] === 'xp'), 'H: the mapping as picked (MP)');
+    const g0 = game();
+    assert(G.INSIGHT_KINDS.every((k) => G.insightPart(g0, k) === 0) && near(G.fedPerHour(g0), 3), 'H: a new game: no part, Fed 3 an hour');
+    // WH-n: a find counts from the next Coil; endCoil and "Not yet" keep it out
+    const w = game(); w.flags.lore1 = true; w.flags.bone_sung = true; w.flags.fungus = true; w.flags.lore_realms = true; w.flags.told_hearth = true;
+    assert(G.INSIGHT_KINDS.every((k) => G.insightPart(w, k) === 0), 'H: found this Coil: no power yet');
+    goTo(w, SCENES, 'wilds'); endCoil(w, 'choice', 'wilds'); goTo(w, SCENES, 'coil_end');
+    assert(G.insightPart(w, 'blow') === 0 && w.coil.known.length === 0, 'H: on the Coil screen: still none');
+    const ny = sceneView(w, SCENES).choices.find((c) => c.label === 'Not yet.');
+    if (ny) choose(w, SCENES, ny.index);
+    assert(!!ny && w.scene === 'wilds' && G.insightPart(w, 'blow') === 0 && G.insightPart(w, 'fed') === 0, `H: "Not yet": back in the same Coil, still none (${w.scene})`);
+    rewind(w);
+    assert(near(G.insightPart(w, 'blow'), 0.3) && near(G.insightPart(w, 'sit'), 0.15) && near(G.insightPart(w, 'fed'), 0.15) && near(G.insightPart(w, 'xp'), 0.15), 'H: after the rewind: blow 30%, sit 15%, Fed 15%, XP 15%');
+    rewind(w); assert(G.insightsHeld(w, 'blow') === 2, 'H: kept by every rewind, counted once');
+    // old saves: no known list
+    const o = game(); delete o.coil.known; assert(G.insightPart(o, 'blow') === 0, 'H: no known list: no part'); o.flags.roots = true; remember(o); assert(o.coil.known.join() === 'roots', 'H: remember makes the list');
+    const nc = game(); nc.coil = null; assert(G.insightPart(nc, 'fed') === 0 && near(G.fedPerHour(nc), 3), 'H: no Coil: no part');
+    // blow
+    const b = game(); b.coil.known = ['lore1', 'bone_sung'];
+    assert(G.insightBlow(b, 10) === 7 && G.insightBlow(b, 0) === 0 && G.insightBlow(b, 3) === 2.1, 'H: two blow Insights: 10 → 7, 3 → 2.1, 0 stays');
+    b.coil.known = ['lore1', 'bone_sung', 'bl_tracker', 'log_heard', 'lore1']; assert(G.insightBlow(b, 10) === 4, 'H: all four: −60% (a repeated entry counts once)');
+    assert(G.insightBlow(game(), 7) === 7, 'H: none: the blow unchanged');
+    const src = read('js/core/game.js');
+    assert(/let dmg = insightBlow\(g, hitDamage\(e\.dmg,/.test(src) && /const dmg = insightBlow\(g, hitDamage\(biter\.dmg,/.test(src), 'H: the fight round and a failed run use it');
+    // sit
+    const s0 = game(), s1 = game(); s1.coil.known = ['lore_realms', 'lore_tree', 'saw_lights', 'grove'];
+    const raw = 100 / G.SAT_HOURS(0) / G.satDiv(s0);
+    assert(near(G.sitGain(s1), Math.round(raw * 1.6 * 10) / 10) && G.sitGain(s1) > G.sitGain(s0), `H: four sit Insights: a sit gives ×1.6 (${G.sitGain(s0)} → ${G.sitGain(s1)})`);
+    // fed: with the marks, capped
+    const f = game(); f.coil.known = ['fungus', 'gills', 'roots'];
+    assert(near(G.fedPerHour(f), 1.65) && near(G.fedCut(f), 0.45), 'H: three Fed Insights: 1.65 an hour (−45%)');
+    f.stats.marks = 511; assert(near(G.fedPerHour(f), 1.5) && near(G.fedCut(f), 0.5), 'H: with all 9 marks: capped at −50% (1.5 an hour)');
+    f.stats.marks = 0b1; f.coil.known = ['fungus']; assert(near(G.fedPerHour(f), 3 * 0.8), 'H: 1 mark and 1 Fed Insight: −20%');
+    const fa = game(); fa.coil.known = ['fungus', 'gills', 'roots']; fa.stats.marks = 511; fa.james.satiety = 80; G.advance(fa, 60);
+    assert(near(80 - fa.james.satiety, 1.5), `H: an hour awake at the cap: −1.5 (${(80 - fa.james.satiety).toFixed(3)})`);
+    // xp
+    const x0 = game(), x1 = game(); x1.coil.known = ['told_hearth', 'ship_found'];
+    const xp = (g) => { const before = JSON.stringify(g.james.gu); G.awardXp(g, 'GU', 'standard'); return { before, after: g.james.gu }; };
+    const r0 = xp(x0), r1 = xp(x1);
+    const tot = (n) => n.tier * 1e6 + n.level * 1e3 + n.xp;
+    assert(tot(r1.after) > tot(r0.after), `H: two XP Insights: more GU XP (${JSON.stringify(r0.after)} vs ${JSON.stringify(r1.after)})`);
+    assert(/pool \* \(\(100 \+ insightPct\(g, 'xp'\)\) \/ 100\) \* coilMult\(g\)/.test(src), 'H: awardXp\'s pool takes the XP part');
+    // the Archive (UI-p)
+    const v = game(); v.coil.known = ['lore1', 'fungus']; v.flags.lore1 = true; v.flags.bone_sung = true;
+    const av = A.archiveView(v);
+    assert(av.insights.map((x) => `${x.name}:${x.kind}:${x.held}`).join() === 'The bracket fungus:fed:true,Bone song:blow:false,The tribute:blow:true', `H: the view: kind and whether it counts this Coil (${av.insights.map((x) => `${x.name}:${x.kind}:${x.held}`).join()})`);
+    assert(av.power.map((p) => `${p.kind}${p.pct}`).join() === 'blow15,fed15' && av.step === 15 && av.fedAll === 15, 'H: the view: what counts this Coil');
+    const AT = A.ARCHIVE_TEXT;
+    assert(AT.gives('blow', 15) === '−15% a foe\'s blow' && AT.gives('sit', 15) === '+15% Saturation a sit' && AT.gives('fed', 30) === '−30% Fed\'s drain' && AT.gives('xp', 15) === '+15% skill XP (Yuki\'s share too)', 'H: the words for each kind');
+    assert(AT.power(av.power, av.fedAll, av.held, av.fedCapped) === 'This Coil: −15% a foe\'s blow, −15% Fed\'s drain.' && AT.power([], 0) === 'None counts yet: each Insight counts from the Coil after the one that found it, and those of a kind add up.', `H: the power line, no marks: no total (the review's L2) (${AT.power(av.power, av.fedAll, av.held, av.fedCapped)})`);
+    // the review's TG4: with marks, the total; the cap only when reached
+    v.stats.marks = 0b11; const av2 = A.archiveView(v);
+    assert(AT.power(av2.power, av2.fedAll, av2.held, av2.fedCapped) === 'This Coil: −15% a foe\'s blow, −15% Fed\'s drain. With the Coil marks, Fed drains 25% slower.' && !av2.fedCapped, `H (TG4): with 2 marks: the total, no cap (${AT.power(av2.power, av2.fedAll, av2.held, av2.fedCapped)})`);
+    v.stats.marks = 511; v.coil.known = ['fungus', 'gills']; const av3 = A.archiveView(v);
+    assert(av3.fedCapped && av3.fedAll === 50 && AT.power(av3.power, av3.fedAll, av3.held, av3.fedCapped) === 'This Coil: −30% Fed\'s drain. With the Coil marks, Fed drains 50% slower (50% at most).', `H (TG4): past the cap (${AT.power(av3.power, av3.fedAll, av3.held, av3.fedCapped)})`);
+    v.stats.marks = 0b1; v.coil.known = ['fungus', 'gills', 'roots']; const av4 = A.archiveView(v);
+    assert(av4.fedAll === 50 && !av4.fedCapped && /Fed drains 50% slower\.$/.test(AT.power(av4.power, av4.fedAll, av4.held, av4.fedCapped)), 'H (TG4): exactly at 50%: no cap note');
+    assert(G.fedInsightLine(1, 3) === 'Coil marks: 1 of 9 (−5%), Insights: −45%. Fed drains 50% slower.', `H (TG4): the Fed bar exactly at 50% (${G.fedInsightLine(1, 3)})`);
+    assert(AT.kind.xp === 'skill XP (Yuki\'s share too)', 'H (the review\'s L1): the XP kind names Yuki\'s share');
+    assert(/T\.power\(a\.power, a\.fedAll, a\.held, a\.fedCapped\)\)\}\$\{a\.power\.length \? /.test(read('js/main.js')), 'H (L2): the tab passes the marks and the cap, the rule note only with a part held');
+    const main = read('js/main.js');
+    assert(/T\.power\(a\.power, a\.fedAll, a\.held, a\.fedCapped\)/.test(main) && /T\.gives\(x\.kind, a\.step\)/.test(main) && /x\.held \? '' : ' dim'/.test(main) && /T\.next/.test(main), 'H: the tab draws the power line, each row\'s gift, this Coil\'s finds dimmed');
+    // the Fed bar
+    const fb = game(); fb.coil.known = ['fungus', 'gills']; fb.stats.marks = 0b11;
+    const fl = G.barLines(fb, 'fed');
+    assert(fl.includes('Coil marks: 2 of 9 (−10%), Insights: −30%. Fed drains 40% slower.'), `H: the Fed bar: marks and Insights (${fl.join(' | ')})`);
+    fb.coil.known = ['fungus', 'gills', 'roots']; fb.stats.marks = 511;
+    assert(G.barLines(fb, 'fed').includes('Coil marks: 9 of 9 (−45%), Insights: −45%. Fed drains 50% slower (50% at most).'), 'H: the Fed bar at the cap');
+    fb.coil.known = []; assert(G.barLines(fb, 'fed').includes('Coil marks: 9 of 9, 45% slower.'), 'H: the Fed bar: marks alone, as before');
+    // the Coil screen
+    const cs = game(); cs.coil.known = ['lore1']; cs.flags.lore1 = true; cs.flags.roots = true; cs.flags.gills = true; endCoil(cs, 'choice', 'wilds'); goTo(cs, SCENES, 'coil_end');
+    const ct = sceneView(cs, SCENES).text;
+    assert(coilReport(cs).fresh === 2 && /2 of these are new this Coil: their power starts with the next Coil \(the Archive\)\./.test(ct), 'H: the Coil screen: this Coil\'s finds, from the next Coil');
+    const c1 = game(); c1.flags.roots = true; endCoil(c1, 'choice', 'wilds'); goTo(c1, SCENES, 'coil_end');
+    assert(/One of these is new this Coil: its power starts/.test(sceneView(c1, SCENES).text), 'H: the Coil screen: one find');
+    const c0 = game(); c0.coil.known = ['roots']; c0.flags.roots = true; endCoil(c0, 'choice', 'wilds'); goTo(c0, SCENES, 'coil_end');
+    assert(!/new this Coil/.test(sceneView(c0, SCENES).text), 'H: the Coil screen: nothing new, no note');
+    // FAQ and What's new
+    assert(/each Fed Insight \(the bracket fungus, Ghost-gill, Roots\) 15% more, from the Coil after it is found; together at most 50%/.test(faqText('HP, Convergence and Fed', game())), 'H: the FAQ: Fed');
+    assert(/each Insight gives one thing from the Coil after it is found: 15% off a foe's blow, 15% more Saturation a sit, 15% off Fed's drain or 15% more skill XP \(Yuki's bond share too\)/.test(faqText('What carries over', game())), 'H: the FAQ: what carries over, with the direction (the review\'s L3)');
+    const n288 = NOTES.find(([ver]) => ver === '0.11.288');
+    assert(!!n288 && /From the Coil after one is found, each gives 15%/.test(n288[1]) && /50% at most/.test(n288[1]) && /Yuki\\'s share|Yuki's share/.test(n288[1]), 'H: What\'s new');
+}
+
+// H2: the P56 review's test gaps (Opus; PG): TG1 real fight rounds, TG2 the act crossing and an old filled list, TG3 exact XP and sits, L4
+{
+    // TG1: a real fight: the round, a big blow, a failed run; two blow Insights: ×0.7 (3 → 2.1, the big blow 6 → 4.2)
+    const fight = (known, act, rounds) => { const g = game(); G.ensureBars(g); g.coil.known = known;
+        G.startCombat(g, { id: 'test_p56', intro: 'In.', band: 'standard', enemies: [{ name: 'Brute', hp: 999, dc: 99, atk: 99, dmg: 4, heavy: true }], win: 'stream', lose: 'stream', flee: 'stream' });
+        const out = []; for (let r = 0; r < rounds; r++) { const h0 = g.james.hp; const o = act === 'flee' ? G.combatFlee(g) : G.combatStep(g, act); out.push(Math.round((h0 - g.james.hp) * 10) / 10); if (o?.done) break; }
+        return { out, hp: g.james.hp };
+    };
+    const f0 = fight([], 'blade', 4), f2 = fight(['lore1', 'bone_sung'], 'blade', 4);
+    assert(f0.out.join() === '3,3,6,3' && f2.out.join() === '2.1,2.1,4.2,2.1', `TG1: blade rounds, the third a big blow: ${f0.out.join()} without, ${f2.out.join()} with two blow Insights`);
+    assert(Math.round(f2.hp * 10) === f2.hp * 10, `TG1 (L4): James's HP stays in tenths (${f2.hp})`);
+    const r0 = fight([], 'flee', 1), r2 = fight(['lore1', 'bone_sung'], 'flee', 1);
+    assert(r0.out.join() === '3' && r2.out.join() === '2.1', `TG1: a failed run's bite: ${r0.out.join()} → ${r2.out.join()}`);
+    const fy = fight(['told_hearth', 'ship_found', 'fungus', 'lore_realms'], 'blade', 4);
+    assert(fy.out.join() === '3,3,6,3', 'TG1: other kinds leave the blow alone');
+    // L4: exact percent arithmetic
+    const b = game(); b.coil.known = ['lore1'];
+    assert(G.insightBlow(b, 13) === 11.1 && G.insightBlow(b, 7) === 6, `L4: 13 → 11.1 (exact 11.05), 7 → 6 (5.95) (${G.insightBlow(b, 13)}, ${G.insightBlow(b, 7)})`);
+    let off = 0; for (let d = 0; d <= 200; d++) if (G.insightBlow(b, d) !== Math.round(d * 85 / 10) / 10) off++;
+    assert(off === 0, `L4: every blow 0–200 exact with one Insight (${off} off)`);
+    // TG2: the act crossing keeps what is remembered
+    const a = game(); a.coil.known = ['lore1', 'roots', 'told_hearth']; G.startActCoil(a, 1);
+    assert(a.coil.act === 1 && G.insightsHeld(a, 'blow') === 1 && G.insightsHeld(a, 'fed') === 1 && G.insightsHeld(a, 'xp') === 1, 'TG2: into Act 1 with every Insight remembered');
+    a.flags.ship_found = true; rewind(a);
+    assert(a.coil.act === 1 && G.insightsHeld(a, 'xp') === 2, 'TG2: an Act 1 rewind adds its find');
+    // TG2 / L5: an old save on the Coil screen whose list the old endCoil already filled: it counts for that one Coil, nothing new is claimed
+    const o = game(); o.flags.roots = true; o.coil.known = ['roots']; endCoil(o, 'choice', 'wilds');
+    assert(G.insightsHeld(o, 'fed') === 1 && coilReport(o).fresh === 0, 'TG2 (L5): an old filled list counts as it is; the Coil screen claims nothing new');
+    // TG3: XP exactly ×1.3 with two XP Insights (the pool before the skill's own steps), and Yuki's share from it (L1)
+    const pool = (known) => { const g = game(); g.coil.known = known; const before = JSON.parse(JSON.stringify(g)); const lines = G.awardXp(g, 'GU', 'standard'); return { lines, g, before }; };
+    const x0 = pool([]), x2 = pool(['told_hearth', 'ship_found']);
+    const num = (ls) => ls.map((l) => Number((String(l).match(/\+(\d+) XP/) || [])[1] || 0)).reduce((p, q) => p + q, 0);
+    const n0 = num(x0.lines.filter((l) => /^GU /.test(l))), n2 = num(x2.lines.filter((l) => /^GU /.test(l))), y2 = x2.lines.filter((l) => /^Yuki \(bond\)/.test(l)).map((l) => Number((String(l).match(/\+(\d+)/) || [])[1] || 0)).reduce((p, q) => p + q, 0);
+    assert(n0 > 0 && n2 >= Math.floor(n0 * 1.3) && n2 <= Math.floor((n0 + 1) * 1.3), `TG3: two XP Insights: James's XP ×1.3 (${n0} → ${n2}; ${x2.lines.join(' | ')})`);
+    assert(y2 === Math.floor(n2 / 2), `TG3 (L1): Yuki's bond share is half the raised pool (${y2} of ${n2})`);
+    // TG3: sits: two at once (the grove, the hollow), and the long calendar's floor untouched
+    const s0 = game(), s1 = game(); s1.coil.known = ['lore_realms'];
+    const exact = (sits, pct) => Math.round(((sits * (100 + pct)) / G.SAT_HOURS(0) / G.satDiv(s0)) * 10) / 10;
+    assert(G.sitGain(s1, 2) === exact(2, 15) && G.sitGain(s1, 2) > G.sitGain(s0, 2), `TG3: two sits with one sit Insight: ${G.sitGain(s0, 2)} → ${G.sitGain(s1, 2)} (exact ${exact(2, 15)})`);
+    const hi = game(); hi.james.realm = 12; const hi1 = game(); hi1.james.realm = 12; hi1.coil.known = ['lore_realms', 'lore_tree', 'saw_lights', 'grove'];
+    assert(G.sitGain(hi1) >= G.sitGain(hi) && G.sitGain(hi) >= G.LONG_SIT_MIN, `TG3: high realms keep the floor (${G.sitGain(hi)} → ${G.sitGain(hi1)})`);
+}
+
+// H3: M1-u (the owner 2026-11-27 21:01): the root and the seclusion take the sit Insights too
+{
+    const r0 = game(), r4 = game(); r4.coil.known = ['lore_realms', 'lore_tree', 'saw_lights', 'grove'];
+    assert(ROOT_SAT === 12 && rootGain(r0) === Math.round((12 / G.satDiv(r0)) * 10) / 10 && rootGain(r4) === Math.round((12 * 1.6 / G.satDiv(r4)) * 10) / 10 && rootGain(r4) > rootGain(r0), `M1-u: the root ×1.6 with four sit Insights (${rootGain(r0)} → ${rootGain(r4)})`);
+    const sec = (known) => { const g = game(); G.ensureBars(g); g.coil.known = known; g.james.saturation = 0; SCENES.lf_seclusion.enter(g); return g.james.saturation; };
+    const z0 = sec([]), z1 = sec(['lore_realms']);
+    assert(z0 > 0 && Math.abs(z1 - Math.round(z0 * 1.15 * 10) / 10) <= 0.1 && z1 > z0, `M1-u: a season of seclusion ×1.15 with one sit Insight (${z0} → ${z1})`);
+    assert(sec(['fungus', 'told_hearth', 'lore1']) === z0, 'M1-u: other kinds leave the seclusion alone');
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

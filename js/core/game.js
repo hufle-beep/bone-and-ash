@@ -25,8 +25,33 @@ export const SATIETY_PER_HOUR = 3;
 export const MARK_DRAIN = 0.05, MARK_COUNT = 9;
 /** The Coil marks held (0–9). */
 export const marksHeld = (g) => { let k = 0; for (let x = (Number(g?.stats?.marks) || 0) & 511; x; x &= x - 1) k += 1; return k; };
-/** Fed's drain an hour awake with the marks held (half that asleep). */
-export const fedPerHour = (g) => SATIETY_PER_HOUR * (1 - MARK_DRAIN * marksHeld(g));
+/** v0.11.288 (owner pick P56-A, 2026-11-27: MP + WH-n + LV-15 + UI-p + SV): Insights' power. Each Insight James remembers at a Coil's
+ *  start (`coil.known`; coil.js `remember` adds a Coil's finds at its rewind, so a find counts from the next Coil) gives INSIGHT_STEP
+ *  to its kind (INSIGHT_KIND); a kind's Insights add up: 'blow' takes it off a foe's blow on James (the fight round and a failed run;
+ *  4: −60%), 'sit' adds it to the Saturation a sit gives (sitGain; 4: +60%), 'fed' takes it off Fed's drain (fedPerHour; 3: −45%, with
+ *  the marks at most FED_CUT_MAX), 'xp' adds it to James's skill XP (awardXp; 2: +30%; Yuki's bond share is half the raised pool, the review's L1: named in the words). Measured (`project/research/p56-measure.md`):
+ *  T1 unchanged (Coil 1 remembers nothing), T3 Careful 4.98 → 4.88, the Sociable 4.99 → 4.82. No save field. */
+export const INSIGHT_STEP = 0.15, FED_CUT_MAX = 0.5;
+export const INSIGHT_KIND = { lore1: 'blow', bone_sung: 'blow', bl_tracker: 'blow', log_heard: 'blow', lore_realms: 'sit', lore_tree: 'sit', saw_lights: 'sit', grove: 'sit', fungus: 'fed', gills: 'fed', roots: 'fed', told_hearth: 'xp', ship_found: 'xp' };
+export const INSIGHT_KINDS = ['blow', 'sit', 'fed', 'xp'];
+/** How many Insights of a kind James remembers at this Coil's start. */
+export const insightsHeld = (g, kind) => { const k = g?.coil?.known; if (!Array.isArray(k)) return 0; let n = 0; for (const f of new Set(k)) if (INSIGHT_KIND[f] === kind) n += 1; return n; };
+/** A kind's part (0–0.6), as a fraction. */
+export const insightPart = (g, kind) => INSIGHT_STEP * insightsHeld(g, kind);
+/** A foe's blow on James after the Insights (in tenths, as the Qi shield's soak). */
+export const insightPct = (g, kind) => Math.round(100 * INSIGHT_STEP) * insightsHeld(g, kind); // whole percent (the review's L4: exact, no float drift)
+export const insightBlow = (g, dmg) => { const pct = insightPct(g, 'blow'); return pct > 0 && dmg > 0 ? Math.round((dmg * (100 - pct)) / 10) / 10 : dmg; };
+/** James's HP after a blow; in tenths when the blow Insights made the blow a tenth (the review's L4: 20 − 4.3 − 4.3 is 11.4, not 11.39…). */
+export const hpAfterBlow = (g, dmg) => { const v = Math.max(0, g.james.hp - dmg); return insightPct(g, 'blow') > 0 ? Math.round(v * 10) / 10 : v; };
+/** Fed's drain cut by the marks and the Insights together, at most FED_CUT_MAX. */
+export const fedCut = (g) => Math.min(FED_CUT_MAX, MARK_DRAIN * marksHeld(g) + insightPart(g, 'fed'));
+/** Fed's drain an hour awake with the marks and the Insights held (half that asleep). */
+export const fedPerHour = (g) => SATIETY_PER_HOUR * (1 - fedCut(g));
+/** v0.11.288 (P56-A, UI-p): the Fed bar's hold line when 'fed' Insights are held: the marks' part, the Insights' part, the total. */
+export const fedInsightLine = (marks, ins) => {
+    const m = Math.round(100 * MARK_DRAIN * marks), i = Math.round(100 * INSIGHT_STEP * ins), all = Math.min(Math.round(100 * FED_CUT_MAX), m + i);
+    return `${marks ? `Coil marks: ${marks} of ${MARK_COUNT} (−${m}%), ` : ''}Insights: −${i}%. Fed drains ${all}% slower${m + i > all ? ` (${Math.round(100 * FED_CUT_MAX)}% at most)` : ''}.`;
+};
 export const HUNGRY_AT = 30;
 export const STARVE_HP_PER_HOUR = 1.5; // task mode (v0.10.0, owner pick b): 1.5 HP per starving hour; classic keeps its old rule
 export const XP_BANDS = { routine: 0, standard: 30, challenging: 60, major: 120 };
@@ -338,7 +363,7 @@ export function awardXp(g, skillName, band = 'standard', { fail = false, factor 
     let pool = (XP_BANDS[band] ?? 30) * (poolTier ?? n.tier); // poolTier: v0.11.89, the unarmed brawl (awardFightXp)
     if (fail) pool = Math.floor(pool * FAIL_XP_FRACTION);
     if (factor !== 1) pool = Math.floor(pool * factor); // a partial result on a task card (v0.9.2)
-    pool = xpFloor(g, pool * coilMult(g) * XP_RATE * xpPace(g)); // the Coil bonus (v0.11.0), the XP rate (v0.11.85), the long calendar's pace (v0.11.207, SC2)
+    pool = xpFloor(g, pool * ((100 + insightPct(g, 'xp')) / 100) * coilMult(g) * XP_RATE * xpPace(g)); // v0.11.288 (P56-A): the 'xp' Insights // the Coil bonus (v0.11.0), the XP rate (v0.11.85), the long calendar's pace (v0.11.207, SC2)
     if (!pool) return [];
     const out = [];
     const heads = name === 'GU' ? 1 : 2;
@@ -717,7 +742,7 @@ export const sitMinutes = (g) => Math.max(1, Math.round(SIT_MINUTES_INC / actSpe
 /** v0.11.207 (owner pick FL1, found in SC2's build): on the long calendar a sit below the top realm gives at least 0.1% (÷4 rounds to 0 from realm 10). */
 export const LONG_SIT_MIN = 0.1;
 export const sitGain = (g, sits = 1) => { // v0.11.15: no Coil bonus; v0.11.207 (SC2): ÷4 on the long calendar, FL1: at least 0.1% a sit there below the top
-    const v = Math.round(((100 * sits) / SAT_HOURS(g.james.realm) / satDiv(g)) * 10) / 10;
+    const v = Math.round(((sits * (100 + insightPct(g, 'sit'))) / SAT_HOURS(g.james.realm) / satDiv(g)) * 10) / 10; // v0.11.288 (P56-A): the 'sit' Insights
     return satDiv(g) > 1 && (g.james.realm || 0) < MAX_REALM ? Math.max(Math.round(LONG_SIT_MIN * sits * 10) / 10, v) : v;
 };
 /** v0.11.37 (owner 13:06, pick B2): a sit that changes nothing (the top realm, or a gain that rounds to 0%: from realm 14 since v0.11.66's ×1.5, so only the top realm) is not offered (Incremental Mode). */
@@ -1463,7 +1488,7 @@ function stepNoDice(g, actionId, targetIdx) {
         if (big && guard) { lines.push(foeFill(TELL_TEXT.bigAvoided, e.name)); continue; } // DB1 (P): Fable kept it for people too
         const r = rollCheck(g, 'GU', e.atk, (guard ? guardBonus(g) : 0) + (c.memDef || 0)); // v0.11.252 (P22-A, FD): the tribute remembered on defence
         if (r.ratio >= 1) { lines.push(`${e.name} attacks: you defend (${checkText(r)}) — avoided.`); continue; }
-        let dmg = hitDamage(e.dmg, e.realm, g.james.realm, jamesDr(g));
+        let dmg = insightBlow(g, hitDamage(e.dmg, e.realm, g.james.realm, jamesDr(g))); // v0.11.288 (P56-A): the 'blow' Insights
         const soaked = []; // v0.11.95 (Q1): the Qi shield soaks the blow first (as measured), what gets through is halved as before; its lines after the attack's (review)
         if (c.qshieldHp > 0 && dmg > 0) {
             const t1 = (x) => Math.round(x * 10) / 10; // v0.11.104 (SH1, S1): the soak is in tenths; every step to 0.1, so no float noise reaches the log or HP
@@ -1474,7 +1499,7 @@ function stepNoDice(g, actionId, targetIdx) {
         }
         if (r.ratio >= 0.5) dmg = Math.floor(dmg / 2);
         if (big) dmg *= BIG_BLOW;
-        g.james.hp = Math.max(0, g.james.hp - dmg);
+        g.james.hp = hpAfterBlow(g, dmg); // v0.11.288 (P56 review, L4)
         lines.push(`${e.name} attacks: you defend (${checkText(r)}) — ${r.ratio >= 0.5 ? 'it only half lands' : 'it lands'}: ${dmg} (DR ${jamesDr(g)}).`, ...soaked);
         if (big) lines.push(TELL_TEXT.bigLands);
         if (e.thief && !c.stole && dmg > 0 && combatHooks.steal) { const k = combatHooks.steal(g); if (k) { g.inventory[k]--; c.stole = true; lines.push(foeFill(TELL_TEXT.theft, e.name).replace('{item}', itemNames[k]?.name || k)); } } // v0.11.113 (DA1, CS)
@@ -1606,8 +1631,8 @@ export function combatFlee(g) {
         return { lines, done: 'flee', next };
     }
     const biter = c.enemies.filter((e) => e.hp > 0).reduce((a, e) => (e.dmg > a.dmg ? e : a));
-    const dmg = hitDamage(biter.dmg, biter.realm, g.james.realm, jamesDr(g));
-    g.james.hp = Math.max(0, g.james.hp - dmg);
+    const dmg = insightBlow(g, hitDamage(biter.dmg, biter.realm, g.james.realm, jamesDr(g))); // v0.11.288 (P56-A)
+    g.james.hp = hpAfterBlow(g, dmg); // v0.11.288 (P56 review, L4)
     lines.push(`Something bites on the way out: −${dmg} HP.`);
     if (c.wait) for (const k of Object.keys(c.wait)) c.wait[k] -= 1; // v0.11.116 (WB1, FR; review low 4): a failed run is a round for the rhythm
     c.stall = 0; // v0.11.121 (AS1, RV1 FR): a failed run is a round on the ground, so the air stalemate's count starts again
@@ -1837,7 +1862,7 @@ export function barParts(g) {
     return {
         hp: { max: hpMax, base: 20, body, realm: Math.max(0, hpMax - 20 - body), gu: g.james.gu },
         qi: { max: jamesQiMax(g), base: 20, cu, prim, realm: rb, raw: 20 + cu + prim + rb, mult: CONVERGENCE_MULTIPLIER, skill: g.james.skills['Convergence Use'] },
-        fed: { now: fed, perHour: r2(fedPerHour(g)), hours: Math.floor(fed / fedPerHour(g)), work: Math.floor(fed / (fedPerHour(g) + BAR_WORK_EXTRA)), marks: marksHeld(g) }, // v0.11.287 (P55-A, CM-5): with the marks
+        fed: { now: fed, perHour: r2(fedPerHour(g)), hours: Math.floor(fed / fedPerHour(g)), work: Math.floor(fed / (fedPerHour(g) + BAR_WORK_EXTRA)), marks: marksHeld(g), ins: insightsHeld(g, 'fed') }, // v0.11.287 (P55-A, CM-5): with the marks
     };
 }
 const tlOf = (n) => `T${n.tier} L${n.level}`;
@@ -1846,6 +1871,6 @@ export function barLines(g, which) {
     const p = barParts(g), rn = realmName(g.james.realm);
     if (which === 'hp') return [`Most HP: ${p.hp.max}.`, `${p.hp.base} to start, +${p.hp.body} from the body (GU ${tlOf(p.hp.gu)}), +${p.hp.realm} from the realm (${rn}).`];
     if (which === 'qi') return [`Most Convergence: ${p.qi.max}.`, `${p.qi.base} to start, +${p.qi.cu} from Convergence Use (${tlOf(p.qi.skill)}), +${p.qi.prim} for the primaries open, +${p.qi.realm} from the realm (${rn}): ${p.qi.raw}, ×${p.qi.mult} for Convergence.`];
-    if (which === 'fed') return [`Fed falls ${p.fed.perHour} an hour awake (${r2(p.fed.perHour + BAR_WORK_EXTRA)} working), half that asleep.`, ...(p.fed.marks ? [`Coil marks: ${p.fed.marks} of ${MARK_COUNT}, ${Math.round(100 * MARK_DRAIN * p.fed.marks)}% slower.`] : []), p.fed.now <= 0 ? 'Empty: every hour now costs HP.' : p.fed.hours < 1 ? 'Under an hour awake until it runs out.' : `About ${p.fed.hours} h awake resting, ${p.fed.work} h working.`]; // RV-A (L3-w)
+    if (which === 'fed') return [`Fed falls ${p.fed.perHour} an hour awake (${r2(p.fed.perHour + BAR_WORK_EXTRA)} working), half that asleep.`, ...(p.fed.ins ? [fedInsightLine(p.fed.marks, p.fed.ins)] : p.fed.marks ? [`Coil marks: ${p.fed.marks} of ${MARK_COUNT}, ${Math.round(100 * MARK_DRAIN * p.fed.marks)}% slower.`] : []), p.fed.now <= 0 ? 'Empty: every hour now costs HP.' : p.fed.hours < 1 ? 'Under an hour awake until it runs out.' : `About ${p.fed.hours} h awake resting, ${p.fed.work} h working.`]; // RV-A (L3-w)
     return [];
 }

@@ -855,7 +855,8 @@ function renderArchive() {
     view.innerHTML = `<section class="page archive"><h1>Archive</h1>
 <p class="lede">${esc(T.lede)}</p>
 <h2>${esc(T.insights(a.insights.length, a.insightsOf))}</h2>
-${a.insights.map((x) => `<div class="row"><span>${esc(x.name)}</span><span></span><span class="sub">${esc(cap(x.line))}</span></div>`).join('') || `<p class="note">${esc(T.noInsights)}</p>`}
+${a.insights.length ? `<p class="note">${esc(T.power(a.power, a.fedAll, a.held, a.fedCapped))}${a.power.length ? ` ${esc(T.powerNote)}` : ''}</p>` : ''}
+${a.insights.map((x) => `<div class="row${x.held ? '' : ' dim'}"><span>${esc(x.name)}</span><span>${esc(T.gives(x.kind, a.step))}</span><span class="sub">${esc(cap(x.line))}${x.held ? '' : ` · ${esc(T.next)}`}</span></div>`).join('') || `<p class="note">${esc(T.noInsights)}</p>`}
 <h2>${esc(T.marks(a.held, a.marksOf, a.slower))}</h2>
 <p class="note">${esc(T.marksNote)}</p>
 ${a.marks.map((m) => `<div class="row${m.got ? '' : ' dim'}"><span>${esc(cap(m.name))}</span><span>${m.got ? esc(T.got) : ''}</span></div>`).join('')}

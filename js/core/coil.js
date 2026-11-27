@@ -66,8 +66,15 @@ export const tabWhy = (g) => (g.scene === 'collectors_lost' ? 'tribute' : g.scen
 export function endCoil(g, why, back = null) {
     const c = coil(g);
     c.why = why; c.back = back;
-    for (const f of Object.keys(REMEMBER)) if (g.flags[f] && !c.known.includes(f)) c.known.push(f);
-    for (const f of Object.keys(KNOW_TEXT)) if (g.flags[f] && !c.known.includes(f)) c.known.push(f);
+}
+/** This Coil's finds, as the Coil screen and the rewind see them (REMEMBER and KNOW_TEXT flags set now, in that order). */
+const finds = (g) => [...Object.keys(REMEMBER), ...Object.keys(KNOW_TEXT)].filter((f) => g.flags?.[f]);
+/** v0.11.288 (owner pick P56-A, WH-n): the rewind adds this Coil's finds to `coil.known` (endCoil did, before), so an Insight's power
+ *  (game.js insightPart) counts from the next Coil: "Not yet" on the Coil screen goes back to a Coil that holds none of its own finds. */
+export function remember(g) {
+    const c = coil(g);
+    if (!Array.isArray(c.known)) c.known = [];
+    for (const f of finds(g)) if (!c.known.includes(f)) c.known.push(f);
 }
 
 /** What this Coil gained and what James remembers (the Coil screen). */
@@ -84,7 +91,7 @@ export function coilReport(g) {
     const tiers = [0, 0, 0, 0];
     for (const [id, f] of Object.entries(g.tasks.fam || {})) { if (isYukiJob(id)) continue; const t = famTier(f); if (t > famTier(s.fam[id] || 0)) tiers[t]++; }
     for (let t = 1; t < 4; t++) if (tiers[t]) gained.push(`${tiers[t]} card${tiers[t] > 1 ? 's' : ''} ${FAM[t].name}`);
-    const known = c.known.map((f) => REMEMBER[f] || KNOW_TEXT[f]).filter(Boolean);
+    const known = [...(c.known || []), ...finds(g).filter((f) => !(c.known || []).includes(f))].map((f) => REMEMBER[f] || KNOW_TEXT[f]).filter(Boolean); // P56-A (WH-n): with this Coil's finds, added at the rewind
     // v0.11.72 (owner pick S1): the cards that grew this Coil and are closest to their next tier (up to 3)
     const near = [];
     for (const [id, f] of Object.entries(g.tasks.fam || {})) {
@@ -96,7 +103,8 @@ export function coilReport(g) {
     near.sort((a, b) => b.frac - a.frac || a.id.localeCompare(b.id));
     // v0.11.159 (NX2, CL): each Yuki job whose practice grew this Coil, in id order (her lane's speed line on the screen)
     const yuki = Object.entries(g.tasks.fam || {}).filter(([id, f]) => isYukiJob(id) && f > (s.fam[id] || 0)).map(([id, f]) => ({ id, f })).sort((a, b) => a.id.localeCompare(b.id));
-    return { n: c.n, why: c.why, gained, known, near: near.slice(0, 3), yuki };
+    const fresh = finds(g).filter((f) => !(c.known || []).includes(f)).length; // P56-A (UI-p): this Coil's own finds, whose power starts next Coil
+    return { n: c.n, why: c.why, gained, known, fresh, near: near.slice(0, 3), yuki };
 }
 
 /* ---------- v0.11.227 (owner pick KA1 + XW-a): the realm kept for a won game ---------- */
@@ -179,6 +187,7 @@ export function targetsText(g) {
  */
 export function rewind(g, { to = 'act', xpOut = null } = {}) { // xpOut: v0.11.274 (P42-A, LK), the kept lift's XP lines
     const c = coil(g);
+    remember(g); // v0.11.288 (P56-A, WH-n): this Coil's finds join what James remembers here, so their power starts with the next Coil
     const whole = to === 'game' && (c.act || 0) === 1;
     const fresh = whole ? coilSnap(newGame(g.seed, { closed: true })) : null; // v0.11.260 (P28-A, OC2): the long calendar, as every game (the `cal` option gone) // the arrival as a new game has it
     const base = clone(whole ? fresh : c.snap);

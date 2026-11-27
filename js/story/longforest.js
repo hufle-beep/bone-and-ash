@@ -5,7 +5,7 @@
  * Also here: Yuki's transformations (great root-kin at Core Formation, human form at Nascent Soul) and her form chooser.
  * Contract: js/story/power.js (degrees, Long Forest scaling with a ceiling, STOMP texts). James never kills humans.
  */
-import { addItem, hasItem, eat, condense, sleepUntil, advance, d6, awardXp, awardYukiFightXp, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, yukiForms, yukiForm, ensureBars, bumpRel, itemCap, satDiv } from '../core/game.js'; // v0.11.207 (RV1, L2): satDiv
+import { addItem, hasItem, eat, condense, sleepUntil, advance, d6, awardXp, awardYukiFightXp, jamesHpMax, jamesQiMax, yukiHpMax, yukiQiMax, yukiForms, yukiForm, ensureBars, bumpRel, itemCap, satDiv, insightPct } from '../core/game.js'; // v0.11.207 (RV1, L2): satDiv
 import { condensationSatGain } from '../core/formulas.js';
 import { daily, markDaily, hour, eatBest, pantry, foodCount, byForm, dayKey } from './common.js'; // v0.11.126 (NQ1): byForm
 import { registerStomp } from './power.js';
@@ -476,7 +476,7 @@ Yuki says nothing at all. From her, that is the loudest thing she has ever said.
             for (let i = 0; i < 4; i++) lines.push(...awardXp(g, 'Convergence Use', 'major'));
             lines.push(...awardXp(g, 'GU', 'major'));
             lines.push(...awardYukiFightXp(g, 'major'));
-            const gain = (condensationSatGain(10, jamesQiMax(g)) * 3) / satDiv(g); // v0.11.207 (RV1, L2): ÷4 on the long calendar, as a sit
+            const sp = insightPct(g, 'sit'), gain = (condensationSatGain(10, jamesQiMax(g)) * 3 * (sp ? (100 + sp) / 100 : 1)) / satDiv(g); // v0.11.288 (P56 review, M1-u): the sit Insights, as a sit // v0.11.207 (RV1, L2): ÷4 on the long calendar, as a sit
             g.james.saturation = Math.min(100, Math.round((g.james.saturation + gain) * 10) / 10);
             sleepUntil(g, 6, { bed: false }); // v0.11.91 (owner pick S1): a season of sitting, not a bed: no wait for 21:00
             g.flags.lf_days = lfDays(g) + 1;

@@ -1725,8 +1725,8 @@ for (const [hub, cfg] of Object.entries(TASK_HUBS)) {
     g.james.hp = 3; g.james.satiety = 5;
     const stats0 = g.stats.checks = 17;
     endCoil(g, 'choice', 'ashfall');
-    assert(g.coil.known.includes('bone_sung') && g.coil.known.includes('roots') && g.coil.known.includes('gills'), 'the Coil remembers the one-time discoveries');
     const n = rewind(g);
+    assert(g.coil.known.includes('bone_sung') && g.coil.known.includes('roots') && g.coil.known.includes('gills'), 'the Coil remembers the one-time discoveries (v0.11.288, P56-A: added at the rewind)');
     assert(n === 2 && g.coil.n === 2 && g.scene === 'arrival' && g.minutes === newGame(1).minutes, `rewind to Day 1 dawn (${g.scene})`);
     const s0 = newGame(1);
     assert(g.james.realm === s0.james.realm && g.yuki.realm === s0.yuki.realm && g.james.saturation === 0 && g.james.gu.level === 1 && g.yuki.fight.level === 1 && !g.james.extra8, 'v0.11.0: realm, skills, meridians, Saturation start over');
