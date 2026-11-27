@@ -54,6 +54,8 @@ Targets: the first Coil's deadline fight about 30% win, the third about 80%; a s
 
 **Threads (option 3, picked):** a task at Practised (×2) can be given to a thread, which works it whenever its lane is free. A thread wakes on every rewind **and** on every first finish of an arc (a Coil mark), up to 9. A player who never rewinds has 3 after the prologue and 9 by the end of Act 1; a player who loops gets them sooner. Lore: this world dulled the threads; "a thread holds only what your hands already know"; "each bite of the tail wakes another". Threads never make story choices.
 
+**Threads as built (v0.11.286, owner picks G4-A, TQ-A, WR-a, HP-n, RV-A; replaces option 3's wake rule and its queue):** a thread is a lane like Yuki's: it holds one card and works it on the time James's cards spend on that card's screen, 06:00–19:00, then does the card's one run of the day for him: the same items, XP and Qi, +1 familiarity, none of his time, no gain with anyone. It holds only a daily Forage or Hunt card with a check and items, or Smoke the catch, that James has tapped by hand once (its result read) and knows to Practised, whose result now is full or double. Threads wake only after Act 1 is won and the tail bitten from there (`stats.clears`): one for every such bite and one for every arc's first finish after the first (9 arcs), up to 9. The Coil screen: "Threads at work". Open with G5: priority tiers, standing rules (eat, rest), a domain pick, the Coil marks' drain, a Mastery tab.
+
 ## The screen
 The story becomes the stops; tasks fill the days between them. Art plate, ink look and prose panel stay.
 

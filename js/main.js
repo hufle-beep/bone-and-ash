@@ -1,4 +1,5 @@
 /** Bone and Ash — UI. Renders the story, combat, sheet, hammerspace, journal and saves. */
+import { threadLanes, threadChoices, setThread, noteHand, THREAD_HOURS } from './core/threads.js'; // v0.11.286 (owner picks G4-A, TQ-A, WR-a, HP-n)
 import { LONG_CAL } from './core/calendar.js'; // v0.11.203 (owner pick T1, TS1)
 import { runWeek, planCards, planHere, planEnsure, planEndDay, planClear, STOP_TEXT, planNotes, storyTap, afterStory, planCount, planView, doorCards, planRanks, planPrio, doorNote, cardNote, noteCardTap, noteCardDone, noteReadTap, planEmptyShown, planDoorsShown, spacedClosed, withSpaced, planHub, campHub, planShown, planStep } from './core/week.js'; // v0.11.284 (P52-A): planHub, campHub (BP-d), planShown, planStep (KR-k); // v0.11.204 (owner pick W1: R3, P1); v0.11.206 (FC1, RV1): the forecast's texts, the shared tap steps
 import { actionOpen, actionLabel, FORM_LINES, lineState, rankLabel, fragileKnife, knifeSwings } from './core/forms.js';
@@ -19,6 +20,7 @@ import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMedit
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
 import { meridianRow } from './story/meridians.js';
 import { APK_URL, UPDATE_KEY, CHECK_DELAY, UPDATE_TEXT, updPrefs, inApp, makeUpdater, goLabel, offerBrowser } from './core/update.js'; // v0.11.147 (UP1; RV1: makeUpdater; v0.11.187 U1: goLabel, offerBrowser)
+import { secondTap, ASK_MIN_MS } from './core/app.js'; // v0.11.286 (G4-A, L5-a)
 import { exportRoute, canSaveToFile, wantsServiceWorker, savedName, resultPlace, FILE_TEXT, tipBox, TIP_WIDE, saveParts, SAVE_PART_MAX, partName, PART_TEXT, WELCOME_KEY, welcomePrefs, welcomeDue, welcomeView, awayText, WELCOME_TEXT, fileStamp, ASK_TEXT, askStep, HOTKEYS, hotkeyOf } from './core/app.js'; // v0.11.148 (EX1; RX1: savedName, resultPlace); v0.11.283 (P51-A: SV-p, WB-y)
 import { SEEN_KEY, NOTES, newsSince, versionLabel, statusPlace, takeoverNotice, recheckDue, READY_TEXT } from './core/news.js'; // v0.11.150 (BL1)
 import { realmShockHpBonus } from './core/formulas.js';
@@ -119,6 +121,7 @@ const shownLines = (lines) => (showChecks ? lines : lines.map(hideCheck).filter(
 /** A card's tag without its check: what's left is time, Qi and effects. */
 const hideTag = (t) => (showChecks || !t ? t : String(t).replace(RX_TAG, '').replace(/^\s*·\s*|\s*·\s*$/g, '').replace(/(\s*·\s*){2,}/g, ' · ').trim());
 let lastWritten = null; // v0.11.8: the autosave text this tab last wrote or loaded (a closing tab never overwrites a newer save from another tab)
+let threadPick = null; // v0.11.286 (G4-A, UI): the thread whose card list is open: { i, g, scene } (RV L5: only for that game and screen), null when none
 let panel = 'cards'; // the phone's switch under the story: 'cards' | 'results' (wide screens show both)
 let taskResults = []; // newest first: { title, sum, lines, fail } — the last 8 tasks (all of it is in the Journal too)
 let unseen = 0;
@@ -204,7 +207,8 @@ const endAt = (m) => { if (g.flags?.lf_active) return ''; const same = clockPart
 /** v0.11.64 (B1): a card whose dry run ends the Coil asks for a second tap (Settings can turn this off). True = go ahead. */
 function fatalOk(id, out) {
     if (!askFatal || !out?.death) return true;
-    if (fatalArmed.id === id && Date.now() - fatalArmed.at < 6000) { fatalArmed = { id: null, at: 0 }; return true; }
+    if (fatalArmed.id === id && Date.now() - fatalArmed.at < ASK_MIN_MS) return false; // L5-a: a double tap is one tap
+    if (fatalArmed.id === id && secondTap(fatalArmed.at, Date.now(), 6000)) { fatalArmed = { id: null, at: 0 }; return true; }
     fatalArmed = { id, at: Date.now() };
     lastResult = { lines: [`James ${out.death === 'hunger' ? 'starves' : 'collapses'} on this (${clockLabelG(g, out.deathAt ?? out.end)}): the Coil would end there. Tap it again to do it anyway.`], fail: true };
     render();
@@ -213,6 +217,24 @@ function fatalOk(id, out) {
 /** v0.11.64 (the Fable review): a card's dry run never stops the screen from drawing; a card it can't play shows no end. */
 const safeOutcome = (f) => { try { return f(); } catch { return null; } };
 /** v0.11.64: a task card, at once. */
+/** v0.11.286 (owner picks G4-A, TQ-A, WR-a, HP-n): the awake threads, one row each, and the open one's card list. */
+function threadsHtml() {
+    if (threadPick && (threadPick.g !== g || threadPick.scene !== g.scene)) threadPick = null; // RV (L5): the picker only for this game and screen
+    const lanes = threadLanes(g, SCENES);
+    if (!lanes.length) return '';
+    const hours = THREAD_HOURS.map((h) => `${String(h).padStart(2, '0')}:00`).join('–');
+    const row = (l) => {
+        const where = l.id && !l.here ? `on ${SCENES[l.hub]?.title || l.hub}: ` : '';
+        const what = !l.id ? 'holds nothing' : l.why ? `${where}${l.why}` : `its run after ${durLabel(Math.max(1, l.len - l.p))} more of your time here (${hours})`;
+        return `<div class="yuki-lane thread-lane"><div><b>Thread ${l.i + 1}:</b> ${l.id ? esc(l.label) : 'off'} <span class="note">${esc(what)}</span></div><button class="btn${threadPick?.i === l.i ? ' primary' : ''}" data-thread="${l.i}">${threadPick?.i === l.i ? 'Close' : 'Change'}</button></div>`;
+    };
+    let pick = '';
+    if (threadPick && lanes[threadPick.i]) {
+        const ch = threadChoices(g, SCENES, g.scene, threadPick.i);
+        pick = `<div class="thread-pick">${ch.length ? ch.map((c) => `<button class="card" data-thpick="${threadPick.i}|${esc(c.id)}"${c.why ? ' disabled' : ''}>${esc(c.label)}${c.why ? `<span class="tag">${esc(c.why)}</span>` : ''}</button>`).join('') : '<p class="note">Nothing here a thread can hold: the daily Forage and Hunt cards and Smoke the catch.</p>'}<button class="card" data-thpick="${threadPick.i}|">Off</button></div>`;
+    }
+    return lanes.map(row).join('') + pick;
+}
 function doTask(id) {
     const out = safeOutcome(() => taskOutcome(g, SCENES, id));
     if (!fatalOk(id, out)) return;
@@ -223,6 +245,7 @@ function doTask(id) {
     noteReadTap(g, SCENES, id, r); // v0.11.214 (RD1, RB): the card the plan stopped for, tapped: it counts as the plan's step
     noteCardDone(g, tap, r); // v0.11.219 (KC1, RV1 LS): taken, its kept row back to 0
     land(label, r.lines, r.fail, rel0, { always: !r.stopped }); // v0.11.68: a door or collapse shows its reply in the scene it opens
+    if (!r.skipped) noteHand(g, SCENES, id); // v0.11.286 (HP-n): tapped by hand, its result on the screen: a thread may hold it (RV L1: not a tap the day's routine left no time for)
     autosave(); render();
     if (r.stopped) window.scrollTo({ top: 0, behavior: smoothScroll() });
 }
@@ -376,8 +399,9 @@ function renderCardScreen() {
         const yLeft = yl ? Math.max(1, yl.len - yl.progress) : 0;
         const laneHours = YUKI_HOURS.map((h) => `${String(h).padStart(2, '0')}:00`).join('–'); // v0.11.121 (AS1, LH): from YUKI_HOURS, no longer typed
         const yHtml = yl ? `<div class="yuki-lane"><div><b>Yuki:</b> ${esc(yl.label)} <span class="note">${showChecks ? `${YUKI_LANE_TEXT.roll} · ` : ''}${yl.on ? `next haul after ${durLabel(yLeft)} of your time (${laneHours})` : `${durLabel(yl.len)} a haul`} · ${esc(yl.speedLine)}${g.cal === LONG_CAL ? ' · food home from one haul in 3 (the long calendar)' : ''}</span></div><button class="btn${yl.on ? ' primary' : ''}" data-yuki="1">${yl.on ? 'On' : 'Off'}</button></div>` : '';
+        const thHtml = threadsHtml(); // v0.11.286 (G4-A, UI): the awake threads under her lane
         const ns = store.get(NONEXT_KEY) === '1' ? '' : nextStep(g, SCENES); // v0.11.72 (N1): Selene's next-step line, ✕ hides it for good
-        hubTop = `${ns ? `<div class="nstep"><b>Next step</b> <span>${esc(ns)}</span><button class="nstep-x" data-nonext="1" aria-label="Hide the next-step line">✕</button></div>` : ''}${yHtml}`;
+        hubTop = `${ns ? `<div class="nstep"><b>Next step</b> <span>${esc(ns)}</span><button class="nstep-x" data-nonext="1" aria-label="Hide the next-step line">✕</button></div>` : ''}${yHtml}${thHtml}`;
         const work = workGroups(g.scene);
         hubHtml = (hub && planHub(g) ? weekHtml() : '') + groups.map((gr) => groupHtml(gr.name, gr.cards.map(cardHtml), !work.has(gr.name), gr.note)).join(''); // v0.11.67 (D2); v0.11.204 (W1, P1): the week's plan first
     }
@@ -1003,10 +1027,13 @@ function tipFor(b) {
         if (choiceQi(g, ch)) lines.push(`Costs ${ch.qi} Qi.`); // v0.11.109 (FQ1): not for a sung crossing he flies
         if (ch.combat) { lines.push('Leads to a fight.'); const th = b.dataset.story != null && !b.disabled ? threatOf(g, SCENES, Number(b.dataset.story)) : null; if (th != null) lines.push((th.fists ? THREAT_TEXT.fists : THREAT_TEXT.hold)[th.band]); } // v0.11.117 (TW1); TX1 (UB): the brawl's own line
     }
-    if (mins) lines.push(`Takes ${durLabel(mins)}, at once.`); // v0.11.64: every card at once
+    // v0.11.286 (owner pick G4-A, L4-w): a week's card says its week and its one run, not a "Takes" beside the run's own time
+    const wk = card?.week && card.kind === 'work' && weekHub(g) ? Math.round(((card.minutes || 0) * NEW_LENGTH) / cardSpeed(card.fam || 0)) : 0;
+    if (wk) lines.push(`This week: ${WEEK_MULT} runs, ${durLabel(wk * WEEK_MULT)}${mins && mins < wk * WEEK_MULT ? `; ${durLabel(mins)} of it today, at once` : ', at once'}.`);
+    else if (mins) lines.push(`Takes ${durLabel(mins)}, at once.`); // v0.11.64: every card at once
     { const id0 = b.dataset.run || b.dataset.med || ''; const k = medActivity(id0) || (/^(.+):(\d+)$/.test(id0) && isSitChoice(SCENES[id0.split(':')[0]]?.choices?.[Number(id0.split(':')[1])], id0.split(':')[0]) ? 'sit' : null); if (k) lines.push(useLine(g, k)); } // v0.11.15: speed by use
     if (card && (card.kind === 'work' || card.kind === 'door')) lines.push(`Familiarity: ${FAM[card.tier].name}${card.next != null ? `, ${card.fam} of ${card.next} to ${FAM[card.tier + 1].name}` : ' (the top)'}.${card.kind === 'work' ? ' Familiar work goes faster.' : ''}`); // v0.11.140 (RV1, DS): a door card too (its walk speeds up), no new words
-    { const fn = famNext(card); if (fn) lines.push(`At ${fn.name} (${fn.at}): ×${Math.round(fn.speed * 10) / 10} speed; one run ${durLabel(fn.now)} → ${durLabel(fn.then)}.`); } // G3-A (FE-t): a work card's next step
+    { const fn = famNext(card); if (fn) lines.push(wk ? `One run ${durLabel(fn.now)}; ${durLabel(fn.then)} at ${fn.name} (${fn.at}), ×${Math.round(fn.speed * 10) / 10} speed.` : `At ${fn.name} (${fn.at}): ×${Math.round(fn.speed * 10) / 10} speed; one run ${durLabel(fn.now)} → ${durLabel(fn.then)}.`); else if (wk) lines.push(`One run ${durLabel(wk)}.`); } // G3-A (FE-t): a work card's next step; L4-w: a week's card by its one run
     if (card && card.status === 'late') lines.push('It would end past midnight, when the day is over. Sleep.');
     else if (card && card.status !== 'open') { const sp = card.status === 'tomorrow' && weekHub(g) ? spacedClosed(g, SCENES).find((x) => x.id === card.id) : null; lines.push(sp ? `Not now: ${sp.note}.` : 'Done for today. Back tomorrow.'); } // v0.11.225 (RV1, L1): a spaced card says its day, as its tag
     if (b.disabled && !card) { const tag = b.querySelector('.tag')?.textContent; lines.push(tag ? `Not now: ${tag}.` : 'Not now.'); }
@@ -1180,6 +1207,7 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.bak) {
             let next;
             try { next = checkScene(deserialize(store.get(BAK_KEY(b.dataset.bak)))); } catch (err) { note(`That backup can't be loaded: ${err.message}`); return; }
+            if (g && !askTwice(`bak:${b.dataset.bak}`, ASK_TEXT.restore(descOf(store.get(BAK_KEY(b.dataset.bak))), hereDesc()))) return; // v0.11.286 (G4-A, L5-a): a second tap, as a load
             backupBefore('restoring a backup');
             g = next; lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
             return;
@@ -1243,6 +1271,7 @@ view.addEventListener('click', (ev) => {
         }
         if (b.dataset.bite) {
             if (!coilActive(g)) return; // v0.11.106 (Fable's review of RA1, medium 1): only where the Coil can turn
+            if (Date.now() - biteArmed < ASK_MIN_MS) return; // L5-a: a double tap is one tap
             if (Date.now() - biteArmed > 4000) { biteArmed = Date.now(); note(`Tap Bite the tail again to end this Coil. Everything in the hammerspace is lost; what James learned is not. ${tabWhy(g) === 'choice' ? ' By choice, it adds nothing to the faster learning.' : tabWhy(g) === 'clear' ? ` Act 1 is won: this bite adds to the faster learning (the next Coil learns ×${fmtMult(coilMultNext(g, false))}).` : ''}`); return; }
             biteArmed = 0;
             endCoil(g, tabWhy(g), g.scene); // v0.11.86 (Fable review): at a lost tribute or Shen Qiu, that loss's bite
@@ -1252,6 +1281,8 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.panel) { panel = b.dataset.panel; if (panel === 'results') unseen = 0; render(); return; }
         if (b.dataset.nonext) { store.set(NONEXT_KEY, '1'); render(); return; } // v0.11.72 (N1)
         if (b.dataset.yuki) { const yl = yukiLane(g); setYuki(g, !yl.on); autosave(); render(); return; }
+        if (b.dataset.thread != null) { const i = Number(b.dataset.thread); threadPick = threadPick?.i === i ? null : { i, g, scene: g.scene }; render(); return; } // v0.11.286 (G4-A, UI)
+        if (b.dataset.thpick != null) { const [i, id] = b.dataset.thpick.split('|'); if (setThread(g, SCENES, Number(i), g.scene, id || null)) autosave(); threadPick = null; render(); return; }
         if (b.dataset.act) {
             const wl = waitLeft(g, b.dataset.act); // v0.11.116 (WA2, CDB): a waiting card says when it is ready and does nothing
             if (wl) { const a = COMBAT_ACTIONS[b.dataset.act]; note((wl === 1 ? SONG_TEXT.holdNext : SONG_TEXT.holdIn.replace('{n}', wl)).replace('{move}', actionLabel(g, b.dataset.act, a.label))); return; }
@@ -1261,6 +1292,7 @@ view.addEventListener('click', (ev) => {
             if (out.done) { const lines = out.lines.slice(); lines.push(...goTo(g, SCENES, out.next)); land(fightTitle, lines, out.done === 'lose', rel0, { quiet: false }); combatLog = null; } // v0.11.68
             autosave(); render();
         } else if (b.dataset.flee || b.dataset.yield) {
+            if (b.dataset.yield && Date.now() - yieldArmed < ASK_MIN_MS) return; // L5-a
             if (b.dataset.yield && Date.now() - yieldArmed > 4000) { yieldArmed = Date.now(); note(SPAR_TEXT.yieldConfirm); return; } // v0.11.114 (PB1, YC; review low 1): a second tap, as Bite the tail
             yieldArmed = 0;
             const rel0 = relSnap(); const fightTitle = sceneTitle(g.scene);
@@ -1325,7 +1357,8 @@ let biteArmed = 0;
 let yieldArmed = 0; // v0.11.114 (PB1, YC)
 let newKind = ''; // v0.11.203 (T1, TS1): the second tap must be on the same button (v0.11.226, FP1: one New game button left)
 function confirmNew(kind = '1') {
-    if (Date.now() - newArmed < 4000 && newKind === kind) return true;
+    if (newKind === kind && Date.now() - newArmed < ASK_MIN_MS) return false; // L5-a: a double tap is one tap
+    if (secondTap(newArmed, Date.now(), 4000) && newKind === kind) return true;
     newArmed = Date.now(); newKind = kind;
     note('Tap New game again to start over. Your autosave will be replaced (slots are kept).');
     return false;

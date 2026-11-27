@@ -125,13 +125,19 @@ export const ASK_MS = 4000;
 /** The second tap's decision (RV TG2): { go: true } on the second tap of the same `k` within ASK_MS, else { go: false } and armed for `k`.
  *  `armed`: { k, at } from the last call. Pure, so the tests run it. */
 export function askStep(armed, k, now) {
+    if (armed && armed.k === k && now - armed.at < ASK_MIN_MS) return { go: false, armed, early: true }; // L5-a: a double tap is one tap
     if (armed && armed.k === k && now - armed.at < ASK_MS) return { go: true, armed: { k: '', at: 0 } };
     return { go: false, armed: { k, at: now } };
 }
+/** v0.11.286 (owner pick G4-A, L5-a): a second tap counts only from this many ms after the first (a double tap confirms nothing). */
+export const ASK_MIN_MS = 400;
+/** L5-a: is a tap `now` the second tap of a confirm armed at `at`, within `win` ms? (New game, Bite the tail, Yield, a fatal card.) */
+export const secondTap = (at, now, win) => now - at >= ASK_MIN_MS && now - at < win;
 export const ASK_TEXT = {
     save: (n, there, here) => `Slot ${n} holds ${there}. Tap Save here again to put this game there instead (${here}); the game in the slot is lost.`,
     load: (n, there, here) => `Tap Load again: slot ${n} (${there}) takes the place of this game (${here}), which is kept as the "before" backup.`,
     file: (there, here) => `This file holds a game at ${there}. Loading it takes the place of this game (${here}), which is kept as the "before" backup.`,
+    restore: (there, here) => `Tap the backup again: ${there} takes the place of this game (${here}), which is kept as the "before" backup.`, // L5-a
     fileBtn: 'Load it', cancel: 'Cancel',
 };
 /** HK-t: the keys, one table (a PC; the phone has none). `key` as KeyboardEvent.key; the Settings list reads `show` and `does`. */

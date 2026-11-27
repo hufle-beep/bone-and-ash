@@ -541,6 +541,9 @@ def saves(pg, url):
     open_saves(pg)
     if not pg.query_selector('button[data-bak="5m"]'): fails.append('Backups: no Restore button for the 5-minute backup')
     else:
+        pg.click('button[data-bak="5m"]'); until(pg, "/Tap the backup again/.test(document.getElementById('saveNote')?.textContent || '')", 3000)  # v0.11.286 (G4-A, L5-a): a restore asks first
+        if 'Tap the backup again' not in (pg.inner_text('#saveNote') or ''): fails.append('L5-a: Restore a backup did not ask for a second tap')
+        pg.wait_for_timeout(450)  # L5-a: no second tap counts within 400 ms
         pg.click('button[data-bak="5m"]'); on_tab(pg, 'story')  # the backup is loaded and autosaved, then the Story tab
         a = pg.evaluate("[localStorage.getItem('boneash.auto'), localStorage.getItem('boneash.bak.before')]")
         if scene_of(a[0]) != scene_of(b5) or scene_of(a[1]) != scene_of(lf): fails.append(f'Backups: after restore the game is at {scene_of(a[0])}, before = {scene_of(a[1])}')
@@ -737,6 +740,7 @@ def lp2(pg, url):
     ld = pg.query_selector('button[data-load="1"]')
     if not ld: fails.append('RQ1 (TG): no Load button for slot 1'); return
     ld.click(); until(pg, "/Tap Load again/.test(document.getElementById('saveNote')?.textContent || '')", 3000)  # v0.11.285 (G3-A, OS-a): a load asks first
+    pg.wait_for_timeout(450)  # v0.11.286 (L5-a): no second tap counts within 400 ms
     pg.click('button[data-load="1"]'); on_tab(pg, 'story')
     title = pg.query_selector('.head .title'); title = title.inner_text() if title else ''
     if title != 'The Bone Field' or pg.query_selector('.prose.again'): fails.append(f'RQ1 (TG): a slot loaded on the same scene should show it in full ({title!r}, folded: {bool(pg.query_selector(".prose.again"))})')
@@ -803,6 +807,10 @@ def g3_ui(b, url):
         open_saves(pg)
         pg.click('button[data-save="2"]'); until(pg, "/Tap Save here again/.test(document.getElementById('saveNote')?.textContent || '')", 3000)
         asked = 'Tap Save here again' in (pg.inner_text('#saveNote') or '')
+        pg.click('button[data-save="2"]'); pg.wait_for_timeout(100)  # v0.11.286 (L5-a): a double tap is one tap
+        if (pg.inner_text('#saveNote') or '').startswith('Saved'): fails.append('L5-a: a second tap within 400 ms saved over the slot')
+        else: notes.append('L5-a: a fast second tap did not save')
+        pg.wait_for_timeout(450)
         pg.click('button[data-save="2"]'); until(pg, "/^Saved/.test(document.getElementById('saveNote')?.textContent || '')", 3000)
         if not asked: fails.append('OS-a: Save here on a full slot did not ask first')
         elif 'Saved' not in (pg.inner_text('#saveNote') or ''): fails.append('OS-a: the second tap did not save')

@@ -116,6 +116,8 @@ export function sceneView(g, scenes) {
     return { id: s.id, title: asText(s.title, g) || '', art: asText(s.art, g), place: asText(s.place, g), text, choices, end: !!s.end };
 }
 
+/** v0.11.286 (owner pick WR-a): a scene entered, told to threads.js (set by it; a hook, so story.js imports nothing more). */
+export const enterHook = { fn: null };
 function go(g, scenes, to) {
     const id = typeof to === 'function' ? to(g) : to;
     if (!scenes[id]) throw new Error(`Choice leads to unknown scene "${id}"`);
@@ -127,6 +129,7 @@ function go(g, scenes, to) {
     let skip = !!g.coil?.skipEnter; // a Coil rewind or "Not yet": the scene was entered already, don't run its enter twice
     if (skip) g.coil.skipEnter = false;
     if (g.flags.med_back && g.flags.med_back === id) { skip = true; delete g.flags.med_back; } // back from the Meditate card (v0.9.5)
+    if (enterHook.fn && !skip) enterHook.fn(g, id); // v0.11.286 (owner pick WR-a): the threads' arcs (threads.js); not a rewind's own first scene
     const lines = s.enter && !skip ? (s.enter(g) || []) : [];
     noteDay(g, id); // v0.11.135 (owner picks NT1, EV1): the days this Coil it shows (lines.js byDay)
     if (s.dayKey) noteDay(g, s.dayKey(g)); // an event scene: the days this Coil each event showed

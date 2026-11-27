@@ -7,6 +7,7 @@ import { TT } from './tribute_texts.js'; // v0.11.251 (owner pick P21-E, TK)
 import { advance, startActCoil, combatHooks, PEOPLE_FIGHTS, coilMult, coilMultNext, fmtMult, realmName } from '../core/game.js';
 import { setDeathHook, goTo } from '../core/story.js';
 import { coilActive, endCoil, rewind, coilReport, actOf, actWon, willUnwind, noteClear, targetsText, keptRealm, keptAfterClear, keptLine } from '../core/coil.js';
+import { threadsLine } from '../core/threads.js'; // v0.11.286 (owner picks G4-A, WR-a): the threads' line
 import { yukiJobLabel, yukiSpeedLine } from '../core/tasks.js'; // v0.11.159 (owner pick NX2, CL)
 
 const WHY = {
@@ -77,6 +78,8 @@ ${r.near.length ? `
 **Carries over:** familiarity with every card and Yuki's practice, what James remembers, the faster learning, Yuki's bond, and a quarter of each relationship's best as a head start.
 
 **Targets:** ${targetsText(g)}
+
+**Threads at work:** ${threadsLine(g)}
 
 Yuki remembers all of it, through the bond, as she always has. Expect to hear it quoted.
 

@@ -54,6 +54,7 @@ import { sceneView, choose, goTo } from '../js/core/story.js';
 import { isTaskHub, isTaskChoice, taskCards, taskOpen, runTask, taskState, setYuki, yukiLane, weekHub, isCarryTask } from '../js/core/tasks.js';
 import { foldNight, runWeek, planHere, planEnsure, planSet, weekResume, noteReadTap, noteEvening } from '../js/core/week.js'; // v0.11.204 (owner pick W1, B1): the bots plan by the week
 import { medCards, runMed, canMeditate } from '../js/core/meditate.js';
+import { noteHand, threadsAwake, threadsRead, threadChoices, setThread } from '../js/core/threads.js'; // v0.11.286 (owner picks G4-A, TQ-A, WR-a, HP-n)
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { noFold, OUTCOME_SCENES, againView, noteRead, noteLines } from '../js/story/again.js'; // v0.11.132 (E1, RP); v0.11.133 (FP2): noteRead
 import { shareNote } from '../tools/lib/textlint.mjs'; // v0.11.132 (E1, EB)
@@ -139,7 +140,24 @@ function fight(g, st, smart) {
 }
 // v0.11.273 (owner pick P41-A, SW): what each step shows, for skillWatch (tests/lib/skillwatch.mjs; log only)
 let swSeen = [];
-const see = (x) => { swSeen.push(...linesOf(x)); return x; };
+const see = (x) => { const ls = linesOf(x); swSeen.push(...ls); for (const l of ls) if (/^Thread \d+ · /.test(l)) thRuns.n++; return x; };
+// v0.11.286 (G4-A): --no-threads: the models leave the threads off (the balance stop's comparison); the thread runs a game are counted
+const NO_THREADS = argv.includes('--no-threads');
+const thRuns = { n: 0 };
+/** v0.11.286 (G4-A, TQ-A): the models' threads: every awake lane on the cards here a thread may hold (by hand, Practised), in their order. */
+function autoThreads(g) {
+    const n = threadsAwake(g);
+    if (!n || NO_THREADS) return;
+    const th = threadsRead(g), ok = threadChoices(g, SCENES).filter((c) => !c.why).map((c) => c.id);
+    const held = new Set(th.lanes.slice(0, n).filter((l) => l && l.hub === g.scene && ok.includes(l.id)).map((l) => l.id));
+    for (let i = 0; i < n; i++) {
+        const l = th.lanes[i];
+        if (l && l.hub === g.scene && ok.includes(l.id)) continue;
+        const id = ok.find((x) => !held.has(x));
+        if (!id) break;
+        setThread(g, SCENES, i, g.scene, id); held.add(id);
+    }
+}
 const runCombat = (g, r, st, smart) => { if (r?.combat) { see(startCombat(g, r.combat(g))); fight(g, st, smart); } };
 
 /** What a model queues on a task screen this visit (card ids), or null to take a story stop. */
@@ -236,7 +254,7 @@ function weekRun(model, g, cards, st) {
     const r = see(runWeek(g, SCENES));
     st.weekStops[r.stop] = (st.weekStops[r.stop] || 0) + 1;
     // v0.11.214 (owner pick RD1, RB): a card with text not read yet: the model taps it (a card tap), reads it, and runs the week again
-    if (r.stop === 'read') { const id = planHere(g)?.read; if (id && taskOpen(g, SCENES, id)) { const rr = see(runTask(g, SCENES, id)); noteReadTap(g, SCENES, id, rr); noteLines(g, rr.lines); st.cards++; st.taps.card++; return true; } }
+    if (r.stop === 'read') { const id = planHere(g)?.read; if (id && taskOpen(g, SCENES, id)) { const rr = see(runTask(g, SCENES, id)); noteReadTap(g, SCENES, id, rr); noteHand(g, SCENES, id); noteLines(g, rr.lines); st.cards++; st.taps.card++; return true; } }
     return g.minutes !== m0 || g.scene !== s0;
 }
 
@@ -336,6 +354,7 @@ function play(run, model, st, yuki, kept = false) {
         if (isTaskHub(g)) {
             const yl = yukiLane(g);
             if (yl) { if (model === 'random') { if (rnd(3) === 0) setYuki(g, !yl.on); } else if (yl.on !== (yuki === 'on')) setYuki(g, yuki === 'on'); }
+            if (model !== 'random') autoThreads(g); // v0.11.286 (G4-A): awake only after a won Act 1 (the kept pass)
             const cards = taskCards(g, SCENES);
             const stops = v.choices.filter((c) => !c.disabled && (c.index >= 1000 || !isTaskChoice(SCENES, g.scene, c.index)));
             let plan = null;
@@ -366,6 +385,7 @@ function play(run, model, st, yuki, kept = false) {
                     if (c && !EAT.test(c.label)) st.work++;
                     const m0 = g.minutes;
                     const rr = see(runTask(g, SCENES, id)); st.cards++; st.taps.card++; if (CAL) noteLines(g, rr.lines); // v0.11.214 (RD1): what a tap shows is read
+                    noteHand(g, SCENES, id); // v0.11.286 (HP-n): the model's own tap is a tap by hand
                     if (model === 'sociable' && c?.kind === 'door' && SOCIAL.test(c.label)) st.talks = (st.talks || 0) + 1; // v0.11.160 (NX2, CN; RV1 TC)
                     const ck = c && (c.kind === 'chore' && /^(Cultivate|Condense)/.test(c.label) ? 'sit' : c.kind); // a hub's own Cultivate chore is a sit
                     if (CULT_KINDS.includes(ck)) st.cult[ck] = (st.cult[ck] || 0) + (g.minutes - m0); // v0.11.142 (CV1): cultivation on task screens
@@ -380,6 +400,7 @@ function play(run, model, st, yuki, kept = false) {
                 const c = careLike(model) ? forcedPick(open, done, mem.walked, dayKey(g)) : oldForcedPick(open, done); // v0.11.163 (W1, RS; tests/lib/forced.mjs)
                 done.add(c.id); st.forced++; st.cards++; st.taps.card++;
                 const rr = see(runTask(g, SCENES, c.id)); if (CAL) noteLines(g, rr.lines); // v0.11.214 (RD1)
+                noteHand(g, SCENES, c.id); // v0.11.286 (HP-n)
                 continue;
             }
             const i = storyPick(model, g, stops, mem); mem.tried.add(`${g.scene}:${i}`);
@@ -423,7 +444,7 @@ const CULT_NAMES = { sit: 'sits', mer: 'meridians', qi: 'gather Qi', bt: 'breakt
 const GATES = [['epilogue', 'Mei Lin', (f) => f > 10], ['rt_road', 'Ya', (f) => f >= 20]];
 const blank = () => ({ gates: {}, taps: { story: 0, card: 0, set: 0, run: 0, fold: 0 }, weekStops: {}, hungryAt: {}, hungryFed: {}, cult: {}, endRealm: {}, spare: 0, nights: {}, games: 0, finished: 0, gaveUp: 0, stuck: 0, cards: 0, work: 0, forced: 0, oneCoil: 0, hungry: 0, cuAhead: 0, deaths: {}, tribute: {}, prologueClear: {}, act1Clear: {}, endings: {}, fights: {} });
 const all = {};
-const playInto = (st, run, m, yuki, kept = false) => { st.games++; const r = play(run, m, st, yuki, kept); if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
+const playInto = (st, run, m, yuki, kept = false) => { st.games++; thRuns.n = 0; const r = play(run, m, st, yuki, kept); st.thRuns = (st.thRuns || 0) + thRuns.n; if (r === 'end') st.finished++; else if (r === 'stuck') st.stuck++; };
 for (const m of PLAY) {
     if (KEPT) { all[`${m}:kept`] = blank(); if (!kids) for (const run of myRuns()) if (ownCount(m, run)) playInto(all[`${m}:kept`], run, m, 'on', true); continue; } // KA1 (KM)
     all[m] = blank();
@@ -487,6 +508,7 @@ for (const [m, st] of Object.entries(all)) {
     const sum = (o) => Object.values(o).reduce((a, b) => a + b, 0);
     console.log(`  cleared: prologue ${pct(sum(st.prologueClear), st.games)} (mean Coil ${avg(st.prologueClear)}) · Act 1 ${pct(sum(st.act1Clear), st.games)} (mean Coil ${avg(st.act1Clear)}) · the whole game on Coil 1 ${pct(st.oneCoil, st.games)}`);
     if (st.talks) console.log(`  talk doors: ${(st.talks / Math.max(1, st.games)).toFixed(1)} a game (Ya and Mei Lin)`); // v0.11.160 (NX2, CN)
+    if (st.thRuns) console.log(`  threads (G4-A): ${(st.thRuns / Math.max(1, st.games)).toFixed(1)} thread runs a game`);
     if (st.p1N || st.noClear || st.p1GaveUp) console.log(`  kept (KA1, KM): the first pass won ${st.p1N || 0} of ${(st.p1N || 0) + (st.noClear || 0) + (st.p1GaveUp || 0)}${st.noClear || st.p1GaveUp ? ` (${st.noClear || 0} not won, ${st.p1GaveUp || 0} gave up: no second pass, left out of this block)` : ''} (realm at its clear ${st.p1N ? (st.p1Realm / st.p1N).toFixed(2) : '—'}, mean Coil ${st.p1N ? (st.p1Coil / st.p1N).toFixed(2) : '—'}); this second pass starts at realm ${st.p1N ? (st.keptStart / st.p1N).toFixed(2) : '—'}${KEPT_CLEARS ? ` (${KEPT_CLEARS} won clears held, --kept-clears)` : ''}, with its Coil bonus; Coils above counted from its first`);
     if (st.farmN) console.log(`  farmer: ${FARM_BITES} bites by choice at the first dawn first, then ×${(st.farmMult / st.farmN).toFixed(2)} (a bite by choice adds no bonus); Coils above counted from its first real one`);
     const fl = KEY_FIGHTS.filter((k) => st.fights[k]).map((k) => { const f = st.fights[k]; const n = f.win + f.lose + (f.flee || 0); return `${k} ${pct(f.win, n)} (${n})`; });

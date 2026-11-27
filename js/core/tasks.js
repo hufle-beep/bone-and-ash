@@ -25,6 +25,7 @@ import { storyDay, calStart, calEnd, atStoryDay, LONG_CAL, STAY_DAYS, tributeLef
 import { endCoil } from './coil.js';
 import { canMeditate } from './meditate.js';
 import { keepReplies } from './replies.js'; // v0.11.69 (P1)
+import { threadTick } from './threads.js'; // v0.11.286 (owner picks G4-A, TQ-A, WR-a, HP-n): the threads' lanes
 
 setTimeless(Object.fromEntries(Object.entries(TASK_HUBS).map(([h, cfg]) => [h, [...Object.keys(cfg.menus || {}), ...Object.keys(cfg.doorMenus || {})]]))); // hub ↔ menu steps take no extra time (v0.9.5)
 
@@ -198,7 +199,7 @@ export function merChoice(g, scenes) {
 /* v0.11.64: every card happens at once, so the old "instant" cards (rest, sleep, eating: `instantChoice`, `isInstantTask`, v0.10.0 / v0.11.37) are no longer singled out. */
 
 /** What kind of card `id` is on hub `hubId`, with its choice and (for menu cards) the door choice into its menu. */
-function cardOf(scenes, hubId, id) {
+export function cardOf(scenes, hubId, id) {
     const cfg = TASK_HUBS[hubId];
     if (id === BT_TASK) return { kind: 'bt', c: null, p: { scene: 'breakthrough', index: -1 }, group: 'Meditate' };
     if (id === MER_TASK) return { kind: 'mer', c: null, p: { scene: 'meridians', index: -1 }, group: 'Meditate' };
@@ -324,7 +325,7 @@ function collapse(g, scenes, hubId) {
         ...goTo(g, scenes, 'coil_end')];
 }
 
-function learn(g, scenes, hubId, card, id, gain) {
+export function learn(g, scenes, hubId, card, id, gain) {
     const t = st(g);
     t.fam[id] = r1((t.fam[id] || 0) + gain);
     if (card.menu) {
@@ -596,6 +597,7 @@ export function runTask(g, scenes, id) {
     }
     if (PT1.on && slot0 && !fail) dayMeal(g, hubId, null, true, '', slot0); // RV1 (L1, L2): the eat card tapped is this part of the day's meal, now it ran
     lines.push(...yukiTick(g, hubId, g.minutes - mY));
+    lines.push(...threadTick(g, scenes, hubId, g.minutes - mY)); // v0.11.286 (G4-A, TH-l): the threads on the same time, after hers
     lines.push(...takeSpoilNotes(g)); // v0.11.209 (RV1, H1 + M1): the food that turned while the card took its time (a sit, a meridian, the routine)
     let stopped = g.scene !== hubId;
     if (!stopped && g.james.hp <= 0) { lines.push(...collapse(g, scenes, hubId)); stopped = true; }

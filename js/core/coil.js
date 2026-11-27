@@ -17,6 +17,7 @@
  *   Relationships other than Yuki: max(snapshot value, 25% of the last Coil's peak), friendship and affection apart.
  * Pure — no DOM.
  */
+import { threadsKept } from './threads.js'; // v0.11.286 (owner picks G4-A, WR-a, HP-n)
 import { coilStart, coilSnap, ensureBars, SAVE_VERSION, newGame, yukiAbove, awardXp, realmName, MAX_REALM } from './game.js';
 import { COL_GROUPS, colGroupsOpen } from '../story/meridians.js'; // v0.11.227 (KA1, KL-x): the meridians a kept realm opens
 import { famTier, FAM } from './tasks.js';
@@ -203,7 +204,7 @@ export function rewind(g, { to = 'act', xpOut = null } = {}) { // xpOut: v0.11.2
     }
     if (g.rel.Yuki) rel.Yuki = clone(g.rel.Yuki);
     base.rel = rel;
-    base.tasks = { queue: [], fam: clone(g.tasks.fam || {}), use: clone(g.tasks.use || {}), adapt: clone(g.tasks.adapt || {}), yuki: { on: !!g.tasks.yuki?.on, progress: 0 }, ...(g.tasks.prio && typeof g.tasks.prio === 'object' ? { prio: clone(g.tasks.prio) } : {}), ...(g.tasks.keep && typeof g.tasks.keep === 'object' ? { keep: clone(g.tasks.keep) } : {}) }; // v0.11.219 (owner pick KC1, KG): the plan's counts kept for good too // v0.11.211 (owner pick PK1): the plan's places kept for good
+    base.tasks = { queue: [], fam: clone(g.tasks.fam || {}), use: clone(g.tasks.use || {}), adapt: clone(g.tasks.adapt || {}), yuki: { on: !!g.tasks.yuki?.on, progress: 0 }, ...(g.tasks.prio && typeof g.tasks.prio === 'object' ? { prio: clone(g.tasks.prio) } : {}), ...(g.tasks.keep && typeof g.tasks.keep === 'object' ? { keep: clone(g.tasks.keep) } : {}), ...(threadsKept(g) ? { threads: threadsKept(g) } : {}) }; // v0.11.286 (G4-A, SV): the threads kept, their lanes from 0 // v0.11.219 (owner pick KC1, KG): the plan's counts kept for good too // v0.11.211 (owner pick PK1): the plan's places kept for good
     base.stats = clone(g.stats);
     histClose(g, base); // v0.11.285 (G3-A, CH-t): the ending Coil on the history's list, when the game has one
     if (c.why === 'clear') { base.stats.clears = (base.stats.clears || 0) + 1; base.stats.keptTop = Math.max(base.stats.keptTop || 0, g.james.realm || 0); } // v0.11.227 (KA1): a won clear
