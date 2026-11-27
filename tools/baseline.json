@@ -1,5 +1,5 @@
 {
- "saved": "2026-11-24",
+ "saved": "2026-11-27",
  "limit": 20,
  "minN": 50,
  "metrics": {
@@ -16,56 +16,56 @@
    "n": 1000
   },
   "prologue C2 dead before Mei Lin": {
-   "v": 96.6,
+   "v": 96.7,
    "n": 1000
   },
   "prologue C2 dead after Mei Lin": {
-   "v": 2.4,
+   "v": 2.3,
    "n": 1000
   },
   "prologue C2 beast deaths": {
-   "v": 97.4,
+   "v": 97.5,
    "n": 1000
   },
   "prologue C3 dead before Mei Lin": {
-   "v": 84.3,
+   "v": 84.7,
    "n": 1000
   },
   "prologue C3 dead after Mei Lin": {
-   "v": 8.2,
+   "v": 8,
    "n": 1000
   },
   "prologue C3 beast deaths": {
-   "v": 90.3,
+   "v": 90.5,
    "n": 1000
   },
   "prologue C4 dead before Mei Lin": {
-   "v": 72.6,
-   "n": 987
+   "v": 71.7,
+   "n": 993
   },
   "prologue C4 dead after Mei Lin": {
-   "v": 14.8,
-   "n": 987
+   "v": 14.4,
+   "n": 993
   },
   "prologue C4 beast deaths": {
-   "v": 85.1,
-   "n": 987
+   "v": 84.3,
+   "n": 993
   },
   "Act 1 C3 dead": {
    "v": 0,
-   "n": 13
+   "n": 7
   },
   "Act 1 C3 beast deaths": {
    "v": 0,
-   "n": 13
+   "n": 7
   },
   "Act 1 C4 dead": {
    "v": 0,
-   "n": 52
+   "n": 55
   },
   "Act 1 C4 beast deaths": {
    "v": 0,
-   "n": 52
+   "n": 55
   },
   "tribute C1 won": {
    "v": 0,
@@ -92,440 +92,440 @@
    "n": 10
   },
   "tribute C3 won": {
-   "v": 17.3,
-   "n": 75
+   "v": 9.6,
+   "n": 73
   },
   "tribute C3 paid": {
    "v": 0,
-   "n": 75
+   "n": 73
   },
   "tribute C3 lost": {
-   "v": 82.7,
-   "n": 75
+   "v": 90.4,
+   "n": 73
   },
   "tribute C4 won": {
-   "v": 33.9,
-   "n": 124
+   "v": 32.6,
+   "n": 138
   },
   "tribute C4 paid": {
-   "v": 5.6,
-   "n": 124
+   "v": 5.8,
+   "n": 138
   },
   "tribute C4 lost": {
-   "v": 60.5,
-   "n": 124
+   "v": 61.6,
+   "n": 138
   },
   "tribute C5 won": {
-   "v": 45.7,
-   "n": 188
+   "v": 45.8,
+   "n": 177
   },
   "tribute C5 paid": {
-   "v": 13.8,
-   "n": 188
+   "v": 16.4,
+   "n": 177
   },
   "tribute C5 lost": {
-   "v": 40.4,
-   "n": 188
+   "v": 37.9,
+   "n": 177
   },
   "tribute C6 won": {
-   "v": 41.6,
-   "n": 209
+   "v": 40.3,
+   "n": 221
   },
   "tribute C6 paid": {
-   "v": 24.4,
-   "n": 209
+   "v": 21.7,
+   "n": 221
   },
   "tribute C6 lost": {
-   "v": 34,
-   "n": 209
+   "v": 38,
+   "n": 221
   },
   "fight inc:mire:smart": {
-   "v": 70.3,
-   "n": 666
+   "v": 69.7,
+   "n": 660
   },
   "fight inc:jackals:smart": {
-   "v": 29.4,
-   "n": 2464
+   "v": 29.2,
+   "n": 2478
   },
   "fight inc:gao:smart": {
-   "v": 77.7,
-   "n": 188
+   "v": 77.8,
+   "n": 189
   },
   "fight inc:boar:smart": {
-   "v": 41.4,
-   "n": 664
-  },
-  "fight inc:arson:smart": {
-   "v": 100,
-   "n": 257
-  },
-  "fight inc:thornback:smart": {
-   "v": 100,
-   "n": 326
-  },
-  "fight inc:collectors:smart": {
-   "v": 72.9,
-   "n": 339
-  },
-  "fight inc:palisade_wolf:smart": {
-   "v": 100,
-   "n": 251
-  },
-  "fight inc:ya_brawl:smart": {
-   "v": 100,
-   "n": 256
-  },
-  "fight inc:bone_elk:smart": {
-   "v": 100,
-   "n": 553
-  },
-  "fight inc:root_wyrm:smart": {
-   "v": 100,
-   "n": 247
-  },
-  "fight inc:night_drowned:smart": {
-   "v": 100,
-   "n": 169
-  },
-  "fight inc:mire_serpent:smart": {
-   "v": 100,
-   "n": 389
-  },
-  "fight inc:drowned:smart": {
-   "v": 100,
-   "n": 267
-  },
-  "fight inc:cinder_hawks:smart": {
-   "v": 100,
-   "n": 710
-  },
-  "fight inc:rot_ape:smart": {
-   "v": 99.6,
-   "n": 271
-  },
-  "fight inc:husks:smart": {
-   "v": 100,
-   "n": 247
-  },
-  "fight inc:guardian:smart": {
-   "v": 100,
-   "n": 122
-  },
-  "fight inc:rt_wolves:smart": {
-   "v": 100,
-   "n": 265
-  },
-  "fight inc:night_serpent:smart": {
-   "v": 100,
-   "n": 102
-  },
-  "fight inc:elder:smart": {
-   "v": 100,
-   "n": 85
+   "v": 41.7,
+   "n": 676
   },
   "fight inc:wolves:smart": {
    "v": 100,
-   "n": 346
+   "n": 294
+  },
+  "fight inc:arson:smart": {
+   "v": 100,
+   "n": 258
+  },
+  "fight inc:collectors:smart": {
+   "v": 69.7,
+   "n": 337
+  },
+  "fight inc:palisade_wolf:smart": {
+   "v": 100,
+   "n": 236
+  },
+  "fight inc:ya_brawl:smart": {
+   "v": 100,
+   "n": 247
+  },
+  "fight inc:bone_elk:smart": {
+   "v": 100,
+   "n": 565
   },
   "fight inc:night_wolves:smart": {
    "v": 100,
-   "n": 89
+   "n": 82
+  },
+  "fight inc:night_drowned:smart": {
+   "v": 100,
+   "n": 160
+  },
+  "fight inc:mire_serpent:smart": {
+   "v": 100,
+   "n": 363
+  },
+  "fight inc:drowned:smart": {
+   "v": 100,
+   "n": 254
+  },
+  "fight inc:cinder_hawks:smart": {
+   "v": 100,
+   "n": 673
   },
   "fight inc:night_hawks:smart": {
    "v": 100,
-   "n": 99
+   "n": 96
+  },
+  "fight inc:rot_ape:smart": {
+   "v": 100,
+   "n": 262
+  },
+  "fight inc:husks:smart": {
+   "v": 100,
+   "n": 240
   },
   "fight inc:root_husks:smart": {
    "v": 100,
-   "n": 92
+   "n": 79
   },
-  "fight inc:rt_brawl:smart": {
+  "fight inc:guardian:smart": {
    "v": 100,
-   "n": 10
+   "n": 128
   },
-  "fight inc:lizard:smart": {
-   "v": 87.5,
-   "n": 32
+  "fight inc:rt_wolves:smart": {
+   "v": 100,
+   "n": 252
   },
   "fight inc:sect_watcher:smart": {
    "v": 100,
-   "n": 74
+   "n": 81
+  },
+  "fight inc:root_wyrm:smart": {
+   "v": 100,
+   "n": 224
+  },
+  "fight inc:elder:smart": {
+   "v": 100,
+   "n": 72
+  },
+  "fight inc:thornback:smart": {
+   "v": 100,
+   "n": 318
+  },
+  "fight inc:night_serpent:smart": {
+   "v": 100,
+   "n": 94
   },
   "fight inc:rats:smart": {
-   "v": 91.3,
-   "n": 23
+   "v": 95.5,
+   "n": 22
   },
   "fight inc:crows:smart": {
    "v": 85.7,
    "n": 21
   },
-  "fight inc:jackals:random": {
-   "v": 22.5,
-   "n": 2621
-  },
-  "fight inc:mire:random": {
-   "v": 65.6,
-   "n": 681
-  },
-  "fight inc:boar:random": {
-   "v": 39.4,
-   "n": 573
-  },
-  "fight inc:rats:random": {
-   "v": 80,
+  "fight inc:lizard:smart": {
+   "v": 86.7,
    "n": 30
   },
+  "fight inc:rt_brawl:smart": {
+   "v": 100,
+   "n": 11
+  },
+  "fight inc:jackals:random": {
+   "v": 22.7,
+   "n": 2624
+  },
+  "fight inc:mire:random": {
+   "v": 65.9,
+   "n": 687
+  },
+  "fight inc:boar:random": {
+   "v": 42.2,
+   "n": 581
+  },
+  "fight inc:rats:random": {
+   "v": 79.3,
+   "n": 29
+  },
   "fight inc:gao:random": {
-   "v": 81,
-   "n": 137
+   "v": 81.9,
+   "n": 127
   },
   "fight inc:wolves:random": {
-   "v": 100,
-   "n": 225
+   "v": 99.6,
+   "n": 269
   },
   "fight inc:thornback:random": {
-   "v": 99.2,
-   "n": 243
+   "v": 98,
+   "n": 252
   },
   "fight inc:collectors:random": {
-   "v": 24.3,
-   "n": 268
+   "v": 25.4,
+   "n": 283
   },
-  "fight inc:palisade_wolf:random": {
+  "fight inc:arson:random": {
    "v": 100,
-   "n": 58
+   "n": 215
   },
   "fight inc:ya_brawl:random": {
    "v": 100,
-   "n": 61
+   "n": 67
   },
-  "fight inc:night_wolves:random": {
+  "fight inc:sect_watcher:random": {
    "v": 100,
-   "n": 19
+   "n": 35
   },
   "fight inc:bone_elk:random": {
-   "v": 100,
-   "n": 149
+   "v": 98.2,
+   "n": 163
   },
   "fight inc:root_wyrm:random": {
+   "v": 100,
+   "n": 51
+  },
+  "fight inc:night_drowned:random": {
    "v": 100,
    "n": 56
   },
   "fight inc:mire_serpent:random": {
    "v": 100,
-   "n": 81
+   "n": 99
   },
   "fight inc:drowned:random": {
    "v": 100,
-   "n": 64
-  },
-  "fight inc:night_drowned:random": {
-   "v": 100,
-   "n": 46
-  },
-  "fight inc:night_hawks:random": {
-   "v": 100,
-   "n": 19
+   "n": 69
   },
   "fight inc:cinder_hawks:random": {
-   "v": 100,
-   "n": 181
+   "v": 99.5,
+   "n": 195
   },
   "fight inc:rot_ape:random": {
    "v": 100,
-   "n": 65
+   "n": 72
   },
   "fight inc:husks:random": {
    "v": 100,
-   "n": 56
+   "n": 65
   },
   "fight inc:root_husks:random": {
    "v": 100,
-   "n": 18
-  },
-  "fight inc:guardian:random": {
-   "v": 100,
-   "n": 14
+   "n": 22
   },
   "fight inc:rt_wolves:random": {
-   "v": 95.2,
-   "n": 62
-  },
-  "fight inc:arson:random": {
-   "v": 100,
-   "n": 195
-  },
-  "fight inc:crows:random": {
-   "v": 96.8,
-   "n": 31
-  },
-  "fight inc:night_serpent:random": {
-   "v": 100,
-   "n": 20
+   "v": 98.5,
+   "n": 66
   },
   "fight inc:elder:random": {
    "v": 100,
-   "n": 25
+   "n": 24
   },
-  "fight inc:lizard:random": {
-   "v": 78.6,
-   "n": 28
+  "fight inc:palisade_wolf:random": {
+   "v": 100,
+   "n": 64
+  },
+  "fight inc:night_wolves:random": {
+   "v": 100,
+   "n": 22
+  },
+  "fight inc:night_serpent:random": {
+   "v": 100,
+   "n": 27
+  },
+  "fight inc:night_hawks:random": {
+   "v": 100,
+   "n": 27
+  },
+  "fight inc:guardian:random": {
+   "v": 100,
+   "n": 26
+  },
+  "fight inc:crows:random": {
+   "v": 96.7,
+   "n": 30
   },
   "fight inc:rt_brawl:random": {
    "v": 100,
-   "n": 2
+   "n": 1
   },
-  "fight inc:sect_watcher:random": {
-   "v": 100,
-   "n": 15
+  "fight inc:lizard:random": {
+   "v": 80.6,
+   "n": 31
   },
   "fight story-test:boar:smart": {
-   "v": 37.3,
-   "n": 1283
+   "v": 36.1,
+   "n": 1317
   },
   "fight story-test:jackals:smart": {
-   "v": 29.2,
-   "n": 3262
+   "v": 29.7,
+   "n": 3276
   },
   "fight story-test:wolves:smart": {
-   "v": 98,
-   "n": 589
+   "v": 97.6,
+   "n": 591
+  },
+  "fight story-test:thornback:smart": {
+   "v": 98.1,
+   "n": 592
   },
   "fight story-test:collectors:smart": {
    "v": 100,
-   "n": 464
+   "n": 466
   },
   "fight story-test:sect_watcher:smart": {
    "v": 100,
-   "n": 382
+   "n": 375
   },
   "fight story-test:bone_elk:smart": {
    "v": 100,
-   "n": 1666
-  },
-  "fight story-test:night_wolves:smart": {
-   "v": 100,
-   "n": 146
-  },
-  "fight story-test:mire_serpent:smart": {
-   "v": 100,
-   "n": 897
-  },
-  "fight story-test:drowned:smart": {
-   "v": 100,
-   "n": 457
+   "n": 1610
   },
   "fight story-test:night_serpent:smart": {
    "v": 100,
-   "n": 157
+   "n": 180
   },
-  "fight story-test:cinder_hawks:smart": {
+  "fight story-test:mire_serpent:smart": {
    "v": 100,
-   "n": 1595
+   "n": 949
   },
-  "fight story-test:rot_ape:smart": {
+  "fight story-test:drowned:smart": {
    "v": 100,
-   "n": 358
-  },
-  "fight story-test:husks:smart": {
-   "v": 100,
-   "n": 204
-  },
-  "fight story-test:root_husks:smart": {
-   "v": 100,
-   "n": 145
-  },
-  "fight story-test:rt_wolves:smart": {
-   "v": 100,
-   "n": 215
-  },
-  "fight story-test:elder:smart": {
-   "v": 100,
-   "n": 351
-  },
-  "fight story-test:mire:smart": {
-   "v": 95,
-   "n": 461
-  },
-  "fight story-test:thornback:smart": {
-   "v": 98.4,
-   "n": 557
-  },
-  "fight story-test:arson:smart": {
-   "v": 100,
-   "n": 151
+   "n": 450
   },
   "fight story-test:night_drowned:smart": {
    "v": 100,
-   "n": 296
+   "n": 311
+  },
+  "fight story-test:cinder_hawks:smart": {
+   "v": 100,
+   "n": 1571
   },
   "fight story-test:night_hawks:smart": {
    "v": 100,
-   "n": 162
+   "n": 152
+  },
+  "fight story-test:rot_ape:smart": {
+   "v": 100,
+   "n": 342
+  },
+  "fight story-test:husks:smart": {
+   "v": 100,
+   "n": 159
+  },
+  "fight story-test:elder:smart": {
+   "v": 100,
+   "n": 368
   },
   "fight story-test:gao:smart": {
-   "v": 98.3,
-   "n": 407
+   "v": 99,
+   "n": 403
   },
   "fight story-test:ya_brawl:smart": {
    "v": 100,
-   "n": 162
+   "n": 173
   },
-  "fight story-test:lf_bog_mother:smart": {
-   "v": 22.2,
-   "n": 18
+  "fight story-test:night_wolves:smart": {
+   "v": 100,
+   "n": 170
   },
-  "fight story-test:lf_rogue:smart": {
-   "v": 22.9,
-   "n": 35
+  "fight story-test:root_husks:smart": {
+   "v": 100,
+   "n": 172
+  },
+  "fight story-test:rt_wolves:smart": {
+   "v": 100,
+   "n": 184
+  },
+  "fight story-test:lf_bandits:smart": {
+   "v": 47.8,
+   "n": 23
+  },
+  "fight story-test:mire:smart": {
+   "v": 95.2,
+   "n": 456
   },
   "fight story-test:root_wyrm:smart": {
    "v": 100,
-   "n": 152
+   "n": 176
+  },
+  "fight story-test:lf_bog_mother:smart": {
+   "v": 28.6,
+   "n": 21
+  },
+  "fight story-test:lf_rogue:smart": {
+   "v": 14.3,
+   "n": 35
   },
   "fight story-test:lf_storm_hawks:smart": {
-   "v": 28.8,
-   "n": 59
+   "v": 33.3,
+   "n": 51
   },
   "fight story-test:lf_mire_brood:smart": {
-   "v": 30.6,
-   "n": 36
+   "v": 31,
+   "n": 29
   },
-  "fight story-test:lf_bandits:smart": {
-   "v": 66.7,
-   "n": 21
+  "fight story-test:arson:smart": {
+   "v": 100,
+   "n": 161
   },
   "fight story-test:palisade_wolf:smart": {
    "v": 100,
-   "n": 42
-  },
-  "fight story-test:lf_bone_hounds:smart": {
-   "v": 50,
-   "n": 30
-  },
-  "fight story-test:lf_heartless:smart": {
-   "v": 11.1,
-   "n": 36
-  },
-  "fight story-test:lf_ossuary:smart": {
-   "v": 30,
-   "n": 30
-  },
-  "fight story-test:rt_brawl:smart": {
-   "v": 100,
-   "n": 10
-  },
-  "fight story-test:lf_thunder_ram:smart": {
-   "v": 20,
-   "n": 10
-  },
-  "fight story-test:lf_root_lurkers:smart": {
-   "v": 37,
-   "n": 27
+   "n": 47
   },
   "fight story-test:guardian:smart": {
    "v": 100,
-   "n": 8
+   "n": 9
+  },
+  "fight story-test:lf_bone_hounds:smart": {
+   "v": 38.1,
+   "n": 21
+  },
+  "fight story-test:lf_heartless:smart": {
+   "v": 9.4,
+   "n": 32
+  },
+  "fight story-test:rt_brawl:smart": {
+   "v": 100,
+   "n": 7
+  },
+  "fight story-test:lf_root_lurkers:smart": {
+   "v": 33.3,
+   "n": 21
+  },
+  "fight story-test:lf_ossuary:smart": {
+   "v": 20,
+   "n": 25
+  },
+  "fight story-test:lf_thunder_ram:smart": {
+   "v": 16.7,
+   "n": 6
   },
   "fight story-test:lizard:smart": {
    "v": 100,
@@ -533,151 +533,151 @@
   },
   "fight story-test:jackals:random": {
    "v": 18.5,
-   "n": 4749
+   "n": 4710
   },
   "fight story-test:boar:random": {
-   "v": 33,
-   "n": 1484
+   "v": 33.1,
+   "n": 1470
   },
   "fight story-test:thornback:random": {
-   "v": 81.2,
-   "n": 542
-  },
-  "fight story-test:arson:random": {
-   "v": 100,
-   "n": 148
+   "v": 81.8,
+   "n": 555
   },
   "fight story-test:wolves:random": {
-   "v": 91,
-   "n": 586
+   "v": 90,
+   "n": 598
   },
   "fight story-test:collectors:random": {
-   "v": 99.4,
-   "n": 462
-  },
-  "fight story-test:sect_watcher:random": {
-   "v": 100,
-   "n": 377
-  },
-  "fight story-test:ya_brawl:random": {
-   "v": 100,
-   "n": 136
-  },
-  "fight story-test:bone_elk:random": {
-   "v": 99.9,
-   "n": 1600
-  },
-  "fight story-test:night_drowned:random": {
-   "v": 100,
-   "n": 292
-  },
-  "fight story-test:drowned:random": {
-   "v": 100,
-   "n": 455
-  },
-  "fight story-test:cinder_hawks:random": {
-   "v": 98.9,
-   "n": 1561
-  },
-  "fight story-test:rot_ape:random": {
-   "v": 99.4,
-   "n": 338
-  },
-  "fight story-test:elder:random": {
-   "v": 100,
-   "n": 363
-  },
-  "fight story-test:lf_mire_brood:random": {
-   "v": 38.6,
-   "n": 44
-  },
-  "fight story-test:lf_storm_hawks:random": {
-   "v": 36.5,
-   "n": 85
-  },
-  "fight story-test:gao:random": {
-   "v": 63.4,
-   "n": 372
-  },
-  "fight story-test:lf_ossuary:random": {
-   "v": 18.9,
-   "n": 37
-  },
-  "fight story-test:mire_serpent:random": {
-   "v": 99.8,
-   "n": 975
-  },
-  "fight story-test:night_hawks:random": {
-   "v": 100,
-   "n": 153
-  },
-  "fight story-test:husks:random": {
-   "v": 99.4,
-   "n": 169
-  },
-  "fight story-test:rt_wolves:random": {
-   "v": 97.8,
-   "n": 185
-  },
-  "fight story-test:mire:random": {
-   "v": 88,
-   "n": 661
-  },
-  "fight story-test:lf_bog_mother:random": {
-   "v": 13.8,
-   "n": 29
-  },
-  "fight story-test:night_wolves:random": {
-   "v": 99.3,
-   "n": 144
-  },
-  "fight story-test:night_serpent:random": {
-   "v": 100,
-   "n": 172
-  },
-  "fight story-test:lf_root_lurkers:random": {
-   "v": 31.3,
-   "n": 32
-  },
-  "fight story-test:lf_bone_hounds:random": {
-   "v": 34.4,
-   "n": 32
+   "v": 99.6,
+   "n": 478
   },
   "fight story-test:root_wyrm:random": {
    "v": 100,
-   "n": 163
+   "n": 154
   },
-  "fight story-test:lf_rogue:random": {
-   "v": 31.4,
-   "n": 51
+  "fight story-test:mire_serpent:random": {
+   "v": 99.6,
+   "n": 970
   },
-  "fight story-test:lf_heartless:random": {
-   "v": 5,
-   "n": 40
+  "fight story-test:drowned:random": {
+   "v": 100,
+   "n": 460
+  },
+  "fight story-test:night_drowned:random": {
+   "v": 100,
+   "n": 295
+  },
+  "fight story-test:cinder_hawks:random": {
+   "v": 98.6,
+   "n": 1622
+  },
+  "fight story-test:rot_ape:random": {
+   "v": 99.7,
+   "n": 327
+  },
+  "fight story-test:husks:random": {
+   "v": 100,
+   "n": 164
+  },
+  "fight story-test:elder:random": {
+   "v": 100,
+   "n": 367
+  },
+  "fight story-test:lf_mire_brood:random": {
+   "v": 43.8,
+   "n": 48
+  },
+  "fight story-test:lf_storm_hawks:random": {
+   "v": 38.8,
+   "n": 85
+  },
+  "fight story-test:sect_watcher:random": {
+   "v": 99.7,
+   "n": 378
+  },
+  "fight story-test:bone_elk:random": {
+   "v": 100,
+   "n": 1617
+  },
+  "fight story-test:gao:random": {
+   "v": 63.2,
+   "n": 397
+  },
+  "fight story-test:mire:random": {
+   "v": 88,
+   "n": 665
+  },
+  "fight story-test:rt_wolves:random": {
+   "v": 96.2,
+   "n": 186
+  },
+  "fight story-test:ya_brawl:random": {
+   "v": 100,
+   "n": 152
+  },
+  "fight story-test:night_wolves:random": {
+   "v": 100,
+   "n": 137
+  },
+  "fight story-test:night_serpent:random": {
+   "v": 100,
+   "n": 162
+  },
+  "fight story-test:night_hawks:random": {
+   "v": 100,
+   "n": 151
+  },
+  "fight story-test:palisade_wolf:random": {
+   "v": 94.6,
+   "n": 37
   },
   "fight story-test:root_husks:random": {
    "v": 100,
-   "n": 163
+   "n": 169
+  },
+  "fight story-test:lf_root_lurkers:random": {
+   "v": 34.5,
+   "n": 29
+  },
+  "fight story-test:lf_rogue:random": {
+   "v": 36.4,
+   "n": 55
+  },
+  "fight story-test:lf_bone_hounds:random": {
+   "v": 35.3,
+   "n": 34
+  },
+  "fight story-test:lf_heartless:random": {
+   "v": 2.6,
+   "n": 38
+  },
+  "fight story-test:lf_bog_mother:random": {
+   "v": 20,
+   "n": 30
+  },
+  "fight story-test:arson:random": {
+   "v": 100,
+   "n": 130
+  },
+  "fight story-test:lf_ossuary:random": {
+   "v": 6.9,
+   "n": 29
   },
   "fight story-test:lf_bandits:random": {
-   "v": 31.6,
+   "v": 26.3,
    "n": 57
   },
-  "fight story-test:palisade_wolf:random": {
-   "v": 88.9,
-   "n": 36
-  },
   "fight story-test:lf_thunder_ram:random": {
-   "v": 0,
-   "n": 12
-  },
-  "fight story-test:guardian:random": {
-   "v": 100,
-   "n": 12
+   "v": 6.7,
+   "n": 15
   },
   "fight story-test:rt_brawl:random": {
    "v": 100,
-   "n": 10
+   "n": 7
+  },
+  "fight story-test:guardian:random": {
+   "v": 100,
+   "n": 7
   }
  }
 }

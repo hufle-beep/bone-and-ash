@@ -32,6 +32,7 @@ import { installReading } from './reading.js'; // v0.11.182 (RS1)
 import { installYukiPath, ykAskNow, YK_HERE } from './yuki_path.js'; // v0.11.191 (Y1, AK): ykAskNow; v0.11.193 (N1, HQ): YK_HERE
 import { installCoil } from './coil_scenes.js';
 import { installThreads } from '../core/threads.js';
+import { installArchive } from '../core/archive.js'; // v0.11.287 (owner pick P55-A)
 import { installOnce } from './oneoff.js';
 import { installRomance } from './romance.js'; // v0.11.249 (owner pick P19-A: TB, RL, AL)
 import { markWalks } from './walks.js'; // v0.11.109 (owner pick MW1)
@@ -1347,6 +1348,7 @@ export const ASK_WOMEN = {
 installCoil(SCENES);
 // v0.11.286 (owner picks G4-A, WR-a): the arcs' ends wake threads (after the Coil's wrappers on fo_start and a1_end)
 installThreads(SCENES);
+installArchive();
 installOnce(SCENES); // v0.11.33: the task screens' one-off work, "Call it a day"
 markWalks(SCENES); // v0.11.109 (MW1): the walks flown from Foundation
 

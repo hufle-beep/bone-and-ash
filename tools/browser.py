@@ -167,7 +167,7 @@ def main_menu(pg, url):
     check_text(pg, 'after Begin', strict=True)
     # back to the menu from the game: it pauses, and Continue says so now
     pg.click('[data-tab="menu"]'); until(pg, '.main-menu', 5000, 'attached')
-    if not pg.query_selector('.main-menu'): fails.append('menu: the ☰ Menu tab did not open the menu')
+    if not pg.query_selector('.main-menu'): fails.append('menu: the ☰ tab did not open the menu')
     enter(pg)
 
 def news_box(pg, url):
@@ -407,10 +407,10 @@ def faq(pg, url):
     kept = json.dumps({'u': {'start': 1}, 'seen': {q: 1 for q in start}})
     fresh(pg, url, "a => { localStorage.clear(); localStorage.setItem('boneash.auto', a[0]); localStorage.setItem('boneash.faq.v1', a[1]); }", [save, kept])
     row = pg.eval_on_selector_all('#tabs button', "els => els.map(e => Math.round(e.getBoundingClientRect().top))")
-    if len(row) != 6 or len(set(row)) != 1: fails.append(f'FAQ: the six tabs are not one row at 390 px: tops {row}')
+    if len(row) != 7 or len(set(row)) != 1: fails.append(f'FAQ: the seven tabs (v0.11.287, P55-A: the Archive) are not one row at 390 px: tops {row}')
     pg.set_viewport_size({'width': 360, 'height': 780})
     row = pg.eval_on_selector_all('#tabs button', "els => els.map(e => Math.round(e.getBoundingClientRect().top))")
-    if len(set(row)) != 1: fails.append(f'FAQ: the six tabs are not one row at 360 px: tops {row}')
+    if len(set(row)) != 1: fails.append(f'FAQ: the seven tabs are not one row at 360 px: tops {row}')
     pg.set_viewport_size({'width': 390, 'height': 844})
     if not until(pg, '#tabs button[data-tab="faq"].new', 3000, 'attached'): fails.append('FAQ: no dot on the tab with new entries'); return
     pg.click('#tabs [data-tab="faq"]'); on_tab(pg, 'faq')
@@ -461,7 +461,7 @@ def faq(pg, url):
     fresh(pg, url, "localStorage.clear()")
     pg.click('#tabs [data-tab="sheet"]'); on_tab(pg, 'sheet'); pg.click('#view button[data-tab-go="faq"]'); on_tab(pg, 'faq')
     if not pg.evaluate("document.querySelector('details[data-faq=\"Skills and checks\"]')?.open"): fails.append('FAQ: on a new game, the James tab\'s button does not open Skills and checks')
-    elif not fails or not any(f.startswith(('FAQ', 'R1')) for f in fails): notes.append(f'the FAQ: six tabs in a row, {len(ents)} entries unfold with a dot and new tags, search, per-tab entries, kept on the phone')
+    elif not fails or not any(f.startswith(('FAQ', 'R1')) for f in fails): notes.append(f'the FAQ: seven tabs in a row, {len(ents)} entries unfold with a dot and new tags, search, per-tab entries, kept on the phone')
 
 def rest_places(pg, url):
     fresh(pg, url, "localStorage.clear()")
@@ -1116,6 +1116,29 @@ def update_test(b):
     finally:
         srv.shutdown(); shutil.rmtree(tmp, ignore_errors=True)
 
+def tab_bar(b, url):
+    """v0.11.287 (owner picks P55-A, TB-A): seven tabs (the Archive) on one line at a 360 px phone: every button as tall as the
+    others and no taller than 60 px, nothing past the right edge, the menu button shown as ☰ alone (its aria-label kept); the
+    Archive tab opens and draws its four headings."""
+    save = (ROOT / 'saves/v0.11.7-long-forest-coil2.json').read_text()
+    ctx = b.new_context(viewport={'width': 360, 'height': 740}, service_workers='block')
+    pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+    fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", save)
+    enter(pg)
+    m = pg.evaluate("""() => { const t = document.querySelector('#tabs'); const bs = [...t.querySelectorAll('button')];
+        return { n: bs.length, sw: t.scrollWidth, cw: t.clientWidth, hs: bs.map(x => Math.round(x.getBoundingClientRect().height)),
+                 menu: document.querySelector('[data-tab=menu]').textContent.trim(), aria: document.querySelector('[data-tab=menu]').getAttribute('aria-label') }; }""")
+    if m['n'] != 7 or m['sw'] > m['cw'] or max(m['hs']) > 60 or len(set(m['hs'])) != 1:
+        fails.append(f"TB-A: the tab bar at 360 px is not one line of 7 within the screen ({m})")
+    if m['menu'] != '☰' or m['aria'] != 'Main menu': fails.append(f"TB-A: the menu button ({m['menu']!r}, {m['aria']!r})")
+    pg.click('[data-tab="archive"]'); on_tab(pg, 'archive')
+    hs = pg.eval_on_selector_all('#view h2', 'els => els.map(e => e.textContent)')
+    if not (len(hs) == 4 and hs[0].startswith('Insights: ') and hs[1].startswith('Coil marks: ') and hs[2].startswith('Foes met: ') and hs[3].startswith('Endings seen: ')):
+        fails.append(f"AR-t: the Archive's headings ({hs})")
+    check_text(pg, 'AR-t, the Archive tab', strict=True)
+    ctx.close()
+
+
 def wide_layout(b, url):
     """v0.11.208 (owner pick PC3): the PC layout from 1100 px (saves/v0.11.7-long-forest-coil2.json, the Long Forest camp, 24 cards):
     three columns (story, cards, Results), the switch hidden; at 1366x768 at least 10 cards whole on the first screen and Results
@@ -1420,6 +1443,7 @@ def main(part=0):
                 plan_rows(b, url)
                 plan_forecast(b, url)  # v0.11.206 (FC1)
                 wide_layout(b, url)  # v0.11.208 (PC3)
+                tab_bar(b, url)  # v0.11.287 (P55-A, TB-A)
                 n1_ui(b, url)  # v0.11.210 (N1: SC, DC-a, MS, TT)
                 pr2_ui(b, url)  # v0.11.211 (PR2 + PK1)
                 vq1_ui(b, url)  # v0.11.213 (VQ1 + FQ1)

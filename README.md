@@ -16,7 +16,7 @@ A text RPG for your phone. James Green (forty, with a doctorate three days old) 
 - **On the phone:** open **https://hufle-beep.github.io/bone-and-ash/** in Chrome and choose *Add to Home screen*. After the first load it works offline. New versions arrive on their own; reopen the game once or twice.
 - **On the PC:** run `python -m http.server 8080` in this folder and open `http://localhost:8080`.
 - **On Android, as an app:** see *Android app* below.
-- **Saves:** the game saves itself after every choice, in the browser. **☰ Menu → Saves** has 3 slots, automatic backups and export / import. A save can also be shared to this repository's `saves/` folder.
+- **Saves:** the game saves itself after every choice, in the browser. **The ☰ menu → Saves** has 3 slots, automatic backups and export / import. A save can also be shared to this repository's `saves/` folder.
 
 ## Android app
 

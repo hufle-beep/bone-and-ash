@@ -84,7 +84,7 @@ function suite(A) {
         t(JSON.stringify(k('1')) === '{"card":0}' && JSON.stringify(k('9')) === '{"card":8}' && k('0') === null, 'A (HK-t): 1–9 the cards in order, 0 nothing');
         t(k('Escape').esc === true && k('s').tab === 'story' && k('C').tab === 'sheet' && k('h').tab === 'bag' && k('j').tab === 'journal' && k('f').tab === 'faq' && k('m').tab === 'menu' && k('x') === null, 'A (HK-t): Esc and the tabs');
         t(k('1', { ctrlKey: true }) === null && k('s', { metaKey: true }) === null && k('2', { altKey: true }) === null && A.hotkeyOf({ key: '1' }, true) === null && A.hotkeyOf(null) === null && k('1', { repeat: true }) === null && k('Escape', { repeat: true }) === null, 'A (HK-t, RV-A H1-r): nothing with a modifier, in a field, or from a held key\'s repeats');
-        t(A.HOTKEYS.length === 8 && A.HOTKEYS.every((h) => h.show && h.does) && new Set(A.HOTKEYS.map((h) => h.key)).size === 8, 'A (HK-t): one table, each key once, each with its words');
+        t(A.HOTKEYS.length === 9 && A.HOTKEYS.every((h) => h.show && h.does) && new Set(A.HOTKEYS.map((h) => h.key)).size === 9 && A.HOTKEYS.some((h) => h.key === 'a' && h.tab === 'archive'), 'A (HK-t): one table, each key once, each with its words; v0.11.287 (P55-A, AR-t): A, the Archive');
     } else t(false, 'A (HK-t): hotkeyOf is there');
     return bad;
 }

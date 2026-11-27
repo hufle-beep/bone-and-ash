@@ -64,6 +64,7 @@ const jobs = [
     { name: 'consistency (offline files, versions)', key: 'consistency', cmd: node('tools/consistency.mjs') },
     { name: 'engine numbers', key: 'rules', cmd: node('tests/rules.test.mjs') },
     { name: 'the threads (G4-A: what they hold, waking, the hand record, a lane\'s run; L4-w, L5-a)', key: 'threads', cmd: node('tests/threads.test.mjs') }, // v0.11.286 (owner picks G4-A, TQ-A, WR-a, HP-n)
+    { name: 'the Archive (P55-A: the Coil marks\' drain, the Insights, the endings, foes met, the tab)', key: 'archive', cmd: node('tests/archive.test.mjs') }, // v0.11.287 (owner pick P55-A)
     { name: "engine's own formula tests", key: 'engine', cmd: node('tests/engine.test.mjs') },
     { name: 'old saves (saves/)', key: 'saves', cmd: node('tests/saves.test.mjs') },
     { name: 'data integrity (ids, markers)', key: 'data', cmd: node('tests/data.test.mjs') },

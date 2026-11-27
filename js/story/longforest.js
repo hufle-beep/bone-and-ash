@@ -62,7 +62,7 @@ const lfDrill = (g, k) => { const list = LF_DRILL[k]; const i = pickLine(g, `lf_
 
 /* ---------------------------------------------------------------- fights ---------------------------------------------------------------- */
 
-const FIGHTS = {
+export const FIGHTS = { // v0.11.287 (P55-A): exported for the Archive test (every fight named)
     lf_bone_hounds: { zone: 'bone', band: 'challenging', intro: '' /* v0.11.175 (P8A, IN): never shown: the stomp posture opens this fight at every degree (power.js prepare) */, enemies: [{ name: 'Bone-hound', hp: 10, dc: 5, atk: 6, dmg: 4 }, { name: 'Bone-hound (scarred)', hp: 11, dc: 5, atk: 6.5, dmg: 4 }], loot: (g) => { addItem(g, 'beast_core', 1); return ['+1 Murky beast core.']; } },
     lf_ossuary: { zone: 'bone', band: 'major', intro: '' /* v0.11.175 (P8A, IN): never shown: the stomp posture opens this fight at every degree (power.js prepare) */, enemies: [{ name: 'Ossuary Wyrm', hp: 26, dc: 6, atk: 8, dmg: 6, dr: 1 }], loot: (g) => { addItem(g, 'beast_core', 2); addItem(g, 'bone_meal', 1); return ['+2 Murky beast cores, +1 Giant\'s bone-meal.']; } },
     lf_mire_brood: { zone: 'mire', band: 'challenging', intro: '' /* v0.11.175 (P8A, IN): never shown: the stomp posture opens this fight at every degree (power.js prepare) */, enemies: [{ name: 'Mire-brood', hp: 8, dc: 5, atk: 6, dmg: 3 }, { name: 'Mire-brood', hp: 8, dc: 5, atk: 6, dmg: 3 }, { name: 'Mire-brood (bloated)', hp: 9, dc: 5, atk: 6, dmg: 4 }], loot: (g) => { addItem(g, 'ghost_gill', 2); return ['+2 Ghost-gill.']; } },

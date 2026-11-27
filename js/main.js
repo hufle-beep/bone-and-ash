@@ -15,6 +15,7 @@ import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts, landReply, noteSaid } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1); v0.11.134 (LP2, QR; RQ1): landReply, noteSaid
 import { againView, skipPlan, skipRun, noteRead, noFold, noteLines } from './story/again.js'; // v0.11.35 (P1-a); v0.11.133 (FP2): noteRead, noFold
 import { coilActive, endCoil, targetsText, tabWhy, keptTabText, tlNote, histRows, TL_KINDS, TL_NAMES, WHY_SHORT } from './core/coil.js';
+import { archiveView, ARCHIVE_TEXT } from './core/archive.js'; // v0.11.287 (owner pick P55-A, AR-t)
 import { CREDITS } from './core/credits.js'; // v0.11.285 (G3-A, CR-p)
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMeditate } from './core/meditate.js';
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
@@ -468,7 +469,7 @@ ${welcomeHtml()}${statusHtml()}
  *  v0.11.253) is no longer read: every game and every loaded save is on the long calendar. */
 const freshGame = () => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true })); // meridians closed at the start (v0.9.6); v0.11.260 (P28-A, OC2): every game on the long calendar (newGame's `cal` option gone)
 const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
-function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: ☰ Menu → Saves.'); } }
+function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: the ☰ menu → Saves.'); } }
 
 /** Throws a SaveError if the state points at a scene this version doesn't have. */
 function checkScene(s) { flipFill(s); /* v0.11.226 (FP1, MV + DK): an old-calendar save moves to the long calendar */ if (!SCENES[s.scene]) throw new SaveError('notSave', `The save points at a scene this version doesn't have (${s.scene}).`); const hub = deadMenuHub(s, SCENES); if (hub) s.scene = hub; return s; } // v0.11.177 (RV1, C2): a save resting in an emptied menu opens on its hub
@@ -848,6 +849,22 @@ ${rel ? `<h2>People</h2>${rel}` : ''}
 <p class="note">How checks, XP, regeneration and hunger work, and more as James gets further: the FAQ.</p><div class="btns"><button class="btn" data-tab-go="faq">Open the FAQ</button></div>
 </section>`;
 }
+/** v0.11.287 (owner pick P55-A, AR-t): the Archive tab: Insights, the Coil marks, foes met, endings seen (archive.js archiveView). */
+function renderArchive() {
+    const a = archiveView(g), T = ARCHIVE_TEXT, cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+    view.innerHTML = `<section class="page archive"><h1>Archive</h1>
+<p class="lede">${esc(T.lede)}</p>
+<h2>${esc(T.insights(a.insights.length, a.insightsOf))}</h2>
+${a.insights.map((x) => `<div class="row"><span>${esc(x.name)}</span><span></span><span class="sub">${esc(cap(x.line))}</span></div>`).join('') || `<p class="note">${esc(T.noInsights)}</p>`}
+<h2>${esc(T.marks(a.held, a.marksOf, a.slower))}</h2>
+<p class="note">${esc(T.marksNote)}</p>
+${a.marks.map((m) => `<div class="row${m.got ? '' : ' dim'}"><span>${esc(cap(m.name))}</span><span>${m.got ? esc(T.got) : ''}</span></div>`).join('')}
+<h2>${esc(T.foes(a.foes.length))}</h2>
+${a.foes.map((f) => `<div class="row"><span>${esc(f.name)}</span><span>${esc(T.times(f.n))}</span></div>`).join('') || `<p class="note">${esc(T.noFoes)}</p>`}
+<h2>${esc(T.endings(a.endings.length, a.endingsOf))}</h2>
+${a.endings.map((e) => `<div class="row"><span>${esc(e)}</span><span></span></div>`).join('')}${a.wonOld ? `<p class="note">${esc(T.wonOld)}</p>` : ''}${!a.endings.length && !a.wonOld ? `<p class="note">${esc(T.noEndings)}</p>` : ''}
+</section>`;
+}
 function renderBag() {
     const items = Object.entries(g.inventory).filter(([, n]) => n > 0);
     view.innerHTML = `<section class="page"><h1>Hammerspace</h1>
@@ -1156,7 +1173,7 @@ function render() {
     if (recovery) return renderRecovery();
     faqUpdate(); // v0.11.83: unlock what the game has reached; the tab's dot
     const keep = colScroll(); // v0.11.210 (owner pick N1, SC)
-    ({ story: renderStory, sheet: renderSheet, bag: renderBag, journal: renderJournal, faq: renderFaq })[tab]();
+    ({ story: renderStory, sheet: renderSheet, bag: renderBag, journal: renderJournal, archive: renderArchive, faq: renderFaq })[tab]();
     keep();
     if (tab === 'story' && g && g.scene !== announcedScene) { announcedScene = g.scene; announce(g.combat ? `A fight: ${sceneTitle(g.scene)}` : val(SCENES[g.scene]?.title) || ''); }
 }

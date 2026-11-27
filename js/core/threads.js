@@ -24,7 +24,7 @@ export const THREAD_HOURS = [6, 19];
 export const ARCS = ['the Wilds', 'Ashfall', 'the tribute', 'the Fallout', 'the Root Road', 'the Drowned Wood', 'the Ashen Hills', 'the Heart', 'the Return'];
 /** The scene whose entry finishes arcs (their indexes): the next arc's first scene. The Blackroot's regions also by `bl_region`. */
 export const ARC_AT = { village: [0], tribute: [1], fo_start: [2], bl_start: [3], ht_start: [4, 5, 6], rt_start: [7], a1_end: [8] };
-const REGION_DONE = { dw: [4], ah: [4, 5] };
+export const REGION_DONE = { dw: [4], ah: [4, 5] };
 /** TQ-A (EL-f): the menus whose cards a thread may hold (a check and items each); Smoke the catch by its `preserve` mark. */
 const FOOD_MENUS = /^(wild_forage|wild_hunt|lf_forage|lf_hunt|rr_forage|dw_forage|ah_forage)$/;
 export const THREAD_TEXT = {

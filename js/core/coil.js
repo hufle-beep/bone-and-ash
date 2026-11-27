@@ -29,8 +29,10 @@ export const ykLastOf = (f) => f.yk_path || (f.yk_wait ? 'wait' : f.yk_last);
 /** What James knows and keeps (plus Yuki's own flags and the Long Forest run, so that run stays scaled; v0.11.31: and the speed gates, tasks.js maxSpeed; v0.11.183 (SG2, ON-S): the songs heard, songs.js). */
 export const KEEP_FLAGS = ['lore1', 'lore_realms', 'lore_tree', 'saw_lights', 'yuki_tiger_seen', 'yuki_human_seen', 'yk_last', 'long', 'longforest', 'lf_instant', 'spd_pro', 'spd_a1', 'lf_known', 'songs'];
 /** Discoveries that also lock a one-time action: reset with the world, but the Coil remembers them (Insights in step 4). */
-export const REMEMBER = { roots: 'the roots under the hollow', bone_sung: 'the song in the bone field', gills: 'where the ghost-gills grow', fungus: 'the jade bracket fungus by the stream', ship_found: 'where the seed-ship lies', log_heard: 'what Wren Aldous\'s log said' };
-const KNOW_TEXT = { lore1: 'what the tribute is', lore_realms: 'the realms, from Old Wen', lore_tree: 'the story of the dead tree', saw_lights: 'where the night lights go' };
+export const REMEMBER = { roots: 'the roots under the hollow', bone_sung: 'the song in the bone field', gills: 'where the ghost-gills grow', fungus: 'the jade bracket fungus by the stream', ship_found: 'where the seed-ship lies', log_heard: 'what Wren Aldous\'s log said',
+    // v0.11.287 (owner pick P55-A, IN-13): three more of design.md's Insights, kept as the others (archive.js INSIGHTS)
+    bl_tracker: 'how Ya reads a trail in the moss', told_hearth: 'what a Hearth Tree is, said aloud', grove: 'where the seed took root in Ashfall' };
+export const KNOW_TEXT = { lore1: 'what the tribute is', lore_realms: 'the realms, from Old Wen', lore_tree: 'the story of the dead tree', saw_lights: 'where the night lights go' };
 export const HEAD_START = 0.25;
 /** v0.11.249 (P19-A, RL): the bar for Mei Lin's remembered line (act1_common.js KISS_MEI; core does not import the story's gates). */
 export const RL_BAR = 30;

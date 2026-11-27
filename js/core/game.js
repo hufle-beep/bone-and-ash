@@ -18,6 +18,15 @@ export const K = 0.5;
 export const CONVERGENCE_MULTIPLIER = 1.25;
 export const START_MINUTES = 6 * 60 + 40; // Day 1, 06:40
 export const SATIETY_PER_HOUR = 3;
+/** v0.11.287 (owner pick P55-A, CM-5): the Coil marks. One for each of the 9 arcs (threads.js ARCS) the first time it is finished in
+ *  the game (`stats.marks`, its bits in ARCS' order; archive.js sets them; every rewind keeps `stats`). Each mark takes MARK_DRAIN off
+ *  Fed's own drain, awake and asleep (a card's extra Fed an hour, FED_EXTRA_PER_HOUR, is not touched): up to −45%. Measured
+ *  (`project/research/p55-measure.md`): Fed drained awake Careful −14.2%, the Completionist −11.7%, the Cultivator −11.3%; T1 and T3 within noise. */
+export const MARK_DRAIN = 0.05, MARK_COUNT = 9;
+/** The Coil marks held (0–9). */
+export const marksHeld = (g) => { let k = 0; for (let x = (Number(g?.stats?.marks) || 0) & 511; x; x &= x - 1) k += 1; return k; };
+/** Fed's drain an hour awake with the marks held (half that asleep). */
+export const fedPerHour = (g) => SATIETY_PER_HOUR * (1 - MARK_DRAIN * marksHeld(g));
 export const HUNGRY_AT = 30;
 export const STARVE_HP_PER_HOUR = 1.5; // task mode (v0.10.0, owner pick b): 1.5 HP per starving hour; classic keeps its old rule
 export const XP_BANDS = { routine: 0, standard: 30, challenging: 60, major: 120 };
@@ -73,7 +82,7 @@ export function newGame(seed = Date.now(), { closed = false } = {}) {
         flags: {},
         rel: {},
         log: [],
-        stats: { checks: 0, wins: 0, kills: 0, meals: 0 },
+        stats: { checks: 0, wins: 0, kills: 0, meals: 0, marks: 0, ends: [] }, // v0.11.287 (P55-A, SV): the Coil marks, the endings seen
         combat: null,
         tasks: { queue: [], fam: {}, adapt: {}, yuki: { on: false, progress: 0 } },
     };
@@ -538,11 +547,12 @@ export function advance(g, minutes, { resting = false } = {}) {
     g.minutes += m;
     spoilFresh(g); // v0.11.209 (TF1, S): long calendar only; RV1 (M1): its line waits for the action's end (takeSpoilNotes)
     const fed0 = Math.max(0, g.james.satiety);
-    g.james.satiety -= (SATIETY_PER_HOUR * m) / 60;
+    const ph = fedPerHour(g); // v0.11.287 (P55-A, CM-5)
+    g.james.satiety -= (ph * m) / 60;
     if (g.james.satiety <= 0) {
         // task mode (v0.10.0): STARVE_HP_PER_HOUR per starving hour, the minutes carried over
         g.james.satiety = 0;
-        g.starveCarry = (g.starveCarry || 0) + Math.max(0, m - (fed0 * 60) / SATIETY_PER_HOUR);
+        g.starveCarry = (g.starveCarry || 0) + Math.max(0, m - (fed0 * 60) / ph);
         const loss = Math.floor((g.starveCarry * STARVE_HP_PER_HOUR) / 60);
         g.starveCarry -= (loss * 60) / STARVE_HP_PER_HOUR;
         if (loss > 0) { g.james.hp -= loss; notes.push(`Starving: −${loss} HP`); }
@@ -616,7 +626,7 @@ export function nightTo(g, at = 60) {
     const p = clockParts(g.minutes), n0 = (p.hh < 6 ? p.day - 1 : p.day) * 1440; // before 06:00 it is still this night
     const t = Math.max(g.minutes, n0 + at), span = t - g.minutes;
     wakeState(g); g.minutes = t; g.wake.lastX = X4(t);
-    const drop = (SATIETY_PER_HOUR * span) / 60 / 2, fed0 = g.james.satiety;
+    const drop = (fedPerHour(g) * span) / 60 / 2, fed0 = g.james.satiety;
     const fedShare = fed0 <= 0 ? 0 : drop > 0 ? Math.min(1, fed0 / drop) : 1; // v0.11.143 (RN1, FP): only the hours he was still fed for
     if (span > 0 && fedShare > 0) { regenFor(g, Math.round(span * fedShare), true); ensureBars(g); } // v0.11.143 (NF1)
     g.james.satiety = Math.max(0, fed0 - drop);
@@ -648,7 +658,7 @@ export function sleepUntil(g, hour = 6, { bed = true } = {}) {
     wakeState(g);
     g.minutes = target;
     { const w = g.wake, d = clockParts(target).day; if (d > w.slept) { w.n += 1; w.slept = d; } w.lastX = X4(target); }
-    g.james.satiety = Math.max(0, g.james.satiety - (SATIETY_PER_HOUR * span) / 60 / 2);
+    g.james.satiety = Math.max(0, g.james.satiety - (fedPerHour(g) * span) / 60 / 2);
     spoilFresh(g); // RV1 (H1): what turned overnight goes with the night (its line with the action's), not at the first meal
     g.james.hp = jamesHpMax(g);
     g.james.qi = jamesQiMax(g);
@@ -1647,7 +1657,7 @@ export function migrate(g) {
     if (g.v === undefined) g.v = 1;
     if (g.v > SAVE_VERSION) throw new SaveError('tooNew', `This save is from a newer version of the game (state ${g.v}; this version reads up to ${SAVE_VERSION}).`);
     while (g.v < SAVE_VERSION) { const step = MIGRATIONS[g.v]; if (!step) throw new SaveError('notSave', `No migration from state ${g.v}.`); step(g); g.v += 1; }
-    return blFill(readFill(fliesFill(queueDrop(gaoFill(seenFill(oneCount(g)))))));
+    return archiveFill(blFill(readFill(fliesFill(queueDrop(gaoFill(seenFill(oneCount(g))))))));
 }
 /**
  * v0.11.222 (owner pick J2, TS9: SV): a long-calendar save from before this version has no `calBl`. One still before the Blackroot
@@ -1702,6 +1712,29 @@ export function flipFill(g) {
     flipOne(g, act);
     if (g.coil?.snap && g.coil.snap.cal !== LONG_CAL) flipOne(g.coil.snap, act);
     return true;
+}
+/**
+ * v0.11.287 (owner pick P55-A, SV): a save from before this version has no `stats.marks` or `stats.ends`. Filled once from where it
+ * stands: the marks: in Act 1, the prologue's 3 arcs; a won clear of Act 1 (`stats.clears`), all 9; and the arcs the threads have
+ * counted (`tasks.threads.arcs`). The endings: the tribute's (`flags.ending`, kept in Act 1), Act 1's (`flags.a1_outcome`), and 'a:won'
+ * (a won Act 1, which one not kept) for a won clear with no outcome on the save. Fills a missing field only.
+ */
+export function archiveFill(g) {
+    const s = g.stats || (g.stats = {});
+    if (s.marks == null) {
+        let m = (Number(g.tasks?.threads?.arcs) || 0) & 511;
+        if ((g.coil?.act || 0) === 1) m |= 7;
+        if ((s.clears || 0) > 0) m = 511;
+        s.marks = m;
+    }
+    if (!Array.isArray(s.ends)) {
+        const e = [];
+        if (g.flags?.ending) e.push(`t:${g.flags.ending}`);
+        if (g.flags?.a1_outcome) e.push(`a:${g.flags.a1_outcome}`);
+        if ((s.clears || 0) > 0 && !['a:victory', 'a:accord', 'a:revelation'].some((k) => e.includes(k))) e.push('a:won');
+        s.ends = e;
+    }
+    return g;
 }
 export function blFill(g) {
     if (!g || g.cal !== LONG_CAL || g.calBl !== undefined) return g;
@@ -1796,6 +1829,7 @@ export function deserialize(text, { force = false } = {}) {
  * max (the base, Convergence Use, the primaries open, the realm, ×CONVERGENCE_MULTIPLIER) and how long Fed lasts. Display only. */
 /** RV-A (L3-w): a card's extra Fed an hour (tasks.js FED_EXTRA_PER_HOUR; the story test checks they match). */
 export const BAR_WORK_EXTRA = 1;
+const r2 = (x) => Math.round(x * 100) / 100;
 export function barParts(g) {
     const gu = skillCheck(g.james.gu), body = Math.floor(bodyHpTerm(gu)), hpMax = jamesHpMax(g); // the max is floored, so is its body part
     const cu = skillCheck(g.james.skills['Convergence Use']), prim = g.james.primaries || 0, rb = realmBonus(g.james.realm);
@@ -1803,7 +1837,7 @@ export function barParts(g) {
     return {
         hp: { max: hpMax, base: 20, body, realm: Math.max(0, hpMax - 20 - body), gu: g.james.gu },
         qi: { max: jamesQiMax(g), base: 20, cu, prim, realm: rb, raw: 20 + cu + prim + rb, mult: CONVERGENCE_MULTIPLIER, skill: g.james.skills['Convergence Use'] },
-        fed: { now: fed, perHour: SATIETY_PER_HOUR, hours: Math.floor(fed / SATIETY_PER_HOUR), work: Math.floor(fed / (SATIETY_PER_HOUR + BAR_WORK_EXTRA)) },
+        fed: { now: fed, perHour: r2(fedPerHour(g)), hours: Math.floor(fed / fedPerHour(g)), work: Math.floor(fed / (fedPerHour(g) + BAR_WORK_EXTRA)), marks: marksHeld(g) }, // v0.11.287 (P55-A, CM-5): with the marks
     };
 }
 const tlOf = (n) => `T${n.tier} L${n.level}`;
@@ -1812,6 +1846,6 @@ export function barLines(g, which) {
     const p = barParts(g), rn = realmName(g.james.realm);
     if (which === 'hp') return [`Most HP: ${p.hp.max}.`, `${p.hp.base} to start, +${p.hp.body} from the body (GU ${tlOf(p.hp.gu)}), +${p.hp.realm} from the realm (${rn}).`];
     if (which === 'qi') return [`Most Convergence: ${p.qi.max}.`, `${p.qi.base} to start, +${p.qi.cu} from Convergence Use (${tlOf(p.qi.skill)}), +${p.qi.prim} for the primaries open, +${p.qi.realm} from the realm (${rn}): ${p.qi.raw}, ×${p.qi.mult} for Convergence.`];
-    if (which === 'fed') return [`Fed falls ${p.fed.perHour} an hour awake (${p.fed.perHour + BAR_WORK_EXTRA} working), half that asleep.`, p.fed.now <= 0 ? 'Empty: every hour now costs HP.' : p.fed.hours < 1 ? 'Under an hour awake until it runs out.' : `About ${p.fed.hours} h awake resting, ${p.fed.work} h working.`]; // RV-A (L3-w)
+    if (which === 'fed') return [`Fed falls ${p.fed.perHour} an hour awake (${r2(p.fed.perHour + BAR_WORK_EXTRA)} working), half that asleep.`, ...(p.fed.marks ? [`Coil marks: ${p.fed.marks} of ${MARK_COUNT}, ${Math.round(100 * MARK_DRAIN * p.fed.marks)}% slower.`] : []), p.fed.now <= 0 ? 'Empty: every hour now costs HP.' : p.fed.hours < 1 ? 'Under an hour awake until it runs out.' : `About ${p.fed.hours} h awake resting, ${p.fed.work} h working.`]; // RV-A (L3-w)
     return [];
 }

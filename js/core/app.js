@@ -148,6 +148,7 @@ export const HOTKEYS = [
     { key: 'c', show: 'C', does: 'James', tab: 'sheet' },
     { key: 'h', show: 'H', does: 'Hammerspace', tab: 'bag' },
     { key: 'j', show: 'J', does: 'Journal', tab: 'journal' },
+    { key: 'a', show: 'A', does: 'Archive', tab: 'archive' }, // v0.11.287 (owner pick P55-A, AR-t)
     { key: 'f', show: 'F', does: 'FAQ', tab: 'faq' },
     { key: 'm', show: 'M', does: 'the menu', tab: 'menu' },
 ];
