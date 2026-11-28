@@ -1133,10 +1133,34 @@ def tab_bar(b, url):
     if m['menu'] != '☰' or m['aria'] != 'Main menu': fails.append(f"TB-A: the menu button ({m['menu']!r}, {m['aria']!r})")
     pg.click('[data-tab="archive"]'); on_tab(pg, 'archive')
     hs = pg.eval_on_selector_all('#view h2', 'els => els.map(e => e.textContent)')
-    if not (len(hs) == 4 and hs[0].startswith('Insights: ') and hs[1].startswith('Coil marks: ') and hs[2].startswith('Foes met: ') and hs[3].startswith('Endings seen: ')):
+    if not (len(hs) == 6 and hs[0].startswith('Insights: ') and hs[1].startswith('Coil marks: ') and hs[2].startswith('Foes met: ') and hs[3].startswith('Endings seen: ')
+            and hs[4].startswith('Feats: ') and hs[5].startswith('Memories: ')):  # v0.11.289 (P57-A, FT + MM-k): six
         fails.append(f"AR-t: the Archive's headings ({hs})")
     check_text(pg, 'AR-t, the Archive tab', strict=True)
     ctx.close()
+
+
+def deadline_bar(b, url):
+    """v0.11.289 (owner pick P57-A, DL): the deadline line under the bars at a 360 px phone (saves/v0.11.204-long-wilds-day2.json, the
+    prologue's Wilds on the long road): shown, inside the screen, at most two lines, the status bar at most 40 px taller than without
+    it; none in the Long Forest (saves/v0.11.7-long-forest-coil2.json)."""
+    for name, want in (('v0.11.204-long-wilds-day2.json', True), ('v0.11.7-long-forest-coil2.json', False)):
+        save = (ROOT / 'saves' / name).read_text()
+        ctx = b.new_context(viewport={'width': 360, 'height': 740}, service_workers='block')
+        pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+        fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", save)
+        m = pg.evaluate("""() => { const d = document.querySelector('.status .deadline'), st = document.querySelector('.status');
+            if (!d) return { none: true, st: Math.round(st.getBoundingClientRect().height) };
+            const r = d.getBoundingClientRect(), lh = parseFloat(getComputedStyle(d).fontSize) * 1.6;
+            const h0 = Math.round(st.getBoundingClientRect().height); d.style.display = 'none'; const h1 = Math.round(st.getBoundingClientRect().height); d.style.display = '';
+            return { text: d.textContent, h: Math.round(r.height), lines: Math.round(r.height / lh), right: Math.round(r.right), w: innerWidth, grow: h0 - h1, hs: document.documentElement.scrollWidth > innerWidth }; }""")
+        if not want:
+            if not m.get('none'): fails.append(f"DL: a deadline line in the Long Forest ({m})")
+            ctx.close(); continue
+        if m.get('none') or not m['text'].startswith('Tribute '): fails.append(f"DL: no deadline line on the prologue's Wilds ({m})")
+        elif m['right'] > m['w'] or m['hs'] or m['lines'] > 2 or m['grow'] > 40: fails.append(f"DL: the deadline line at 360 px ({m})")
+        else: notes.append(f"DL at 360 px: {m['text']!r}, {m['lines']} line(s), +{m['grow']} px")
+        ctx.close()
 
 
 def wide_layout(b, url):
@@ -1444,6 +1468,7 @@ def main(part=0):
                 plan_forecast(b, url)  # v0.11.206 (FC1)
                 wide_layout(b, url)  # v0.11.208 (PC3)
                 tab_bar(b, url)  # v0.11.287 (P55-A, TB-A)
+                deadline_bar(b, url)  # v0.11.289 (P57-A, DL)
                 n1_ui(b, url)  # v0.11.210 (N1: SC, DC-a, MS, TT)
                 pr2_ui(b, url)  # v0.11.211 (PR2 + PK1)
                 vq1_ui(b, url)  # v0.11.213 (VQ1 + FQ1)

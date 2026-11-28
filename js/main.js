@@ -15,7 +15,7 @@ import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts, landReply, noteSaid } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1); v0.11.134 (LP2, QR; RQ1): landReply, noteSaid
 import { againView, skipPlan, skipRun, noteRead, noFold, noteLines } from './story/again.js'; // v0.11.35 (P1-a); v0.11.133 (FP2): noteRead, noFold
 import { coilActive, endCoil, targetsText, tabWhy, keptTabText, tlNote, histRows, TL_KINDS, TL_NAMES, WHY_SHORT } from './core/coil.js';
-import { archiveView, ARCHIVE_TEXT } from './core/archive.js'; // v0.11.287 (owner pick P55-A, AR-t)
+import { archiveView, ARCHIVE_TEXT, deadlineLine, memKeys, noteMemory, noteRecords } from './core/archive.js'; // v0.11.287 (owner pick P55-A, AR-t); v0.11.289 (P57-A): DL, FT, MM-k, LH
 import { CREDITS } from './core/credits.js'; // v0.11.285 (G3-A, CR-p)
 import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMeditate } from './core/meditate.js';
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
@@ -178,7 +178,7 @@ function addResult(title, lines, fail, { sumLines = lines, quiet = false } = {})
     taskResults.length = Math.min(taskResults.length, RESULTS_MAX);
     if (panel !== 'results') unseen += 1;
 }
-const relSnap = () => ({ rel: JSON.parse(JSON.stringify(g?.rel || {})), coil: `${g?.coil?.n}|${g?.coil?.act}` });
+const relSnap = () => ({ rel: JSON.parse(JSON.stringify(g?.rel || {})), coil: `${g?.coil?.n}|${g?.coil?.act}`, mem: g ? memKeys(g) : null, scene: g?.scene }); // v0.11.289 (P57-A, MM-k): what a memory is kept for, before the tap
 /** v0.11.68: one action's lines: the reply under the scene text, the gains and relationship changes as a Results entry
  * (`always`: an entry even with no gains, as a task card always had). */
 function land(title, lines, fail, snap0, { always = false, quiet = true } = {}) {
@@ -191,6 +191,11 @@ function land(title, lines, fail, snap0, { always = false, quiet = true } = {}) 
     const entry = p.gains.length || always || /collapsed/.test(sum);
     // v0.11.134 (LP2, QR; RQ1): a reply part already shown this Coil is not shown again (its gains still go to Results); a fight's
     // end (`quiet: false`, M1) and an action with nothing else to show (M2) keep theirs; replyHtml records what it draws (L2)
+    try { // v0.11.289 (P57-A): the feats and limits; a memory for a mark, ending or Insight this tap brought (the words as shown, before the repeat filter)
+        noteRecords(g);
+        // the review's L8: the screen's text read only when a key is new; L10: a skip walks several screens, so a first in its middle keeps the last screen (rare: a skip walks screens read before)
+        if (snap0.mem && [...memKeys(g)].some((k) => !snap0.mem.has(k))) { const v = sceneView(g, SCENES); noteMemory(g, snap0.mem, { title: v.title, text: v.text, reply: p.reply, moved: g.scene !== snap0.scene }); }
+    } catch { /* the records never stop a tap */ }
     p.reply = landReply(g, p.reply, { quiet, entry: !!entry });
     lastReply = p.reply;
     if (entry) addResult(title, p.gains, fail, { sumLines: p.sumLines, quiet: true });
@@ -797,7 +802,12 @@ function statusHtml() {
 <div class="bar hp" data-bar="hp" title="${esc(barLines(g, 'hp').join(' '))}"><b>${n1(g.james.hp)} / ${jamesHpMax(g)}</b>HP${pbar(g.james.hp, jamesHpMax(g), 'HP')}</div>
 <div class="bar qi" data-bar="qi" title="${esc(barLines(g, 'qi').join(' '))}"><b>${n1(g.james.qi)} / ${n1(jamesQiMax(g))}</b>Convergence${pbar(g.james.qi, jamesQiMax(g), 'Convergence')}</div>
 <div class="bar food" data-bar="fed" title="${esc(barLines(g, 'fed').join(' '))}"><b>${Math.round(g.james.satiety)}</b>Fed${pbar(g.james.satiety, 100, 'Fed')}</div>
-<div class="clock"><span class="clk">${clockLabelG(g)}</span></div></div>`;
+<div class="clock"><span class="clk">${clockLabelG(g)}</span></div>${deadlineHtml()}</div>`;
+}
+/** v0.11.289 (owner pick P57-A, DL): the deadline and its progress, under the bars ('' where there is none). */
+function deadlineHtml() {
+    const d = deadlineLine(g);
+    return d ? `<div class="deadline">${esc(d)}</div>` : '';
 }
 
 /** v0.11.68 (A1): the reply to the last choice or card, under the scene text. */
@@ -864,6 +874,12 @@ ${a.marks.map((m) => `<div class="row${m.got ? '' : ' dim'}"><span>${esc(cap(m.n
 ${a.foes.map((f) => `<div class="row"><span>${esc(f.name)}</span><span>${esc(T.times(f.n))}</span></div>`).join('') || `<p class="note">${esc(T.noFoes)}</p>`}
 <h2>${esc(T.endings(a.endings.length, a.endingsOf))}</h2>
 ${a.endings.map((e) => `<div class="row"><span>${esc(e)}</span><span></span></div>`).join('')}${a.wonOld ? `<p class="note">${esc(T.wonOld)}</p>` : ''}${!a.endings.length && !a.wonOld ? `<p class="note">${esc(T.noEndings)}</p>` : ''}
+<h2>${esc(T.feats(a.feats.filter((f) => f.got).length, a.featsOf))}</h2>
+<p class="note">${esc(T.featsNote)}</p>
+${a.feats.map((f) => `<div class="row${f.got ? '' : ' dim'}"><span>${esc(f.name)}</span><span>${f.got ? esc(T.onCoil(f.c)) : ''}</span></div>`).join('')}
+<h2>${esc(T.mems(a.mems.length))}</h2>
+<p class="note">${esc(a.mems.length ? T.memsNote : T.noMems)}</p>
+${a.mems.map((m) => `<details class="memory-row"><summary><span class="mem-head"><span>${esc(m.title || m.what[0] || '')}</span><span class="sub">${esc([...m.what, T.onCoil(m.c)].join(' · '))}</span></span></summary><div class="prose">${paras(m.text)}</div></details>`).join('')}
 </section>`;
 }
 function renderBag() {

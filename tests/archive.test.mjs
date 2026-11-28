@@ -7,6 +7,10 @@
 // H (v0.11.288, owner pick P56-A: MP + WH-n + LV-15 + UI-p + SV): Insights' power: the mapping, from the next Coil (the rewind, not
 // endCoil; "Not yet" keeps none), each kind's hook (a foe's blow, a sit, Fed with the marks' cap, skill XP), the Archive, the Fed bar,
 // the Coil screen, the FAQ and What's new.
+// P (v0.11.289, owner pick P57-A: DL + FT + MM-k + LH): the deadline line (prologue and Act 1, its progress, where it shows none),
+// feats (12, no power; the Coil each came on, an old save's fill 0, kept by the rewind, noted on a scene entered), limits (7, the
+// FAQ's "Limits you have hit" with the game's numbers), memories (the keys, one memory a tap, the words as shown, none for an old
+// save, kept by the rewind), the Archive's two sections and main.js's wiring (read as text).
 // Mutation: tools/mutate.mjs on archive.js and game.js's marks.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -14,9 +18,11 @@ import { fileURLToPath } from 'node:url';
 import { SCENES } from '../js/story/prologue.js';
 import * as G from '../js/core/game.js';
 import * as A from '../js/core/archive.js';
+import * as CAL from '../js/core/calendar.js'; // v0.11.289 (P57-A, DL)
 import { ARCS, ARC_AT } from '../js/core/threads.js';
 import { rewind, endCoil, REMEMBER, KNOW_TEXT, KEEP_FLAGS, coilReport, remember } from '../js/core/coil.js';
 import { goTo, enterHook, choose, sceneView } from '../js/core/story.js';
+import { landParts } from '../js/core/replies.js'; // v0.11.289 (P57 review, TG3)
 import { tabWhy } from '../js/core/coil.js';
 import * as T from '../js/core/tasks.js';
 import { NO_DICE_TUNE } from '../js/story/nodice_tune.js';
@@ -168,7 +174,7 @@ const game = (seed = 5) => G.newGame(seed, { closed: true });
 {
     const fed = faqText('HP, Convergence and Fed', game());
     assert(/Every <b>Coil mark<\/b>.*5% slower, up to 45% with all 9/.test(fed), 'F: the FAQ: the marks\' drain');
-    assert(/the Archive \(Insights, Coil marks, foes met, endings seen[;)]/.test(faqText('What carries over', game())), 'F: the FAQ: what carries over');
+    assert(/the Archive \(Insights, Coil marks, foes met, endings seen(, feats and memories)?[;)]/.test(faqText('What carries over', game())), 'F: the FAQ: what carries over');
     const note = NOTES.find(([v]) => v === '0.11.287');
     assert(!!note && /Archive/.test(note[1]) && /5% slower, up to 45%/.test(note[1]), 'F: What\'s new');
 }
@@ -341,6 +347,212 @@ const game = (seed = 5) => G.newGame(seed, { closed: true });
     const z0 = sec([]), z1 = sec(['lore_realms']);
     assert(z0 > 0 && Math.abs(z1 - Math.round(z0 * 1.15 * 10) / 10) <= 0.1 && z1 > z0, `M1-u: a season of seclusion ×1.15 with one sit Insight (${z0} → ${z1})`);
     assert(sec(['fungus', 'told_hearth', 'lore1']) === z0, 'M1-u: other kinds leave the seclusion alone');
+}
+
+// P: v0.11.289 (owner pick P57-A): the deadline line, feats, memories, limits
+{
+    // DL
+    const g = game(); g.james.primaries = 7;
+    assert(A.deadlineLine(g) === 'Tribute ahead · 7 of 12 primaries', `P DL: Day 1, before the first night: no count (${A.deadlineLine(g)})`);
+    g.flags.long = true;
+    assert(A.deadlineLine(g) === 'Tribute 21 days after the village · 7 of 12 primaries', `P DL: the long road before the village (${A.deadlineLine(g)})`);
+    g.flags.vday = 1; g.flags.cal_night = 0;
+    assert(CAL.tributeLeft(g) === 21 && A.deadlineLine(g) === 'Tribute in 21 days · 7 of 12 primaries', `P DL: the village's count (${A.deadlineLine(g)})`);
+    g.flags.vday = 3; g.flags.cal_night = 6;
+    assert(A.deadlineLine(g) === 'Tribute tomorrow · 7 of 12 primaries', `P DL: tomorrow (${A.deadlineLine(g)})`);
+    g.james.primaries = 12;
+    assert(A.deadlineLine(g) === 'Tribute tomorrow', 'P DL: all 12 primaries open: the deadline alone');
+    g.minutes = CAL.calMinutes(g, 7, 10);
+    assert(CAL.storyDay(g) === 7 && A.deadlineLine(g) === 'Tribute today', `P DL: the tribute's day (${A.deadlineLine(g)})`);
+    g.flags.ending = 'fought';
+    assert(A.deadlineLine(g) === '', 'P DL: none after the tribute');
+    // the review's M1 (RV-A, M1-f) on real paths (TG1): the short road, then the tribute itself; a long road left early
+    const sr = game(); goTo(sr, SCENES, 'mei_lin');
+    choose(sr, SCENES, SCENES.mei_lin.choices.findIndex((c) => /roof and food/.test(String(typeof c.text === 'function' ? c.text(sr) : c.text))));
+    const srAt = sr.scene, srLine = A.deadlineLine(sr); goTo(sr, SCENES, 'elder');
+    assert(srAt === 'village' && /^Tribute tomorrow/.test(srLine) && /^Tribute tomorrow/.test(A.deadlineLine(sr)) && /Tomorrow, the collectors come/.test(sceneView(sr, SCENES).text), `P DL (TG1): the short road: tomorrow, as the elder says (${srLine})`);
+    goTo(sr, SCENES, 'tribute');
+    assert(/^Tribute today/.test(A.deadlineLine(sr)) && CAL.storyDay(sr) < 7, `P DL (TG1): the short road's tribute: today (${A.deadlineLine(sr)}, story day ${CAL.storyDay(sr)})`);
+    const ex = game(); ex.flags.long = true; ex.minutes = 8 * 1440 + 10 * 60; goTo(ex, SCENES, 'village'); ex.flags.vday = 3; ex.flags.cal_night = 6; ex.minutes = 29 * 1440 + 20 * 60;
+    goTo(ex, SCENES, 'tribute_dawn_sleep'); const eve = A.deadlineLine(ex); choose(ex, SCENES, 0);
+    assert(/^Tribute tomorrow/.test(eve) && ex.scene === 'tribute' && /^Tribute today/.test(A.deadlineLine(ex)) && CAL.storyDay(ex) < 7, `P DL (TG1): a long road left early: tomorrow on the eve, today at the tribute (${eve}; ${A.deadlineLine(ex)})`);
+    assert([...A.TRIBUTE_SCENES].every((id) => SCENES[id]), 'P DL: the tribute\'s scenes exist');
+    // TG8 (the review's L3): 00:30, one clock for both acts: the story's day turns at 05:00
+    const n0 = game(); n0.flags.long = true; n0.flags.vday = 3; n0.flags.cal_night = 6; n0.james.primaries = 12; n0.minutes = CAL.calMinutes(n0, 7, 0, 30);
+    const n1 = game(); n1.coil.act = 1; n1.minutes = CAL.calMinutes(n1, 21, 0, 30);
+    assert(A.deadlineLine(n0) === 'Tribute tomorrow' && /^Shen Qiu tomorrow/.test(A.deadlineLine(n1)), `P DL (TG8): 00:30 reads tomorrow in both acts (${A.deadlineLine(n0)}; ${A.deadlineLine(n1)})`);
+    const lf = game(); lf.flags.lf_active = true;
+    assert(A.deadlineLine(lf) === '', 'P DL: none in the Long Forest');
+    const a = game(); a.coil.act = 1;
+    const at = (d, r) => { a.minutes = CAL.calMinutes(a, d, 10); if (r) a.flags.bl_region = r; else delete a.flags.bl_region; return A.deadlineLine(a); };
+    const left9 = CAL.calStart(a, 21) - CAL.calStart(a, 9);
+    assert(at(9) === `Shen Qiu in ${left9} days · 0 of 6 arcs` && left9 > 1, `P DL: Act 1, the Fallout (${at(9)})`);
+    // the review's M3 (RV-A, M3-s): an arc counts once he has left it, by the scenes of the game's own marks shown this Coil (TG2)
+    const walk = (id, d, r) => { goTo(a, SCENES, id); a.minutes = CAL.calMinutes(a, d, 10); if (r) a.flags.bl_region = r; return A.act1Arcs(a); };
+    const arcs = [walk('bl_start', 11, 'rr') === 1, walk('dw_enter', 12, 'dw') === 2, walk('ah_enter', 14, 'ah') === 3, (a.minutes = CAL.calMinutes(a, 16, 10), A.act1Arcs(a)) === 3,
+        walk('ht_start', 16) === 4, walk('heart_hub', 19) === 4, walk('rt_start', 19) === 5, walk('rt_camp', 20) === 5];
+    assert(arcs.every(Boolean), `P DL (TG2): the arcs he has left: the Fallout at bl_start, the Root Road and the Drowned Wood by the region, the Ashen Hills still 3 on Day 16 until ht_start, the Heart still 4 in its hub on Day 19 until rt_start (${arcs})`);
+    a.minutes = CAL.calMinutes(a, 21, 10);
+    assert(A.deadlineLine(a) === 'Shen Qiu today · 5 of 6 arcs', `P DL: Shen Qiu's day: the Return ends with the duel (${A.deadlineLine(a)})`);
+    const other = game(); other.coil.act = 1; other.coil.n = 2; other.lines = { ...a.lines };
+    assert(A.act1Arcs(other) === 0, 'P DL: another Coil\'s record counts nothing');
+    a.flags.a1_outcome = 'accord';
+    assert(A.deadlineLine(a) === '', 'P DL: none after Act 1');
+    const main = read('js/main.js'), css = read('css/style.css');
+    assert(/<div class="clock">[^\n]*\$\{deadlineHtml\(\)\}<\/div>`;/.test(main) && /function deadlineHtml\(\) \{\n    const d = deadlineLine\(g\);/.test(main), 'P DL: the status bar draws it under the clock');
+    assert(/\.deadline \{ grid-column: 1 \/ -1;/.test(css), 'P DL: across the bar');
+
+    // FT
+    assert(A.FEATS.length === 12 && new Set(A.FEATS.map((f) => f.k)).size === 12 && A.FEATS.every((f) => f.name && typeof f.ok === 'function'), 'P FT: 12 feats, each once');
+    const f = game();
+    assert(JSON.stringify(f.stats.feats) === '{}' && JSON.stringify(f.stats.limits) === '{}' && Array.isArray(f.stats.mem) && !f.stats.mem.length, 'P: a new game starts the three empty');
+    A.noteRecords(f);
+    assert(!Object.keys(f.stats.feats).length && !Object.keys(f.stats.limits).length, 'P FT: a new game has none');
+    f.coil.n = 3; f.stats.kills = 100; f.stats.meals = 99; A.noteRecords(f);
+    assert(f.stats.feats.kills_100 === 3 && f.stats.feats.meals_100 == null, 'P FT: a hundred kills, noted with its Coil; 99 meals not yet');
+    f.stats.meals = 100; f.coil.n = 4; A.noteRecords(f);
+    assert(f.stats.feats.meals_100 === 4 && f.stats.feats.kills_100 === 3, 'P FT: a later one with its own Coil, the first unchanged');
+    const t = game(); t.flags.ending = 'bluff'; A.noteRecords(t);
+    assert(t.stats.feats.tribute_c1 === 1, 'P FT: the tribute won on Coil 1');
+    const t2 = game(); t2.coil.n = 2; t2.flags.ending = 'bluff'; A.noteRecords(t2);
+    const t3 = game(); t3.flags.ending = 'lost'; A.noteRecords(t3);
+    assert(t2.stats.feats.tribute_c1 == null && t3.stats.feats.tribute_c1 == null, 'P FT: not on Coil 2, not a lost tribute');
+    const e = game(); e.stats.ends = ['t:fought', 't:bluff']; A.noteRecords(e);
+    assert(e.stats.feats.tribute_3 == null, 'P FT: two ways of three: not yet');
+    e.stats.ends.push('t:paid'); e.stats.ends.push('a:victory', 'a:accord'); A.noteRecords(e);
+    assert(e.stats.feats.tribute_3 === 1 && e.stats.feats.act1_won === 1 && e.stats.feats.act1_3 == null && e.stats.feats.ends_all == null, 'P FT: the tribute all three ways; Act 1 won, not yet all three');
+    e.stats.ends.push('a:revelation', 't:lost', 'a:taken'); A.noteRecords(e);
+    assert(e.stats.feats.act1_3 === 1 && e.stats.feats.ends_all === 1, 'P FT: Act 1 all three ways; every ending');
+    const o = game(); o.stats.ends = ['a:won']; A.noteRecords(o);
+    assert(o.stats.feats.act1_won === 1, 'P FT: an old save\'s "Act 1 won" counts');
+    const m = game(); m.stats.marks = 255; A.noteRecords(m);
+    assert(m.stats.feats.marks_all == null, 'P FT: 8 marks: not yet'); m.stats.marks = 511; A.noteRecords(m);
+    assert(m.stats.feats.marks_all === 1 && m.stats.limits.marks === 1, 'P FT + LH: all nine marks (a feat and a limit)');
+    const ins = game(); ins.coil.known = A.INSIGHTS.slice(0, 12).map((x) => x.f); A.noteRecords(ins);
+    assert(ins.stats.feats.insights_all == null, 'P FT: 12 Insights: not yet'); ins.flags[A.INSIGHTS[12].f] = true; A.noteRecords(ins);
+    assert(ins.stats.feats.insights_all === 1, 'P FT: every Insight (remembered, or found this Coil)');
+    const fo = game(); fo.stats.foes = Object.fromEntries(Object.keys(A.FOE_NAMES).slice(0, 20).map((k, i) => [k, i ? 1 : 0])); A.noteRecords(fo);
+    assert(fo.stats.feats.foes_20 == null, 'P FT: 19 met (one at 0): not yet'); fo.stats.foes[Object.keys(A.FOE_NAMES)[0]] = 2; A.noteRecords(fo);
+    assert(fo.stats.feats.foes_20 === 1, 'P FT: twenty kinds of foe');
+    const r = game(); r.james.realm = 1; r.flags.longforest = true; A.noteRecords(r);
+    assert(r.stats.feats.foundation === 1 && r.stats.feats.long_forest === 1, 'P FT: Foundation, the Long Forest');
+    const old = game(); delete old.stats.feats; delete old.stats.limits; old.coil.n = 6; old.stats.kills = 300; old.inventory.hare_raw = 99; A.noteRecords(old);
+    assert(old.stats.feats.kills_100 === 0 && old.stats.limits.item === 0, 'P FT + LH: an old save\'s first check: 0, before the record');
+    old.stats.meals = 100; A.noteRecords(old);
+    assert(old.stats.feats.meals_100 === 6, 'P FT: after the fill, its Coil');
+    const ld = game(); delete ld.stats.feats; delete ld.stats.limits; ld.stats.kills = 120; G.migrate(ld);
+    assert(ld.stats.feats.kills_100 === 0 && ld.stats.limits && typeof ld.stats.limits === 'object', 'P FT (the review\'s L5): an old save\'s feats filled at load, before its first tap');
+    const kept = game(); kept.stats.kills = 100; goTo(kept, SCENES, 'village');
+    assert(kept.stats.feats.kills_100 === 1, 'P FT: noted on a scene entered (archiveAt: the bots\' games too)');
+    kept.james.realm = 1; A.noteRecords(kept); rewind(kept);
+    assert(kept.stats.feats.kills_100 === 1 && kept.stats.feats.foundation === 1 && kept.james.realm === 0, 'P FT: kept by the rewind, the realm gone');
+    const vw = A.archiveView(kept);
+    assert(vw.featsOf === 12 && vw.feats.length === 12 && vw.feats.filter((x) => x.got).map((x) => x.name).join() === 'Foundation reached,A hundred kills' && vw.feats.find((x) => x.got).c === 1, `P FT: the view, in order (${vw.feats.filter((x) => x.got).map((x) => x.name)})`);
+    assert(A.ARCHIVE_TEXT.onCoil(0) === 'before the record' && A.ARCHIVE_TEXT.onCoil(4) === 'Coil 4' && A.ARCHIVE_TEXT.feats(2, 12) === 'Feats: 2 of 12', 'P FT: the words');
+    const sl = (x) => { const g2 = game(); g2.stats.feats = { [x]: 1 }; return JSON.stringify(g2); };
+    assert(sl('kills_100').length < JSON.stringify(game()).length + 40, 'P FT: a feat costs a few bytes');
+
+    // LH
+    assert(A.LIMITS.length === 7 && new Set(A.LIMITS.map((x) => x.k)).size === 7, 'P LH: 7 limits');
+    const L = (fn) => { const g2 = game(); fn(g2); A.noteRecords(g2); return Object.keys(g2.stats.limits).sort().join(); };
+    assert(L(() => {}) === '', 'P LH: a new game: none');
+    assert(L((x) => { x.inventory.hare_raw = 98; x.inventory.beast_core = 998; }) === '', 'P LH: one short of each cap: none');
+    assert(L((x) => { x.inventory.hare_raw = 99; }) === 'item' && L((x) => { x.inventory.beast_core = 999; }) === 'stock' && L((x) => { x.inventory.beast_core = 99; }) === '', 'P LH: 99 of an item; 999 cores (99 cores is no limit)');
+    assert(L((x) => { x.james.gu = { tier: 10, level: 10, xp: 0 }; }) === 'skill' && L((x) => { x.james.skills['Convergence Use'] = { tier: 10, level: 10, xp: 0 }; }) === 'skill' && L((x) => { x.james.gu = { tier: 10, level: 9, xp: 0 }; }) === '', 'P LH: a skill at T10 L10 (not L9)');
+    assert(L((x) => { x.james.saturation = 100; }) === 'sat' && L((x) => { x.james.saturation = 99.9; }) === '', 'P LH: Saturation at 100%');
+    assert(L((x) => { x.stats.clears = 9; }) === 'threads' && L((x) => { x.stats.clears = 8; }) === '', 'P LH: 9 threads (8: not yet)');
+    assert(L((x) => { x.stats.marks = 127; x.coil.known = ['fungus']; }) === '' && L((x) => { x.stats.marks = 127; x.coil.known = ['fungus', 'gills']; }) === 'fed', 'P LH: Fed\'s cap: 35% + 15% = 50% is no hit, 35% + 30% is');
+    assert(L((x) => { x.stats.marks = 511; x.coil.known = ['fungus']; }) === 'fed,marks', 'P LH: 45% + 15%: the marks and the cap');
+    const lim = game(); lim.inventory.hare_raw = 99; lim.james.saturation = 100; lim.stats.clears = 9; A.noteRecords(lim);
+    const lines = A.limitsHit(lim);
+    assert(lines[1].includes(`from ${G.breakAt()}%`), 'P LH (TG7): the breakthrough\'s threshold read from the game');
+    assert(lines.length === 3 && /takes 99 of anything/.test(lines[0]) && /stops at 100%/.test(lines[1]) && /9 awake, no more/.test(lines[2]), `P LH: the FAQ's lines, in the list's order, with the game's numbers (${lines.length})`);
+    const all = game(); all.stats.limits = Object.fromEntries(A.LIMITS.map((x) => [x.k, 1]));
+    const allL = A.limitsHit(all).join(' ');
+    assert(/999 of each/.test(allL) && /T10 L10/.test(allL) && /at most 45% slower/.test(allL) && /by 50% at most/.test(allL), 'P LH: the caps\' own numbers');
+    const lq = FAQ.find(([q]) => q === 'Limits you have hit');
+    assert(lq && lq[2] === 'limits' && /None yet\./.test(lq[1](game())) && lq[1](lim).includes(lines[1]), 'P LH: the FAQ entry (its gate, none yet, the lines)');
+    lim.inventory.hare_raw = 3; A.noteRecords(lim);
+    assert(lim.stats.limits.item === 1, 'P LH: a limit hit stays on the list after the pile shrinks');
+
+    // MM-k
+    const k0 = game();
+    assert(A.memKeys(k0).size === 0, 'P MM: a new game: no keys');
+    k0.stats.marks = 1; k0.flags.ending = 'fought'; k0.flags.gills = true; k0.coil.known = ['roots'];
+    assert([...A.memKeys(k0)].sort().join() === 'e:t:fought,i:gills,i:roots,m:0', `P MM: a mark, an ending, an Insight found or remembered (${[...A.memKeys(k0)]})`);
+    const mm = game(); mm.coil.n = 2; const b0 = A.memKeys(mm); mm.flags.gills = true;
+    const m1 = A.noteMemory(mm, b0, { title: 'The Hollow', text: 'Scene text.', reply: ['First.', 'Second.'], moved: false });
+    assert(m1 && m1.k.join() === 'i:gills' && m1.c === 2 && m1.t === 'The Hollow' && m1.x === 'First.\n\nSecond.' && mm.stats.mem.length === 1, 'P MM: a find on the same screen: the reply');
+    assert(A.noteMemory(mm, b0, { title: 'x', text: 'y', reply: ['z'] }) === null && mm.stats.mem.length === 1, 'P MM: kept once');
+    const b1 = A.memKeys(mm); mm.stats.marks = 1;
+    const m2 = A.noteMemory(mm, b1, { title: 'Ashfall', text: 'The village.', reply: ['The walk.'], moved: true });
+    assert(m2.x === 'The village.' && m2.k.join() === 'm:0', 'P MM: a mark on a new screen: its text');
+    // the review's H1 (RV-A, H1-k): an Insight found in a reply that moves on keeps the reply; with a mark too, the reply then the screen
+    const hb = A.memKeys(mm); mm.flags.fungus = true;
+    assert(A.noteMemory(mm, hb, { title: 'Blackwater', text: 'The stream.', reply: ['Spore print.'], moved: true }).x === 'Spore print.', 'P MM (H1-k): an Insight on a new screen: the reply');
+    const hb2 = A.memKeys(mm); mm.flags.bl_tracker = true; mm.stats.marks = 1 | 8;
+    assert(A.noteMemory(mm, hb2, { title: 'Into the Blackroot', text: 'The road.', reply: ['Tracks.'], moved: true }).x === 'Tracks.\n\nThe road.', 'P MM (H1-k): an Insight and a mark in one tap: the reply, then the screen');
+    const b2 = A.memKeys(mm); mm.flags.lore1 = true;
+    assert(A.noteMemory(mm, b2, { title: 'T', text: 'Only text.', reply: [], moved: false }).x === 'Only text.', 'P MM: no reply: the scene\'s text');
+    const b3 = A.memKeys(mm); mm.flags.a1_outcome = 'victory'; mm.stats.marks = 3 | 8;
+    const m4 = A.noteMemory(mm, b3, { title: 'End', text: 'E.', moved: true });
+    assert(m4.k.sort().join() === 'e:a:victory,m:1' && mm.stats.mem.length === 6, 'P MM: two keys at once: one memory');
+    // TG3: the real forage → stream: the fungus's memory holds the find, not the stream's text
+    let fz = null;
+    for (let seed = 1; seed < 60 && !fz; seed++) {
+        const fg = game(seed); goTo(fg, SCENES, 'forage'); const fb2 = A.memKeys(fg), s0 = fg.scene;
+        const r0 = choose(fg, SCENES, 0); if (!fg.flags.fungus) continue;
+        const pr = landParts(r0.lines); const fv = sceneView(fg, SCENES);
+        fz = { m: A.noteMemory(fg, fb2, { title: fv.title, text: fv.text, reply: pr.reply, moved: fg.scene !== s0 }), scene: fg.scene, text: fv.text };
+    }
+    assert(fz && fz.scene === 'stream' && /Spore print/.test(fz.m.x) && fz.m.x !== fz.text && fz.m.k.join() === 'i:fungus', `P MM (TG3): the fungus, forage → stream: the find kept (${fz && fz.m.x.slice(0, 40)})`);
+    // TG6 (the review's L7): a broken entry can't break the view
+    const bk = game(); bk.stats.mem = [null, 5, { k: 'i:gills' }, { k: [7, 'i:gills'], c: 'x', t: null, x: 3 }];
+    let bv = null; try { bv = A.archiveView(bk); } catch { bv = null; }
+    assert(bv && bv.mems.length === 1 && bv.mems[0].what.join() === 'Insight: Ghost-gill' && bv.mems[0].c === 0 && bv.mems[0].text === '3', 'P MM (TG6): broken entries left out, no throw');
+    const bb = A.memKeys(bk); bk.flags.gills = true;
+    assert(A.noteMemory(bk, bb, { text: 'x' }) === null, 'P MM: a key in a broken entry still counts as kept');
+    assert(A.noteMemory(mm, A.memKeys(mm), { text: 'n' }) === null, 'P MM: nothing new: none');
+    const om = game(); delete om.stats.mem; const ob = A.memKeys(om); om.flags.gills = true;
+    const om1 = A.noteMemory(om, ob, { text: 'x' });
+    assert(om1 && om.stats.mem.length === 1 && om1.k.join() === 'i:gills', 'P MM: an old save starts its list with its next first');
+    const op = game(); delete op.stats.mem; op.flags.gills = true; const opb = A.memKeys(op);
+    assert(A.noteMemory(op, opb, { text: 'x' }) === null && op.stats.mem === undefined, 'P MM: what an old save reached before is no memory');
+    assert(A.memLabel('m:0') === 'Coil mark: the Wilds' && A.memLabel('e:t:fought') === 'The tribute: Lu Han beaten' && A.memLabel('i:gills') === 'Insight: Ghost-gill' && A.memLabel('i:nope') === '' && A.memLabel('m:9') === '', 'P MM: the labels');
+    // the real path: a mark brought by entering the village, the words as the screen shows them
+    const rp = game(); const rb = A.memKeys(rp); goTo(rp, SCENES, 'village'); const v = sceneView(rp, SCENES);
+    const rm = A.noteMemory(rp, rb, { title: v.title, text: v.text, reply: ['The road.'], moved: true });
+    assert(rm && rm.k.join() === 'm:0' && rm.x === v.text && v.text.length > 100 && rm.t === v.title, 'P MM: the village: the mark, its words as shown');
+    rewind(rp);
+    assert(rp.stats.mem.length === 1 && rp.stats.mem[0].x === v.text, 'P MM: kept by the rewind');
+    const mv = A.archiveView(rp);
+    assert(mv.mems.length === 1 && mv.mems[0].what.join() === 'Coil mark: the Wilds' && mv.mems[0].c === 1 && mv.mems[0].text === v.text, 'P MM: the view');
+    const full = game(); const fb = A.memKeys(full); full.stats.marks = 511; full.stats.ends = A.ENDINGS.map((x) => x.k); full.coil.known = A.INSIGHTS.map((x) => x.f);
+    assert(A.memKeys(full).size === 30 && A.noteMemory(full, fb, { text: 'x' }).k.length === 30, 'P MM: 30 keys at most (9 marks, 8 endings, 13 Insights)');
+    // TG4 (the review's M2, RV-A, M2-s): Act 1's snapshot holds no second copy
+    const sn = game(); for (let i = 0; i < 12; i++) sn.stats.mem.push({ k: [`i:x${i}`], c: 1, t: 'T', x: 'x'.repeat(800) }); sn.stats.feats.kills_100 = 1; sn.stats.limits.item = 1;
+    const sb = JSON.stringify(sn).length; G.startActCoil(sn, 1);
+    assert(!('mem' in sn.coil.snap.stats) && !('feats' in sn.coil.snap.stats) && !('limits' in sn.coil.snap.stats) && sn.stats.mem.length === 12 && JSON.stringify(sn).length < sb + 3000, `P MM (TG4): the snapshot leaves the records out (${sb} → ${JSON.stringify(sn).length})`);
+    sn.coil.why = 'choice'; rewind(sn);
+    assert(sn.stats.mem.length === 12 && sn.stats.feats.kills_100 === 1 && !('mem' in sn.coil.snap.stats), 'P MM (TG4): an Act 1 rewind keeps the game\'s own');
+    const KEY_SCREENS = ['village', 'tribute', 'fo_start', 'bl_start', 'dw_enter', 'ah_enter', 'ht_start', 'rt_start', 'a1_end', 'bluff_win', 'tribute_paid', 'collectors_won', 'collectors_lost', 'rt_truth_won', 'rt_accord', 'rt_duel_won', 'rt_taken'];
+    const ks = KEY_SCREENS.reduce((n, id) => { const t0 = SCENES[id].text; return n + String(typeof t0 === 'function' ? t0(game()) : t0).length; }, 0);
+    assert(ks < 17000, `P MM (TG4): the 9 marks' and 8 endings' screens, all kept: ${ks} characters (the Insights' replies add about 4–5 KB more)`);
+    const avg = Object.keys(SCENES).reduce((n, id) => { try { const t0 = SCENES[id].text; return n + String(typeof t0 === 'function' ? t0(game()) : t0 || '').length; } catch { return n; } }, 0) / Object.keys(SCENES).length;
+    assert(avg * 30 < 20000, `P MM: 30 scenes at the average length stay under 20 KB (${Math.round(avg * 30)})`);
+
+    // the wiring (main.js as text)
+    assert(/const relSnap = \(\) => \(\{[^\n]*mem: g \? memKeys\(g\) : null, scene: g\?\.scene \}\)/.test(main), 'P MM: every action\'s snapshot holds the keys and the scene');
+    assert(/noteRecords\(g\);\n[^\n]*\n\s*if \(snap0\.mem && \[\.\.\.memKeys\(g\)\]\.some\(\(k\) => !snap0\.mem\.has\(k\)\)\) \{ const v = sceneView\(g, SCENES\); noteMemory\(g, snap0\.mem, \{ title: v\.title, text: v\.text, reply: p\.reply, moved: g\.scene !== snap0\.scene \}\); \}\n\s*\} catch[^\n]*\n\s*p\.reply = landReply\(/.test(main), 'P MM + FT: land() notes the records, and the memory (the screen read only for a new key: L8), before the repeat filter');
+    assert(/\$\{esc\(T\.feats\(a\.feats\.filter\(\(f\) => f\.got\)\.length, a\.featsOf\)\)\}/.test(main) && /<details class="memory-row"><summary>/.test(main) && /paras\(m\.text\)/.test(main), 'P: the Archive draws the feats and the memories');
+    assert(/\.memory-row summary \{ display: list-item;/.test(css), 'P MM (L6): the memory keeps its open marker');
+    // TG5: the view and the markup carry a feat's and a memory's own Coil and a memory's title
+    const t5 = game(); t5.coil.n = 4; t5.stats.feats = { kills_100: 0, meals_100: 3 }; t5.stats.mem = [{ k: ['m:0'], c: 2, t: 'Ashfall', x: 'Words.' }];
+    const v5 = A.archiveView(t5);
+    assert(v5.feats.find((x) => x.name === 'A hundred kills').c === 0 && v5.feats.find((x) => x.name === 'A hundred meals').c === 3 && v5.mems[0].c === 2 && v5.mems[0].title === 'Ashfall', 'P (TG5): the view keeps each one\'s Coil and the title');
+    assert(/<span>\$\{f\.got \? esc\(T\.onCoil\(f\.c\)\) : ''\}<\/span>/.test(main) && /<span>\$\{esc\(m\.title \|\| m\.what\[0\] \|\| ''\)\}<\/span><span class="sub">\$\{esc\(\[\.\.\.m\.what, T\.onCoil\(m\.c\)\]\.join\(' · '\)\)\}<\/span>/.test(main), 'P (TG5): the markup draws them');
+    const n289 = NOTES.find(([ver]) => ver === '0.11.289');
+    assert(n289 && /deadline/i.test(n289[1]) && /feats/i.test(n289[1]) && /memor/i.test(n289[1]) && /limits/i.test(n289[1]), 'P: What\'s new');
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

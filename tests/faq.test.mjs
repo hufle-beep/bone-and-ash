@@ -19,7 +19,7 @@ const plain = (s) => s.replace(/<[^>]+>/g, '');
 
 // the list itself
 const qs = FAQ.map(([q]) => q);
-assert(FAQ.length === 22 && new Set(qs).size === qs.length, `22 entries, no question twice (v0.11.109: Flight; v0.11.150: The Android app) (${FAQ.length})`);
+assert(FAQ.length === 23 && new Set(qs).size === qs.length, `23 entries, no question twice (v0.11.109: Flight; v0.11.150: The Android app; v0.11.289: Limits you have hit) (${FAQ.length})`);
 assert(FAQ.every(([, , gate]) => gate in FAQ_TEST), 'every entry has a known gate');
 assert(Object.keys(FAQ_TEST).every((k) => FAQ.some(([, , gate]) => gate === k)), 'every gate opens at least one entry');
 assert(Object.values(FAQ_TAB).every((q) => FAQ.find(([x]) => x === q)?.[2] === 'start'), 'every tab\'s entry exists and is there from a new game (the James tab\'s button finds its entry on Day 1)');

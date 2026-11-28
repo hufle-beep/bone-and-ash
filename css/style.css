@@ -74,6 +74,7 @@ button { font: inherit; color: inherit; }
 .qi i { background: var(--ink); }
 .food i { background: var(--ink-dim); }
 .clock { font-family: var(--display); font-weight: 600; font-size: 0.95rem; color: var(--ink); white-space: nowrap; }
+.deadline { grid-column: 1 / -1; margin-top: -0.55rem; font-size: 0.74rem; color: var(--ink-dim); letter-spacing: 0.02em; } /* v0.11.289 (P57-A, DL): the deadline and its progress, under the bars */
 
 /* ---- prose ---- */
 .prose { padding: 1.1rem 1.15rem 0.4rem; max-width: var(--measure); color: var(--ink); }
@@ -146,6 +147,12 @@ button { font: inherit; color: inherit; }
 .row .sub { grid-column: 1 / -1; font-size: 0.85rem; color: var(--ink-dim); }
 .row .stroke { grid-column: 1 / -1; }
 .row.dim { color: var(--ink-dim); } /* v0.11.287 (P55-A, AR-t): an Archive row not yet reached */
+/* v0.11.289 (P57-A, MM-k): a memory, folded; its words open under it */
+.memory-row { border-bottom: 1px solid rgba(35,33,30,0.12); }
+.memory-row summary { display: list-item; padding: 0.55rem 0; cursor: pointer; } /* the review's L6: list-item keeps the open / closed marker */
+.memory-row .mem-head { display: inline-flex; flex-direction: column; gap: 0.15rem; vertical-align: top; }
+.memory-row summary .sub { font-size: 0.78rem; color: var(--ink-dim); }
+.memory-row .prose { padding: 0.2rem 0 0.6rem; }
 .row .stroke i { background: var(--ink); }
 .btn { display: inline-block; padding: 0.6rem 1.05rem; border-radius: 4px 10px 4px 10px; border: 1.5px solid var(--ink); background: transparent; cursor: pointer; }
 .btn:hover { background: rgba(35,33,30,0.06); }

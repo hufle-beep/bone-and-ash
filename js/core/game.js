@@ -107,7 +107,7 @@ export function newGame(seed = Date.now(), { closed = false } = {}) {
         flags: {},
         rel: {},
         log: [],
-        stats: { checks: 0, wins: 0, kills: 0, meals: 0, marks: 0, ends: [] }, // v0.11.287 (P55-A, SV): the Coil marks, the endings seen
+        stats: { checks: 0, wins: 0, kills: 0, meals: 0, marks: 0, ends: [], feats: {}, limits: {}, mem: [] }, // v0.11.287 (P55-A, SV): the Coil marks, the endings seen; v0.11.289 (P57-A, FT + LH + MM-k): feats, limits, memories (archive.js)
         combat: null,
         tasks: { queue: [], fam: {}, adapt: {}, yuki: { on: false, progress: 0 } },
     };
@@ -126,6 +126,7 @@ export function coilSnap(g) {
     delete s.coil;
     s.log = []; s.combat = null; s.lastWin = null;
     if (s.stats?.hist) delete s.stats.hist; // v0.11.285 (G3-A, CH-t): a rewind takes the history from the game, not the snapshot
+    if (s.stats) { delete s.stats.feats; delete s.stats.limits; delete s.stats.mem; } // v0.11.289 (P57 review, M2-s): so do the feats, limits and memories (no second copy in the save)
     if (s.tasks) s.tasks.queue = [];
     delete s.read; // v0.11.133 (RF1, L1): a rewind takes the record from the game itself (coil.js), never from the snapshot
     delete s.readStops; // v0.11.228 (RE1, SC): so do the plan's read stops
@@ -1759,8 +1760,11 @@ export function archiveFill(g) {
         if ((s.clears || 0) > 0 && !['a:victory', 'a:accord', 'a:revelation'].some((k) => e.includes(k))) e.push('a:won');
         s.ends = e;
     }
+    if (fillHook.records) { try { fillHook.records(g); } catch { /* a record never stops a load */ } } // v0.11.289 (P57 review, L5): an old save's feats and limits filled at load (archive.js)
     return g;
 }
+/** v0.11.289 (P57 review, L5): set by archive.js installArchive (a hook, so game.js imports nothing more). */
+export const fillHook = { records: null };
 export function blFill(g) {
     if (!g || g.cal !== LONG_CAL || g.calBl !== undefined) return g;
     g.calBl = (g.coil?.act || 0) === 0 || storyDay(g) <= 10 ? BL_SPAN : 1; // the prologue (the Long Forest too) always before it
