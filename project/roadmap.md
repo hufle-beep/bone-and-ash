@@ -1,6 +1,6 @@
 # Roadmap: Bone and Ash
 
-Last updated: 2026-11-28 (v0.11.289: G5's third push (P57-A + RV-A; cold review on Opus): the deadline line under the bars, 12 feats, memories of the key moments, the FAQ's "Limits you have hit". Before it, v0.11.288: G5's second push (P56-A + WL-d + M1-u + BL-a): Insights' power.)
+Last updated: 2026-11-28 (v0.11.290: G5's fourth push (P58-A + RV-A; cold review on Opus): the Mastery list, a second open copy can't overwrite the save, the picker's look; L6 and the tiers closed. Before it, v0.11.289: G5's third push (P57-A + RV-A).)
 
 *(v0.11.88, owner pick A: this file holds sections 0–2 of the open work; sections 3–6 and Decided are in `roadmap-2.md`; done, stale and moot lines in `roadmap-done.md` and, since v0.11.88, `roadmap-done-2.md`. The two paragraphs on how this file is laid out (v0.11.53, v0.11.65) moved word for word to `roadmap-done-2.md`.)*
 
@@ -10,6 +10,7 @@ Last updated: 2026-11-28 (v0.11.289: G5's third push (P57-A + RV-A; cold review 
 
 *(v0.11.88: section 0 is empty: the FAQ (v0.11.83), the difficulty (v0.11.85), #53 (v0.11.86) and the sitting loop (v0.11.87) are done; their notes moved word for word to `roadmap-done-2.md`. Next: the owner's pick.)*
 
+- *(v0.11.290: G5's fourth push (P58-A + RV-A: MT-j, SC-g, L7-c; L6-x, TR-x, DM-w; M1-f, D-k, M2-r; cold review on Opus); next: open, options later (step 6: G5's next pushes; then G6–G8), `roadmap-open.md`.)*
 - *(v0.11.289: G5's third push (P57-A + RV-A: DL, FT, MM-k, LH; H1-k, M1-f, M2-s, M3-s; cold review on Opus); next: open, options later (step 6: G5's next pushes, crafting, the fight ideas, the 4 Insights without a scene, the FAQ in Yuki's voice, lore boxes, faction rows, perk shapes, the threads' leftovers; then G6–G8), `roadmap-open.md`.)*
 - *(v0.11.288: G5's second push (P56-A + WL-d + M1-u + BL-a: MP, WH-n, LV-15, UI-p, SV; cold review on Opus); next: open, options later (step 6: G5's next pushes, crafting, the fight ideas, the 4 Insights without a scene, feats, memories, the threads' leftovers; then G6–G8), `roadmap-open.md`.)*
 - *(v0.11.287: G5's first push (P55-A + TB-A + M1-p: CM-5, IN-13, AR-t, SV; MN; cold review on Opus); next: open, options later (step 6: G5's next pushes, crafting, the fight ideas, Insights' power, feats, memories, the threads' leftovers; then G6–G8), `roadmap-open.md`.)*

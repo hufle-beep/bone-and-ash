@@ -9,7 +9,7 @@ import {
     startCombat, combatStep, combatFlee, combatYield, waitLeft, songPays, sungKey, THREAT_TEXT, SONG_TEXT, SONG_COST, SONG_MAX, SAY_TEXT, SPAR_TEXT, postureNow, postureCount, unarmedMastery, fightAdapt, weaponMastery, COMBAT_ACTIONS, noDiceDc, airStrike, AIR_TEXT, FOE_TRAITS, foeTraits, TELL_TEXT, bigBlowNow, lungeNow, serialize, deserialize, peekSave, SaveError, BONESINGER_TIERS, itemCap, jamesDr, hpRegenPct, actionCost, actionDmg, guardBonus, FIELD_ROUNDS, fieldDamage, qiShield,
 } from './core/game.js';
 import { sceneView, choose, goTo, gives, choiceQi, threatOf } from './core/story.js'; // v0.11.109 (FQ1): choiceQi
-import { carriesHere, weekHub, cardSpeed, NEW_LENGTH, WEEK_MULT, deadMenuHub, showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, famLine, famNext, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
+import { carriesHere, weekHub, cardSpeed, NEW_LENGTH, WEEK_MULT, deadMenuHub, showPicked, isTaskHub, isQueueScreen, isTaskChoice, taskCards, taskLabel, taskOutcome, dryOutcome, outcomeOf, runTask, FAM, famLine, masteryView, masteryHtml, famNext, yukiLane, setYuki, nextStep, YUKI_LANE_TEXT, YUKI_HOURS } from './core/tasks.js';
 import { SCENES, ITEMS } from './story/prologue.js';
 import { TASK_HUBS } from './story/task_hubs.js';
 import { landParts, landReply, noteSaid } from './core/replies.js'; // v0.11.68 (A1 + B2 + C1); v0.11.134 (LP2, QR; RQ1): landReply, noteSaid
@@ -21,7 +21,7 @@ import { medCards, runMed, isSitChoice, medActivity, useLine, LATE_TAG, canMedit
 import { FAQ_KEY, FAQ_TAB, faqState, faqText, faqCheck, faqList, faqHasNew, faqSeen, faqMatch } from './core/faq.js'; // v0.11.83 (P1 + T1 + R1)
 import { meridianRow } from './story/meridians.js';
 import { APK_URL, UPDATE_KEY, CHECK_DELAY, UPDATE_TEXT, updPrefs, inApp, makeUpdater, goLabel, offerBrowser } from './core/update.js'; // v0.11.147 (UP1; RV1: makeUpdater; v0.11.187 U1: goLabel, offerBrowser)
-import { secondTap, ASK_MIN_MS } from './core/app.js'; // v0.11.286 (G4-A, L5-a)
+import { secondTap, ASK_MIN_MS, mayAutosave, COPY_TEXT } from './core/app.js'; // v0.11.286 (G4-A, L5-a)
 import { exportRoute, canSaveToFile, wantsServiceWorker, savedName, resultPlace, FILE_TEXT, tipBox, TIP_WIDE, saveParts, SAVE_PART_MAX, partName, PART_TEXT, WELCOME_KEY, welcomePrefs, welcomeDue, welcomeView, awayText, WELCOME_TEXT, fileStamp, ASK_TEXT, askStep, HOTKEYS, hotkeyOf } from './core/app.js'; // v0.11.148 (EX1; RX1: savedName, resultPlace); v0.11.283 (P51-A: SV-p, WB-y)
 import { SEEN_KEY, NOTES, newsSince, versionLabel, statusPlace, takeoverNotice, recheckDue, READY_TEXT } from './core/news.js'; // v0.11.150 (BL1)
 import { realmShockHpBonus } from './core/formulas.js';
@@ -474,7 +474,7 @@ ${welcomeHtml()}${statusHtml()}
  *  v0.11.253) is no longer read: every game and every loaded save is on the long calendar. */
 const freshGame = () => ensureBars(newGame(Math.floor(Math.random() * 2 ** 31), { closed: true })); // meridians closed at the start (v0.9.6); v0.11.260 (P28-A, OC2): every game on the long calendar (newGame's `cal` option gone)
 const bakMeta = () => { try { return JSON.parse(store.get(BAK_META)) || { play: 0, at: {}, when: {} }; } catch { return { play: 0, at: {}, when: {} }; } };
-function writeKey(k, s) { if (!store.set(k, s) && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: the ☰ menu → Saves.'); } }
+function writeKey(k, s) { const ok = store.set(k, s); if (!ok && !storageWarned) { storageWarned = true; showError('Could not save: the storage for this site is full or blocked. Download your save: the ☰ menu → Saves.'); } return ok; } // SC-g: says whether it was written
 
 /** Throws a SaveError if the state points at a scene this version doesn't have. */
 function checkScene(s) { flipFill(s); /* v0.11.226 (FP1, MV + DK): an old-calendar save moves to the long calendar */ if (!SCENES[s.scene]) throw new SaveError('notSave', `The save points at a scene this version doesn't have (${s.scene}).`); const hub = deadMenuHub(s, SCENES); if (hub) s.scene = hub; return s; } // v0.11.177 (RV1, C2): a save resting in an emptied menu opens on its hub
@@ -490,7 +490,7 @@ function rolling(s) {
     store.set(BAK_META, JSON.stringify(m));
 }
 function backupBefore(label) {
-    if (!g) return;
+    if (!g || staleStop()) return; // RV-A (M2-r): a copy left behind writes no backup either
     try { writeKey(BAK_KEY('before'), serialize(g)); } catch { return; }
     const m = bakMeta(); m.when.before = Date.now(); m.label = label; store.set(BAK_META, JSON.stringify(m));
 }
@@ -503,14 +503,22 @@ function tlCount() {
     if (tlMark && tlMark.g === g && tlMark.n === g.coil?.n && g.minutes > tlMark.m) tlNote(g, tlKind || 'story', tlMark.m, g.minutes);
     tlMark = { g, n: g.coil?.n, m: g.minutes }; tlKind = null;
 }
+let staleCopy = false; // v0.11.290 (owner pick P58-A, SC-g): another tab or window saved since this copy last wrote or loaded: no more writes until a reload
+/** SC-g; RV-A (M2-r, L2): true when this copy is left behind (another copy saved since): it writes nothing, and the notebar says so,
+ *  with Download now (this copy's game as a file) and Reload (the other copy's save). Every action that writes a game asks first. */
+function staleStop() {
+    if (mayAutosave(store.get(AUTO), lastWritten, staleCopy)) return false;
+    staleCopy = true; showNotice(COPY_TEXT, true, true);
+    return true;
+}
 function autosave() {
     if (!g) return;
+    if (staleStop()) return; // SC-g: never over another copy's save
     try { tlCount(); } catch { /* the strip never stops a save */ }
     delete g.runPart; // v0.11.64: no bars any more (game.js queueDrop empties an old save's)
     let s;
     try { s = serialize(g); } catch (err) { showError(err.message); return; } // never write a broken state
-    writeKey(AUTO, s);
-    lastWritten = s;
+    if (writeKey(AUTO, s)) lastWritten = s; // SC-g: only a save that was written is this copy's (a full storage keeps the last one)
     rolling(s);
     expRemind();
     if (g.scene !== prevScene && RISKY_SCENES[g.scene]) backupBefore(RISKY_SCENES[g.scene]);
@@ -728,6 +736,7 @@ ${bak.length ? `<h2>Backups</h2>${bak.map((b) => `<div class="row"><span>${esc(b
 <p class="note" id="saveNote"></p></section>`;
 }
 function leaveRecovery(next) {
+    if (staleStop()) return; // RV-A (M2-r): another copy saved since: nothing here replaces it
     store.set(BROKEN, recovery.raw);
     g = next; recovery = null; prevScene = g.scene; lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
 }
@@ -846,6 +855,7 @@ ${skillRow('GU', j.gu, 'General Use: anything he has no skill for, and his defen
 ${skillRow('Convergence Use', cu, 'the song: what he can sing, how hard it hits, the Qi blast and shield')}
 <p class="note">${esc(BONESINGER_TIERS[Math.min(cu.tier, BONESINGER_TIERS.length - 1)] || '')}</p>
 ${Object.entries(FORM_LINES).map(([k, l]) => { const s = lineState(g, k); return `<div class="row"><span>${esc(l.label)}</span><span>${s.now ? esc(s.now.name) : '—'}${s.next ? ` <span class="note">(next: ${esc(s.next.name)} at ${rankLabel(s.next.at)})</span>` : ''}</span></div>`; }).join('')}
+${masteryHtml(masteryView(g, SCENES), esc)}
 ${g.coil ? `<h2>The Coil</h2><p class="note">${g.coil.act === 1 ? 'Act 1, ' : ''}Coil ${g.coil.n}. ${coilActive(g) ? `Bite the tail to start ${g.coil.act === 1 ? 'Act 1' : 'the prologue'} over at ${g.coil.act === 1 ? 'its start' : 'the first dawn'}: James keeps his familiarity and what he knows; his realm, skills and meridians, the hammerspace and the world start over (the realm no lower than the kept realm below). This Coil he learns ×${fmtMult(coilMult(g))} as fast. ${tabWhy(g) === 'clear' ? `Act 1 is won, so this bite adds to the faster learning: the next learns ×${fmtMult(coilMultNext(g, false))}.` : tabWhy(g) === 'choice' ? `A Coil ended by choice still counts as a Coil, but adds nothing to the faster learning: the next learns ×${fmtMult(coilMultNext(g, true))} too. A collapse, a lost fight or a lost deadline adds to it (×${fmtMult(coilMultNext(g, false))}).` : `The deadline went against him, so this bite adds to the faster learning: the next learns ×${fmtMult(coilMultNext(g, false))}.`}` : 'The Coil turns during the prologue (until the tribute is settled) and during Act 1 (until Shen Qiu is settled, and again at its end).'}</p><p class="note"><b>Targets:</b> ${esc(targetsText(g))}</p>${keptTabLine(g)}${coilActive(g) ? '<div class="btns"><button class="btn" data-bite="1">Bite the tail</button></div><p class="note" id="saveNote"></p>' : ''}` : ''}
 <h2>Pillars</h2>
 <div class="row"><span>Ouroboros Axiom</span><span>DR 1</span><span class="sub">The body as a closed garden: what comes in is filtered and returned clean.</span></div>
@@ -1242,6 +1252,7 @@ view.addEventListener('click', (ev) => {
             let next;
             try { next = checkScene(deserialize(store.get(BAK_KEY(b.dataset.bak)))); } catch (err) { note(`That backup can't be loaded: ${err.message}`); return; }
             if (g && !askTwice(`bak:${b.dataset.bak}`, ASK_TEXT.restore(descOf(store.get(BAK_KEY(b.dataset.bak))), hereDesc()))) return; // v0.11.286 (G4-A, L5-a): a second tap, as a load
+            if (staleStop()) return; // RV-A (M2-r)
             backupBefore('restoring a backup');
             g = next; lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
             return;
@@ -1255,6 +1266,7 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.loadfile != null) { // G3-A (OS-a): the file's line seen, then Load it or Cancel
             const p = pendingFile; pendingFile = null;
             if (!b.dataset.loadfile || !p) { render(); return; }
+            if (staleStop()) return; // RV-A (M2-r)
             backupBefore('loading a save file');
             g = p.next; autosave(); lastResult = null; lastReply = []; combatLog = null; setTab('story');
             return;
@@ -1262,6 +1274,7 @@ view.addEventListener('click', (ev) => {
         if (b.dataset.restoreall != null) {
             const p = pendingAll; pendingAll = null;
             if (!b.dataset.restoreall || !p) { render(); return; }
+            if (staleStop()) return; // RV-A (M2-r): no slot, backup or save of the file's is written in a copy left behind
             try { restoreAll(p); } catch (err) { render(); note(`Nothing was changed: ${err.message}`); return; }
             setTab('story');
             return;
@@ -1336,6 +1349,7 @@ view.addEventListener('click', (ev) => {
             autosave(); render();
         } else if (b.dataset.new) {
             if ((menu || tab !== 'story') && hadSave && !confirmNew(b.dataset.new)) return; // RV1 (L3): no autosave yet, nothing to warn about
+            if (staleStop()) return; // RV-A (M2-r)
             backupBefore('a new game');
             g = freshGame(); // v0.11.226 (FP1, NG): every new game on the long calendar (v0.11.203's test switch gone)
             hadSave = true; // RV1 (L3): the new game's autosave exists from now on
@@ -1345,11 +1359,13 @@ view.addEventListener('click', (ev) => {
         } else if (b.dataset.save) {
             const n = b.dataset.save, there = store.get(SLOT(n)); // G3-A (OS-a): a full slot asks for a second tap, naming both games
             if (there && !askTwice(`save${n}`, ASK_TEXT.save(n, descOf(there), hereDesc()))) return;
+            if (staleStop()) return; // RV-A (M2-r): a copy left behind keeps its game with Download now
             writeKey(SLOT(n), serialize(g)); render(); note('Saved.');
         } else if (b.dataset.load) {
             let next;
             try { next = checkScene(deserialize(store.get(SLOT(b.dataset.load)))); } catch (err) { note(`Slot ${b.dataset.load} can't be loaded: ${err.message}`); return; }
             if (g && !askTwice(`load${b.dataset.load}`, ASK_TEXT.load(b.dataset.load, descOf(store.get(SLOT(b.dataset.load))), hereDesc()))) return; // G3-A (OS-a)
+            if (staleStop()) return; // RV-A (M2-r)
             backupBefore(`loading slot ${b.dataset.load}`);
             g = next; lastResult = null; lastReply = []; combatLog = null; autosave(); setTab('story');
         } else if (b.dataset.export || b.dataset.exportfile) {
@@ -1381,6 +1397,7 @@ view.addEventListener('change', async (ev) => {
         next = checkScene(deserialize(text));
         if (g) { pendingFile = { next, there: descOf(serialize(next)) }; render(); return; } // G3-A (OS-a): with a game on, the file's line first
     } catch (err) { inp.value = ''; note(`That file can't be loaded: ${err.message}`); return; }
+    if (staleStop()) return; // RV-A (M2-r)
     backupBefore('loading a save file');
     g = next; autosave(); lastResult = null; lastReply = []; setTab('story');
 });

@@ -12,6 +12,8 @@
 // FAQ's "Limits you have hit" with the game's numbers), memories (the keys, one memory a tap, the words as shown, none for an old
 // save, kept by the rewind), the Archive's two sections and main.js's wiring (read as text).
 // Mutation: tools/mutate.mjs on archive.js and game.js's marks.
+// Q (v0.11.290, owner pick P58-A: MT-j + SC-g + L7-c): the Mastery list (masteryView: work and door cards only, by place, a shared menu
+// once, the tiers, the words), the second open copy (mayAutosave and its wiring in autosave), the threads' picker CSS, the FAQ, What's new.
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,6 +27,8 @@ import { goTo, enterHook, choose, sceneView } from '../js/core/story.js';
 import { landParts } from '../js/core/replies.js'; // v0.11.289 (P57 review, TG3)
 import { tabWhy } from '../js/core/coil.js';
 import * as T from '../js/core/tasks.js';
+import { mayAutosave, COPY_TEXT } from '../js/core/app.js'; // v0.11.290 (P58-A, SC-g)
+import { TASK_HUBS } from '../js/story/task_hubs.js'; // v0.11.290 (P58-A, MT-j)
 import { NO_DICE_TUNE } from '../js/story/nodice_tune.js';
 import { FIGHTS as LF_FIGHTS } from '../js/story/longforest.js';
 import { rootGain, ROOT_SAT } from '../js/story/act1_blackroot.js'; // v0.11.288 (P56 review, M1-u)
@@ -553,6 +557,92 @@ const game = (seed = 5) => G.newGame(seed, { closed: true });
     assert(/<span>\$\{f\.got \? esc\(T\.onCoil\(f\.c\)\) : ''\}<\/span>/.test(main) && /<span>\$\{esc\(m\.title \|\| m\.what\[0\] \|\| ''\)\}<\/span><span class="sub">\$\{esc\(\[\.\.\.m\.what, T\.onCoil\(m\.c\)\]\.join\(' · '\)\)\}<\/span>/.test(main), 'P (TG5): the markup draws them');
     const n289 = NOTES.find(([ver]) => ver === '0.11.289');
     assert(n289 && /deadline/i.test(n289[1]) && /feats/i.test(n289[1]) && /memor/i.test(n289[1]) && /limits/i.test(n289[1]), 'P: What\'s new');
+}
+
+// Q: v0.11.290 (owner pick P58-A): the Mastery list, the second open copy, the threads' picker
+{
+    // MT-j: the view
+    const g = game();
+    assert(T.masteryView(g, SCENES).length === 0, 'Q MT: a new game: no cards known, no list');
+    g.tasks = g.tasks || {};
+    g.tasks.fam = { 'wild_forage:0': 42.4, 'wild_forage:1': 1, 'wild_hunt:2': 8, 'wild_explore:0': 11.9, 'wilds:5': 253, 'wilds:7': 9, 'yuki:wilds': 52.5, 'bl_train:0': 58.6, 'bl_train:1': 3, 'clinic:0': 13.6, 'village:3': 8, 'ashfall:21': 16, 'wild_hunt:9': 5, 'nope:0': 4, 'wild_train:0': 0 };
+    const v = T.masteryView(g, SCENES);
+    const rows = v.flatMap((p) => p.rows), ids = rows.map((r) => r.id);
+    assert(v.map((p) => p.place).join('|') === 'The Blackroot (prologue)|Ashfall (prologue)|The Root Road', `Q MT: the places in the hubs' order (${v.map((p) => p.place).join('|')})`);
+    assert(['wild_forage:0', 'wild_forage:1', 'wild_hunt:2', 'wild_explore:0', 'bl_train:0', 'bl_train:1', 'clinic:0', 'village:3', 'ashfall:21'].every((x) => ids.includes(x)), 'Q MT: every work and door card with familiarity is listed');
+    assert(!ids.includes('wilds:5') && !ids.includes('wilds:7') && !ids.includes('yuki:wilds') && !ids.includes('wild_hunt:9') && !ids.includes('nope:0') && !ids.includes('wild_train:0'), 'Q MT: no sit, no Eat chore, no Yuki practice, no missing card, no 0');
+    assert(new Set(ids).size === ids.length && ids.filter((x) => x.startsWith('bl_train:')).length === 2, 'Q MT: a menu three hubs share is listed once');
+    assert(v.find((p) => p.place === 'The Root Road').rows.every((r) => r.id.startsWith('bl_train:')), 'Q MT: the Blackroot camps\' Practice under the first hub that has it (the Root Road)');
+    const r0 = rows.find((r) => r.id === 'wild_forage:0'), r1 = rows.find((r) => r.id === 'wild_forage:1'), r2 = rows.find((r) => r.id === 'clinic:0');
+    assert(r0.tier === 3 && r0.next === null && r0.toNext === '' && r0.line === 'Mastered', 'Q MT: Mastered: at the top, no count');
+    assert(r1.tier === 0 && r1.toNext === '1/2 to Practised' && r2.tier === 2 && r2.toNext === '13.6/18 to Mastered', `Q MT: the count to the next step, as the card's (${r1.toNext}; ${r2.toNext})`);
+    assert(r2.line === T.famLine({ tier: 2, fam: 13.6, next: 18 }) && r2.group === 'Clinic', 'Q MT: the line and the group as the card face');
+    assert(r0.label === 'The mushroom ring under the black oaks' && !/\.$/.test(r0.label), 'Q MT: the card\'s own words, no full stop');
+    const bl = v.find((p) => p.place === 'The Blackroot (prologue)');
+    assert(bl.tiers.join(',') === '1,0,2,1', `Q MT: the place's tiers (${bl.tiers.join(',')})`);
+    assert(T.MASTERY_TEXT.tiers([1, 0, 2, 1]) === '1 New · 2 Skilled · 1 Mastered' && T.MASTERY_TEXT.total(1, [0, 0, 0, 1]) === '1 card: 1 Mastered.' && T.MASTERY_TEXT.total(9, [1, 2, 3, 3]) === '9 cards: 1 New · 2 Practised · 3 Skilled · 3 Mastered.', 'Q MT: the counts\' words (zeros left out, one card)');
+    assert(/Practised at 2 completions, Skilled at 8, Mastered at 18/.test(T.MASTERY_TEXT.lede), 'Q MT: the lede names the steps from FAM');
+    assert(Object.keys(TASK_HUBS).every((h) => T.MASTERY_PLACES[h]) && Object.keys(T.MASTERY_PLACES).every((h) => TASK_HUBS[h]), 'Q MT: every task hub has a place, and every place a hub');
+    const junk = game(); junk.tasks = { fam: 'junk' };
+    assert(T.masteryView(junk, SCENES).length === 0 && T.masteryView(null, SCENES).length === 0, 'Q MT: junk or no game: no list');
+    // MT-j: the James tab
+    const main = read('js/main.js'), css = read('css/style.css');
+    assert(/\$\{masteryHtml\(masteryView\(g, SCENES\), esc\)\}\n\$\{g\.coil \? `<h2>The Coil<\/h2>/.test(main), 'Q MT: the James tab draws the list before the Coil');
+    // RV-A (TG2): the part itself (pure): nothing without cards; the total counts cards; each place folded; each row its count to the next
+    const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    assert(T.masteryHtml([], esc) === '' && T.masteryHtml(null, esc) === '', 'Q MT (TG2): no cards, no part');
+    const h = T.masteryHtml(v, esc);
+    assert(h.includes(`<p class="note">${T.MASTERY_TEXT.total(rows.length, [0, 1, 2, 3].map((t) => rows.filter((r) => r.tier === t).length))}</p>`) && new RegExp(`${rows.length} cards: `).test(h), `Q MT (TG2): the total counts the cards (${rows.length}), not the places (${v.length})`);
+    assert((h.match(/<details class="memory-row mastery">/g) || []).length === v.length && (h.match(/<div class="row">/g) || []).length === rows.length, 'Q MT (TG2): a fold a place, a row a card');
+    assert(h.includes('<span class="sub">Clinic · 13.6/18 to Mastered</span>') && h.includes('<span>Skilled</span>') && h.includes('<span class="sub">Forage</span>'), 'Q MT (TG2): each row its step, group and the count to the next (none at the top)');
+    assert(T.masteryHtml([{ place: 'A<b>', tiers: [1, 0, 0, 0], rows: [{ label: 'x<i>', tier: 0, group: 'G', toNext: '1/2 to Practised' }] }], esc).includes('A&lt;b>') && !T.masteryHtml([{ place: 'A', tiers: [1, 0, 0, 0], rows: [{ label: 'x<i>', tier: 0, group: 'G', toNext: '' }] }], esc).includes('<i>'), 'Q MT (TG2): the words escaped');
+    // RV-A (TG3): only the last full stop goes
+    const hare = rows.find((r) => r.id === 'wild_hunt:2');
+    const t3 = game(); t3.tasks = { fam: { 'wild_hunt:0': 3 } };
+    assert(T.masteryView(t3, SCENES)[0].rows[0].label === 'Glassback hare. A dart from cover' && !!hare, 'Q MT (TG3): a label keeps its inner full stops');
+    // RV-A (M1-f, TG1): Yuki's own card is never listed; every menu row passes the screen's filters, on a full map and after real runs
+    const t1 = game(); t1.tasks = { fam: { 'wild_hunt:3': 25.4, 'wild_hunt:0': 3 } };
+    assert(!T.masteryView(t1, SCENES).flatMap((p) => p.rows).some((r) => r.id === 'wild_hunt:3'), 'Q MT (M1-f, TG1): "Let Yuki hunt on her own" (the Wilds\' notJames) is not listed');
+    const every = game(); every.tasks = { fam: {} };
+    for (const [hid, cfg] of Object.entries(TASK_HUBS)) for (const sc of [hid, ...Object.keys(cfg.menus || {}), ...Object.keys(cfg.doorMenus || {})]) (SCENES[sc]?.choices || []).forEach((_, i) => { every.tasks.fam[`${sc}:${i}`] = 5; });
+    const ev = T.masteryView(every, SCENES).flatMap((p) => p.rows);
+    const bad = ev.filter((r) => { const sc = r.id.slice(0, r.id.lastIndexOf(':')), c = SCENES[sc].choices[Number(r.id.split(':').pop())];
+        const hub = Object.entries(TASK_HUBS).find(([hid, cfg]) => hid === sc || (cfg.menus || {})[sc] || (cfg.doorMenus || {})[sc]);
+        const [hid, cfg] = hub; if (hid === sc) return false;
+        const door = !!(cfg.doorMenus || {})[sc];
+        return (door ? (typeof c.to !== 'string' || c.to === hid) : !(!c.combat && !!(c.do || c.check || c.time || c.qi))) || (cfg.notJames && cfg.notJames(c)); });
+    assert(ev.length > 100 && bad.length === 0, `Q MT (M1-f, TG1): every card at 5: ${ev.length} rows, ${bad.length} a hub would not draw (${bad.map((r) => r.id).slice(0, 4).join(', ')})`);
+    const dr = game(); dr.scene = 'ashfall';
+    T.learn(dr, SCENES, 'ashfall', T.cardOf(SCENES, 'ashfall', 'drill:0'), 'drill:0', 1);
+    for (const hid of ['wilds']) { const c0 = T.cardOf(SCENES, hid, 'wild_hunt:0'); T.learn(dr, SCENES, hid, c0, 'wild_hunt:0', 1); }
+    const drIds = T.masteryView(dr, SCENES).flatMap((p) => p.rows).map((r) => r.id);
+    assert(drIds.includes('drill:0') && drIds.includes('wild_hunt:0') && !drIds.includes('wild_hunt:3') && drIds.every((x) => !ev.length || ev.some((r) => r.id === x)), `Q MT (TG1): after real runs (a drill, a hunt) every row is one the screen draws, Yuki's card not among them (${drIds.length} rows)`);
+    // SC-g: the second open copy
+    assert(mayAutosave('a', 'a', false) && mayAutosave(null, 'a', false) && mayAutosave(null, null, false) && mayAutosave('a', 'a', false), 'Q SC: the copy\'s own save, or none stored: write');
+    assert(!mayAutosave('b', 'a', false) && !mayAutosave('b', null, false) && !mayAutosave('a', 'a', true) && !mayAutosave(null, null, true), 'Q SC: another copy\'s save, or found stale before: no write');
+    assert(/Reload/.test(COPY_TEXT) && /was opened in another tab or window/.test(COPY_TEXT) && /download/.test(COPY_TEXT), 'Q SC (L2): the words say why and what to do');
+    assert(/function staleStop\(\) \{\n\s*if \(mayAutosave\(store\.get\(AUTO\), lastWritten, staleCopy\)\) return false;\n\s*staleCopy = true; showNotice\(COPY_TEXT, true, true\);\n\s*return true;\n\}/.test(main), 'Q SC (L2): a copy left behind says so in the notebar, with Download now and Reload');
+    assert(/function autosave\(\) \{\n\s*if \(!g\) return;\n\s*if \(staleStop\(\)\) return;/.test(main), 'Q SC: autosave checks before anything else is written');
+    // RV-A (TG4): a page load takes the stored save as this copy's (else every reopened game would stop saving at its first tap)
+    assert(/function load\(\) \{\n\s*const raw = store\.get\(AUTO\);\n\s*lastWritten = raw;/.test(main), 'Q SC (TG4): load() takes the stored save as this copy\'s');
+    // RV-A (M2-r, TG7): every action that writes a game asks first, before any backup or slot is written
+    for (const [what, re] of [['a backup restored', /if \(staleStop\(\)\) return; \/\/ RV-A \(M2-r\)\n\s*backupBefore\('restoring a backup'\);/], ['a file loaded with a game on', /if \(staleStop\(\)\) return; \/\/ RV-A \(M2-r\)\n\s*backupBefore\('loading a save file'\);\n\s*g = p\.next;/],
+        ['a file loaded with no game', /if \(staleStop\(\)\) return; \/\/ RV-A \(M2-r\)\n\s*backupBefore\('loading a save file'\);\n\s*g = next; autosave\(\);/], ['restore all', /if \(staleStop\(\)\) return;[^\n]*\n\s*try \{ restoreAll\(p\); \}/],
+        ['a new game', /if \(staleStop\(\)\) return; \/\/ RV-A \(M2-r\)\n\s*backupBefore\('a new game'\);/], ['a slot loaded', /if \(staleStop\(\)\) return; \/\/ RV-A \(M2-r\)\n\s*backupBefore\(`loading slot/],
+        ['a slot saved', /if \(staleStop\(\)\) return;[^\n]*\n\s*writeKey\(SLOT\(n\), serialize\(g\)\);/], ['the recovery screen', /function leaveRecovery\(next\) \{\n\s*if \(staleStop\(\)\) return;[^\n]*\n\s*store\.set\(BROKEN/], ['any backup', /function backupBefore\(label\) \{\n\s*if \(!g \|\| staleStop\(\)\) return;/]])
+        assert(re.test(main), `Q SC (M2-r, TG7): ${what}: a copy left behind writes nothing`);
+    assert((main.match(/backupBefore\(/g) || []).length === 9 && (main.match(/writeKey\(SLOT\(/g) || []).length === 2, 'Q SC (TG7): no backup or slot write the pins above miss (8 calls + the function; Save here and restore all)');
+    assert(/if \(writeKey\(AUTO, s\)\) lastWritten = s;/.test(main) && /function writeKey\(k, s\) \{ const ok = store\.set\(k, s\);[^\n]*return ok; \}/.test(main) && !/\n\s*lastWritten = s;\n/.test(main), 'Q SC: only a written save becomes this copy\'s');
+    assert((main.match(/writeKey\(AUTO,/g) || []).length === 1 && (main.match(/store\.set\(AUTO/g) || []).length === 0, 'Q SC: autosave is the only writer of the save');
+    // L7-c: the picker's look
+    assert(/\n\.thread-pick \{[^}]*display: grid; grid-template-columns: repeat\(auto-fill, minmax\(9rem, 1fr\)\);/.test(css) && /\n\.thread-pick \.card \{/.test(css) && /\n\.thread-pick \.card \{/.test(css) && /\n\.thread-lane \{/.test(css) && /\n\.thread-pick > \.note \{/.test(css), 'Q L7: the picker and the lanes have rules of their own');
+    assert(css.indexOf('\n.thread-lane {') > css.indexOf('\n.yuki-lane {'), 'Q L7: the lane rule after Yuki\'s (it wins)');
+    // the FAQ and What's new
+    const fq = FAQ.find((e) => e[0] === 'Work cards and familiarity');
+    assert(fq && /<b>Mastery<\/b>/.test(fq[1](game())), 'Q: the FAQ names the Mastery list');
+    const n290 = NOTES.find(([ver]) => ver === '0.11.290');
+    assert(n290 && /Mastery/.test(n290[1]) && /every card James knows/.test(n290[1]) && /two tabs/.test(n290[1]) && /threads/i.test(n290[1]), 'Q: What\'s new');
+    assert(/every card James knows/.test(fq[1](game())) && /Every card James knows/.test(T.MASTERY_TEXT.lede), 'Q (M1-f): the words say "knows" (a share is familiarity too)');
 }
 
 console.log(`\n${pass} passed, ${fail} failed`);

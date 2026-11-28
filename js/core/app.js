@@ -129,6 +129,11 @@ export function askStep(armed, k, now) {
     if (armed && armed.k === k && now - armed.at < ASK_MS) return { go: true, armed: { k: '', at: 0 } };
     return { go: false, armed: { k, at: now } };
 }
+/** v0.11.290 (owner pick P58-A, SC-g): may this copy write the autosave? `stored`: the save in storage now; `mine`: the one this copy
+ *  last wrote or loaded; `stale`: this copy already found another's save. A save written by another tab or window since stops this
+ *  copy's writes until it is reloaded; an empty storage (none yet, or cleared) takes the write. Pure, so the tests run it. */
+export const mayAutosave = (stored, mine, stale) => !stale && (stored == null || stored === mine);
+export const COPY_TEXT = 'The game was opened in another tab or window and saved there, so this copy saves nothing more. Reload to carry on from that save, or download this copy\'s game first.'; // RV-A (L2): in the notebar, with Download now and Reload
 /** v0.11.286 (owner pick G4-A, L5-a): a second tap counts only from this many ms after the first (a double tap confirms nothing). */
 export const ASK_MIN_MS = 400;
 /** L5-a: is a tap `now` the second tap of a confirm armed at `at`, within `win` ms? (New game, Bite the tail, Yield, a fatal card.) */

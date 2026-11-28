@@ -1163,6 +1163,74 @@ def deadline_bar(b, url):
         ctx.close()
 
 
+TAP_SEL = 'button.card:not([disabled])[data-story], button.card:not([disabled])[data-run], button.card:not([disabled])[data-act]'
+def p58_ui(b, url):
+    """v0.11.290 (owner picks P58-A, RV-A): MT-j, the James tab's Mastery list at a 360 px phone from a late save
+    (saves/2026-11-13-1356-incremental-a1_again.json: 103 cards in 9 places, the first 19 once Yuki's own card is out, M1-f): the
+    heading before the Coil's, a fold a place, an opened place draws its rows, nothing past the right edge. SC-g, two pages of one
+    game: the page that did not save last, tapped after the other saved, writes nothing over the other's save and says so in the
+    notebar with Download now and Reload (L2); closing it writes nothing; reloaded (TG5) it opens the other page's game, with no notice,
+    and saves again. L1 / TG6: the threads' picker at 360 px takes two columns (no fewer than the task cards' pane), inside the screen, and no card is wider than its column."""
+    save = (ROOT / 'saves/2026-11-13-1356-incremental-a1_again.json').read_text()
+    ctx = b.new_context(viewport={'width': 360, 'height': 740}, service_workers='block')
+    pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+    fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", save)
+    pg.click('[data-tab="sheet"]'); on_tab(pg, 'sheet')
+    m = pg.evaluate("""() => { const hs = [...document.querySelectorAll('#view h2')].map(e => e.textContent); const ds = [...document.querySelectorAll('#view details.mastery')];
+        if (ds[0]) ds[0].open = true;
+        return { hs, n: ds.length, rows: ds[0] ? ds[0].querySelectorAll('.row').length : 0, first: ds[0] ? ds[0].querySelector('summary').textContent : '',
+                 yuki: [...document.querySelectorAll('#view details.mastery .row')].some(r => /Let Yuki hunt/.test(r.textContent)),
+                 wide: document.documentElement.scrollWidth > innerWidth }; }""")
+    hs = m['hs']
+    if 'Mastery' not in hs or ('The Coil' in hs and hs.index('Mastery') > hs.index('The Coil')) or m['n'] != 9 or m['rows'] != 19 or m['wide'] or m['yuki']:
+        fails.append(f"MT-j: the Mastery list at 360 px ({m})")
+    else: notes.append(f"MT-j: {m['n']} places, the first {m['first']!r} with {m['rows']} rows")
+    check_text(pg, 'MT-j, the James tab', strict=True)
+    pg.click('[data-tab="story"]'); on_tab(pg, 'story')
+    # SC-g: a second page of the same game saves; this one, tapped after, must not write over it
+    pg2 = ctx.new_page(); pg2.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+    pg2.goto(url); until(pg2, '.main-menu', 10000, 'attached'); enter(pg2)
+    first = lambda p: next((x for x in p.query_selector_all(TAP_SEL) if x.is_visible()), None)
+    b1, b2 = first(pg), first(pg2)
+    if not (b1 and b2): fails.append('SC-g: no card to tap on the late save'); ctx.close(); return
+    tap(pg2, b2)
+    theirs = pg2.evaluate("() => localStorage.getItem('boneash.auto')")
+    if theirs == save: fails.append('SC-g: the second page did not save')
+    tap(pg, b1)
+    r = pg.evaluate("""() => { const n = document.querySelector('#notebar'); return { same: localStorage.getItem('boneash.auto'), bar: !!n && !n.hidden && /another tab or window/.test(n.textContent),
+        dl: !!n && !n.querySelector('[data-note="export"]').hidden, rl: !!n && !n.querySelector('[data-note="reload"]').hidden }; }""")
+    if r['same'] != theirs: fails.append('SC-g: the page left behind wrote over the other page\'s save')
+    if not (r['bar'] and r['dl'] and r['rl']): fails.append(f"SC-g (L2): the page left behind does not say why, with Download now and Reload ({r})")
+    pg.goto(url.replace('index.html', 'art/bg/CREDITS.md'))  # it leaves: its save on leaving must not write either
+    if pg2.evaluate("() => localStorage.getItem('boneash.auto')") != theirs: fails.append('SC-g: the page left behind wrote over the other page\'s save as it left')
+    # TG5: reopened, it carries on from the other page's save, with no notice, and saves again
+    pg.goto(url); until(pg, '.main-menu', 10000, 'attached'); enter(pg)
+    if pg.evaluate("() => { const n = document.querySelector('#notebar'); return !!n && !n.hidden && /another tab/.test(n.textContent); }"): fails.append('SC-g (TG5): the reloaded page still says it is left behind')
+    b3 = first(pg)
+    if b3:
+        tap(pg, b3)
+        if pg.evaluate("() => localStorage.getItem('boneash.auto')") == theirs: fails.append('SC-g (TG5): the reloaded page does not save')
+    check_text(pg, 'SC-g, the reloaded page', strict=True)
+    ctx.close()
+    # L1 / TG6: the picker's columns against the cards' on a task screen at 360 px (the Wilds, the long road)
+    save2 = (ROOT / 'saves/v0.11.204-long-wilds-day2.json').read_text()
+    ctx = b.new_context(viewport={'width': 360, 'height': 740}, service_workers='block')
+    pg = ctx.new_page(); pg.on('pageerror', lambda e: fails.append(f"page error: {e}"))
+    fresh(pg, url, "s => { localStorage.clear(); localStorage.setItem('boneash.auto', s); }", save2)
+    c = pg.evaluate("""() => { const lane = document.querySelector('.yuki-lane'), cards = [...document.querySelectorAll('.cards')].find(e => e.offsetParent && e.querySelector('button.card'));
+        if (!lane || !cards) return { none: true };
+        const p = document.createElement('div'); p.className = 'thread-pick';
+        p.innerHTML = ['Needleberries, if the bushes have any left', 'Glassback hare. A dart from cover', 'The mushroom ring under the black oaks', 'Smoke the catch']
+            .map(t => `<button class="card">${t}<span class="tag">Held by Thread 2.</span></button>`).join('') + '<p class="note">Nothing here a thread can hold.</p>';
+        lane.after(p);
+        const cols = (e) => getComputedStyle(e).gridTemplateColumns.split(' ').length;
+        const r = { pick: cols(p), cards: cols(cards), over: [...p.querySelectorAll('.card')].some(x => x.scrollWidth > x.clientWidth + 1), right: Math.round(p.getBoundingClientRect().right), w: innerWidth };
+        p.remove(); return r; }""")
+    if c.get('none'): fails.append(f"L1 (TG6): no Yuki lane or cards on the Wilds save ({c})")
+    elif c['pick'] != 2 or c['pick'] < c['cards'] or c['over'] or c['right'] > c['w']: fails.append(f"L1 (TG6): the threads' picker at 360 px ({c})")
+    else: notes.append(f"L1: the picker {c['pick']} columns at 360 px (the task cards' pane {c['cards']})")
+    ctx.close()
+
 def wide_layout(b, url):
     """v0.11.208 (owner pick PC3): the PC layout from 1100 px (saves/v0.11.7-long-forest-coil2.json, the Long Forest camp, 24 cards):
     three columns (story, cards, Results), the switch hidden; at 1366x768 at least 10 cards whole on the first screen and Results
@@ -1469,6 +1537,7 @@ def main(part=0):
                 wide_layout(b, url)  # v0.11.208 (PC3)
                 tab_bar(b, url)  # v0.11.287 (P55-A, TB-A)
                 deadline_bar(b, url)  # v0.11.289 (P57-A, DL)
+                p58_ui(b, url)  # v0.11.290 (P58-A: MT-j, SC-g)
                 n1_ui(b, url)  # v0.11.210 (N1: SC, DC-a, MS, TT)
                 pr2_ui(b, url)  # v0.11.211 (PR2 + PK1)
                 vq1_ui(b, url)  # v0.11.213 (VQ1 + FQ1)

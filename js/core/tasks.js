@@ -77,6 +77,59 @@ export const famOf = (g, id) => { const f = Number(g.tasks?.fam?.[id]) || 0; ret
 /** v0.11.155 (FD1, NX): a work or door card's familiarity line names the next step ("Practised · 5/8 to Skilled"); "Mastered" at the top.
  * RV1 (NB): non-breaking spaces keep "5/8 to Skilled" whole, so a narrow card wraps only after a "·" (a 390 px phone: 4 of 4 mid-phrase breaks → 0). */
 export const famLine = (card) => (card.next != null ? `${FAM[card.tier].name}\u00a0· ${card.fam}/${card.next}\u00a0to\u00a0${FAM[card.tier + 1].name}` : FAM[card.tier].name);
+/** v0.11.290 (owner pick P58-A, MT-j): the Mastery list's places (UI words), by task hub; hubs with the same place share a heading. */
+export const MASTERY_PLACES = { camp: 'The Blackroot (prologue)', stream: 'The Blackroot (prologue)', wilds: 'The Blackroot (prologue)', village: 'Ashfall (prologue)', ashfall: 'Ashfall (prologue)', fo_ashfall: 'Ashfall, the Fallout', rr_hub: 'The Root Road', dw_hub: 'The Drowned Wood', ah_hub: 'The Ashen Hills', heart_hub: 'Inside the Old Tree', rt_camp: 'The Last Camp', rt_ashfall: 'Ashfall, the last day', lf_hub: 'The Long Forest' };
+/** MT-j: every work and door card James knows (any familiarity, his own runs or a share from its group or a drill; the cards whose face
+ *  shows famLine), by place in the hubs' order: [{ place, rows: [{ id, label, group, tier, fam, next, line, toNext }], tiers: [New,
+ *  Practised, Skilled, Mastered] }]. A menu several hubs share (the Blackroot camps' Practice) is listed under the first. RV-A (M1-f):
+ *  a menu's cards pass the screen's own filters (taskCards): a door menu's doors that lead off the hub, a work menu's cards with work
+ *  in them, never the hub's `notJames` (Yuki's own hunt). Yuki's practice (`yuki:<hub>`) and the Meditate cards are not cards here. */
+export function masteryView(g, scenes) {
+    const fam = g?.tasks?.fam && typeof g.tasks.fam === 'object' ? g.tasks.fam : {};
+    const byPlace = new Map();
+    const done = new Set();
+    for (const [hubId, cfg] of Object.entries(TASK_HUBS)) {
+        const sceneIds = [hubId, ...Object.keys(cfg.menus || {}), ...Object.keys(cfg.doorMenus || {})];
+        for (const sc of sceneIds) {
+            (scenes[sc]?.choices || []).forEach((c, i) => {
+                const id = `${sc}:${i}`;
+                const f = Number(fam[id]) || 0;
+                if (!(f > 0) || done.has(id)) return;
+                const card = cardOf(scenes, hubId, id);
+                if (!card || (card.kind !== 'work' && card.kind !== 'door')) return;
+                if (card.menu) { // RV-A (M1-f): as taskCards draws a menu's cards
+                    if (card.kind === 'door' ? (typeof c.to !== 'string' || c.to === hubId) : !hasWork(c)) return;
+                    if (cfg.notJames && cfg.notJames(c)) return;
+                }
+                done.add(id);
+                const place = MASTERY_PLACES[hubId] || hubId;
+                if (!byPlace.has(place)) byPlace.set(place, []);
+                const row = { id, label: String(asText(c.text, g)).replace(/\.$/, ''), group: card.group, tier: famTier(f), fam: f, next: nextAt(f) };
+                row.line = famLine(row);
+                row.toNext = row.next != null ? `${f}/${row.next} to ${FAM[row.tier + 1].name}` : '';
+                byPlace.get(place).push(row);
+            });
+        }
+    }
+    return [...byPlace].map(([place, rows]) => ({ place, rows, tiers: FAM.map((_, t) => rows.filter((r) => r.tier === t).length) }));
+}
+/** MT-j: the Mastery list's words (UI, Claude's). `tiers`: counts by FAM tier → "3 Practised · 8 Skilled" (zeros left out). */
+export const MASTERY_TEXT = {
+    head: 'Mastery',
+    lede: `Every card James knows, by place, and how well. Familiarity is kept across Coils, and some of it comes from the other cards in a group and from drills: ${FAM[1].name} at ${FAM[1].at} completions, ${FAM[2].name} at ${FAM[2].at}, ${FAM[3].name} at ${FAM[3].at}; each step makes a card faster and easier (the FAQ: Work cards and familiarity).`,
+    tiers: (counts) => FAM.map((t, i) => (counts[i] ? `${counts[i]} ${t.name}` : '')).filter(Boolean).join(' · '),
+    total: (n, counts) => `${n} card${n === 1 ? '' : 's'}: ${MASTERY_TEXT.tiers(counts)}.`,
+};
+/** MT-j (RV-A, TG2: pure, so the tests read it): the James tab's Mastery part from masteryView's places; '' with none. `esc`: the
+ *  page's HTML escape. Each place folded, its tier counts under its name; each row the card's words, its step, its group and the count to the next. */
+export function masteryHtml(v, esc) {
+    if (!v || !v.length) return '';
+    const M = MASTERY_TEXT, all = v.flatMap((p) => p.rows);
+    const counts = FAM.map((_, t) => all.filter((r) => r.tier === t).length);
+    const row = (r) => `<div class="row"><span>${esc(r.label)}</span><span>${esc(FAM[r.tier].name)}</span><span class="sub">${esc([r.group, r.toNext].filter(Boolean).join(' · '))}</span></div>`;
+    return `<h2>${esc(M.head)}</h2><p class="note">${esc(M.lede)}</p><p class="note">${esc(M.total(all.length, counts))}</p>${v.map((p) => `<details class="memory-row mastery"><summary><span class="mem-head"><span>${esc(p.place)}</span><span class="sub">${esc(M.tiers(p.tiers))}</span></span></summary><div>${p.rows.map(row).join('')}</div></details>`).join('')}`;
+}
+
 /** v0.11.285 (owner pick G3-A, FE-t): a work card's next step and one run's time then ({ name, at, speed, now, then } in minutes), or
  *  null (not a work card, at the top, or no time). One run as `resolveWork` times it: (the menu's + the card's time) × NEW_LENGTH ÷ speed;
  *  the long calendar's ×7 is not in it. The hold tooltip says it (main.js tipFor); the card's face keeps famLine. */
